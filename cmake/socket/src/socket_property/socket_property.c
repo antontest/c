@@ -1218,14 +1218,18 @@ int get_net_mac(char *dstip, unsigned char mac[6])
     /**
      * create socket
      */
-    if ((fd = socket(PF_PACKET, SOCK_PACKET, htons(ETH_P_ARP))) < 0)
+    if ((fd = socket(PF_PACKET, SOCK_PACKET, htons(ETH_P_ARP))) < 0) {
         perror("socket()");
+        exit(1);
+    }
 
     /**
      * bind socket
      */
-    if (bind(fd, &addr, sizeof(addr)) < 0)
+    if (bind(fd, &addr, sizeof(addr)) < 0) {
         perror("bind()");
+        exit(1);
+    }
 
     /**
      * init arp request packet

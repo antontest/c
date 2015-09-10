@@ -125,7 +125,8 @@ int main(int agrc, char *agrv[])
 
         //if (!strlen(ether) || !strlen(gateway_ip)) 
         //    get_gateway(gateway_ip, ether);
-        rt = arp_cheat(ether, ip, gateway_ip);
+        //rt = arp_cheat(ether, ip, gateway_ip);
+        rt = arp_cheating(ip);
         
         return rt;
     }
@@ -460,7 +461,7 @@ static void print_usage()
 static int parser_args(int agrc, char *agrv[])
 {
     int opt = 0;
-    const char *optstr = "hcsbra:i:p:t:w:m:e:g::d::n:";
+    const char *optstr = "hcsb:ra:i:p:t:w:m:e:g::d::n:";
     struct option opts[] = {
         { "help"     , 0, 0, 'h'},
         { "agreement", 1, 0, 'a'},
@@ -490,6 +491,7 @@ static int parser_args(int agrc, char *agrv[])
                 break;
             case 'b':
                 cheat_flag = 1; 
+                if (optarg != NULL) strcpy(ip, optarg);
                 break;
             case 'c':
                 cli_flag = 1; 

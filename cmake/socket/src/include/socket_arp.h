@@ -111,5 +111,13 @@ void* pcap_listen(void *arg);
 int arp_cheat(const char *ifname, const char *attack_ip, 
         const char *gateway_ip);
 
+/**
+ * @brief get_net_mac 
+ *
+ * @param ip     [in]  target ip address
+ *
+ * @return 0, if uscc; -1, if failed
+ */
+int arp_cheating(char *dstip);
 
 #endif
