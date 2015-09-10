@@ -1,0 +1,48 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+ah	getnetip.c	/^        struct arphdr ah;$/;"	m	struct:frame_ether	typeref:struct:frame_ether::arphdr	file:	access:public
+arp_listen	getnetip.c	/^void *arp_listen(void *arg) {$/;"	f	signature:(void *arg)
+attack_ip	getnetip.c	/^unsigned char attack_ip[4] = {192, 168, 1, 100}; \/\/ip address to be attacked$/;"	v
+attack_ip	getnetip.c	/^unsigned char attack_ip[4] = {192, 168, 1, 102}; \/\/ip address to be attacked$/;"	v
+attack_ip	getnetip.c	/^unsigned char attack_ip[4] = {192, 168, 1, 103}; \/\/ip address to be attacked$/;"	v
+attack_ip	getnetip.c	/^unsigned char attack_ip[4] = {192, 168, 1, 104}; \/\/ip address to be attacked$/;"	v
+attack_ip	getnetip.c	/^unsigned char attack_ip[4] = {192, 168, 1, 105}; \/\/ip address to be attacked$/;"	v
+attack_ip	getnetip.c	/^unsigned char attack_ip[4] = {192, 168, 1, 8}; \/\/ip address to be attacked$/;"	v
+bool	getnetip.c	/^typedef enum {false,true}bool;$/;"	t	typeref:enum:__anon1	file:
+callback	getnetip.c	/^void callback(unsigned char *args, const struct pcap_pkthdr *head, const unsigned char *packet) {$/;"	f	signature:(unsigned char *args, const struct pcap_pkthdr *head, const unsigned char *packet)
+dst_ip	getnetip.c	/^        unsigned char dst_ip[4];$/;"	m	struct:frame_ether	file:	access:public
+dst_mac	getnetip.c	/^        unsigned char dst_mac[6];$/;"	m	struct:frame_ether	file:	access:public
+dst_mac	getnetip.c	/^        unsigned char dst_mac[6];$/;"	m	struct:frame_hdr	file:	access:public
+false	getnetip.c	/^typedef enum {false,true}bool;$/;"	e	enum:__anon1	file:
+fh	getnetip.c	/^        struct frame_hdr fh;$/;"	m	struct:frame_ether	typeref:struct:frame_ether::frame_hdr	file:	access:public
+frame_ether	getnetip.c	/^struct frame_ether {$/;"	s	file:
+frame_ether::ah	getnetip.c	/^        struct arphdr ah;$/;"	m	struct:frame_ether	typeref:struct:frame_ether::arphdr	file:	access:public
+frame_ether::dst_ip	getnetip.c	/^        unsigned char dst_ip[4];$/;"	m	struct:frame_ether	file:	access:public
+frame_ether::dst_mac	getnetip.c	/^        unsigned char dst_mac[6];$/;"	m	struct:frame_ether	file:	access:public
+frame_ether::fh	getnetip.c	/^        struct frame_hdr fh;$/;"	m	struct:frame_ether	typeref:struct:frame_ether::frame_hdr	file:	access:public
+frame_ether::src_ip	getnetip.c	/^        unsigned char src_ip[4];$/;"	m	struct:frame_ether	file:	access:public
+frame_ether::src_mac	getnetip.c	/^        unsigned char src_mac[6];$/;"	m	struct:frame_ether	file:	access:public
+frame_hdr	getnetip.c	/^struct frame_hdr {$/;"	s	file:
+frame_hdr::dst_mac	getnetip.c	/^        unsigned char dst_mac[6];$/;"	m	struct:frame_hdr	file:	access:public
+frame_hdr::frm_type	getnetip.c	/^        unsigned short frm_type;$/;"	m	struct:frame_hdr	file:	access:public
+frame_hdr::src_mac	getnetip.c	/^        unsigned char src_mac[6];$/;"	m	struct:frame_hdr	file:	access:public
+frm_type	getnetip.c	/^        unsigned short frm_type;$/;"	m	struct:frame_hdr	file:	access:public
+gateway_ip	getnetip.c	/^unsigned char gateway_ip[4] = {192, 168, 1, 1}; \/\/gateway ip address$/;"	v
+main	getnetip.c	/^int main() $/;"	f
+main	getnetip.c	/^int main(int argc, char **argv) {$/;"	f	signature:(int argc, char **argv)
+my_ip	getnetip.c	/^unsigned char my_ip[4] = {192, 168, 1, 103}; \/\/my ip address$/;"	v
+my_ip	getnetip.c	/^unsigned char my_ip[4] = {192, 168, 1, 108}; \/\/my ip address$/;"	v
+my_ip	getnetip.c	/^unsigned char my_ip[4] = {192, 168, 1, 9}; \/\/my ip address$/;"	v
+my_mac	getnetip.c	/^unsigned char my_mac[6] = {0x00, 0x0c, 0x29, 0xff, 0xe7, 0xbd }; \/\/my mac address$/;"	v
+my_mac	getnetip.c	/^unsigned char my_mac[6] = {0x08, 0x00, 0x27, 0xdc, 0xc3, 0xa7 }; \/\/my mac address$/;"	v
+peer_addr	getnetip.c	/^struct sockaddr_ll peer_addr; \/\/AF_PACKET type socket address$/;"	v	typeref:struct:sockaddr_ll
+send_arp	getnetip.c	/^void send_arp(const unsigned char* attack_ip) {$/;"	f	signature:(const unsigned char* attack_ip)
+sockfd	getnetip.c	/^int sockfd; \/\/AF_PACKET type socket$/;"	v
+src_ip	getnetip.c	/^        unsigned char src_ip[4];$/;"	m	struct:frame_ether	file:	access:public
+src_mac	getnetip.c	/^        unsigned char src_mac[6];$/;"	m	struct:frame_ether	file:	access:public
+src_mac	getnetip.c	/^        unsigned char src_mac[6];$/;"	m	struct:frame_hdr	file:	access:public
+true	getnetip.c	/^typedef enum {false,true}bool;$/;"	e	enum:__anon1	file:

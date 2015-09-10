@@ -1,0 +1,1 @@
+/usr/bin/cc   -g -Wall -O2 -Werror   CMakeFiles/t.dir/t/t.c.o  -o ../../t  -L/home/anton/working/program/c/cmake_test/src/lib -rdynamic 

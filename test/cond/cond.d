@@ -1,0 +1,1 @@
+cond.o: cond.c

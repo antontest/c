@@ -1,0 +1,804 @@
+cscope 15 $HOME/working/program/c/getnetip -q 0000000096 0000004676
+	@getnetip.c
+
+3 
+	~<¡dio.h
+>
+
+4 
+	~<¡dlib.h
+>
+
+5 
+	~<¡ršg.h
+>
+
+7 
+	~<uni¡d.h
+>
+
+8 
+	~<sys/sock‘.h
+>
+
+9 
+	~<lšux/if_¬p.h
+>
+
+10 
+	~<Ãtdb.h
+>
+
+11 
+	~<”ºo.h
+>
+
+12 
+	~<¬·/š‘.h
+>
+
+13 
+	~<sys/ioùl.h
+>
+
+14 
+	~<±h»ad.h
+>
+
+15 
+	~<pÿp.h
+>
+
+17 
+	gsockfd
+;
+
+19 
+sockaddr_Î
+ 
+	g³”_addr
+;
+
+21 
+	gmy_
+[4] = {192, 168, 1, 108};
+
+23 
+	gg©eway_
+[4] = {192, 168, 1, 1};
+
+25 
+	g©ck_
+[4] = {192, 168, 1, 100};
+
+27 
+	gmy_mac
+[6] = {0x08, 0x00, 0x27, 0xdc, 0xc3, 0xa7 };
+
+34 
+	säame_hdr
+ {
+
+35 
+	md¡_mac
+[6];
+
+36 
+	m¤c_mac
+[6];
+
+37 
+	mäm_ty³
+;
+
+41 
+	säame_‘h”
+ {
+
+42 
+äame_hdr
+ 
+	mfh
+;
+
+43 
+¬phdr
+ 
+	mah
+;
+
+44 
+	m¤c_mac
+[6];
+
+45 
+	m¤c_
+[4];
+
+46 
+	md¡_mac
+[6];
+
+47 
+	md¡_
+[4];
+
+53 
+	$£nd_¬p
+(cÚ¡ * 
+©ck_
+) {
+
+55 
+brßd_mac
+[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
+
+59 
+äame_‘h”
+ 
+äame
+;
+
+60 
+	`memıy
+(
+äame
+.
+fh
+.
+d¡_mac
+, 
+brßd_mac
+, 6);
+
+61 
+	`memıy
+(
+äame
+.
+fh
+.
+¤c_mac
+, 
+my_mac
+, 6);
+
+62 
+äame
+.
+fh
+.
+äm_ty³
+ = 
+	`htÚs
+(
+ETH_P_ARP
+);
+
+63 
+äame
+.
+ah
+.
+¬_hrd
+ = 
+	`htÚs
+(
+ARPHRD_ETHER
+);
+
+64 
+äame
+.
+ah
+.
+¬_´o
+ = 
+	`htÚs
+(
+ETH_P_IP
+);
+
+65 
+äame
+.
+ah
+.
+¬_hÊ
+ = 6;
+
+66 
+äame
+.
+ah
+.
+¬_¶n
+ = 4;
+
+67 
+äame
+.
+ah
+.
+¬_İ
+ = 
+	`htÚs
+(
+ARPOP_REQUEST
+);
+
+68 
+	`memıy
+(
+äame
+.
+¤c_mac
+, 
+my_mac
+, 6);
+
+69 
+	`memıy
+(
+äame
+.
+¤c_
+, 
+my_
+, 4);
+
+70 
+	`memıy
+(
+äame
+.
+d¡_mac
+, 
+brßd_mac
+, 6);
+
+71 
+	`memıy
+(
+äame
+.
+d¡_
+, 
+©ck_
+, 4);
+
+73 
+	`£ndto
+(
+sockfd
+, &
+äame
+, (äame), 0, (
+sockaddr
+*)&
+³”_addr
+, (peer_addr));
+
+74 
+	`´štf
+("sucûs £nd‡½„eque¡Ø192.168.1.%d\n", 
+©ck_
+[3]);
+
+75 
+	}
+}
+
+80 
+	$ÿÎback
+(*
+¬gs
+, cÚ¡ 
+pÿp_pkthdr
+ *
+h—d
+, cÚ¡ *
+·ck‘
+) {
+
+81 
+	`´štf
+("------------------------------------------------------------------------------\n");
+
+82 
+äame_‘h”
+ *
+Şd_äame
+ğ(äame_‘h”*)
+·ck‘
+;
+
+83 
+äame_‘h”
+ 
+äame
+;
+
+84 
+	`memıy
+(&
+äame
+, 
+·ck‘
+, (frame));
+
+85 
+¬_İ
+ = 
+	`Áohs
+(
+äame
+.
+ah
+.ar_op);
+
+89 if(
+¬_İ
+ =ğ1)
+	`´štf
+("arp„equest\t");
+
+90 if(
+¬_İ
+ =ğ2)
+	`´štf
+("arp„eply \t");
+
+91 
+_buf
+[128];
+
+92 
+	`š‘_Áİ
+(
+AF_INET
+, &
+Şd_äame
+->
+¤c_
+, 
+_buf
+, (ip_buf));
+
+93 
+	`´štf
+("[%02x:%02x:%02x:%02x:%02x:%02x](%s)", 
+Şd_äame
+->
+¤c_mac
+[0],Şd_äame->¤c_mac[1],Şd_äame->¤c_mac[2],Şd_äame->¤c_mac[3],Şd_äame->¤c_mac[4],Şd_äame->¤c_mac[5], 
+_buf
+);
+
+94 
+	`´štf
+("\t->\t");
+
+95 
+	`mem£t
+(
+_buf
+, 0, (ip_buf));
+
+96 
+	`š‘_Áİ
+(
+AF_INET
+, &
+Şd_äame
+->
+d¡_
+, 
+_buf
+, (ip_buf));
+
+97 
+	`´štf
+("[%02x:%02x:%02x:%02x:%02x:%02x](%s)", 
+Şd_äame
+->
+d¡_mac
+[0],Şd_äame->d¡_mac[1],Şd_äame->d¡_mac[2],Şd_äame->d¡_mac[3],Şd_äame->d¡_mac[4],Şd_äame->d¡_mac[5], 
+_buf
+);
+
+98 
+	`´štf
+("\n");
+
+102 if(
+¬_İ
+ =ğ
+ARPOP_REPLY
+ && (
+Şd_äame
+->
+¤c_
+)[3] =ğ
+©ck_
+[3] && (Şd_äame->
+d¡_
+)[3] =ğ
+my_
+[3]) {
+
+106 
+	`memıy
+(
+äame
+.
+fh
+.
+d¡_mac
+, 
+Şd_äame
+->fh.
+¤c_mac
+, 6);
+
+107 
+	`memıy
+(
+äame
+.
+fh
+.
+¤c_mac
+, 
+my_mac
+, 6);
+
+108 
+äame
+.
+ah
+.
+¬_İ
+ = 
+	`htÚs
+(
+ARPOP_REPLY
+);
+
+109 
+	`memıy
+(
+äame
+.
+d¡_mac
+, 
+Şd_äame
+->
+¤c_mac
+, 6);
+
+110 
+	`memıy
+(
+äame
+.
+d¡_
+, 
+©ck_
+, 4);
+
+111 
+	`memıy
+(
+äame
+.
+¤c_mac
+, 
+my_mac
+, 6);
+
+112 
+	`memıy
+(
+äame
+.
+¤c_
+, 
+g©eway_
+, 4);
+
+115 
+	`£ndto
+(
+sockfd
+, &
+äame
+, (äame), 0, (
+sockaddr
+*)&
+³”_addr
+, (peer_addr));
+
+116 
+	`´štf
+("sucûs çked 192.168.1.%d \n", (
+Şd_äame
+->
+¤c_
+)[3]);
+
+120 if((
+¬_İ
+ =ğ
+ARPOP_REQUEST
+ && (
+Şd_äame
+->
+¤c_
+)[3] =ğ
+g©eway_
+[3]) ||
+
+121 (
+¬_İ
+ =ğ
+ARPOP_REQUEST
+ && (
+Şd_äame
+->
+¤c_
+)[3] =ğ
+©ck_
+[3] && (Şd_äame->
+d¡_
+)[3] =ğ
+g©eway_
+[3]))
+
+124 
+	`¦“p
+(1);
+
+125 
+	`£nd_¬p
+(
+©ck_
+);
+
+127 
+	}
+}
+
+132 *
+	$¬p_li¡’
+(*
+¬g
+) {
+
+133 
+”rbuf
+[1024];
+
+134 *
+dev
+= "eth10";
+
+135 
+pÿp_t
+ *
+hªdË
+ = 
+	`pÿp_İ’_live
+(
+dev
+, 2048, 1, 1000, 
+”rbuf
+);
+
+136 if(
+hªdË
+ =ğ
+NULL
+)
+	`´štf
+("pÿp_İ’_live():%s\n", 
+”rbuf
+);
+
+137 
+Ãt
+,
+mask
+;
+
+138 if(
+	`pÿp_looku²‘
+(
+dev
+, &
+Ãt
+, &
+mask
+, 
+”rbuf
+è=ğ-1)
+	`´štf
+("pcap_lookupnet():%s\n",ƒrrbuf);
+
+139 
+bpf_´og¿m
+ 
+å
+;
+
+140 if(
+	`pÿp_compe
+(
+hªdË
+, &
+å
+, "¬p", 0, 
+Ãt
+è=ğ-1)
+	`´štf
+("pÿp_compe():%s\n", 
+”rbuf
+);
+
+141 if(
+	`pÿp_£tf‹r
+(
+hªdË
+, &
+å
+è=ğ-1)
+	`´štf
+("pÿp_£tf‹r():%s\n", 
+”rbuf
+);
+
+142 
+	`pÿp_loİ
+(
+hªdË
+, -1, 
+ÿÎback
+, 
+NULL
+) != -1);
+
+143  
+NULL
+;
+
+144 
+	}
+}
+
+147 
+	$maš
+(
+¬gc
+, **
+¬gv
+) {
+
+149 
+±h»ad_t
+ 
+tid
+;
+
+150 
+	`±h»ad_ü—‹
+(&
+tid
+, 
+NULL
+, 
+¬p_li¡’
+, NULL);
+
+152 
+sockfd
+ = 
+	`sock‘
+(
+AF_PACKET
+, 
+SOCK_RAW
+, 
+	`htÚs
+(
+ETH_P_ARP
+));
+
+153 if(
+sockfd
+ =ğ-1)
+	`³¼Ü
+("socket()");
+
+155 
+	`mem£t
+(&
+³”_addr
+, 0, (peer_addr));
+
+156 
+³”_addr
+.
+¦l_çmy
+ = 
+AF_PACKET
+;
+
+157 
+iäeq
+ 
+»q
+;
+
+158 
+	`¡rıy
+(
+»q
+.
+iä_Çme
+, "eth10");
+
+159 if(
+	`ioùl
+(
+sockfd
+, 
+SIOCGIFINDEX
+, &
+»q
+è!ğ0)
+	`³¼Ü
+("ioctl()");
+
+160 
+³”_addr
+.
+¦l_ifšdex
+ = 
+»q
+.
+iä_ifšdex
+;
+
+161 
+³”_addr
+.
+¦l_´ÙocŞ
+ = 
+	`htÚs
+(
+ETH_P_ARP
+);
+
+163 
+	`£nd_¬p
+(
+©ck_
+);
+
+165 
+	`±h»ad_ex™
+(
+NULL
+);
+
+167 
+	}
+}
+
+	@
+1
+.
+0
+1
+11
+getnetip.c

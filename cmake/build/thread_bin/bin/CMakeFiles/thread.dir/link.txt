@@ -1,0 +1,1 @@
+/usr/bin/cc     CMakeFiles/thread.dir/main/thread.c.o  -o ../../../thread/thread  -L/home/anton/program/c/cmake/thread/src/lib -rdynamic ../../../thread/src/lib/libthread.a -Wl,-rpath,/home/anton/program/c/cmake/thread/src/lib 

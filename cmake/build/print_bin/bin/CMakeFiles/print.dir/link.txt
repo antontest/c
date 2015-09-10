@@ -1,0 +1,1 @@
+/usr/bin/cc     CMakeFiles/print.dir/main/print.c.o  -o ../../../print/print  -L/home/anton/program/c/cmake/print/src/lib -rdynamic ../../../print/src/lib/libprint.a -Wl,-rpath,/home/anton/program/c/cmake/print/src/lib 

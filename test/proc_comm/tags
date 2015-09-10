@@ -1,0 +1,14 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+fifo_deinit	proc_comm.c	/^int fifo_deinit()$/;"	f
+fifo_deinit	proc_comm.c	/^int fifo_deinit(int fifo_fd)$/;"	f	signature:(int fifo_fd)
+fifo_fd	proc_comm.c	/^int fifo_fd = -1;$/;"	v
+fifo_init	proc_comm.c	/^int fifo_init(const char *path)$/;"	f	signature:(const char *path)
+fifo_init	proc_comm.c	/^int fifo_init(const char *path, int mode)$/;"	f	signature:(const char *path, int mode)
+main	proc_comm.c	/^int main(int agrc, char *agrv[])$/;"	f	signature:(int agrc, char *agrv[])
+pipe_test	proc_comm.c	/^int pipe_test()$/;"	f
+sig_act	proc_comm.c	/^void sig_act(int sig)$/;"	f	signature:(int sig)

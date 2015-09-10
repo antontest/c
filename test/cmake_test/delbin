@@ -1,0 +1,10 @@
+#! /bin/bash
+#脚本功能：
+	#删除build/bin目录下的普通文件
+#创建时间：
+	#2015-02-01 23:44:44
+
+#删除
+find build/bin/ -maxdepth 1 -type f -exec rm {} \;
+
+exit 0

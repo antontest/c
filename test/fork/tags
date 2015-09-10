@@ -1,0 +1,3 @@
+Mfork	fork.c	/^int main(int agrc, char *agrv[])$/
+exec_task	fork.c	/^int exec_task(const char *pcmd)$/
+p_kill	fork.c	/^void* p_kill(void *tid)$/

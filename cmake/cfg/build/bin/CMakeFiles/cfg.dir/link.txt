@@ -1,0 +1,1 @@
+/usr/bin/cc     CMakeFiles/cfg.dir/main/cfg.c.o  -o ../../cfg  -L/home/anton/program/c/cmake/cfg/src/lib -rdynamic ../../src/lib/libcfg.a -Wl,-rpath,/home/anton/program/c/cmake/cfg/src/lib: 

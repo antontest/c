@@ -1,0 +1,53 @@
+#! /bin/bash
+#脚本功能：
+	#修改工程可执行文件名称
+#创建时间：
+	#2015-02-01 22:12:18
+
+#提取执行文件名称的函数
+function get_exec_name()
+{
+	grep "exec_name" ./build/.pro_info | awk -F "=" '{print $2}'
+}
+
+#设置执行文件名称的函数
+function set_exec_name()
+{
+	sed -i 's/exec_name=.*.$/exec_name='$1'/g' ./build/.pro_info
+}
+
+#判定参数个数
+if test $# -lt 1 ; then
+	echo 请输入执行文件名称!
+	exit 0
+fi
+
+#从工程名称文件中读取当前可执行文件的名称，默认为main,文件在./build/.pro_info中
+if test -z $(find ./build/ -maxdepth 1 -name ".pro_info") ; then
+	echo "exec_name=$1" > ./build/.pro_info #没有.pro_info文件，则创建
+	exec_name=$1
+else #.pro_info文件存在，提取执行文件名词
+	exec_name=$(get_exec_name) #提取名称
+	if test -n "$exec_name" ; then
+		echo 执行文件名称获取成功!
+	else
+		echo 执行文件名称获取失败!
+		exit -1
+	fi
+fi
+
+#如果同原来的名称相同则不用修改
+if test "$exec_name" = "$1" ; then
+	echo 名称相同，不用修改!
+	exit 0
+fi
+
+#替换名称
+sed -i 's/ADD_EXECUTABLE(.*\ /ADD_EXECUTABLE('$1'\ /g' ./src/CMakeLists.txt
+sed -i 's/TARGET_LINK_LIBRARIES(.*\ /TARGET_LINK_LIBRARIES('$1'\ /g' ./src/CMakeLists.txt
+
+#替换成功后保存
+set_exec_name $1 #修改名称
+echo "名称修改成功!"
+
+exit 0

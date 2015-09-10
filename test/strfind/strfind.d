@@ -1,0 +1,1 @@
+strfind.o: strfind.c

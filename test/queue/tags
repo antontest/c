@@ -1,0 +1,66 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+birth_seq	queue.c	/^    unsigned int birth_seq; \/* node created with a seq, started with 0 *\/$/;"	m	struct:queue_node	file:	access:public
+create_time	queue.c	/^    long create_time;       \/* time of queue node created *\/$/;"	m	struct:queue_node	file:	access:public
+curr	queue.c	/^    queue_node_t *curr;$/;"	m	struct:queue	file:	access:public
+dequeue	queue.c	/^struct queue_node * dequeue(struct queue *q)$/;"	f	signature:(struct queue *q)
+dequeue_time	queue.c	/^    long dequeue_time;      \/* time of dequeue *\/ $/;"	m	struct:queue_node	file:	access:public
+enqueue	queue.c	/^int enqueue(struct queue *q, struct queue_node *node)$/;"	f	signature:(struct queue *q, struct queue_node *node)
+enqueue_time	queue.c	/^    long enqueue_time;      \/* time of enqueue *\/$/;"	m	struct:queue_node	file:	access:public
+front	queue.c	/^    queue_node_t *front;$/;"	m	struct:queue	file:	access:public
+get_systime	queue.c	/^long get_systime()$/;"	f
+hold_cnt	queue.c	/^    int hold_cnt;           \/* hold member info until hold_cnt equal to 0 *\/$/;"	m	struct:queue	file:	access:public
+hold_cnt	queue.c	/^    int hold_cnt;           \/* hold member info until hold_cnt equal to 0 *\/$/;"	m	struct:queue_node	file:	access:public
+hold_total_sum	queue.c	/^    int hold_total_sum;     \/* hold member in this queue *\/$/;"	m	struct:queue	file:	access:public
+info	queue.c	/^    struct mem_info info;   \/* information of queue member *\/$/;"	m	struct:queue_node	typeref:struct:queue_node::mem_info	file:	access:public
+jump_queue	queue.c	/^int jump_queue(struct queue *q, struct queue_node *node, \\$/;"	f	signature:(struct queue *q, struct queue_node *node, \ unsigned int seq)
+main	queue.c	/^int main(int agrc, char *agrv[])$/;"	f	signature:(int agrc, char *agrv[])
+mem_info	queue.c	/^typedef struct mem_info {$/;"	s	file:
+mem_info::type	queue.c	/^    unsigned int type;    $/;"	m	struct:mem_info	file:	access:public
+mem_info_t	queue.c	/^} mem_info_t;$/;"	t	typeref:struct:mem_info	file:
+next	queue.c	/^    struct queue_node *next;$/;"	m	struct:queue_node	typeref:struct:queue_node::queue_node	file:	access:public
+print_queue	queue.c	/^void print_queue(struct queue *q)$/;"	f	signature:(struct queue *q)
+queue	queue.c	/^typedef struct queue {$/;"	s	file:
+queue::curr	queue.c	/^    queue_node_t *curr;$/;"	m	struct:queue	file:	access:public
+queue::front	queue.c	/^    queue_node_t *front;$/;"	m	struct:queue	file:	access:public
+queue::hold_cnt	queue.c	/^    int hold_cnt;           \/* hold member info until hold_cnt equal to 0 *\/$/;"	m	struct:queue	file:	access:public
+queue::hold_total_sum	queue.c	/^    int hold_total_sum;     \/* hold member in this queue *\/$/;"	m	struct:queue	file:	access:public
+queue::queue_id	queue.c	/^    unsigned int queue_id;  \/* id of queue *\/$/;"	m	struct:queue	file:	access:public
+queue::queue_id	queue.c	/^    unsigned int queue_id;$/;"	m	struct:queue	file:	access:public
+queue::queue_len	queue.c	/^    unsigned int queue_len; \/* total len of queue *\/$/;"	m	struct:queue	file:	access:public
+queue::rear	queue.c	/^    queue_node_t *rear;$/;"	m	struct:queue	file:	access:public
+queue::stop_dequeue	queue.c	/^    bool stop_dequeue;      \/* flag of stop dequeue *\/$/;"	m	struct:queue	file:	access:public
+queue::stop_enqueue	queue.c	/^    bool stop_enqueue;      \/* flag of stop enqueue *\/$/;"	m	struct:queue	file:	access:public
+queue_deinit	queue.c	/^int queue_deinit(struct queue *q)$/;"	f	signature:(struct queue *q)
+queue_id	queue.c	/^    unsigned int queue_id;  \/* id of queue *\/$/;"	m	struct:queue	file:	access:public
+queue_id	queue.c	/^    unsigned int queue_id;$/;"	m	struct:queue	file:	access:public
+queue_id	queue.c	/^static unsigned int queue_id = 1;$/;"	v	file:
+queue_init	queue.c	/^int queue_init(struct queue *q)$/;"	f	signature:(struct queue *q)
+queue_len	queue.c	/^    unsigned int queue_len; \/* total len of queue *\/$/;"	m	struct:queue	file:	access:public
+queue_node	queue.c	/^typedef struct queue_node {$/;"	s	file:
+queue_node::birth_seq	queue.c	/^    unsigned int birth_seq; \/* node created with a seq, started with 0 *\/$/;"	m	struct:queue_node	file:	access:public
+queue_node::create_time	queue.c	/^    long create_time;       \/* time of queue node created *\/$/;"	m	struct:queue_node	file:	access:public
+queue_node::dequeue_time	queue.c	/^    long dequeue_time;      \/* time of dequeue *\/ $/;"	m	struct:queue_node	file:	access:public
+queue_node::enqueue_time	queue.c	/^    long enqueue_time;      \/* time of enqueue *\/$/;"	m	struct:queue_node	file:	access:public
+queue_node::hold_cnt	queue.c	/^    int hold_cnt;           \/* hold member info until hold_cnt equal to 0 *\/$/;"	m	struct:queue_node	file:	access:public
+queue_node::info	queue.c	/^    struct mem_info info;   \/* information of queue member *\/$/;"	m	struct:queue_node	typeref:struct:queue_node::mem_info	file:	access:public
+queue_node::next	queue.c	/^    struct queue_node *next;$/;"	m	struct:queue_node	typeref:struct:queue_node::queue_node	file:	access:public
+queue_node::seq	queue.c	/^    unsigned int seq;       \/* seq started with 0 *\/$/;"	m	struct:queue_node	file:	access:public
+queue_node::seq	queue.c	/^    unsigned int seq;$/;"	m	struct:queue_node	file:	access:public
+queue_node::type	queue.c	/^    unsigned int type;      \/* information of queue member *\/$/;"	m	struct:queue_node	file:	access:public
+queue_node_create	queue.c	/^struct queue_node * queue_node_create()$/;"	f
+queue_node_t	queue.c	/^} queue_node_t;$/;"	t	typeref:struct:queue_node	file:
+queue_seq	queue.c	/^static unsigned int queue_seq = 1;$/;"	v	file:
+queue_t	queue.c	/^} queue_t;$/;"	t	typeref:struct:queue	file:
+quit_queue	queue.c	/^int quit_queue(struct queue *q, int seq)$/;"	f	signature:(struct queue *q, int seq)
+rear	queue.c	/^    queue_node_t *rear;$/;"	m	struct:queue	file:	access:public
+seq	queue.c	/^    unsigned int seq;       \/* seq started with 0 *\/$/;"	m	struct:queue_node	file:	access:public
+seq	queue.c	/^    unsigned int seq;$/;"	m	struct:queue_node	file:	access:public
+stop_dequeue	queue.c	/^    bool stop_dequeue;      \/* flag of stop dequeue *\/$/;"	m	struct:queue	file:	access:public
+stop_enqueue	queue.c	/^    bool stop_enqueue;      \/* flag of stop enqueue *\/$/;"	m	struct:queue	file:	access:public
+type	queue.c	/^    unsigned int type;      \/* information of queue member *\/$/;"	m	struct:queue_node	file:	access:public
+type	queue.c	/^    unsigned int type;    $/;"	m	struct:mem_info	file:	access:public

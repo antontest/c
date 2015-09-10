@@ -1,0 +1,34 @@
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+int main(int agrc,char *agrv[])
+{
+    //parameters
+    if(agrc < 2)
+    {
+        printf("The operation parameters of the input error.\n");
+        exit(0);
+    }
+
+    //open file
+    FILE *fp = NULL;
+    if(NULL == (fp = fopen(agrv[1],"r")))
+    {
+        printf("Open file %s failed.\n",agrv[1]);
+        fclose(fp);
+        exit(0);
+    }
+
+    printf("open succ.\n");
+
+    char buf[512];
+    fgets(buf,512,fp);
+    printf("%s",buf);
+    
+    fclose(fp);
+    fp = NULL;
+    printf("over.\n");
+    
+    return 0;
+}

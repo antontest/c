@@ -1,0 +1,26 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/anton/working/program/c/readini/src/include/readini.h
+stdio.h
+-
+string.h
+-
+sys/types.h
+-
+sys/stat.h
+-
+fcntl.h
+-
+unistd.h
+-
+
+/home/anton/working/program/c/readini/src/main/readini.cpp
+../include/readini.h
+/home/anton/working/program/c/readini/src/include/readini.h
+

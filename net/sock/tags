@@ -1,0 +1,273 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+CMD	sock.h	/^    CMD       $/;"	e	enum:socket_data_type
+DFT_STRING_SIZE	sock.h	35;"	d
+INT	sock.h	/^    INT    = 0,$/;"	e	enum:socket_data_type
+MACRO_STR	sock.h	39;"	d
+MAX_CLIENT_NUM	sock.h	34;"	d
+SOCKET_DATA_HEADER_SIZE	sock.h	37;"	d
+SOCKET_DATA_SIZE	sock.h	36;"	d
+SOCKET_ON_ACCEPT	sock.h	/^    SOCKET_ON_ACCEPT  = 1,$/;"	e	enum:event_type
+SOCKET_ON_CLOSE	sock.h	/^    SOCKET_ON_CLOSE   = 16$/;"	e	enum:event_type
+SOCKET_ON_CONNECT	sock.h	/^    SOCKET_ON_CONNECT = 2, $/;"	e	enum:event_type
+SOCKET_ON_RECV	sock.h	/^    SOCKET_ON_RECV    = 4,$/;"	e	enum:event_type
+SOCKET_ON_SEND	sock.h	/^    SOCKET_ON_SEND    = 8,$/;"	e	enum:event_type
+STRING	sock.h	/^    STRING    ,$/;"	e	enum:socket_data_type
+UNIX_DOMAIN	sock.c	2;"	d	file:
+__SOCK_H__	sock.h	2;"	d
+add_socket_to_membership	sock.c	/^int add_socket_to_membership(int fd, struct ip_mreq *mrq)$/;"	f	signature:(int fd, struct ip_mreq *mrq)
+add_socket_to_membership	sock.h	/^int add_socket_to_membership(int fd, struct ip_mreq *mrq);$/;"	p	signature:(int fd, struct ip_mreq *mrq)
+addr	sock.h	/^    struct sockaddr_in addr;$/;"	m	struct:socket	typeref:struct:socket::sockaddr_in	access:public
+arg	sock.h	/^    void *arg;        $/;"	m	struct:callback	access:public
+callback	sock.h	/^typedef struct callback$/;"	s
+callback	sock.h	/^} callback;$/;"	t	typeref:struct:callback
+callback::arg	sock.h	/^    void *arg;        $/;"	m	struct:callback	access:public
+callback::evt_cb	sock.h	/^    event_cb evt_cb;   $/;"	m	struct:callback	access:public
+cli_fd	sock.h	/^    int cli_fd[MAX_CLIENT_NUM];$/;"	m	struct:socket	access:public
+client_connect	sock.c	/^int client_connect(struct socket *sck, int domain, \\$/;"	f	signature:(struct socket *sck, int domain, \ int type, const char *ip, u_short port)
+client_connect	sock.h	/^int client_connect(struct socket *sck, int domain, int type, \\$/;"	p	signature:(struct socket *sck, int domain, int type, \ const char *ip, u_short port)
+client_time_connect	sock.c	/^int client_time_connect(struct socket *sck, int domain, \\$/;"	f	signature:(struct socket *sck, int domain, \ int type, const char *ip, u_short port, int tm_ms)
+client_time_connect	sock.h	/^int client_time_connect(struct socket *sck, int domain, int type, \\$/;"	p	signature:(struct socket *sck, int domain, int type, \ const char *ip, u_short port, int tm_ms)
+data	sock.h	/^    socket_data_t data;$/;"	m	struct:socket	access:public
+drop_socket_from_membership	sock.c	/^int drop_socket_from_membership(int fd, struct ip_mreq *mrq)$/;"	f	signature:(int fd, struct ip_mreq *mrq)
+drop_socket_from_membership	sock.h	/^int drop_socket_from_membership(int fd, struct ip_mreq *mrq);$/;"	p	signature:(int fd, struct ip_mreq *mrq)
+error_die	sock.c	/^static void error_die(const char *sc)$/;"	f	file:	signature:(const char *sc)
+error_die	sock.c	/^void error_die(const char *sc)$/;"	f	signature:(const char *sc)
+eth_data_capture	sock.c	/^int eth_data_capture(int fd)$/;"	f	signature:(int fd)
+eth_data_capture	sock.h	/^int eth_data_capture(int fd);$/;"	p	signature:(int fd)
+ethdump_socket_init	sock.c	/^int ethdump_socket_init()$/;"	f
+ethdump_socket_init	sock.h	/^int ethdump_socket_init();$/;"	p
+event_cb	sock.h	/^typedef void (*event_cb)(int fd, void *arg);$/;"	t
+event_loop	sock.h	/^typedef struct event_loop$/;"	s
+event_loop::evt	sock.h	/^    event_type_t evt;$/;"	m	struct:event_loop	access:public
+event_loop::on_accept	sock.h	/^    callback on_accept;$/;"	m	struct:event_loop	access:public
+event_loop::on_close	sock.h	/^    callback on_close;$/;"	m	struct:event_loop	access:public
+event_loop::on_connect	sock.h	/^    callback on_connect;$/;"	m	struct:event_loop	access:public
+event_loop::on_recv	sock.h	/^    callback on_recv;$/;"	m	struct:event_loop	access:public
+event_loop::on_send	sock.h	/^    callback on_send;$/;"	m	struct:event_loop	access:public
+event_loop_t	sock.h	/^} event_loop_t;$/;"	t	typeref:struct:event_loop
+event_type	sock.h	/^typedef enum event_type $/;"	g
+event_type_t	sock.h	/^} event_type_t;$/;"	t	typeref:enum:event_type
+evl	sock.h	/^    event_loop_t evl;$/;"	m	struct:socket	access:public
+evt	sock.h	/^    event_type_t evt;$/;"	m	struct:event_loop	access:public
+evt_cb	sock.h	/^    event_cb evt_cb;   $/;"	m	struct:callback	access:public
+fd	sock.h	/^    int fd;$/;"	m	struct:socket	access:public
+get_can_read_bytes	sock.c	/^int get_can_read_bytes(int fd)$/;"	f	signature:(int fd)
+get_can_read_bytes	sock.h	/^int get_can_read_bytes(int fd);$/;"	p	signature:(int fd)
+get_dst_ip	sock.c	/^char* get_dst_ip(const struct ip *iphead, char **dst_ip)$/;"	f	signature:(const struct ip *iphead, char **dst_ip)
+get_dst_ip	sock.h	/^char* get_dst_ip(const struct ip *iphead, char **dst_ip);$/;"	p	signature:(const struct ip *iphead, char **dst_ip)
+get_ifname	sock.c	/^int get_ifname(char **ifname)$/;"	f	signature:(char **ifname)
+get_ifname	sock.c	/^int get_ifname(char *ifname)$/;"	f	signature:(char *ifname)
+get_ifname	sock.h	/^int get_ifname(char *ifname);$/;"	p	signature:(char *ifname)
+get_interface_index	sock.c	/^int get_interface_index(int fd, struct ifreq *req)$/;"	f	signature:(int fd, struct ifreq *req)
+get_interface_index	sock.h	/^int get_interface_index(int fd, struct ifreq *req);$/;"	p	signature:(int fd, struct ifreq *req)
+get_ip	sock.c	/^int get_ip(char ip[])$/;"	f	signature:(char ip[])
+get_ip	sock.h	/^int get_ip(char ip[]);$/;"	p	signature:(char ip[])
+get_ip_by_ifname	sock.c	/^int get_ip_by_ifname(const char *ifname, char *ip)$/;"	f	signature:(const char *ifname, char *ip)
+get_ip_by_ifname	sock.h	/^int get_ip_by_ifname(const char *ifname, char *ip);$/;"	p	signature:(const char *ifname, char *ip)
+get_local_ip	sock.c	/^int get_local_ip(char ip[])$/;"	f	signature:(char ip[])
+get_local_ip	sock.h	/^int get_local_ip(char ip[]);$/;"	p	signature:(char ip[])
+get_net_addr	sock.c	/^char * get_net_addr(const char *ip, const char *mask)$/;"	f	signature:(const char *ip, const char *mask)
+get_proto_name	sock.c	/^char* get_proto_name(const struct ip *iphead, char **proto_name)$/;"	f	signature:(const struct ip *iphead, char **proto_name)
+get_proto_name	sock.h	/^char* get_proto_name(const struct ip *iphead, char **proto_name);$/;"	p	signature:(const struct ip *iphead, char **proto_name)
+get_socket_recv_buf	sock.c	/^int get_socket_recv_buf(int fd)$/;"	f	signature:(int fd)
+get_socket_recv_buf	sock.h	/^int get_socket_recv_buf(int fd);$/;"	p	signature:(int fd)
+get_socket_recv_timeout	sock.c	/^int get_socket_recv_timeout(int fd)$/;"	f	signature:(int fd)
+get_socket_recv_timeout	sock.h	/^int get_socket_recv_timeout(int fd);$/;"	p	signature:(int fd)
+get_socket_send_buf	sock.c	/^int get_socket_send_buf(int fd)$/;"	f	signature:(int fd)
+get_socket_send_buf	sock.h	/^int get_socket_send_buf(int fd);$/;"	p	signature:(int fd)
+get_socket_send_timeout	sock.c	/^int get_socket_send_timeout(int fd)$/;"	f	signature:(int fd)
+get_socket_send_timeout	sock.h	/^int get_socket_send_timeout(int fd);$/;"	p	signature:(int fd)
+get_socket_type	sock.c	/^int get_socket_type(int fd)$/;"	f	signature:(int fd)
+get_socket_type	sock.h	/^int get_socket_type(int fd);$/;"	p	signature:(int fd)
+get_socket_type_str	sock.c	/^char* get_socket_type_str(int fd)$/;"	f	signature:(int fd)
+get_socket_type_str	sock.h	/^char* get_socket_type_str(int fd);$/;"	p	signature:(int fd)
+get_src_ip	sock.c	/^char* get_src_ip(const struct ip *iphead, char **src_ip)$/;"	f	signature:(const struct ip *iphead, char **src_ip)
+get_src_ip	sock.h	/^char* get_src_ip(const struct ip *iphead, char **src_ip);$/;"	p	signature:(const struct ip *iphead, char **src_ip)
+get_subnet_addr	sock.c	/^char * get_subnet_addr(const char *ip, const char *mask)$/;"	f	signature:(const char *ip, const char *mask)
+get_subnet_addr	sock.h	/^char * get_subnet_addr(const char *ip, const char *mask);$/;"	p	signature:(const char *ip, const char *mask)
+i	sock.h	/^        int i;$/;"	m	union:socket_data::__anon1	access:public
+is_big_endian	sock.c	/^int is_big_endian()$/;"	f
+is_big_endian	sock.h	/^int is_big_endian();$/;"	p
+macro_to_str	sock.c	40;"	d	file:
+macro_to_str	sock.c	45;"	d	file:
+main	sock.c	/^int main(int agrc, char *agrv[])$/;"	f	signature:(int agrc, char *agrv[])
+make_listen_socket_reuseable	sock.c	/^int make_listen_socket_reuseable(int fd)$/;"	f	signature:(int fd)
+make_listen_socket_reuseable	sock.h	/^int make_listen_socket_reuseable(int fd);$/;"	p	signature:(int fd)
+make_socket_block	sock.c	/^int make_socket_block(int fd)$/;"	f	signature:(int fd)
+make_socket_block	sock.h	/^int make_socket_block(int fd);$/;"	p	signature:(int fd)
+make_socket_broadcast	sock.c	/^int make_socket_broadcast(int fd, int on)$/;"	f	signature:(int fd, int on)
+make_socket_broadcast	sock.h	/^int make_socket_broadcast(int fd, int on);$/;"	p	signature:(int fd, int on)
+make_socket_close_action	sock.c	/^int make_socket_close_action(int fd, int is_on, int tm_s)$/;"	f	signature:(int fd, int is_on, int tm_s)
+make_socket_close_action	sock.h	/^int make_socket_close_action(int fd, int is_on, int tm_s);$/;"	p	signature:(int fd, int is_on, int tm_s)
+make_socket_closenexec	sock.c	/^int make_socket_closenexec(int fd)$/;"	f	signature:(int fd)
+make_socket_closenexec	sock.h	/^int make_socket_closenexec(int fd);$/;"	p	signature:(int fd)
+make_socket_keep_alive	sock.c	/^int make_socket_keep_alive(int fd)$/;"	f	signature:(int fd)
+make_socket_keep_alive	sock.h	/^int make_socket_keep_alive(int fd);$/;"	p	signature:(int fd)
+make_socket_multicast_loop	sock.c	/^int make_socket_multicast_loop(int fd, int on)$/;"	f	signature:(int fd, int on)
+make_socket_multicast_loop	sock.h	/^int make_socket_multicast_loop(int fd, int on);$/;"	p	signature:(int fd, int on)
+make_socket_multicast_ttl	sock.c	/^int make_socket_multicast_ttl(int fd, int ttl)$/;"	f	signature:(int fd, int ttl)
+make_socket_multicast_ttl	sock.h	/^int make_socket_multicast_ttl(int fd, int ttl);$/;"	p	signature:(int fd, int ttl)
+make_socket_nonblock	sock.c	/^int make_socket_nonblock(int fd)$/;"	f	signature:(int fd)
+make_socket_nonblock	sock.h	/^int make_socket_nonblock(int fd);$/;"	p	signature:(int fd)
+make_socket_promisc	sock.c	/^int make_socket_promisc(const char *ifname, int fd, int on)$/;"	f	signature:(const char *ifname, int fd, int on)
+make_socket_promisc	sock.h	/^int make_socket_promisc(const char *ifname, int fd, int on);$/;"	p	signature:(const char *ifname, int fd, int on)
+make_socket_recv_timeout	sock.c	/^int make_socket_recv_timeout(int fd, int tm_ms)$/;"	f	signature:(int fd, int tm_ms)
+make_socket_recv_timeout	sock.h	/^int make_socket_recv_timeout(int fd, int tm_ms);$/;"	p	signature:(int fd, int tm_ms)
+make_socket_send_timeout	sock.c	/^int make_socket_send_timeout(int fd, int tm_ms)$/;"	f	signature:(int fd, int tm_ms)
+make_socket_send_timeout	sock.h	/^int make_socket_send_timeout(int fd, int tm_ms);$/;"	p	signature:(int fd, int tm_ms)
+mask_to_bits	sock.c	/^int mask_to_bits(const char *mask)$/;"	f	signature:(const char *mask)
+mask_to_bits	sock.h	/^int mask_to_bits(const char *mask);$/;"	p	signature:(const char *mask)
+match_ip	sock.c	/^int match_ip(const char *ip)$/;"	f	signature:(const char *ip)
+match_ip	sock.c	/^int match_ip(const char *ip);$/;"	p	file:	signature:(const char *ip)
+match_ip	sock.h	/^int match_ip(const char *ip);$/;"	p	signature:(const char *ip)
+on_accept	sock.c	/^void on_accept(int cli_fd, void *arg)$/;"	f	signature:(int cli_fd, void *arg)
+on_accept	sock.h	/^    callback on_accept;$/;"	m	struct:event_loop	access:public
+on_close	sock.c	/^void on_close(int cli_fd, void *arg)$/;"	f	signature:(int cli_fd, void *arg)
+on_close	sock.h	/^    callback on_close;$/;"	m	struct:event_loop	access:public
+on_connect	sock.h	/^    callback on_connect;$/;"	m	struct:event_loop	access:public
+on_recv	sock.c	/^void on_recv(int cli_fd, void *arg)$/;"	f	signature:(int cli_fd, void *arg)
+on_recv	sock.h	/^    callback on_recv;$/;"	m	struct:event_loop	access:public
+on_send	sock.h	/^    callback on_send;$/;"	m	struct:event_loop	access:public
+p	sock.h	/^        void *p;$/;"	m	union:socket_data::__anon1	access:public
+parse_eth_head	sock.c	/^int parse_eth_head(const struct ether_header *machead, \\$/;"	f	signature:(const struct ether_header *machead, \ unsigned short *eth_type, char **src_mac, \ char **dst_mac)
+parse_eth_head	sock.h	/^int parse_eth_head(const struct ether_header *machead, \\$/;"	p	signature:(const struct ether_header *machead, \ unsigned short *eth_type, char **src_mac, \ char **dst_mac)
+parse_ethframe	sock.c	/^int parse_ethframe(const char *data)$/;"	f	signature:(const char *data)
+parse_ethframe	sock.h	/^int parse_ethframe(const char *data);$/;"	p	signature:(const char *data)
+parse_ip_head	sock.c	/^int parse_ip_head(const struct ip *iphead, \\$/;"	f	signature:(const struct ip *iphead, \ char **proto_name, char **ip_src, char **ip_dst)
+parse_ip_head	sock.h	/^int parse_ip_head(const struct ip *iphead, \\$/;"	p	signature:(const struct ip *iphead, \ char **proto_name, char **ip_src, char **ip_dst)
+parse_tcp_head	sock.c	/^int parse_tcp_head(const struct tcphdr *tcphead)$/;"	f	signature:(const struct tcphdr *tcphead)
+parse_tcp_head	sock.h	/^int parse_tcp_head(const struct tcphdr *tcphead);$/;"	p	signature:(const struct tcphdr *tcphead)
+parse_udp_head	sock.c	/^int parse_udp_head(const struct udphdr *udphead)$/;"	f	signature:(const struct udphdr *udphead)
+parse_udp_head	sock.h	/^int parse_udp_head(const struct udphdr *udphead);$/;"	p	signature:(const struct udphdr *udphead)
+ptd	sock.h	/^    pthread_t ptd;$/;"	m	struct:socket	access:public
+s	sock.h	/^        char s[0];$/;"	m	union:socket_data::__anon1	access:public
+server_create	sock.c	/^int server_create(struct socket *sck, int domain, \\$/;"	f	signature:(struct socket *sck, int domain, \ int type, u_short port, const char *ip)
+server_create	sock.h	/^int server_create(struct socket *sck, int domain, int type, \\$/;"	p	signature:(struct socket *sck, int domain, int type, \ u_short port, const char *ip)
+server_stop	sock.c	/^void server_stop(struct socket *sck)$/;"	f	signature:(struct socket *sck)
+server_stop	sock.h	/^void server_stop(struct socket *sck);$/;"	p	signature:(struct socket *sck)
+set_socket_recv_buf	sock.c	/^int set_socket_recv_buf(int fd, int buf_size)$/;"	f	signature:(int fd, int buf_size)
+set_socket_recv_buf	sock.h	/^int set_socket_recv_buf(int fd, int buf_size);$/;"	p	signature:(int fd, int buf_size)
+set_socket_send_buf	sock.c	/^int set_socket_send_buf(int fd, int buf_size)$/;"	f	signature:(int fd, int buf_size)
+set_socket_send_buf	sock.h	/^int set_socket_send_buf(int fd, int buf_size);$/;"	p	signature:(int fd, int buf_size)
+show_mac	sock.c	/^void show_mac(int type, const unsigned char addr[])$/;"	f	signature:(int type, const unsigned char addr[])
+show_mac	sock.h	/^void show_mac(int type, const unsigned char addr[]);$/;"	p	signature:(int type, const unsigned char addr[])
+size	sock.h	/^    unsigned long size;$/;"	m	struct:socket_data	access:public
+socket	sock.h	/^struct socket$/;"	s
+socket::addr	sock.h	/^    struct sockaddr_in addr;$/;"	m	struct:socket	typeref:struct:socket::sockaddr_in	access:public
+socket::cli_fd	sock.h	/^    int cli_fd[MAX_CLIENT_NUM];$/;"	m	struct:socket	access:public
+socket::data	sock.h	/^    socket_data_t data;$/;"	m	struct:socket	access:public
+socket::evl	sock.h	/^    event_loop_t evl;$/;"	m	struct:socket	access:public
+socket::fd	sock.h	/^    int fd;$/;"	m	struct:socket	access:public
+socket::ptd	sock.h	/^    pthread_t ptd;$/;"	m	struct:socket	access:public
+socket_accept	sock.c	/^int socket_accept(int fd)$/;"	f	signature:(int fd)
+socket_accept	sock.h	/^int socket_accept(int fd);$/;"	p	signature:(int fd)
+socket_addr_data_recvfrom	sock.c	/^int socket_addr_data_recvfrom(int fd, socket_data_type *type, \\$/;"	f	signature:(int fd, socket_data_type *type, \ void *buf, int size, void *addr)
+socket_addr_data_recvfrom	sock.h	/^int socket_addr_data_recvfrom(int fd, socket_data_type *type, \\$/;"	p	signature:(int fd, socket_data_type *type, \ void *buf, int size, void *addr)
+socket_addr_data_sendto	sock.c	/^int socket_addr_data_sendto(int fd, socket_data_type type, \\$/;"	f	signature:(int fd, socket_data_type type, \ void *buf, int size, void *addr)
+socket_addr_data_sendto	sock.h	/^int socket_addr_data_sendto(int fd, socket_data_type type, \\$/;"	p	signature:(int fd, socket_data_type type, \ void *buf, int size, void *addr)
+socket_addr_init	sock.c	/^void socket_addr_init(void *addr, int domain, u_short port, const char *ip)$/;"	f	signature:(void *addr, int domain, u_short port, const char *ip)
+socket_addr_init	sock.h	/^void socket_addr_init(void *addr, int domain, u_short port, const char *ip);$/;"	p	signature:(void *addr, int domain, u_short port, const char *ip)
+socket_addr_recvfrom	sock.c	/^int socket_addr_recvfrom(int fd, void *buf, int size, void *addr)$/;"	f	signature:(int fd, void *buf, int size, void *addr)
+socket_addr_recvfrom	sock.h	/^int socket_addr_recvfrom(int fd, void *buf, int size, void *addr);$/;"	p	signature:(int fd, void *buf, int size, void *addr)
+socket_addr_sendto	sock.c	/^int socket_addr_sendto(int fd, void *buf, int size, void *addr)$/;"	f	signature:(int fd, void *buf, int size, void *addr)
+socket_addr_sendto	sock.h	/^int socket_addr_sendto(int fd, void *buf, int size, void *addr);$/;"	p	signature:(int fd, void *buf, int size, void *addr)
+socket_bind	sock.c	/^int socket_bind(int fd, void *addr)$/;"	f	signature:(int fd, void *addr)
+socket_bind	sock.h	/^int socket_bind(int fd, void *addr);$/;"	p	signature:(int fd, void *addr)
+socket_close	sock.c	/^int socket_close(int fd)$/;"	f	signature:(int fd)
+socket_close	sock.h	/^int socket_close(int fd);$/;"	p	signature:(int fd)
+socket_connect	sock.c	/^int socket_connect(int fd, void *cli_addr)$/;"	f	signature:(int fd, void *cli_addr)
+socket_connect	sock.h	/^int socket_connect(int fd, void *cli_addr);$/;"	p	signature:(int fd, void *cli_addr)
+socket_create	sock.c	/^int socket_create(int domain, int type)$/;"	f	signature:(int domain, int type)
+socket_create	sock.h	/^int socket_create(int domain, int type);$/;"	p	signature:(int domain, int type)
+socket_data	sock.h	/^typedef struct socket_data$/;"	s
+socket_data::__anon1::i	sock.h	/^        int i;$/;"	m	union:socket_data::__anon1	access:public
+socket_data::__anon1::p	sock.h	/^        void *p;$/;"	m	union:socket_data::__anon1	access:public
+socket_data::__anon1::s	sock.h	/^        char s[0];$/;"	m	union:socket_data::__anon1	access:public
+socket_data::size	sock.h	/^    unsigned long size;$/;"	m	struct:socket_data	access:public
+socket_data::type	sock.h	/^    socket_data_type type;$/;"	m	struct:socket_data	access:public
+socket_data::value	sock.h	/^    } value;$/;"	m	struct:socket_data	typeref:union:socket_data::__anon1	access:public
+socket_data_recv	sock.c	/^int socket_data_recv(int fd, socket_data_type *type, void *buf, int size)$/;"	f	signature:(int fd, socket_data_type *type, void *buf, int size)
+socket_data_recv	sock.h	/^int socket_data_recv(int fd, socket_data_type *type, \\$/;"	p	signature:(int fd, socket_data_type *type, \ void *buf, int size)
+socket_data_recvfrom	sock.c	/^int socket_data_recvfrom(int fd, socket_data_type *type, \\$/;"	f	signature:(int fd, socket_data_type *type, \ void *buf, int size, const char *ip, int port)
+socket_data_recvfrom	sock.h	/^int socket_data_recvfrom(int fd, socket_data_type *type, \\$/;"	p	signature:(int fd, socket_data_type *type, \ void *buf, int size, const char *ip, int port)
+socket_data_send	sock.c	/^int socket_data_send(int fd, socket_data_type type, void *buf, int size)$/;"	f	signature:(int fd, socket_data_type type, void *buf, int size)
+socket_data_send	sock.h	/^int socket_data_send(int fd, socket_data_type type, void *buf, int size);$/;"	p	signature:(int fd, socket_data_type type, void *buf, int size)
+socket_data_sendto	sock.c	/^int socket_data_sendto(int fd, socket_data_type type, \\$/;"	f	signature:(int fd, socket_data_type type, \ void *buf, int size, const char *ip, int port)
+socket_data_sendto	sock.h	/^int socket_data_sendto(int fd, socket_data_type type, \\$/;"	p	signature:(int fd, socket_data_type type, \ void *buf, int size, const char *ip, int port)
+socket_data_t	sock.h	/^} socket_data_t;$/;"	t	typeref:struct:socket_data
+socket_data_time_recv	sock.c	/^int socket_data_time_recv(int fd, socket_data_type *type, \\$/;"	f	signature:(int fd, socket_data_type *type, \ void *buf, int size, int time_ms)
+socket_data_time_recv	sock.h	/^int socket_data_time_recv(int fd, socket_data_type *type, \\$/;"	p	signature:(int fd, socket_data_type *type, \ void *buf, int size, int time_ms)
+socket_data_type	sock.h	/^typedef enum socket_data_type$/;"	g
+socket_data_type	sock.h	/^} socket_data_type;$/;"	t	typeref:enum:socket_data_type
+socket_event_add	sock.c	/^void socket_event_add(event_loop_t *evl, event_type_t evt, event_cb cb, void *arg)$/;"	f	signature:(event_loop_t *evl, event_type_t evt, event_cb cb, void *arg)
+socket_event_add	sock.h	/^void socket_event_add(event_loop_t *evl, event_type_t evt, event_cb cb, void *arg);$/;"	p	signature:(event_loop_t *evl, event_type_t evt, event_cb cb, void *arg)
+socket_event_clearall	sock.c	/^void socket_event_clearall(event_loop_t *evl)$/;"	f	signature:(event_loop_t *evl)
+socket_event_clearall	sock.h	/^void socket_event_clearall(event_loop_t *evl);$/;"	p	signature:(event_loop_t *evl)
+socket_event_delete	sock.c	/^void socket_event_delete(event_loop_t *evl, event_type_t evt)$/;"	f	signature:(event_loop_t *evl, event_type_t evt)
+socket_event_delete	sock.h	/^void socket_event_delete(event_loop_t *evl, event_type_t evt);$/;"	p	signature:(event_loop_t *evl, event_type_t evt)
+socket_event_init	sock.c	/^void socket_event_init(event_loop_t *evl)$/;"	f	signature:(event_loop_t *evl)
+socket_event_init	sock.h	/^void socket_event_init(event_loop_t *evl);$/;"	p	signature:(event_loop_t *evl)
+socket_event_process	sock.c	/^void socket_event_process(int fd, callback cb)$/;"	f	signature:(int fd, callback cb)
+socket_event_process	sock.h	/^void socket_event_process(int fd, callback cb);$/;"	p	signature:(int fd, callback cb)
+socket_listen	sock.c	/^int socket_listen(int fd, int backlog)$/;"	f	signature:(int fd, int backlog)
+socket_listen	sock.h	/^int socket_listen(int fd, int backlog);$/;"	p	signature:(int fd, int backlog)
+socket_recv	sock.c	/^int socket_recv(int fd, void *buf, int size)$/;"	f	signature:(int fd, void *buf, int size)
+socket_recv	sock.h	/^int socket_recv(int fd, void *buf, int size);$/;"	p	signature:(int fd, void *buf, int size)
+socket_recvfrom	sock.c	/^int socket_recvfrom(int fd, void *buf, int size, const char *ip, int port)$/;"	f	signature:(int fd, void *buf, int size, const char *ip, int port)
+socket_recvfrom	sock.h	/^int socket_recvfrom(int fd, void *buf, int size, const char *ip, int port);$/;"	p	signature:(int fd, void *buf, int size, const char *ip, int port)
+socket_send	sock.c	/^int socket_send(int fd, void *buf, int size)$/;"	f	signature:(int fd, void *buf, int size)
+socket_send	sock.h	/^int socket_send(int fd, void *buf, int size);$/;"	p	signature:(int fd, void *buf, int size)
+socket_sendto	sock.c	/^int socket_sendto(int fd, void *buf, int size, const char *ip, int port)$/;"	f	signature:(int fd, void *buf, int size, const char *ip, int port)
+socket_sendto	sock.h	/^int socket_sendto(int fd, void *buf, int size, const char *ip, int port);$/;"	p	signature:(int fd, void *buf, int size, const char *ip, int port)
+socket_startup	sock.c	/^int socket_startup(int domain, int type, void *addr, u_short port, \\$/;"	f	signature:(int domain, int type, void *addr, u_short port, \ const char *ip, int is_ser)
+socket_startup	sock.h	/^int socket_startup(int domain, int type, void *addr, u_short port, \\$/;"	p	signature:(int domain, int type, void *addr, u_short port, \ const char *ip, int is_ser)
+socket_t	sock.h	/^typedef struct socket socket_t;$/;"	t	typeref:struct:socket
+socket_time_connect	sock.c	/^int socket_time_connect(int fd, void *cli_addr, int tm_ms)$/;"	f	signature:(int fd, void *cli_addr, int tm_ms)
+socket_time_connect	sock.h	/^int socket_time_connect(int fd, void *cli_addr, int tm_ms);$/;"	p	signature:(int fd, void *cli_addr, int tm_ms)
+socket_time_recv	sock.c	/^int socket_time_recv(int fd, void *buf, int size, int time_ms)$/;"	f	signature:(int fd, void *buf, int size, int time_ms)
+socket_time_recv	sock.h	/^int socket_time_recv(int fd, void *buf, int size, int time_ms);$/;"	p	signature:(int fd, void *buf, int size, int time_ms)
+socket_time_send	sock.c	/^int socket_time_send(int fd, void *buf, int size, int time_ms)$/;"	f	signature:(int fd, void *buf, int size, int time_ms)
+socket_time_send	sock.h	/^int socket_time_send(int fd, void *buf, int size, int time_ms);$/;"	p	signature:(int fd, void *buf, int size, int time_ms)
+socket_type	sock.h	/^static struct socket_type {$/;"	s
+socket_type	sock.h	/^} socket_type[] = {$/;"	v	typeref:struct:socket_type
+socket_type::type_macro	sock.h	/^    int type_macro;$/;"	m	struct:socket_type	access:public
+socket_type::type_name	sock.h	/^    char *type_name;$/;"	m	struct:socket_type	access:public
+start_data_capture	sock.c	/^int start_data_capture()$/;"	f
+start_data_capture	sock.c	/^int start_data_capture();$/;"	p	file:
+start_data_capture	sock.h	/^int start_data_capture();$/;"	p
+tcp_client_backup_service	sock.c	/^static  void* tcp_client_backup_service(void *sock);$/;"	p	file:	signature:(void *sock)
+tcp_client_backup_service	sock.c	/^static void* tcp_client_backup_service(void *sock)$/;"	f	file:	signature:(void *sock)
+tcp_client_backup_service	sock.c	/^void* tcp_client_backup_service(void *sock)$/;"	f	signature:(void *sock)
+tcp_client_backup_service	sock.c	/^void* tcp_client_backup_service(void *sock);$/;"	p	file:	signature:(void *sock)
+tcp_server_backup_service	sock.c	/^static  void* tcp_server_backup_service(void *sock)$/;"	f	file:	signature:(void *sock)
+tcp_server_backup_service	sock.c	/^static  void* tcp_server_backup_service(void *sock);$/;"	p	file:	signature:(void *sock)
+tcp_server_backup_service	sock.c	/^void* tcp_server_backup_service(void *sock)$/;"	f	signature:(void *sock)
+tcp_server_backup_service	sock.c	/^void* tcp_server_backup_service(void *sock);$/;"	p	file:	signature:(void *sock)
+thread_runtine	sock.h	/^typedef void* (*thread_runtine)(void *arg);$/;"	t
+type	sock.h	/^    socket_data_type type;$/;"	m	struct:socket_data	access:public
+type_macro	sock.h	/^    int type_macro;$/;"	m	struct:socket_type	access:public
+type_name	sock.h	/^    char *type_name;$/;"	m	struct:socket_type	access:public
+udp_backup_service	sock.c	/^static  void* udp_backup_service(void *sock);$/;"	p	file:	signature:(void *sock)
+udp_backup_service	sock.c	/^static void* udp_backup_service(void *sock)$/;"	f	file:	signature:(void *sock)
+udp_backup_service	sock.c	/^void* udp_backup_service(void *sock)$/;"	f	signature:(void *sock)
+udp_backup_service	sock.c	/^void* udp_backup_service(void *sock);$/;"	p	file:	signature:(void *sock)
+udp_broadcast_recv	sock.c	/^int udp_broadcast_recv(const char *cast_ip, int port, int cast_times,\\$/;"	f	signature:(const char *cast_ip, int port, int cast_times,\ char **cast_info, int size)
+udp_broadcast_recv	sock.c	/^int udp_broadcast_recv(const char *cast_ip, int port, int cast_times,\\$/;"	f	signature:(const char *cast_ip, int port, int cast_times,\ char *cast_info, int size)
+udp_broadcast_recv	sock.h	/^int udp_broadcast_recv(const char *cast_ip, int port, int cast_times,\\$/;"	p	signature:(const char *cast_ip, int port, int cast_times,\ char **cast_info, int size)
+udp_broadcast_recv	sock.h	/^int udp_broadcast_recv(const char *cast_ip, int port, int cast_times,\\$/;"	p	signature:(const char *cast_ip, int port, int cast_times,\ char *cast_info, int size)
+udp_broadcast_send	sock.c	/^int udp_broadcast_send(const char *cast_ip, int port, int cast_times,\\$/;"	f	signature:(const char *cast_ip, int port, int cast_times,\ const char *cast_info)
+udp_broadcast_send	sock.h	/^int udp_broadcast_send(const char *cast_ip, int port, int cast_times,\\$/;"	p	signature:(const char *cast_ip, int port, int cast_times,\ const char *cast_info)
+udp_multicast_recv	sock.c	/^int udp_multicast_recv(const char *cast_ip, int port, int cast_times,\\$/;"	f	signature:(const char *cast_ip, int port, int cast_times,\ char **cast_info, int size)
+udp_multicast_recv	sock.c	/^int udp_multicast_recv(const char *cast_ip, int port, int cast_times,\\$/;"	f	signature:(const char *cast_ip, int port, int cast_times,\ char *cast_info, int size)
+udp_multicast_recv	sock.h	/^int udp_multicast_recv(const char *cast_ip, int port, int cast_times,\\$/;"	p	signature:(const char *cast_ip, int port, int cast_times,\ char **cast_info, int size)
+udp_multicast_recv	sock.h	/^int udp_multicast_recv(const char *cast_ip, int port, int cast_times,\\$/;"	p	signature:(const char *cast_ip, int port, int cast_times,\ char *cast_info, int size)
+udp_multicast_send	sock.c	/^int udp_multicast_send(const char *cast_ip, int port, int cast_times,\\$/;"	f	signature:(const char *cast_ip, int port, int cast_times,\ const char *cast_info)
+udp_multicast_send	sock.h	/^int udp_multicast_send(const char *cast_ip, int port, int cast_times,\\$/;"	p	signature:(const char *cast_ip, int port, int cast_times,\ const char *cast_info)
+udp_socket_data_recv	sock.c	/^int udp_socket_data_recv(int fd, socket_data_type *type, void *buf, int size)$/;"	f	signature:(int fd, socket_data_type *type, void *buf, int size)
+udp_socket_data_recv	sock.h	/^int udp_socket_data_recv(int fd, socket_data_type *type, \\$/;"	p	signature:(int fd, socket_data_type *type, \ void *buf, int size)
+value	sock.h	/^    } value;$/;"	m	struct:socket_data	typeref:union:socket_data::__anon1	access:public

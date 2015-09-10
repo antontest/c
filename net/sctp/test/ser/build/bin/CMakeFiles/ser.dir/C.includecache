@@ -1,0 +1,20 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/anton/program/c/sctp/test/ser/src/main/ser.c
+stdio.h
+-
+stdlib.h
+-
+string.h
+-
+unistd.h
+-
+socket/socket_app.h
+-
+

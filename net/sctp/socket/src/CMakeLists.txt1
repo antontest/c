@@ -1,0 +1,58 @@
+# cmake version
+cmake_minimum_required(VERSION 2.8)
+
+# set include and lib path
+INCLUDE_DIRECTORIES(include ${PROJECT_SOURCE_DIR}/src/include)
+LINK_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/lib)
+
+# set c compile parameters
+ADD_DEFINITIONS(-Wall -O2 -Werror -g)
+
+# add source path
+AUX_SOURCE_DIRECTORY(main SRC_PATH)
+
+# set source files and lib source files
+SET(CSRC ${SRC_PATH})
+SET(BASE_SRC socket_base/socket_base.c)
+SET(PROPERTY_SRC socket_property/socket_property.c)
+SET(APP_SRC socket_app/socket_app.c socket_app/socket_event.c)
+# SET(LIBSRC hello/hello.c)
+
+# lib generation
+SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/src/lib)
+ADD_LIBRARY(socket_base STATIC ${BASE_SRC})
+ADD_LIBRARY(socket_property STATIC ${PROPERTY_SRC})
+ADD_LIBRARY(socket_app STATIC ${APP_SRC})
+#ADD_LIBRARY(hello STATIC ${LIBSRC})
+
+# generat exec
+SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR})
+ADD_EXECUTABLE(socket ${CSRC})
+
+# link library
+#TARGET_LINK_LIBRARIES(socket_app socket_base socket_property pthread)
+TARGET_LINK_LIBRARIES(socket_app socket_base socket_property pthread)
+TARGET_LINK_LIBRARIES(socket socket_app)
+
+# -------------- INSTALL -------------- #
+# install path setting
+SET(CMAKE_INSTALL_PREFIX /home/anton/tools/)
+
+# install
+INSTALL(
+    FILES socket_base/socket_base.h DESTINATION include
+    FILES socket_property/socket_property.h DESTINATION include
+    FILES socket_app/socket_app.h DESTINATION include
+    FILES socket_app/socket_event.h DESTINATION include
+    FILES socket_app/socket_header.h DESTINATION include
+    
+    TARGETS socket_base/socket_base.a ARCHIVE DESTINATION lib
+    TARGETS socket_property/socket_property.a ARCHIVE DESTINATION lib
+    TARGETS socket_app/socket_app.a ARCHIVE DESTINATION lib
+
+    TARGETS socket RUNTIME DESTINATION exec
+)
+# INSTALL(TARGETS hello ARCHIVE DESTINATION lib)
+
+# install target
+# INSTALL(TARGETS main RUNTIME DESTINATION exec)

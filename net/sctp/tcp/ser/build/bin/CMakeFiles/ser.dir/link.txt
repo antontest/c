@@ -1,0 +1,1 @@
+/usr/bin/cc     CMakeFiles/ser.dir/main/ser.c.o  -o ../../ser  -L/home/anton/program/c/sctp/tcp/ser/src/lib -rdynamic -lsocket_app -Wl,-rpath,/home/anton/program/c/sctp/tcp/ser/src/lib 

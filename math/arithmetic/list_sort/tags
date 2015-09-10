@@ -1,0 +1,30 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+bubble_sort	list_sort.c	/^struct list * bubble_sort(struct list *list_head)$/;"	f	signature:(struct list *list_head)
+c	list_sort.c	/^    char c;$/;"	m	union:list_data	file:	access:public
+data	list_sort.c	/^    list_data data;$/;"	m	struct:list	file:	access:public
+del_list	list_sort.c	/^int del_list(struct list *list_head)$/;"	f	signature:(struct list *list_head)
+i	list_sort.c	/^    int i;$/;"	m	union:list_data	file:	access:public
+list	list_sort.c	/^typedef struct list$/;"	s	file:
+list::data	list_sort.c	/^    list_data data;$/;"	m	struct:list	file:	access:public
+list::next	list_sort.c	/^    plist next;$/;"	m	struct:list	file:	access:public
+list_add	list_sort.c	/^struct list * list_add(struct list *list_head, void *data, int size)$/;"	f	signature:(struct list *list_head, void *data, int size)
+list_data	list_sort.c	/^typedef union list_data $/;"	u	file:
+list_data	list_sort.c	/^} list_data;$/;"	t	typeref:union:list_data	file:
+list_data::c	list_sort.c	/^    char c;$/;"	m	union:list_data	file:	access:public
+list_data::i	list_sort.c	/^    int i;$/;"	m	union:list_data	file:	access:public
+list_data::p	list_sort.c	/^    void *p;$/;"	m	union:list_data	file:	access:public
+list_malloc	list_sort.c	/^struct list * list_malloc()$/;"	f
+list_t	list_sort.c	/^} list_t;$/;"	t	typeref:struct:list	file:
+main	list_sort.c	/^int main(int agrc, char *agrv[])$/;"	f	signature:(int agrc, char *agrv[])
+next	list_sort.c	/^    plist next;$/;"	m	struct:list	file:	access:public
+p	list_sort.c	/^    void *p;$/;"	m	union:list_data	file:	access:public
+plist	list_sort.c	/^typedef struct list * plist;$/;"	t	typeref:struct:list	file:
+print_list	list_sort.c	/^void print_list(struct list *node, const char *pre)$/;"	f	signature:(struct list *node, const char *pre)
+select_sort	list_sort.c	/^struct list * select_sort(struct list *l)$/;"	f	signature:(struct list *l)
+select_sort	list_sort.c	/^struct list * select_sort(struct list *list_head)$/;"	f	signature:(struct list *list_head)
+value_set	list_sort.c	/^void value_set(struct list *node, void *data, int size)$/;"	f	signature:(struct list *node, void *data, int size)

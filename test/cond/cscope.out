@@ -1,0 +1,162 @@
+cscope 15 $HOME/working/program/c/cond -q 0000000026 0000000776
+	@cond.c
+
+1 
+	~<¡dio.h
+>
+
+2 
+	~<±h»ad.h
+>
+
+3 
+	~<sys/time.h
+>
+
+4 
+	~<uni¡d.h
+>
+
+6 
+±h»ad_mu‹x_t
+ 
+	gmtx
+;
+
+7 
+±h»ad_cÚd_t
+ 
+	gúd
+;
+
+9 * 
+	$fun
+(*
+¬g
+)
+
+11 
+	`±h»ad_mu‹x_lock
+(&
+mtx
+);
+
+12 
+	`±h»ad_cÚd_wa™
+(&
+úd
+, &
+mtx
+);
+
+13 
+	`´štf
+("pid: %u, fuÀ%s\n", ()
+	`±h»ad_£lf
+(), (*)
+¬g
+);
+
+14 
+	`±h»ad_mu‹x_uÆock
+(&
+mtx
+);
+
+16  
+NULL
+;
+
+17 
+	}
+}
+
+19 
+	$maš
+()
+
+21 
+±h»ad_t
+ 
+pid
+;
+
+22 
+±h»ad_t
+ 
+pid1
+;
+
+24 
+	`±h»ad_ü—‹
+(&
+pid
+, 
+NULL
+, 
+fun
+, "1");
+
+25 
+	`±h»ad_ü—‹
+(&
+pid1
+, 
+NULL
+, 
+fun
+, "2");
+
+26 
+	`±h»ad_mu‹x_š™
+(&
+mtx
+, 
+NULL
+);
+
+27 
+	`±h»ad_cÚd_š™
+(&
+úd
+, 
+NULL
+);
+
+29 
+	`¦“p
+(2);
+
+33 
+	`±h»ad_cÚd_brßdÿ¡
+(&
+úd
+);
+
+35 
+	`±h»ad_još
+(
+pid
+, 
+NULL
+);
+
+36 
+	`±h»ad_još
+(
+pid1
+, 
+NULL
+);
+
+39 
+	}
+}
+
+	@
+1
+.
+0
+1
+7
+cond.c

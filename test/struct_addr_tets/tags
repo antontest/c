@@ -1,0 +1,72 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+DEBUG_ERROR	struct_addr_tets.c	22;"	d	file:
+SET	struct_addr_tets.c	46;"	d	file:
+STR	struct_addr_tets.c	48;"	d	file:
+__dirty	struct_addr_tets.c	/^            int __dirty;$/;"	m	struct:par::par_chl1::par_chl1_chl	file:	access:public
+__dirty	struct_addr_tets.c	/^            int __dirty;$/;"	m	struct:par::par_chl1::par_chl1_chl1	file:	access:public
+__dirty	struct_addr_tets.c	/^        int __dirty;$/;"	m	struct:par::par_chl1	file:	access:public
+__dirty	struct_addr_tets.c	/^    int __dirty;$/;"	m	struct:par	file:	access:public
+__dirty	struct_addr_tets.c	/^    int __dirty;$/;"	m	struct:pre	file:	access:public
+age	struct_addr_tets.c	/^            int age;$/;"	m	struct:par::par_chl1::par_chl1_chl	file:	access:public
+age	struct_addr_tets.c	/^            int age;$/;"	m	struct:par::par_chl1::par_chl1_chl1	file:	access:public
+age	struct_addr_tets.c	/^        int age;$/;"	m	struct:par::par_chl	file:	access:public
+age	struct_addr_tets.c	/^        int age;$/;"	m	struct:par::par_chl1	file:	access:public
+age	struct_addr_tets.c	/^    int age;$/;"	m	struct:par	file:	access:public
+id	struct_addr_tets.c	/^            int id;$/;"	m	struct:par::par_chl1::par_chl1_chl	file:	access:public
+id	struct_addr_tets.c	/^            int id;$/;"	m	struct:par::par_chl1::par_chl1_chl1	file:	access:public
+id	struct_addr_tets.c	/^        int id;$/;"	m	struct:par::par_chl	file:	access:public
+id	struct_addr_tets.c	/^        int id;$/;"	m	struct:par::par_chl1	file:	access:public
+id	struct_addr_tets.c	/^    int id;$/;"	m	struct:par	file:	access:public
+main	struct_addr_tets.c	/^int main(int agrc, char *agrv[])$/;"	f	signature:(int agrc, char *agrv[])
+member_set	struct_addr_tets.c	/^void member_set(void *id, int idlen, void *value, int vlen)$/;"	f	signature:(void *id, int idlen, void *value, int vlen)
+par	struct_addr_tets.c	/^            void  *par;$/;"	m	struct:par::par_chl1::par_chl1_chl	file:	access:public
+par	struct_addr_tets.c	/^            void  *par;$/;"	m	struct:par::par_chl1::par_chl1_chl1	file:	access:public
+par	struct_addr_tets.c	/^        void  *par;$/;"	m	struct:par::par_chl1	file:	access:public
+par	struct_addr_tets.c	/^    void  *par;$/;"	m	struct:par	file:	access:public
+par	struct_addr_tets.c	/^    void *par;$/;"	m	struct:pre	file:	access:public
+par	struct_addr_tets.c	/^struct par $/;"	s	file:
+par	struct_addr_tets.c	/^}par;$/;"	v	typeref:struct:par
+par	struct_addr_tets.c	47;"	d	file:
+par::__dirty	struct_addr_tets.c	/^    int __dirty;$/;"	m	struct:par	file:	access:public
+par::age	struct_addr_tets.c	/^    int age;$/;"	m	struct:par	file:	access:public
+par::id	struct_addr_tets.c	/^    int id;$/;"	m	struct:par	file:	access:public
+par::par	struct_addr_tets.c	/^    void  *par;$/;"	m	struct:par	file:	access:public
+par::par_chl	struct_addr_tets.c	/^    struct par_chl {$/;"	s	struct:par	file:	access:public
+par::par_chl	struct_addr_tets.c	/^    }par_chl;$/;"	m	struct:par	typeref:struct:par::par_chl	file:	access:public
+par::par_chl1	struct_addr_tets.c	/^    struct par_chl1 {$/;"	s	struct:par	file:	access:public
+par::par_chl1	struct_addr_tets.c	/^    }par_chl1;$/;"	m	struct:par	typeref:struct:par::par_chl1	file:	access:public
+par::par_chl1::__dirty	struct_addr_tets.c	/^        int __dirty;$/;"	m	struct:par::par_chl1	file:	access:public
+par::par_chl1::age	struct_addr_tets.c	/^        int age;$/;"	m	struct:par::par_chl1	file:	access:public
+par::par_chl1::id	struct_addr_tets.c	/^        int id;$/;"	m	struct:par::par_chl1	file:	access:public
+par::par_chl1::par	struct_addr_tets.c	/^        void  *par;$/;"	m	struct:par::par_chl1	file:	access:public
+par::par_chl1::par_chl1_chl	struct_addr_tets.c	/^        struct par_chl1_chl {$/;"	s	struct:par::par_chl1	file:	access:public
+par::par_chl1::par_chl1_chl	struct_addr_tets.c	/^        }par_chl1_chl;$/;"	m	struct:par::par_chl1	typeref:struct:par::par_chl1::par_chl1_chl	file:	access:public
+par::par_chl1::par_chl1_chl1	struct_addr_tets.c	/^        struct par_chl1_chl1 {$/;"	s	struct:par::par_chl1	file:	access:public
+par::par_chl1::par_chl1_chl1	struct_addr_tets.c	/^        }par_chl1_chl1;$/;"	m	struct:par::par_chl1	typeref:struct:par::par_chl1::par_chl1_chl1	file:	access:public
+par::par_chl1::par_chl1_chl1::__dirty	struct_addr_tets.c	/^            int __dirty;$/;"	m	struct:par::par_chl1::par_chl1_chl1	file:	access:public
+par::par_chl1::par_chl1_chl1::age	struct_addr_tets.c	/^            int age;$/;"	m	struct:par::par_chl1::par_chl1_chl1	file:	access:public
+par::par_chl1::par_chl1_chl1::id	struct_addr_tets.c	/^            int id;$/;"	m	struct:par::par_chl1::par_chl1_chl1	file:	access:public
+par::par_chl1::par_chl1_chl1::par	struct_addr_tets.c	/^            void  *par;$/;"	m	struct:par::par_chl1::par_chl1_chl1	file:	access:public
+par::par_chl1::par_chl1_chl::__dirty	struct_addr_tets.c	/^            int __dirty;$/;"	m	struct:par::par_chl1::par_chl1_chl	file:	access:public
+par::par_chl1::par_chl1_chl::age	struct_addr_tets.c	/^            int age;$/;"	m	struct:par::par_chl1::par_chl1_chl	file:	access:public
+par::par_chl1::par_chl1_chl::id	struct_addr_tets.c	/^            int id;$/;"	m	struct:par::par_chl1::par_chl1_chl	file:	access:public
+par::par_chl1::par_chl1_chl::par	struct_addr_tets.c	/^            void  *par;$/;"	m	struct:par::par_chl1::par_chl1_chl	file:	access:public
+par::par_chl::age	struct_addr_tets.c	/^        int age;$/;"	m	struct:par::par_chl	file:	access:public
+par::par_chl::id	struct_addr_tets.c	/^        int id;$/;"	m	struct:par::par_chl	file:	access:public
+par_chl	struct_addr_tets.c	/^    struct par_chl {$/;"	s	struct:par	file:	access:public
+par_chl	struct_addr_tets.c	/^    }par_chl;$/;"	m	struct:par	typeref:struct:par::par_chl	file:	access:public
+par_chl1	struct_addr_tets.c	/^    struct par_chl1 {$/;"	s	struct:par	file:	access:public
+par_chl1	struct_addr_tets.c	/^    }par_chl1;$/;"	m	struct:par	typeref:struct:par::par_chl1	file:	access:public
+par_chl1_chl	struct_addr_tets.c	/^        struct par_chl1_chl {$/;"	s	struct:par::par_chl1	file:	access:public
+par_chl1_chl	struct_addr_tets.c	/^        }par_chl1_chl;$/;"	m	struct:par::par_chl1	typeref:struct:par::par_chl1::par_chl1_chl	file:	access:public
+par_chl1_chl1	struct_addr_tets.c	/^        struct par_chl1_chl1 {$/;"	s	struct:par::par_chl1	file:	access:public
+par_chl1_chl1	struct_addr_tets.c	/^        }par_chl1_chl1;$/;"	m	struct:par::par_chl1	typeref:struct:par::par_chl1::par_chl1_chl1	file:	access:public
+pre	struct_addr_tets.c	/^struct pre$/;"	s	file:
+pre::__dirty	struct_addr_tets.c	/^    int __dirty;$/;"	m	struct:pre	file:	access:public
+pre::par	struct_addr_tets.c	/^    void *par;$/;"	m	struct:pre	file:	access:public
+set_dirty	struct_addr_tets.c	/^void set_dirty(void *id)$/;"	f	signature:(void *id)

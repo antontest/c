@@ -1,0 +1,1044 @@
+cscope 15 $HOME/working/program/c/queue -q 0000000053 0000004504
+	@queue.c
+
+1 
+	~<¡dio.h
+>
+
+2 
+	~<¡dlib.h
+>
+
+3 
+	~<¡ršg.h
+>
+
+4 
+	~<sys/sysšfo.h
+>
+
+5 
+	~<¡dboÞ.h
+>
+
+7 
+	gqueue_id
+ = 1;
+
+8 
+	gqueue_£q
+ = 1;
+
+10 
+	smem_šfo
+ {
+
+11 
+	mty³
+;
+
+12 } 
+	tmem_šfo_t
+;
+
+14 
+	squeue_node
+ {
+
+15 
+	mbœth_£q
+;
+
+16 
+	m£q
+;
+
+17 
+	mty³
+;
+
+18 
+	mü—‹_time
+;
+
+19 
+	m’queue_time
+;
+
+20 
+	mdequeue_time
+;
+
+21 
+	mhÞd_út
+;
+
+22 
+queue_node
+ *
+	mÃxt
+;
+
+23 } 
+	tqueue_node_t
+;
+
+25 
+	squeue
+ {
+
+26 
+	mqueue_id
+;
+
+27 
+	mqueue_Ën
+;
+
+28 
+boÞ
+ 
+	m¡Ý_’queue
+;
+
+29 
+boÞ
+ 
+	m¡Ý_dequeue
+;
+
+30 
+	mhÞd_tÙ®_sum
+;
+
+31 
+queue_node_t
+ *
+	mäÚt
+;
+
+32 
+queue_node_t
+ *
+	mcu¼
+;
+
+33 
+queue_node_t
+ *
+	m»¬
+;
+
+34 } 
+	tqueue_t
+;
+
+36 
+	$g‘_sy¡ime
+()
+
+38 
+sysšfo
+ 
+u±ime
+ = {0};
+
+40 
+	`sysšfo
+(&
+u±ime
+);
+
+42  
+u±ime
+.uptime;
+
+43 
+	}
+}
+
+45 
+queue_node
+ * 
+	$queue_node_ü—‹
+()
+
+47 
+queue_node
+ *
+node
+ = 
+NULL
+;
+
+49 ià((
+node
+ = (
+queue_node
+ *)
+m®loc
+\
+
+50 ((
+queue_node
+))è=ð
+NULL
+)
+
+51  
+NULL
+;
+
+53 
+	`mem£t
+(
+node
+, 0, (
+queue_node
+));
+
+54 
+node
+->
+bœth_£q
+ = 
+queue_£q
+++;
+
+55 
+node
+->
+ü—‹_time
+ = 
+	`g‘_sy¡ime
+();
+
+57  
+node
+;
+
+58 
+	}
+}
+
+60 
+	$queue_š™
+(
+queue
+ *
+q
+)
+
+62 ià(
+q
+ =ð
+NULL
+)  -1;
+
+64 
+q
+->
+queue_id
+ = queue_id++;
+
+65 
+q
+->
+queue_Ën
+ = 0;
+
+66 
+q
+->
+äÚt
+ = 
+NULL
+;
+
+67 
+q
+->
+»¬
+ = 
+NULL
+;
+
+70 
+	}
+}
+
+72 
+	$queue_deš™
+(
+queue
+ *
+q
+)
+
+74 
+queue_node_t
+ *
+node
+ = 
+NULL
+;
+
+76 ià(
+q
+ =ð
+NULL
+)  -1;
+
+77 
+q
+->
+äÚt
+)
+
+79 
+node
+ = 
+q
+->
+äÚt
+;
+
+80 
+q
+->
+äÚt
+ = q->äÚt->
+Ãxt
+;
+
+81 
+	`ä“
+(
+node
+);
+
+84 
+	`ä“
+(
+q
+);
+
+86 
+	}
+}
+
+88 
+	$’queue
+(
+queue
+ *
+q
+, 
+queue_node
+ *
+node
+)
+
+90 ià(
+q
+ =ð
+NULL
+)  -1;
+
+91 ià(
+q
+->
+äÚt
+ =ð
+NULL
+)
+
+93 
+q
+->
+äÚt
+ = 
+node
+;
+
+94 
+q
+->
+cu¼
+ = 
+node
+;
+
+96 
+q
+->
+»¬
+->
+Ãxt
+ = 
+node
+;
+
+98 
+node
+->
+£q
+ = ++
+q
+->
+queue_Ën
+;
+
+99 
+q
+->
+»¬
+ = 
+node
+;
+
+102 
+	}
+}
+
+104 
+queue_node
+ * 
+	$dequeue
+(
+queue
+ *
+q
+)
+
+107 
+queue_node
+ *
+node
+ = 
+NULL
+;
+
+108 
+queue_node
+ *
+fix_node
+ = 
+NULL
+;
+
+109 
+£q
+ = 1;
+
+110 ià(
+q
+ =ð
+NULL
+)  NULL;
+
+112 
+node
+ = 
+q
+->
+cu¼
+;
+
+113 ià(
+node
+ =ð
+NULL
+) ‚ode;
+
+114 
+q
+->
+cu¼
+ = q->cu¼->
+Ãxt
+;
+
+115 ià(
+q
+->
+cu¼
+ =ð
+NULL
+ && q->
+äÚt
+ != NULL)
+
+116 
+q
+->
+cu¼
+ = q->
+äÚt
+;
+
+117 ià(!
+node
+->
+hÞd_út
+)
+
+118 
+q
+->
+äÚt
+ = q->
+cu¼
+;
+
+119 
+q
+->
+queue_Ën
+--;
+
+121 
+fix_node
+ = 
+q
+->
+äÚt
+;
+
+122 
+fix_node
+ !ð
+NULL
+)
+
+124 
+fix_node
+->
+£q
+ = seq++;
+
+125 
+fix_node
+ = fix_node->
+Ãxt
+;
+
+128  
+node
+;
+
+129 
+	}
+}
+
+131 
+jump_queue
+(
+queue
+ *
+q
+, 
+queue_node
+ *
+node
+, \
+
+132 
+£q
+)
+
+134 
+queue_node
+ *
+	gn
+ = 
+NULL
+;
+
+135 
+queue_node
+ *
+	g´e
+ = 
+NULL
+;
+
+137 ià(
+	gq
+ =ð
+NULL
+ || 
+£q
+ <=0)  -1;
+
+139 
+	gn
+ = 
+q
+->
+äÚt
+;
+
+140 
+	gn
+ !ð
+NULL
+)
+
+142 ià(
+n
+->
+£q
+ == seq)
+
+144 
+	g´e
+ = 
+n
+;
+
+145 
+	gn
+ = 
+n
+->
+Ãxt
+;
+
+148 
+	gnode
+->
+	gÃxt
+ = 
+n
+;
+
+149 ià(
+	g´e
+ =ð
+NULL
+)
+
+151 ià(
+q
+->
+äÚt
+ =ðq->
+cu¼
+)
+
+152 
+q
+->
+cu¼
+ = 
+node
+;
+
+153 
+	gq
+->
+	gäÚt
+ = 
+node
+;
+
+156 
+	g´e
+->
+	gÃxt
+ = 
+node
+;
+
+157 ià(
+	g£q
+ > 
+	gq
+->
+	gqueue_Ën
+)
+
+158 
+	g£q
+ = 
+q
+->
+queue_Ën
+;
+
+159 
+	gnode
+->
+	g£q
+ = 
+£q
+;
+
+162 
+	gn
+ = 
+node
+->
+Ãxt
+;
+
+163 
+	gn
+ !ð
+NULL
+)
+
+165 
+n
+->
+£q
+ = ++seq;
+
+166 
+	gn
+ = 
+n
+->
+Ãxt
+;
+
+172 
+	$qu™_queue
+(
+queue
+ *
+q
+, 
+£q
+)
+
+174 
+queue_node
+ *
+node
+ = 
+NULL
+;
+
+175 
+queue_node
+ *
+´e
+ = 
+NULL
+;
+
+177 ià(
+q
+ =ð
+NULL
+ || 
+£q
+ <= 0)
+
+180 
+node
+ = 
+q
+->
+äÚt
+;
+
+181 
+node
+ !ð
+NULL
+)
+
+183 ià(
+node
+->
+£q
+ == seq)
+
+186 
+´e
+ = 
+node
+;
+
+187 
+node
+ =‚ode->
+Ãxt
+;
+
+190 ià(
+node
+ =ð
+NULL
+)  -1;
+
+192 ià(
+node
+ =ð
+q
+->
+cu¼
+èq->cu¼ = q->cu¼->
+Ãxt
+;
+
+193 ià(
+´e
+ =ð
+NULL
+)
+
+194 
+q
+->
+äÚt
+ = q->äÚt->
+Ãxt
+;
+
+195 ià(
+node
+->
+£q
+ == seq)
+
+196 
+´e
+->
+Ãxt
+ = 
+node
+->next;
+
+197 
+	`ä“
+(
+node
+);
+
+199 
+node
+ = 
+´e
+->
+Ãxt
+;
+
+200 
+node
+ !ð
+NULL
+)
+
+202 
+node
+->
+£q
+ = seq++;
+
+203 
+node
+ =‚ode->
+Ãxt
+;
+
+207 
+	}
+}
+
+209 
+	$´št_queue
+(
+queue
+ *
+q
+)
+
+211 
+queue_node
+ *
+node
+ = 
+NULL
+;
+
+213 ià(
+q
+ =ð
+NULL
+)  ;
+
+215 
+node
+ = 
+q
+->
+äÚt
+;
+
+216 
+node
+ !ð
+NULL
+)
+
+218 
+	`´štf
+("nod£q: %u, bœth seq: %u\n", 
+node
+->
+£q
+, \
+
+219 
+node
+->
+bœth_£q
+);
+
+220 
+node
+ =‚ode->
+Ãxt
+;
+
+224 
+	}
+}
+
+226 
+	$maš
+(
+agrc
+, *
+agrv
+[])
+
+228 
+queue
+ *
+q
+ = 
+NULL
+;
+
+229 
+queue_node
+ *
+node
+ = 
+NULL
+;
+
+231 ià((
+q
+ = (
+queue
+ *)
+	`m®loc
+((queue))è=ð
+NULL
+)
+
+234 
+	`mem£t
+(
+q
+, 0, (
+queue
+));
+
+235 
+	`queue_š™
+(
+q
+);
+
+237 
+node
+ = 
+	`queue_node_ü—‹
+();
+
+238 
+	`’queue
+(
+q
+, 
+node
+);
+
+239 
+node
+ = 
+	`queue_node_ü—‹
+();
+
+240 
+	`’queue
+(
+q
+, 
+node
+);
+
+241 
+node
+ = 
+	`queue_node_ü—‹
+();
+
+242 
+	`’queue
+(
+q
+, 
+node
+);
+
+243 
+node
+ = 
+	`queue_node_ü—‹
+();
+
+244 
+	`jump_queue
+(
+q
+, 
+node
+, 3);
+
+247 
+	`qu™_queue
+(
+q
+, 2);
+
+249 
+	`´št_queue
+(
+q
+);
+
+250 
+	`queue_deš™
+(
+q
+);
+
+253 
+	}
+}
+
+	@
+1
+.
+0
+1
+8
+queue.c

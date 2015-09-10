@@ -1,0 +1,1 @@
+/home/anton/working/program/c/readini/build/bin/CMakeFiles/main.dir

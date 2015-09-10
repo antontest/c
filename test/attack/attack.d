@@ -1,0 +1,1 @@
+attack.o: attack.c

@@ -1,0 +1,2 @@
+/home/anton/program/c/cmake/dir/build/bin/CMakeFiles/dir.dir
+/home/anton/program/c/cmake/dir/build/bin/CMakeFiles/dir_static.dir

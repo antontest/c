@@ -1,0 +1,164 @@
+cscope 15 $HOME/working/program/c/linkstatd -q 0000000037 0000000816
+	@main.c
+
+1 
+	~<asm/ty³s.h
+>
+
+2 
+	~<sys/sock‘.h
+>
+
+3 
+	~<Ãt/if.h
+>
+
+4 
+	~<¡dlib.h
+>
+
+5 
+	~<¡dio.h
+>
+
+6 
+	~<¡ršg.h
+>
+
+7 
+	~<uni¡d.h
+>
+
+8 
+	~<lšux/ÃŽšk.h
+>
+
+9 
+	~<lšux/¹ÃŽšk.h
+>
+
+11 
+	$maš
+(
+¬gc
+, * 
+¬gv
+[]){
+
+12 
+sockaddr_Æ
+ 
+§
+;
+
+13 
+msg
+[1024];
+
+14 
+ifšfomsg
+* 
+ifi
+ = 
+	`NLMSG_DATA
+(
+msg
+);
+
+15 
+fd
+;
+
+16 
+iâame
+[64];
+
+18 
+	`mem£t
+(&
+§
+, 0, (sa));
+
+19 
+§
+.
+Æ_çmžy
+ = 
+AF_NETLINK
+;
+
+20 
+§
+.
+Æ_groups
+ = 
+RTMGRP_LINK
+;
+
+22 
+fd
+ = 
+	`sock‘
+(
+AF_NETLINK
+, 
+SOCK_RAW
+, 
+NETLINK_ROUTE
+);
+
+23 
+	`bšd
+(
+fd
+, (
+sockaddr
+ *è&
+§
+, (sa));
+
+25 
+	`»ad
+(
+fd
+, 
+msg
+, (msg))){
+
+26 
+	`´štf
+("içû % i %s\n", 
+	`if_šdextÚame
+(
+ifi
+->
+ifi_šdex
+, 
+iâame
+),
+
+27 
+ifi
+->
+ifi_æags
+ & 
+IFF_RUNNING
+ ? "up":"down");
+
+30 
+	`þo£
+(
+fd
+);
+
+33 
+	}
+}
+
+	@
+1
+.
+0
+1
+7
+main.c

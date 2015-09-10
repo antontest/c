@@ -1,0 +1,132 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+MOD_ID_TMR	socket_msg.h	/^    MOD_ID_TMR      = 1$/;"	e	enum:__anon1
+MOD_ID_UNKNOW	socket_msg.h	/^    MOD_ID_UNKNOW   = 0,$/;"	e	enum:__anon1
+MOD_MAX	socket_msg.h	15;"	d
+MSG	socket_msg.h	66;"	d
+MSG_DATA	socket_msg.h	70;"	d
+MSG_LEN	socket_msg.h	69;"	d
+MSG_MAX_LEN	socket_msg.h	16;"	d
+MSG_MOD	socket_msg.h	67;"	d
+MSG_MSGID	socket_msg.h	68;"	d
+MSG_RST_FAILURE	socket_msg.h	/^    MSG_RST_FAILURE,$/;"	e	enum:msg_rst
+MSG_RST_INVALID_CFG	socket_msg.h	/^    MSG_RST_INVALID_CFG,$/;"	e	enum:msg_rst
+MSG_RST_INVALID_MOD_ID	socket_msg.h	/^    MSG_RST_INVALID_MOD_ID,$/;"	e	enum:msg_rst
+MSG_RST_QUEUE_FULL	socket_msg.h	/^    MSG_RST_QUEUE_FULL$/;"	e	enum:msg_rst
+MSG_RST_SOCKET_ERROR	socket_msg.h	/^    MSG_RST_SOCKET_ERROR,$/;"	e	enum:msg_rst
+MSG_RST_SUCCESS	socket_msg.h	/^    MSG_RST_SUCCESS = 0,$/;"	e	enum:msg_rst
+MSG_RST_THREAD_ERROR	socket_msg.h	/^    MSG_RST_THREAD_ERROR,$/;"	e	enum:msg_rst
+MSG_SOCKET_DIR	socket_msg.h	17;"	d
+MSG_SRC	socket_msg.h	71;"	d
+__SOCKET_MSG_H__	socket_msg.h	2;"	d
+body	socket_msg.h	/^     char body[0];$/;"	m	struct:msg	access:public
+destructor	socket_msg.h	/^    void (*destructor)(void *);$/;"	m	struct:msg	access:public
+dst_id	socket_msg.h	/^    mod_id_t        dst_id;$/;"	m	struct:msg	access:public
+endian	socket_msg.h	/^    unsigned char   endian;$/;"	m	struct:msg	access:public
+flag	socket_msg.h	/^    int                 flag;$/;"	m	struct:shm_entry	access:public
+free_ptr	socket_msg.h	/^    void            *free_ptr;$/;"	m	struct:msg	access:public
+handler	socket_msg.h	/^    msg_handler_t   handler;        \/* message handler *\/$/;"	m	struct:msg_mod_cfg	access:public
+handler	socket_msg.h	/^    msg_handler_t   handler;$/;"	m	struct:local_msg_entry	access:public
+handling_msg	socket_msg.h	/^    struct msg      *handling_msg;$/;"	m	struct:local_msg_entry	typeref:struct:local_msg_entry::msg	access:public
+hold_cnt	socket_msg.h	/^    unsigned int    hold_cnt;$/;"	m	struct:msg	access:public
+ident	socket_msg.h	/^    msg_ident       ident;$/;"	m	struct:local_msg_entry	access:public
+in_addr	socket_msg.h	/^    struct sockaddr_in  in_addr;$/;"	m	struct:shm_entry	typeref:struct:shm_entry::sockaddr_in	access:public
+ipc_addr_init	socket_msg.c	/^static void ipc_addr_init(struct sockaddr_un *ipc_addr)$/;"	f	file:	signature:(struct sockaddr_un *ipc_addr)
+ipc_fd	socket_msg.h	/^    int         ipc_fd;$/;"	m	struct:msg_ctl	access:public
+ipc_func	socket_msg.c	/^void *ipc_func(void *arg)$/;"	f	signature:(void *arg)
+ipc_init	socket_msg.c	/^static msg_rst_t ipc_init(struct msg_ctl *p_ctl)$/;"	f	file:	signature:(struct msg_ctl *p_ctl)
+ipc_stop	socket_msg.h	/^    int         ipc_stop;$/;"	m	struct:msg_ctl	access:public
+ipc_thread	socket_msg.h	/^    pthread_t   ipc_thread;$/;"	m	struct:msg_ctl	access:public
+len	socket_msg.h	/^    unsigned int    len;            \/* message body length *\/$/;"	m	struct:msg	access:public
+loc_ctl	socket_msg.h	/^    struct loc_ctl {$/;"	s	struct:msg_ctl	access:public
+local_entry_t	socket_msg.h	/^} local_entry_t;$/;"	t	typeref:struct:local_msg_entry
+local_msg_entry	socket_msg.h	/^typedef struct local_msg_entry {$/;"	s
+local_msg_entry::handler	socket_msg.h	/^    msg_handler_t   handler;$/;"	m	struct:local_msg_entry	access:public
+local_msg_entry::handling_msg	socket_msg.h	/^    struct msg      *handling_msg;$/;"	m	struct:local_msg_entry	typeref:struct:local_msg_entry::msg	access:public
+local_msg_entry::ident	socket_msg.h	/^    msg_ident       ident;$/;"	m	struct:local_msg_entry	access:public
+local_msg_entry::mod_id	socket_msg.h	/^    mod_id_t        mod_id;$/;"	m	struct:local_msg_entry	access:public
+local_msg_entry::mod_reg_sys_uptime	socket_msg.h	/^    unsigned int    mod_reg_sys_uptime;$/;"	m	struct:local_msg_entry	access:public
+local_msg_entry::msg_hdled_total	socket_msg.h	/^    unsigned int    msg_hdled_total;$/;"	m	struct:local_msg_entry	access:public
+local_msg_entry::mtx	socket_msg.h	/^    pthread_mutex_t mtx;$/;"	m	struct:local_msg_entry	access:public
+local_msg_entry::pos	socket_msg.h	/^    int             pos;$/;"	m	struct:local_msg_entry	access:public
+local_msg_entry::proc_stop	socket_msg.h	/^    int             proc_stop;$/;"	m	struct:local_msg_entry	access:public
+local_msg_entry::proc_thread	socket_msg.h	/^    pthread_t       proc_thread;$/;"	m	struct:local_msg_entry	access:public
+local_msg_entry::sem	socket_msg.h	/^    sem_t           sem;$/;"	m	struct:local_msg_entry	access:public
+mod	socket_msg.h	/^    mod_id_t        mod;            \/* which mod this message belong to *\/$/;"	m	struct:msg	access:public
+mod_id	socket_msg.h	/^    mod_id_t            mod_id;$/;"	m	struct:shm_entry	access:public
+mod_id	socket_msg.h	/^    mod_id_t        mod_id;         \/* module id *\/  $/;"	m	struct:msg_mod_cfg	access:public
+mod_id	socket_msg.h	/^    mod_id_t        mod_id;$/;"	m	struct:local_msg_entry	access:public
+mod_id_t	socket_msg.h	/^typedef unsigned int    mod_id_t;$/;"	t
+mod_reg_sys_uptime	socket_msg.h	/^    unsigned int    mod_reg_sys_uptime;$/;"	m	struct:local_msg_entry	access:public
+msg	socket_msg.h	/^typedef struct msg {$/;"	s
+msg::body	socket_msg.h	/^     char body[0];$/;"	m	struct:msg	access:public
+msg::destructor	socket_msg.h	/^    void (*destructor)(void *);$/;"	m	struct:msg	access:public
+msg::dst_id	socket_msg.h	/^    mod_id_t        dst_id;$/;"	m	struct:msg	access:public
+msg::endian	socket_msg.h	/^    unsigned char   endian;$/;"	m	struct:msg	access:public
+msg::free_ptr	socket_msg.h	/^    void            *free_ptr;$/;"	m	struct:msg	access:public
+msg::hold_cnt	socket_msg.h	/^    unsigned int    hold_cnt;$/;"	m	struct:msg	access:public
+msg::len	socket_msg.h	/^    unsigned int    len;            \/* message body length *\/$/;"	m	struct:msg	access:public
+msg::mod	socket_msg.h	/^    mod_id_t        mod;            \/* which mod this message belong to *\/$/;"	m	struct:msg	access:public
+msg::msg_id	socket_msg.h	/^    unsigned int    msg_id;         \/* msg id, module releated *\/$/;"	m	struct:msg	access:public
+msg::next	socket_msg.h	/^    struct msg      *next;$/;"	m	struct:msg	typeref:struct:msg::msg	access:public
+msg::src_id	socket_msg.h	/^    mod_id_t        src_id;$/;"	m	struct:msg	access:public
+msg_ctl	socket_msg.h	/^typedef struct msg_ctl {$/;"	s
+msg_ctl::ipc_fd	socket_msg.h	/^    int         ipc_fd;$/;"	m	struct:msg_ctl	access:public
+msg_ctl::ipc_stop	socket_msg.h	/^    int         ipc_stop;$/;"	m	struct:msg_ctl	access:public
+msg_ctl::ipc_thread	socket_msg.h	/^    pthread_t   ipc_thread;$/;"	m	struct:msg_ctl	access:public
+msg_ctl::loc_ctl	socket_msg.h	/^    struct loc_ctl {$/;"	s	struct:msg_ctl	access:public
+msg_ctl::loc_ctl::reg_tbl	socket_msg.h	/^        struct local_msg_entry  reg_tbl[ MOD_MAX ];$/;"	m	struct:msg_ctl::loc_ctl	typeref:struct:msg_ctl::loc_ctl::local_msg_entry	access:public
+msg_ctl::loc_ctl::rwlock	socket_msg.h	/^        pthread_rwlock_t        rwlock;$/;"	m	struct:msg_ctl::loc_ctl	access:public
+msg_ctl::p_loc_ctl	socket_msg.h	/^    } *p_loc_ctl;$/;"	m	struct:msg_ctl	typeref:struct:msg_ctl::loc_ctl	access:public
+msg_ctl::p_shm_ctl	socket_msg.h	/^    } *p_shm_ctl;$/;"	m	struct:msg_ctl	typeref:struct:msg_ctl::shm_ctl	access:public
+msg_ctl::shm_ctl	socket_msg.h	/^    struct shm_ctl {$/;"	s	struct:msg_ctl	access:public
+msg_ctl::shm_ctl::reg_tbl	socket_msg.h	/^        struct shm_entry    reg_tbl[ MOD_MAX ];$/;"	m	struct:msg_ctl::shm_ctl	typeref:struct:msg_ctl::shm_ctl::shm_entry	access:public
+msg_ctl::shm_ctl::rwlock	socket_msg.h	/^        pthread_rwlock_t    rwlock;$/;"	m	struct:msg_ctl::shm_ctl	access:public
+msg_ctl_t	socket_msg.h	/^} msg_ctl_t;$/;"	t	typeref:struct:msg_ctl
+msg_deinit	socket_msg.c	/^msg_rst_t msg_deinit()$/;"	f
+msg_flag_t	socket_msg.h	/^typedef unsigned int    msg_flag_t;$/;"	t
+msg_handler_t	socket_msg.h	/^typedef void            ( *msg_handler_t )(struct msg *msg);$/;"	t
+msg_hdled_total	socket_msg.h	/^    unsigned int    msg_hdled_total;$/;"	m	struct:local_msg_entry	access:public
+msg_id	socket_msg.h	/^    unsigned int    msg_id;         \/* msg id, module releated *\/$/;"	m	struct:msg	access:public
+msg_ident	socket_msg.h	/^typedef msg_flag_t      ( *msg_ident )(struct msg *msg);$/;"	t
+msg_init	socket_msg.c	/^msg_rst_t msg_init()$/;"	f
+msg_mod_cfg	socket_msg.h	/^typedef struct msg_mod_cfg {$/;"	s
+msg_mod_cfg::handler	socket_msg.h	/^    msg_handler_t   handler;        \/* message handler *\/$/;"	m	struct:msg_mod_cfg	access:public
+msg_mod_cfg::mod_id	socket_msg.h	/^    mod_id_t        mod_id;         \/* module id *\/  $/;"	m	struct:msg_mod_cfg	access:public
+msg_mod_cfg::name	socket_msg.h	/^    char            *name;          \/* module name *\/$/;"	m	struct:msg_mod_cfg	access:public
+msg_mod_cfg::thread_id	socket_msg.h	/^    pthread_t       thread_id;      \/* thread id *\/$/;"	m	struct:msg_mod_cfg	access:public
+msg_mod_cfg_t	socket_msg.h	/^} msg_mod_cfg_t;$/;"	t	typeref:struct:msg_mod_cfg
+msg_module_reg	socket_msg.c	/^msg_rst_t msg_module_reg(struct msg_mod_cfg *cfg)$/;"	f	signature:(struct msg_mod_cfg *cfg)
+msg_rst	socket_msg.h	/^typedef enum msg_rst {$/;"	g
+msg_rst_t	socket_msg.h	/^} msg_rst_t;$/;"	t	typeref:enum:msg_rst
+msg_t	socket_msg.h	/^} msg_t;$/;"	t	typeref:struct:msg
+mtx	socket_msg.h	/^    pthread_mutex_t mtx;$/;"	m	struct:local_msg_entry	access:public
+name	socket_msg.h	/^    char            *name;          \/* module name *\/$/;"	m	struct:msg_mod_cfg	access:public
+next	socket_msg.h	/^    struct msg      *next;$/;"	m	struct:msg	typeref:struct:msg::msg	access:public
+open_local_socket	socket_msg.c	/^static int open_local_socket(const char *path)$/;"	f	file:	signature:(const char *path)
+p_loc_ctl	socket_msg.h	/^    } *p_loc_ctl;$/;"	m	struct:msg_ctl	typeref:struct:msg_ctl::loc_ctl	access:public
+p_msg_ctl	socket_msg.h	/^struct msg_ctl *p_msg_ctl;$/;"	v	typeref:struct:msg_ctl
+p_shm_ctl	socket_msg.h	/^    } *p_shm_ctl;$/;"	m	struct:msg_ctl	typeref:struct:msg_ctl::shm_ctl	access:public
+pos	socket_msg.h	/^    int             pos;$/;"	m	struct:local_msg_entry	access:public
+proc_stop	socket_msg.h	/^    int             proc_stop;$/;"	m	struct:local_msg_entry	access:public
+proc_thread	socket_msg.h	/^    pthread_t       proc_thread;$/;"	m	struct:local_msg_entry	access:public
+reg_tbl	socket_msg.h	/^        struct local_msg_entry  reg_tbl[ MOD_MAX ];$/;"	m	struct:msg_ctl::loc_ctl	typeref:struct:msg_ctl::loc_ctl::local_msg_entry	access:public
+reg_tbl	socket_msg.h	/^        struct shm_entry    reg_tbl[ MOD_MAX ];$/;"	m	struct:msg_ctl::shm_ctl	typeref:struct:msg_ctl::shm_ctl::shm_entry	access:public
+rwlock	socket_msg.h	/^        pthread_rwlock_t        rwlock;$/;"	m	struct:msg_ctl::loc_ctl	access:public
+rwlock	socket_msg.h	/^        pthread_rwlock_t    rwlock;$/;"	m	struct:msg_ctl::shm_ctl	access:public
+sem	socket_msg.h	/^    sem_t           sem;$/;"	m	struct:local_msg_entry	access:public
+shm_ctl	socket_msg.h	/^    struct shm_ctl {$/;"	s	struct:msg_ctl	access:public
+shm_entry	socket_msg.h	/^typedef struct shm_entry {$/;"	s
+shm_entry::flag	socket_msg.h	/^    int                 flag;$/;"	m	struct:shm_entry	access:public
+shm_entry::in_addr	socket_msg.h	/^    struct sockaddr_in  in_addr;$/;"	m	struct:shm_entry	typeref:struct:shm_entry::sockaddr_in	access:public
+shm_entry::mod_id	socket_msg.h	/^    mod_id_t            mod_id;$/;"	m	struct:shm_entry	access:public
+shm_entry::un_addr	socket_msg.h	/^    struct sockaddr_un  un_addr;$/;"	m	struct:shm_entry	typeref:struct:shm_entry::sockaddr_un	access:public
+shm_entry_t	socket_msg.h	/^} shm_entry_t;$/;"	t	typeref:struct:shm_entry
+shm_init	socket_msg.c	/^static msg_rst_t shm_init(struct msg_ctl *p_ctl)$/;"	f	file:	signature:(struct msg_ctl *p_ctl)
+src_id	socket_msg.h	/^    mod_id_t        src_id;$/;"	m	struct:msg	access:public
+thread_id	socket_msg.h	/^    pthread_t       thread_id;      \/* thread id *\/$/;"	m	struct:msg_mod_cfg	access:public
+un_addr	socket_msg.h	/^    struct sockaddr_un  un_addr;$/;"	m	struct:shm_entry	typeref:struct:shm_entry::sockaddr_un	access:public

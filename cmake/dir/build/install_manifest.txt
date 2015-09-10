@@ -1,0 +1,3 @@
+/home/anton/tools/include/dir.h
+/home/anton/tools/lib/libdir.a
+/home/anton/tools/exec/dir

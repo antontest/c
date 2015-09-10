@@ -1,0 +1,1 @@
+/usr/bin/cc   -g -Wall -O2 -Werror   CMakeFiles/main.dir/main/main.c.o  -o ../../main  -L/home/anton/working/program/c/cmake_test/src/lib -rdynamic ../../src/lib/libhello.a -Wl,-rpath,/home/anton/working/program/c/cmake_test/src/lib: 

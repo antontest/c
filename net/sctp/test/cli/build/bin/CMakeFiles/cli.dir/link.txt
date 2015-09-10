@@ -1,0 +1,1 @@
+/usr/bin/cc     CMakeFiles/cli.dir/main/cli.c.o  -o ../../cli  -L"\$LIB_PATH"  -L/home/anton/program/c/sctp/test/cli/src/lib -rdynamic -lsocket_app -Wl,-rpath,"\$LIB_PATH:/home/anton/program/c/sctp/test/cli/src/lib" 

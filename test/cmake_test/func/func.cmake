@@ -1,0 +1,15 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
+
+function (get_lib_by_path path output)
+    string(REGEX REPLACE ".*lib\(.*\).a$" "\\1" opt ${path})
+    set(${output} ${opt} PARENT_SCOPE)
+endfunction()
+
+function (find_files mode path output)
+    file(GLOB_RECURSE files ${path}/*.${mode})
+    if(${mode} MATCHES "a")
+        get_lib_by_path(${files} ${output})
+    else()
+        set(${output} ${files} PARENT_SCOPE)
+    endif()
+endfunction ()

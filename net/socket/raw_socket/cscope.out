@@ -1,0 +1,66 @@
+cscope 15 $HOME/working/program/c/socket/raw_socket -q 0000000013 0000000333
+	@raw_socket.c
+
+1 
+	~<¡dio.h
+>
+
+2 
+	~<¡dlib.h
+>
+
+3 
+	~<¡ršg.h
+>
+
+4 
+	~<uni¡d.h
+>
+
+5 
+	~<sock‘_ba£.h
+>
+
+7 
+	s‘h”_h—d”
+ {
+
+8 
+	md_ho¡
+[6];
+
+9 
+	ms_ho¡
+[6];
+
+10 
+	m´Ùo_ty³
+;
+
+20 
+	$maš
+(
+agrc
+, *
+agrv
+[])
+
+22 
+¹
+ = 0;
+
+24  
+¹
+;
+
+25 
+	}
+}
+
+	@
+1
+.
+0
+1
+13
+raw_socket.c

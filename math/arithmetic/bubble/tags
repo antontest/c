@@ -1,0 +1,10 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+BubbleSort3	bubble.c	/^void BubbleSort3(int a[], int n)  $/;"	f	signature:(int a[], int n)
+bubble_sort	bubble.c	/^int bubble_sort(int arr[],int size)$/;"	f	signature:(int arr[],int size)
+main	bubble.c	/^int main(int agrc, char *argv[])$/;"	f	signature:(int agrc, char *argv[])
+print_array	bubble.c	/^void print_array(int arr[], int size)$/;"	f	signature:(int arr[], int size)

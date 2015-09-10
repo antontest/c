@@ -1,0 +1,1 @@
+/home/anton/program/c/sctp/tcp/cli/build/bin/CMakeFiles/cli.dir

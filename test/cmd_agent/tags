@@ -1,0 +1,71 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+CC	Makefile	/^CC = gcc$/;"	m	language:Make
+CDEF	Makefile	/^CDEF = $(CSRCS:.c=.d)$/;"	m	language:Make
+CMD_AGENT_ERROR	cmd_agent.c	25;"	d	language:C	file:
+COBJS	Makefile	/^COBJS := $(CSRCS:.c=.o)$/;"	m	language:Make
+CPP	Makefile	/^CPP = g++$/;"	m	language:Make
+CPPDEF	Makefile	/^CPPDEF = $(CPPSRCS:.cpp=.d)$/;"	m	language:Make
+CPPOBJS	Makefile	/^CPPOBJS := $(CPPSRCS:.cpp=.o)$/;"	m	language:Make
+DFL_RECENT_TASK_NUM	cmd_agent.c	34;"	d	language:C	file:
+DFL_SELECT_TIME_OUT	cmd_agent.c	36;"	d	language:C	file:
+DFL_TASK_Q_NUM	cmd_agent.c	33;"	d	language:C	file:
+DFL_TASK_TIME_OUT	cmd_agent.c	35;"	d	language:C	file:
+FIFO_DIR_PATH	cmd_agent.c	38;"	d	language:C	file:
+LPFLAGS	Makefile	/^LPFLAGS:=-lstdc++ -Wall -O2 -fomit-frame-pointer -g -ansi -Werr -lm -lpthread$/;"	m	language:Make
+MAKEDEPEND	Makefile	/^MAKEDEPEND = gcc -MM -MT$/;"	m	language:Make
+TARGET	Makefile	/^TARGET=bin$/;"	m	language:Make
+cfg_line_split	cmd_agent.c	/^static void cfg_line_split(char buf[], const char *separator, char **name, char **value)$/;"	f	language:C	file:	signature:(char buf[], const char *separator, char **name, char **value)
+cmd	cmd_agent.c	/^    char *cmd;$/;"	m	language:C	struct:task_entry	file:
+conf	cmd_agent.c	/^struct conf {$/;"	s	language:C	file:
+conf	cmd_agent.c	/^} conf = {$/;"	v	language:C	typeref:struct:conf
+create_multi_dir	cmd_agent.c	/^static int create_multi_dir(const char *dir_path)$/;"	f	language:C	file:	signature:(const char *dir_path)
+create_task	cmd_agent.c	/^static task_entry_t *create_task(const char* cmd)$/;"	f	language:C	file:	signature:(const char* cmd)
+create_time	cmd_agent.c	/^    long create_time;$/;"	m	language:C	struct:task_entry	file:
+curr_task	cmd_agent.c	/^    task_entry_t *curr_task;$/;"	m	language:C	struct:task_q_entry	file:
+dequeue_task_q	cmd_agent.c	/^static task_entry_t* dequeue_task_q(task_q_entry_t *task_q)$/;"	f	language:C	file:	signature:(task_q_entry_t *task_q)
+destory_task	cmd_agent.c	/^static int destory_task(task_entry_t *task)$/;"	f	language:C	file:	signature:(task_entry_t *task)
+destory_task_q_entry	cmd_agent.c	/^static int destory_task_q_entry(task_q_entry_t task_q)$/;"	f	language:C	file:	signature:(task_q_entry_t task_q)
+enqueue_task_q	cmd_agent.c	/^static int enqueue_task_q(task_q_entry_t *task_q, task_entry_t *task)$/;"	f	language:C	file:	signature:(task_q_entry_t *task_q, task_entry_t *task)
+exec_task	cmd_agent.c	/^static int exec_task(task_entry_t *task)$/;"	f	language:C	file:	signature:(task_entry_t *task)
+fifo_fd	cmd_agent.c	/^    int fifo_fd;$/;"	m	language:C	struct:task_q_entry	file:
+fifo_path	cmd_agent.c	/^    char *fifo_path;$/;"	m	language:C	struct:task_q_entry	file:
+file_path	cmd_agent.c	/^    char *file_path;$/;"	m	language:C	struct:conf	file:
+finish_time	cmd_agent.c	/^    long finish_time;$/;"	m	language:C	struct:task_entry	file:
+first_task	cmd_agent.c	/^    task_entry_t *first_task;$/;"	m	language:C	struct:task_q_entry	file:
+get_args	cmd_agent.c	/^static int get_args(int agrc, char *args[])$/;"	f	language:C	file:	signature:(int agrc, char *args[])
+get_sys_uptime	cmd_agent.c	/^static long get_sys_uptime()$/;"	f	language:C	file:
+handle_task	cmd_agent.c	/^static void* handle_task(void *arg)$/;"	f	language:C	file:	signature:(void *arg)
+init_and_open_fifo	cmd_agent.c	/^static int init_and_open_fifo()$/;"	f	language:C	file:
+init_task_q_entry	cmd_agent.c	/^static int init_task_q_entry()$/;"	f	language:C	file:
+iskilled	cmd_agent.c	/^    bool iskilled;$/;"	m	language:C	struct:task_entry	file:
+kill_task	cmd_agent.c	/^static int kill_task()$/;"	f	language:C	file:
+last_task	cmd_agent.c	/^    task_entry_t *last_task;$/;"	m	language:C	struct:task_q_entry	file:
+main	cmd_agent.c	/^int main(int agrc, char *argv[])$/;"	f	language:C	signature:(int agrc, char *argv[])
+mut	cmd_agent.c	/^    pthread_mutex_t mut;$/;"	m	language:C	struct:task_q_entry	file:
+next_task	cmd_agent.c	/^    task_entry_t *next_task;$/;"	m	language:C	struct:task_entry	file:
+poll_task	cmd_agent.c	/^static int poll_task(fd_set fds)$/;"	f	language:C	file:	signature:(fd_set fds)
+process_over_handle	cmd_agent.c	/^static int process_over_handle()$/;"	f	language:C	file:
+pthr_t	cmd_agent.c	/^    pthread_t pthr_t;$/;"	m	language:C	struct:task_q_entry	file:
+read_config_file	cmd_agent.c	/^static int read_config_file()$/;"	f	language:C	file:
+recent_task_num	cmd_agent.c	/^    int recent_task_num;$/;"	m	language:C	struct:conf	file:
+select_time_out	cmd_agent.c	/^    int select_time_out;$/;"	m	language:C	struct:conf	file:
+sem_q	cmd_agent.c	/^    sem_t sem_q;$/;"	m	language:C	struct:task_q_entry	file:
+signal_handler	cmd_agent.c	/^static void signal_handler(int sig)$/;"	f	language:C	file:	signature:(int sig)
+start_exec_time	cmd_agent.c	/^    long start_exec_time;$/;"	m	language:C	struct:task_entry	file:
+stop_dequeue	cmd_agent.c	/^    bool stop_dequeue;$/;"	m	language:C	struct:task_q_entry	file:
+task_entry	cmd_agent.c	/^struct task_entry {$/;"	s	language:C	file:
+task_entry_t	cmd_agent.c	/^typedef struct task_entry task_entry_t;$/;"	t	language:C	typeref:struct:task_entry	file:
+task_num	cmd_agent.c	/^    long task_num;$/;"	m	language:C	struct:task_q_entry	file:
+task_q_entry	cmd_agent.c	/^struct task_q_entry { $/;"	s	language:C	file:
+task_q_entry	cmd_agent.c	/^} task_q_entry[4] = {0};$/;"	v	language:C	typeref:struct:task_q_entry
+task_q_entry_t	cmd_agent.c	/^typedef struct task_q_entry task_q_entry_t;$/;"	t	language:C	typeref:struct:task_q_entry	file:
+task_q_num	cmd_agent.c	/^    int task_q_num;$/;"	m	language:C	struct:conf	file:
+task_q_time_out	cmd_agent.c	/^    int task_q_time_out;$/;"	m	language:C	struct:task_q_entry	file:
+task_t	cmd_agent.c	/^    long task_t;$/;"	m	language:C	struct:task_entry	file:
+total_task_num	cmd_agent.c	/^    long total_task_num;$/;"	m	language:C	struct:task_q_entry	file:
+uninit_and_close_fifo	cmd_agent.c	/^static int uninit_and_close_fifo()$/;"	f	language:C	file:

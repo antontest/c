@@ -1,0 +1,174 @@
+cscope 15 $HOME/working/program/c/getopt -q 0000000020 0000001348
+	@getopt.c
+
+1 
+	~<°dio.h
+>
+
+2 
+	~<°dlib.h
+>
+
+3 
+	~<°rög.h
+>
+
+4 
+	~<gë›t.h
+>
+
+11 
+	$¥öt_ußge
+(c⁄° *
+¥ogøm_«me
+) {
+
+12 
+	`¥ötf
+("%†1.0.0 (2015-06-02)\n", 
+¥ogøm_«me
+);
+
+13 
+	`¥ötf
+("This isáÖrogram decodingá BERÉncoded CDR file\n");
+
+14 
+	`¥ötf
+("Ußge: %†-‡<fûe_«me> -ÿ<ouçut_«me> [-¯<c⁄fig_«me>] [-k <keyw‹d>]\n", 
+¥ogøm_«me
+);
+
+15 
+	`¥ötf
+(" -f --fileÅhe CDR fileÅo be decoded\n");
+
+16 
+	`¥ötf
+(" -o --outputÅhe output file inÖlainÅext format\n");
+
+17 
+	`¥ötf
+(" -c --configÅhe description file ofÅhe CDR file, ifÇot given, use default configuration\n");
+
+18 
+	`¥ötf
+(" -k --keywordÅhe keywordÅo search, ifÇot given,állÑecords will be written into output file\n");
+
+19 
+	}
+}
+
+29 
+	$∑r£r_¨gs
+(
+agrc
+, *
+agrv
+[])
+
+31 
+›t
+ = 0;
+
+32 
+›ti⁄
+ 
+›ts
+[] = {
+
+33 { "hñp" , 
+no_¨gumít
+ , 0, 'h'},
+
+34 { "fûe" , 
+ªquúed_¨gumít
+, 1, 'f'},
+
+35 { "ouçut" , 
+no_¨gumít
+ , 0, 'o'},
+
+36 { "keyw‹d", 
+no_¨gumít
+ , 0, 'k'},
+
+40  ( 
+›t
+ = 
+	`gë›t_l⁄g
+–
+agrc
+, 
+agrv
+, "hf:ok", 
+›ts
+, 
+NULL
+ ) ) != -1 ) {
+
+41 
+›t
+) {
+
+43 
+	`¥öt_ußge
+(
+__FILE__
+);
+
+46 
+	`¥ötf
+("I≈uàfûêi†%s.\n", 
+›èrg
+);
+
+49 
+	`¥ötf
+("Ouçuàfûêi†%s.\n", 
+›èrg
+);
+
+52 
+	`¥ötf
+("Keyw‹d i†%s.\n", 
+›èrg
+);
+
+56 
+	`¥öt_ußge
+(
+__FILE__
+);
+
+59 
+	}
+}
+
+61 
+	$maö
+(
+agrc
+, *
+agrv
+[])
+
+63 
+	`∑r£r_¨gs
+(
+agrc
+, 
+agrv
+);
+
+66 
+	}
+}
+
+	@
+1
+.
+0
+1
+9
+getopt.c

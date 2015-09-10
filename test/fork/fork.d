@@ -1,0 +1,1 @@
+fork.o: fork.c

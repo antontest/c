@@ -1,0 +1,15 @@
+#! /bin/bash
+#脚本功能：
+	#工程编译
+#创建时间：
+	#2015-02-01 19:30:11
+
+#生成Makefile文件
+cd ./build/
+cmake ..
+
+#编译
+make
+cd ..
+
+exit 0

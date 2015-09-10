@@ -1,0 +1,251 @@
+cscope 15 $HOME/working/program/c/sys_bak -q 0000000031 0000001165
+	@bak/kill.c
+
+1 
+	~<°dio.h
+>
+
+2 
+	~<°dlib.h
+>
+
+3 
+	~<°rög.h
+>
+
+4 
+	~<uni°d.h
+>
+
+5 
+	~<sig«l.h
+>
+
+6 
+	~<sys/ty≥s.h
+>
+
+15 
+	$maö
+(
+agrc
+, *
+agrv
+[])
+
+17 
+π
+ = 0;
+
+19 i‡(
+agrc
+ < 2)  -1;
+
+20 i‡(
+agrv
+[1] !
+NULL
+)
+
+21 
+π
+ = 
+	`©oi
+(
+agrv
+[1]);
+
+22 
+	`kûl
+(-
+π
+, 
+SIGTERM
+);
+
+24  
+π
+;
+
+25 
+	}
+}
+
+	@sys_bak.c
+
+1 
+	~<°dio.h
+>
+
+2 
+	~<°dlib.h
+>
+
+3 
+	~<°rög.h
+>
+
+4 
+	~<uni°d.h
+>
+
+5 
+	~<sys/waô.h
+>
+
+6 
+	~<sys/ty≥s.h
+>
+
+7 
+	~<î∫o.h
+>
+
+12 
+	$cmd_exec
+(c⁄° *
+cmd
+, *
+¥oc_pid
+)
+
+14 
+pid_t
+ 
+pid
+ = -1;
+
+15 
+°©e
+ = -1;
+
+17 i‡(
+cmd
+ =
+NULL
+)  -1;
+
+18 
+	`¥ötf
+("%s\n", 
+	`gëív
+("PATH"));
+
+19 
+pid
+ = 
+	`f‹k
+();
+
+20 
+pid
+)
+
+23 
+°©e
+ = -1;
+
+26 
+	`£çgΩ
+();
+
+27 
+	`exe˛
+("/bö/sh", "sh", "-c", 
+cmd
+, (*)0);
+
+30 *
+¥oc_pid
+ = 
+pid
+;
+
+31 
+	`¥ötf
+("pid2: %d\n", 
+pid
+);
+
+33 
+	`waôpid
+(
+pid
+, &
+°©e
+, 0) < 0)
+
+35 i‡(
+î∫o
+ !
+EINTR
+)
+
+41  
+°©e
+;
+
+42 
+	}
+}
+
+47 
+	$maö
+(
+agrc
+, *
+agrv
+[])
+
+49 
+π
+ = 0;
+
+50 
+pid_t
+ 
+pid
+ = -1;
+
+51 i‡(
+agrv
+[1] !
+NULL
+)
+
+52 
+	`cmd_exec
+(
+agrv
+[1], &
+pid
+);
+
+54 
+	`¥ötf
+("pid0 = %d\n", 
+	`gëpid
+());
+
+55 
+	`¥ötf
+("pid1 = %d\n", 
+pid
+);
+
+57  
+π
+;
+
+58 
+	}
+}
+
+	@
+1
+.
+0
+2
+21
+bak/kill.c
+sys_bak.c

@@ -1,0 +1,170 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define THRESHOLD 0.99999
+
+typedef struct
+{
+    int nTimes;
+    char strTime[30];
+    //tagTimeData  *pNext;
+}TimeData,*pTimeData;
+
+//从一行数据中提取日志写入时间
+int getTimeAndSec(const char *loginfo,char *logtime,float *logsec);
+//保存出现的不同次数
+void addToDiffTimes(int showTimes[],int times,int *diffCount);
+
+int main(int argc,char *agrv[])
+{   
+	if(argc < 2)
+	{
+		printf("input error.\n");
+		return -1;
+	}
+
+    //打开文件
+	FILE *fp = NULL;
+	fp = fopen(agrv[1],"r");
+	if(NULL == fp)
+	{
+		printf("Open file failed.\n");
+		return -1;
+	}
+
+    //定义
+	char buf[512],strCurTime[30]={0},strPreTime[30] = {0},startTime[30] = {0};
+	float preSec = 0,curSec = 0;//上一次时间，当前时间
+	int continuousTimes = 0; //连续出现的次数
+    int showTimes[100] = {0},diffShowTimes[100] = {0},count = 0,diffCount = 0;
+    char strShowTime[100][30] = {0};
+
+    //跳过文本前两行数据
+    int line = 2;
+    while(!feof(fp) && line-- >0 )
+        fgets(buf,512,fp);
+
+    //循环读取文本剩余数据
+	while(!feof(fp))
+	{
+		if(fgets(buf,512,fp) == NULL) continue;
+        strcpy(strPreTime,strCurTime);//保存上一次日志时间
+
+        //提取日志时间
+		if(getTimeAndSec(buf,strCurTime,&curSec) == -1)
+            continue;
+
+        //时间差
+        float diffSec = curSec - preSec;
+        //防止时间间隔不是同一天
+        if(diffSec < 0.000001)
+        {
+            diffSec = curSec + curSec*24*60*60 - preSec;
+        }
+
+        //当时间戳符合条件，则开始计数
+		if(diffSec < 5 + THRESHOLD)
+		{
+			continuousTimes++;//计数
+            //保存符合条件的第一个时间
+            if(continuousTimes == 1)
+            {
+                strcpy(startTime,strPreTime);
+            }
+		}
+		else
+		{ 
+			if(continuousTimes > 1)
+            {
+                showTimes[ count ] = continuousTimes;//保存连续次数
+                strcpy(strShowTime[count++],startTime);//保存首次连续的时间
+                addToDiffTimes(diffShowTimes,continuousTimes,&diffCount);
+            }
+
+            //不符合条件，清除计数
+			continuousTimes = 0;
+		}
+
+        //保存上一个日志的时间
+        preSec = curSec;
+        
+	}
+
+    //结束分析，关闭文件
+	fclose(fp);
+	fp = NULL;
+
+    //分组显示
+    int i;
+    for(i=0;i<diffCount;i++)
+    {
+        printf("连续出现%d次的时间有：\n",diffShowTimes[i]);
+        int j;
+        for(j=0;j<count;j++)
+        {
+            if(showTimes[j] == diffShowTimes[i])
+                printf("%s\n",strShowTime[j]);
+        }
+    }
+
+	return 0;
+}
+
+//从一行数据中提取日志写入时间
+int getTimeAndSec(const char *loginfo,char *logtime,float *logsec)
+{
+    //防止数据为空
+	if(NULL == loginfo) return -1;
+
+    //提取日志日期
+	char *p = strtok(loginfo," ");
+	strtok(NULL," ");
+	p = strtok(NULL," ");
+    if(NULL == p) return -1;
+	sprintf(logtime,"%s ",p);
+    p = strtok(NULL," ");
+    strcat(logtime,p);
+
+    //提取日志时间
+    char buf[30]={0};
+    strcpy(buf,p);
+    p = strtok(buf,":");
+    *logsec = 0;
+    *logsec += atof(p)*60*60;
+    p = strtok(NULL,":");
+    *logsec += atof(p)*60;
+    p = strtok(NULL,":");
+    *logsec += atof(p);
+    
+    return 0;
+}
+
+//将连续次数添加到不同连续次数数组中
+void addToDiffTimes(int showTimes[],int times,int *diffCount)
+{
+    //如果数组中没有数据，则直接添加数据返回
+    if(*diffCount < 1)
+    {
+        showTimes[(*diffCount)++] = times;
+        return;
+    }
+
+    //寻找位置
+    int insertPos = 0;
+    for(insertPos ; insertPos < *diffCount;insertPos++)
+    {
+        //如果已经有该次数，则返回；否则添加到合适位置
+        if(showTimes[insertPos] > times) break;
+        else if(showTimes[insertPos] == times) return;
+    }
+
+    //顺序后移
+    int i;
+    for(i= *diffCount;i > insertPos;i--)
+        showTimes[i] = showTimes[i - 1];
+    showTimes[insertPos] = times;
+
+    //次数字加1
+    (*diffCount)++;
+}

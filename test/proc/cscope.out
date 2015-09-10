@@ -1,0 +1,2108 @@
+cscope 15 $HOME/working/program/c/proc -q 0000000144 0000010799
+	@macro.h
+
+5 #i‚de‡
+ma¸o_to_°r
+
+
+6 
+	#ma¸o_to_°r
+(
+x
+Ë#x
+
+	)
+
+9 #i‚de‡
+ma¸o_ˇt
+
+
+10 
+	#ma¸o_ˇt
+(
+a
+, 
+b
+Ëa##
+	)
+b
+
+13 #i‚de‡
+func_«me
+
+
+14 
+	#func_«me
+ 
+__func__
+
+
+	)
+
+17 #i‚de‡
+löe_num
+
+
+18 
+	#löe_num
+ 
+__LINE__
+
+
+	)
+
+21 #i‚de‡
+debug_îr‹
+
+
+22 
+	#debug_îr‹
+(...) \
+
+24 
+	`Ârötf
+(
+°dîr
+, "\033[1;35m[ Function %s ] [Üine %d ] \033[0m", \
+
+25 
+func_«me
+, 
+löe_num
+); \
+
+26 
+	`Ârötf
+(
+°dîr
+, ##
+__VA_ARGS__
+); \
+
+27 
+	`Ârötf
+(
+°dîr
+, "\n"); \
+
+28 } 0);
+
+	)
+
+31 #i‚de‡
+debug_öfo
+
+
+32 
+	#debug_öfo
+(...) \
+
+34 
+	`Ârötf
+(
+°dout
+, "\033[1;35m"); \
+
+35 
+	`Ârötf
+(
+°dout
+, ##
+__VA_ARGS__
+); \
+
+36 
+	`Ârötf
+(
+°dout
+, "\n\033[0;0m"); \
+
+37 } 0);
+
+	)
+
+40 #i‚de‡
+off£t_of
+
+
+41 
+	#off£t_of
+(
+ty≥
+, 
+membî
+Ë(()&((—y≥ *)0)->membî))
+
+	)
+
+44 #i‚de‡
+c⁄èöî_of
+
+
+45 
+	#c⁄èöî_of
+(
+±r
+, 
+ty≥
+, 
+membî
+) ({\
+
+46 c⁄° 
+	`ty≥of
+(((
+ty≥
+ *)0)->
+membî
+Ë*
+_m±r
+ = 
+±r
+; \
+
+47 (
+ty≥
+ *)((*)
+_m±r
+ - 
+	`off£t_of
+—y≥, 
+membî
+));})
+
+	)
+
+50 #i‚de‡
+sw≠
+
+
+51 
+	#sw≠
+(
+a
+, 
+b
+Ë{á =á ^ b; b =á ^ b;á =á ^ b; }
+
+	)
+
+54 #i‚de‡
+¨r_size
+
+
+55 
+	#¨r_size
+(
+a
+Ë–◊Ë/ ◊[0]Ë)
+
+	)
+
+	@proc.c
+
+1 
+	~"¥oc.h
+"
+
+6 
+	$maö
+(
+agrc
+, *
+agrv
+[])
+
+8 
+π
+ = 0;
+
+9 
+buf
+[256] = {0};
+
+11 
+	`SYSTEM
+("%s", "ls");
+
+12 
+	`gë_«me_by_pid
+(
+	`gëpid
+(), 
+buf
+, (buf));
+
+13 
+	`¥ötf
+("«me: %s\n", 
+buf
+);
+
+14 
+	`¥ötf
+("pid: %d\n", 
+	`gë_pid_by_«me
+("proc"));
+
+15 
+	`gë_exe_∑th_by_pid
+(
+	`gëpid
+(), 
+buf
+, (buf));
+
+16 
+	`¥ötf
+("exê∑th: %s\n", 
+buf
+);
+
+17 
+	`gë_shñl_ªsu…
+("ls", 
+buf
+, (buf));
+
+18 
+	`¥ötf
+("shñ»ªsu…: %s", 
+buf
+);
+
+19 
+	`gë_cmdlöe
+(
+	`gëpid
+(), 
+buf
+, (buf));
+
+20 
+	`¥ötf
+("cmdlöe: %s\n", 
+buf
+);
+
+21 
+	`gë_¥oc_°©e
+(
+	`gëpid
+());
+
+24 i‡(!
+	`is_¥oc_unique
+("mylib")Ë
+	`¥ötf
+("yes\n");
+
+25 
+	`¥ötf
+("no\n");
+
+27 
+	`¶ìp
+(100);
+
+29  
+π
+;
+
+30 
+	}
+}
+
+40 
+	$cmd_exec
+(c⁄° *
+cmd
+, *
+pid
+)
+
+42 
+pid_t
+ 
+p_id
+ = -1;
+
+43 
+π
+ = -1;
+
+45 i‡(
+cmd
+ =
+NULL
+Ë
+ªt
+;
+
+47 if((
+p_id
+ = 
+	`f‹k
+()Ë< 0Ë
+ªt
+;
+
+48 i‡(
+p_id
+ == 0)
+
+50 
+	`£çgΩ
+();
+
+51 i‡(
+	`exe˛
+("/bö/sh", "sh", "-c", 
+cmd
+, (*)0))
+
+53 
+	`Ârötf
+(
+°dîr
+, "exe˛ %†Áûed.", 
+cmd
+);
+
+54 
+ªt
+;
+
+59 i‡(
+pid
+ !
+NULL
+Ë*pid = 
+p_id
+;
+
+61 
+	`waôpid
+(
+p_id
+, &
+π
+, 0) < 0)
+
+63 i‡(
+î∫o
+ !
+EINTR
+Ë
+ªt
+;
+
+66 
+π
+ = 0;
+
+69 
+ªt
+:
+
+70  
+π
+;
+
+71 
+	}
+}
+
+82 
+	$gë_shñl_ªtu∫
+(c⁄° *
+cmd
+, *
+ªsu…
+, 
+size
+)
+
+84 
+FILE
+ *
+Â
+ = 
+NULL
+;
+
+85 
+buf
+[128] = {0};
+
+87 i‡(
+cmd
+ =
+NULL
+)  -1;
+
+88 i‡((
+Â
+ = 
+	`p›í
+(
+cmd
+, "r")Ë=
+NULL
+)  -1;
+
+90 
+	`°r˝y
+(
+ªsu…
+, "\0");
+
+91 
+	`fgës
+(
+buf
+, (buf), 
+Â
+Ë!
+NULL
+)
+
+93 i‡(
+ªsu…
+ !
+NULL
+ && (
+	`°æí
+‘esu…Ë+ såÀn(
+buf
+)Ë< 
+size
+)
+
+94 
+	`°rˇt
+(
+ªsu…
+, 
+buf
+);
+
+97 i‡(
+Â
+ !
+NULL
+Ë
+	`p˛o£
+(fp);
+
+100 
+	}
+}
+
+111 
+	$gë_shñl_ªsu…
+(c⁄° *
+cmd
+, *
+ªsu…
+, 
+size
+)
+
+113 
+fd
+[2] = {0};
+
+114 
+°©us
+ = -1;
+
+115 
+n
+ = 0;
+
+116 
+cou¡
+ = 0;
+
+117 
+pid_t
+ 
+pid
+ = -1;
+
+118 
+buf
+[256] = {0};
+
+120 i‡(
+cmd
+ =
+NULL
+ || 
+ªsu…
+ =NULL || 
+size
+ <= 0)  -1;
+
+121 i‡(
+	`pùe
+(
+fd
+) < 0)  -1;
+
+123 
+	`°r˝y
+(
+ªsu…
+, "\0");
+
+124 
+pid
+ = 
+	`f‹k
+();
+
+125 i‡(
+pid
+ =-1Ë
+°©us
+ = -1;
+
+126 i‡(
+pid
+ == 0)
+
+128 
+	`˛o£
+(
+fd
+[0]);
+
+129 i‡(
+fd
+[1] !
+STDOUT_FILENO
+)
+
+131 i‡(
+	`dup2
+(
+fd
+[1], 
+STDOUT_FILENO
+) != STDOUT_FILENO)
+
+132 
+	`_exô
+(127);
+
+133 
+	`˛o£
+(
+fd
+[1]);
+
+135 
+	`exe˛
+("/bö/sh", "sh", "-c", 
+cmd
+, (*)0);
+
+136 
+	`_exô
+(127);
+
+140 
+	`˛o£
+(
+fd
+[1]);
+
+141 (
+n
+ = 
+	`ªad
+(
+fd
+[0], 
+buf
+, (buf))) > 0)
+
+143 
+cou¡
+ +
+n
+;
+
+144 i‡(
+cou¡
+ < 
+size
+Ë
+	`°rˇt
+(
+ªsu…
+, 
+buf
+);
+
+146 
+	`˛o£
+(
+fd
+[0]);
+
+148 
+	`waôpid
+(
+pid
+, &
+°©us
+, 0) < 0)
+
+150 i‡(
+î∫o
+ !
+EINTR
+)
+
+153 
+°©us
+ = 0;
+
+156  
+°©us
+;
+
+157 
+	}
+}
+
+166 
+	$gë_µid
+(
+pid_t
+ 
+pid
+)
+
+168 
+∑th
+[64] = {0};
+
+169 
+buf
+[128] = {0};
+
+170 
+FILE
+ *
+Â
+ = 
+NULL
+;
+
+171 
+pid_t
+ 
+µid
+ = -1;
+
+173 
+	`•rötf
+(
+∑th
+, "/¥oc/%d/°©us", 
+pid
+);
+
+174 i‡((
+Â
+ = 
+	`f›í
+(
+∑th
+, "r")Ë=
+NULL
+)  -1;
+
+176 
+	`fgës
+(
+buf
+, (buf), 
+Â
+Ë!
+NULL
+)
+
+178 i‡(
+	`°r°r
+(
+buf
+, "Pid"Ë!
+NULL
+)
+
+182 i‡(
+	`fsˇnf
+(
+Â
+, "PPid:%d", &
+µid
+) == -1)Öpid = -1;
+
+183 i‡(
+Â
+ !
+NULL
+Ë
+	`f˛o£
+(fp);
+
+185  
+µid
+;
+
+186 
+	}
+}
+
+195 
+	$gë_pid_by_«me
+(c⁄° *
+¥oc_«me
+)
+
+197 
+dúít
+ *
+dú
+ = 
+NULL
+;
+
+198 
+DIR
+ *
+dúp
+ = 
+NULL
+;
+
+199 
+pid_t
+ 
+pid
+ = -1;
+
+200 
+FILE
+ *
+Â
+ = 
+NULL
+;
+
+201 
+«me
+[64] = {0};
+
+202 
+∑th
+[128] = {0};
+
+204 i‡((
+dúp
+ = 
+	`›ídú
+("/¥oc/")Ë=
+NULL
+)  -1;
+
+206 (
+dú
+ = 
+	`ªaddú
+(
+dúp
+)Ë!
+NULL
+)
+
+208 i‡(
+dú
+->
+d_«me
+ && (
+	`©oi
+(dir->d_name) > 0))
+
+210 
+	`•rötf
+(
+∑th
+, "/¥oc/%s/°©us", 
+dú
+->
+d_«me
+);
+
+211 i‡((
+Â
+ = 
+	`f›í
+(
+∑th
+, "r")Ë=
+NULL
+) ;
+
+212 i‡(
+	`fsˇnf
+(
+Â
+, "Name:%s", 
+«me
+) == -1)
+
+213 
+«me
+[0] = '\0';
+
+214 i‡(
+Â
+ !
+NULL
+Ë
+	`f˛o£
+(fp);
+
+215 i‡(
+	`°rcmp
+(
+«me
+, 
+¥oc_«me
+)) ;
+
+216 
+pid
+ = 
+	`©oi
+(
+dú
+->
+d_«me
+);
+
+221 i‡(
+dúp
+ !
+NULL
+Ë
+	`˛o£dú
+(dirp);
+
+223  
+pid
+;
+
+224 
+	}
+}
+
+233 
+	$gë_id_by_«me
+(c⁄° *
+«me
+)
+
+235 
+FILE
+ *
+Â
+ = 
+NULL
+;
+
+236 
+cmd
+[128] = {0};
+
+237 
+ªt_°r
+[1024] = {0};
+
+238 i‡(
+«me
+ =
+NULL
+)  -1;
+
+240 
+	`•rötf
+(
+cmd
+, "p†-®| gª∞%†| \
+ -v 'gªp' |áwk '{Öröà$1 }'", 
+«me
+);
+
+242 i‡((
+Â
+ = 
+	`p›í
+(
+cmd
+, "r")Ë=
+NULL
+)  -1;
+
+244 i‡(
+	`fgës
+(
+ªt_°r
+, ‘ë_°r), 
+Â
+)) ;
+
+245 
+	`p˛o£
+(
+Â
+);
+
+247  
+	`©oi
+(
+ªt_°r
+);
+
+248 
+	}
+}
+
+259 
+	$gë_¥oc_«me_by_pid
+(
+pid_t
+ 
+pid
+, *
+¥oc_«me
+, 
+size
+)
+
+261 
+∑th
+[64] = {0};
+
+262 
+buf
+[128] = {0};
+
+263 *
+p
+ = 
+buf
+;
+
+264 
+Àn
+ = 0;
+
+266 i‡(
+pid
+ < 1)  -1;
+
+267 
+	`•rötf
+(
+∑th
+, "/¥oc/%d/exe", 
+pid
+);
+
+268 i‡((
+Àn
+ = 
+	`ªadlök
+(
+∑th
+, 
+buf
+, (buf))) < 0)
+
+271 
+Àn
+ > 0 && 
+buf
+[len -1] != '/')Üen--;
+
+272 
+p
+ +
+Àn
+;
+
+273 
+	`°∫˝y
+(
+¥oc_«me
+, 
+p
+, 
+size
+);
+
+276 
+	}
+}
+
+287 
+	$gë_«me_by_pid
+(
+pid_t
+ 
+pid
+, *
+«me
+, 
+size
+)
+
+289 
+∑th
+[64] = {0};
+
+290 
+buf
+[64] = {0};
+
+291 
+FILE
+ *
+Â
+ = 
+NULL
+;
+
+292 
+π
+ = -1;
+
+294 i‡(
+«me
+ =
+NULL
+)  -1;
+
+295 
+	`•rötf
+(
+∑th
+, "/¥oc/%d/°©us", 
+pid
+);
+
+296 i‡((
+Â
+ = 
+	`f›í
+(
+∑th
+, "r")Ë=
+NULL
+Ë
+‰ì
+;
+
+298 i‡(
+	`fsˇnf
+(
+Â
+, "Name: %s", 
+buf
+Ë=-1Ë
+‰ì
+;
+
+299 
+	`°∫˝y
+(
+«me
+, 
+buf
+, 
+size
+);
+
+300 
+π
+ = 0;
+
+302 
+‰ì
+:
+
+303 i‡(
+Â
+ !
+NULL
+Ë
+	`f˛o£
+(fp);
+
+305  
+π
+;
+
+306 
+	}
+}
+
+308 c⁄° * 
+	$gë_¥oc_«me
+(c⁄° *
+«me
+)
+
+310 *
+«me
+ != '\0' && ( *name == '.' || *name == '/' ))
+
+311 
+«me
+++;
+
+313  
+«me
+;
+
+314 
+	}
+}
+
+323 
+	$check_¥oc_unique
+(c⁄° *
+«me
+)
+
+325 
+FILE
+ *
+Â
+ = 
+NULL
+;
+
+326 
+cmd
+[256] = {0};
+
+327 
+buf
+[518] = {0};
+
+328 
+èsk_˙t
+ = 0;
+
+330 
+«me
+ = 
+	`gë_¥oc_«me
+(name);
+
+331 
+	`•rötf
+(
+cmd
+, "p†-®| gª∞%†| gª∞-v gª∞| \
+ '{Öröà$1}'", 
+«me
+);
+
+333 i‡((
+Â
+ = 
+	`p›í
+(
+cmd
+, "r")Ë=
+NULL
+)  -1;
+
+334 
+	`fgës
+(
+buf
+, (buf), 
+Â
+Ë!
+NULL
+)
+
+336 i‡(
+	`°æí
+(
+buf
+Ë&& 
+	`©oi
+(buf) > 0)
+
+337 
+èsk_˙t
+++;
+
+338 i‡(
+èsk_˙t
+ > 1) ;
+
+341 i‡(
+Â
+ !
+NULL
+Ë
+	`p˛o£
+(fp);
+
+342 i‡(
+èsk_˙t
+ > 1)  0;
+
+344 
+	}
+}
+
+354 
+	$is_¥oc_unique
+(c⁄° *
+¥oc_«me
+)
+
+356 
+dúít
+ *
+dú
+ = 
+NULL
+;
+
+357 
+DIR
+ *
+dúp
+ = 
+NULL
+;
+
+358 
+pid_t
+ 
+pid0
+ = 
+	`gë_pid_by_«me
+(
+¥oc_«me
+);
+
+359 
+pid_t
+ 
+pid1
+ = -1;
+
+360 
+FILE
+ *
+Â
+ = 
+NULL
+;
+
+361 
+«me
+[64] = {0};
+
+362 
+∑th
+[128] = {0};
+
+364 i‡((
+dúp
+ = 
+	`›ídú
+("/¥oc/")Ë=
+NULL
+)  -1;
+
+366 (
+dú
+ = 
+	`ªaddú
+(
+dúp
+)Ë!
+NULL
+)
+
+368 i‡(
+dú
+->
+d_«me
+ && (
+	`©oi
+(dir->d_name)) > 0)
+
+370 
+	`•rötf
+(
+∑th
+, "/¥oc/%s/°©us", 
+dú
+->
+d_«me
+);
+
+372 i‡((
+Â
+ = 
+	`f›í
+(
+∑th
+, "r")Ë=
+NULL
+) ;
+
+373 i‡(
+	`fsˇnf
+(
+Â
+, "Name:%s", 
+«me
+) == -1)
+
+374 
+«me
+[0] = '\0';
+
+375 i‡(
+Â
+ !
+NULL
+Ë
+	`f˛o£
+(fp);
+
+377 i‡(
+	`°rcmp
+(
+«me
+, 
+¥oc_«me
+)) ;
+
+378 
+pid1
+ = 
+	`©oi
+(
+dú
+->
+d_«me
+);
+
+379 i‡(
+pid0
+ !
+pid1
+)
+
+384 i‡(
+dúp
+ !
+NULL
+Ë
+	`˛o£dú
+(dirp);
+
+385 i‡(
+pid0
+ !
+pid1
+) Öid1;
+
+388 
+	}
+}
+
+399 
+	$gë_exe_∑th_by_pid
+(
+pid_t
+ 
+pid
+, *
+∑th
+, 
+size
+)
+
+401 
+exe_∑th
+[64] = {0};
+
+402 
+buf
+[256] = {0};
+
+404 i‡(
+pid
+ <=0 || 
+∑th
+ =
+NULL
+)  -1;
+
+406 
+	`•rötf
+(
+exe_∑th
+, "/¥oc/%d/exe", 
+pid
+);
+
+407 i‡(
+	`ªadlök
+(
+exe_∑th
+, 
+buf
+, (buf)) <= 0)  -1;
+
+408 
+	`°∫˝y
+(
+∑th
+, 
+buf
+, 
+size
+);
+
+411 
+	}
+}
+
+423 
+	$gë_fûe_∑th
+(
+fd
+, 
+pid
+, *
+∑th
+, 
+size
+)
+
+425 
+fd_∑th
+[128] = {0};
+
+426 
+buf
+[256] = {0};
+
+428 i‡(
+fd
+ < 0 || 
+pid
+ <0 || 
+∑th
+ =
+NULL
+ || 
+size
+ <= 0)
+
+431 
+	`•rötf
+(
+fd_∑th
+, "/¥oc/%d/fd/%d", 
+pid
+, 
+fd
+);
+
+432 i‡(
+	`ªadlök
+(
+fd_∑th
+, 
+buf
+, (buf)) <= 0)  -1;
+
+433 
+	`°∫˝y
+(
+∑th
+, 
+buf
+, 
+size
+);
+
+436 
+	}
+}
+
+447 
+	$gë_cmdlöe
+(
+pid
+, *
+cmdlöe
+, 
+size
+)
+
+449 
+buf
+[128] = {0};
+
+450 
+π
+ = -1;
+
+452 i‡(
+cmdlöe
+ =
+NULL
+ || 
+pid
+ <=0 )  -1;
+
+454 
+	`°r˝y
+(
+cmdlöe
+, "\0");
+
+455 
+	`•rötf
+(
+buf
+, "ˇà-v /¥oc/%d/cmdlöê| sed 's/\\^\\@/\\ /g'", 
+pid
+);
+
+457 
+π
+ = 
+	`gë_shñl_ªsu…
+(
+buf
+, 
+cmdlöe
+, 
+size
+);
+
+458 
+	`°rˇt
+(
+cmdlöe
+, "\0");
+
+460  
+π
+;
+
+461 
+	}
+}
+
+470 
+	$gë_°©e_by_°r
+(c⁄° *
+code_°r
+)
+
+472 
+i
+ = 0;
+
+474 i‡(
+code_°r
+ =
+NULL
+)  -1;
+
+475 
+≠p_°©e
+[
+i
+].
+code_°r
+ !
+NULL
+ \
+
+476 && 
+	`°rcmp
+(
+≠p_°©e
+[
+i
+].
+code_°r
+, code_str) != 0)
+
+477 
+i
+++;
+
+479  
+≠p_°©e
+[
+i
+].
+code_ma¸o
+;
+
+480 
+	}
+}
+
+489 
+	$gë_¥oc_°©e
+(
+pid
+)
+
+491 
+∑th
+[64] = {0};
+
+492 
+buf
+[64] = {0};
+
+493 
+FILE
+ *
+Â
+ = 
+NULL
+;
+
+494 
+π
+ = -1;
+
+496 i‡(
+pid
+ <= 0)  -1;
+
+497 
+	`•rötf
+(
+∑th
+, "/¥oc/%d/°©us", 
+pid
+);
+
+498 i‡((
+Â
+ = 
+	`f›í
+(
+∑th
+, "r")Ë=
+NULL
+Ë
+‰ì
+;
+
+500 i‡(
+	`fgës
+(
+buf
+, (buf), 
+Â
+Ë=
+NULL
+Ë
+‰ì
+;
+
+501 i‡(
+	`fsˇnf
+(
+Â
+, "Sèã: %s", 
+buf
+Ë=-1Ë
+‰ì
+;
+
+502 
+	`¥ötf
+("°©e: %s\n", 
+buf
+);
+
+503 
+π
+ = 0;
+
+505 
+‰ì
+:
+
+506 i‡(
+Â
+ !
+NULL
+Ë
+	`f˛o£
+(fp);
+
+508  
+π
+;
+
+509 
+	}
+}
+
+519 
+	$SYSTEM
+(c⁄° *
+f‹m©
+,...)
+
+521 
+buf
+[1024] = {0};
+
+522 
+va_li°
+ 
+¨g
+;
+
+523 
+ªt
+ = -1;
+
+525 
+	`va_°¨t
+(
+¨g
+,
+f‹m©
+);
+
+526 
+	`v¢¥ötf
+(
+buf
+, (buf), 
+f‹m©
+, 
+¨g
+);
+
+527 
+	`va_íd
+(
+¨g
+);
+
+529 
+ªt
+ = 
+	`sy°em
+(
+buf
+);
+
+530 
+	`u¶ìp
+(1);
+
+532  
+ªt
+;
+
+533 
+	}
+}
+
+	@proc.h
+
+1 #i‚de‡
+__PROC_H__
+
+
+2 
+	#__PROC_H__
+
+
+	)
+
+4 
+	~<°dio.h
+>
+
+5 
+	~<°dlib.h
+>
+
+6 
+	~<°rög.h
+>
+
+7 
+	~<uni°d.h
+>
+
+8 
+	~<sys/waô.h
+>
+
+9 
+	~<sys/ty≥s.h
+>
+
+10 
+	~<dúít.h
+>
+
+11 
+	~<î∫o.h
+>
+
+12 
+	~<°d¨g.h
+>
+
+13 
+	~<f˙é.h
+>
+
+19 
+	mTASK_RUNNING
+ = 0,
+
+20 
+	mTASK_SLEEPING
+,
+
+21 
+	mTASK_INTERRUPTIBLE
+,
+
+22 
+	mTASK_UNINTERRUPTIBLE
+,
+
+23 
+	mTASK_STOPPED
+,
+
+24 
+	mTASK_ZOMBLE
+
+
+27 
+	s¥oc_°©_öfo
+ {
+
+28 
+	mcode_ma¸o
+;
+
+29 *
+	mcode_°r
+;
+
+30 *
+	mcode_d•
+;
+
+31 } 
+	g≠p_°©e
+ [] = {
+
+32 { 
+TASK_RUNNING
+ , "R", "Running orÑunnable (onÑun queue)" },
+
+33 { 
+TASK_SLEEPING
+ , "S", "Interruptible sleep (waiting foránÉventÅo complete)" },
+
+35 { 
+TASK_UNINTERRUPTIBLE
+ , "D", "Uninterruptible sleep (usually IO)" },
+
+36 { 
+TASK_STOPPED
+ , "T", "Stopped,Éither byá job control signal or because it is beingÅraced" },
+
+37 { 
+TASK_ZOMBLE
+ , "Z", "Defunct (\"zombie\")Örocess,Åerminated butÇot" },
+
+38 { -1 , 
+NULL
+, NULL}
+
+52 
+cmd_exec
+(c⁄° *
+cmd
+, *
+pid
+);
+
+63 
+gë_shñl_ªtu∫
+(c⁄° *
+cmd
+, *
+ªsu…
+, 
+size
+);
+
+74 
+gë_shñl_ªsu…
+(c⁄° *
+cmd
+, *
+ªsu…
+, 
+size
+);
+
+83 
+gë_µid
+(
+pid_t
+ 
+pid
+);
+
+92 
+gë_pid_by_«me
+(c⁄° *
+¥oc_«me
+);
+
+101 
+gë_id_by_«me
+(c⁄° *
+«me
+);
+
+112 
+gë_¥oc_«me_by_pid
+(
+pid_t
+ 
+pid
+, *
+¥oc_«me
+, 
+size
+);
+
+123 
+gë_«me_by_pid
+(
+pid_t
+ 
+pid
+, *
+«me
+, 
+size
+);
+
+132 
+check_¥oc_unique
+(c⁄° *
+«me
+);
+
+142 
+is_¥oc_unique
+(c⁄° *
+¥oc_«me
+);
+
+153 
+gë_exe_∑th_by_pid
+(
+pid_t
+ 
+pid
+, *
+∑th
+, 
+size
+);
+
+165 
+gë_fûe_∑th
+(
+fd
+, 
+pid
+, *
+∑th
+, 
+size
+);
+
+176 
+gë_cmdlöe
+(
+pid
+, *
+cmdlöe
+, 
+size
+);
+
+185 
+gë_¥oc_°©e
+(
+pid
+);
+
+195 
+SYSTEM
+(c⁄° *
+f‹m©
+,...);
+
+	@
+1
+.
+0
+3
+22
+macro.h
+proc.c
+proc.h

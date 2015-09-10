@@ -1,0 +1,180 @@
+cscope 15 $HOME/working/program/c/t -q 0000000018 0000000894
+	@head.h
+
+1 
+	~<¡dio.h
+>
+
+2 
+	~<¡dlib.h
+>
+
+4 
+	smod_¡©e
+ {
+
+5 
+	mmod_id
+;
+
+6 
+	m­p_¡©e
+;
+
+8 
+upd©e_tbl
+(
+mod_id
+, 
+¡©e
+);
+
+	@main.c
+
+1 
+	~<¡dio.h
+>
+
+2 
+	~<¡dlib.h
+>
+
+3 
+	~"h—d.h
+"
+
+8 
+mod_¡©e
+ 
+mod_¡_tbl
+[2];
+
+13 
+	$maš
+(
+agrc
+, *
+agrv
+[])
+
+15 
+¹
+ = 0;
+
+16 
+i
+ = 0;
+
+18 
+	`upd©e_tbl
+(1, 3);
+
+19 
+i
+ = 0; i < ((
+mod_¡_tbl
+) / (mod_st_tbl[0])); i++)
+
+20 
+	`´štf
+("id: %d, s‹: %d\n", 
+mod_¡_tbl
+[
+i
+].
+mod_id
+, mod_¡_tbl[i].
+­p_¡©e
+);
+
+23  
+¹
+;
+
+24 
+	}
+}
+
+	@t.c
+
+1 
+	~<¡dio.h
+>
+
+2 
+	~<¡dlib.h
+>
+
+3 
+	~<¡ršg.h
+>
+
+4 
+	~<uni¡d.h
+>
+
+5 
+	~"h—d.h
+"
+
+10 
+mod_¡©e
+ 
+	gmod_¡_tbl
+[2] = {
+
+20 
+	$upd©e_tbl
+(
+mod_id
+, 
+¡©e
+)
+
+22 
+size
+ = (
+mod_¡_tbl
+) / (mod_st_tbl[0]);
+
+23 
+i
+ = 0;
+
+25 
+i
+ = 0; i < 
+size
+; i++)
+
+27 ià(
+mod_¡_tbl
+[
+i
+].
+mod_id
+ == mod_id)
+
+29 
+mod_¡_tbl
+[
+i
+].
+­p_¡©e
+ = 
+¡©e
+;
+
+35 
+	}
+}
+
+	@
+1
+.
+0
+3
+18
+head.h
+main.c
+t.c

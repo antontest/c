@@ -1,0 +1,14 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+d_host	raw_socket.c	/^    unsigned char d_host[6];$/;"	m	struct:ether_header	file:	access:public
+ether_header	raw_socket.c	/^struct ether_header {$/;"	s	file:
+ether_header::d_host	raw_socket.c	/^    unsigned char d_host[6];$/;"	m	struct:ether_header	file:	access:public
+ether_header::proto_type	raw_socket.c	/^    unsigned short proto_type;$/;"	m	struct:ether_header	file:	access:public
+ether_header::s_host	raw_socket.c	/^    unsigned char s_host[6];$/;"	m	struct:ether_header	file:	access:public
+main	raw_socket.c	/^int main(int agrc, char *agrv[])$/;"	f	signature:(int agrc, char *agrv[])
+proto_type	raw_socket.c	/^    unsigned short proto_type;$/;"	m	struct:ether_header	file:	access:public
+s_host	raw_socket.c	/^    unsigned char s_host[6];$/;"	m	struct:ether_header	file:	access:public

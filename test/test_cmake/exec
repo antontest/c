@@ -1,0 +1,31 @@
+#! /bin/bash
+#脚本功能：
+	#执行目标文件文件
+#创建时间：
+	#2015-02-01 21:23:44
+
+#提取执行文件名称的函数
+function get_exec_name()
+{
+	grep "exec_name" ./build/.pro_info | awk -F "=" '{print $2}'
+}
+
+#读取执行文件名称
+if test -z $(find ./build/ -maxdepth 1 -name ".pro_info") ; then #工程信息文件不存在，退出
+	echo 工程信息文件不存在，不能执行!
+	exit -1
+else #文件存在，提取名称
+	exec_name=$(get_exec_name) #提取名称
+	if test -z "$exec_name" ; then
+#		ECHO 执行文件名称获取成功!
+#	else
+		echo 执行文件名称获取失败!
+		exit -1
+	fi
+fi
+
+#执行
+echo 程序执行结果如下：
+echo "------------------------Start-----------------------"
+./build/bin/$exec_name
+echo "-------------------------End------------------------"

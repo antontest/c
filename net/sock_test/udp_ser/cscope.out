@@ -1,0 +1,192 @@
+cscope 15 $HOME/working/program/c/sock_test/udp_ser -q 0000000035 0000000990
+	@udp_ser.c
+
+48 
+	~<°dlib.h
+>
+
+49 
+	~<°dio.h
+>
+
+50 
+	~<î∫o.h
+>
+
+51 
+	~<°rög.h
+>
+
+52 
+	~<uni°d.h
+>
+
+53 
+	~<√tdb.h
+>
+
+54 
+	~<sys/sockë.h
+>
+
+55 
+	~<√töë/ö.h
+>
+
+56 
+	~<sys/ty≥s.h
+>
+
+57 
+	~<¨∑/öë.h
+>
+
+59 
+	$maö
+()
+
+61 
+fd
+ = {-1};
+
+62 
+sockaddr_ö
+ 
+addr
+ = {0};
+
+64 
+Àn
+ = (
+sockaddr_ö
+);
+
+65 
+buf
+[128] = {0};
+
+67 
+fd
+ = 
+	`sockë
+(
+AF_INET
+, 
+SOCK_DGRAM
+, 0);
+
+68 i‡(
+fd
+ < 0Ë
+	`≥º‹
+("socket");
+
+70 
+addr
+.
+sö_Ámûy
+ = 
+AF_INET
+;
+
+71 
+addr
+.
+sö_addr
+.
+s_addr
+ = 
+	`ht⁄l
+(
+INADDR_ANY
+);
+
+72 
+addr
+.
+sö_p‹t
+ = 
+	`ht⁄s
+(5001);
+
+74 i‡(
+	`böd
+(
+fd
+, (
+sockaddr
+ *)&
+addr
+, (
+sockÀn_t
+)
+Àn
+) < 0)
+
+75 
+	`≥º‹
+("bind");
+
+77 
+π
+ = 0;
+
+78 
+	`ªcv‰om
+(
+fd
+, 
+buf
+, 128, 0, (
+sockaddr
+ *)&
+addr
+, (
+sockÀn_t
+ *)&
+Àn
+))
+
+80 
+	`¥ötf
+("£∏ªcv: %s\n", 
+buf
+);
+
+81 i‡((
+π
+ = 
+	`£ndto
+(
+fd
+, 
+buf
+, 
+	`°æí
+(buf), 0, (
+sockaddr
+ *)&
+addr
+, (
+sockÀn_t
+)
+Àn
+)) > 0)
+
+82 
+	`¥ötf
+("£∏£nd cou¡: %d\n", 
+π
+);
+
+86 
+	}
+}
+
+	@
+1
+.
+0
+1
+10
+udp_ser.c

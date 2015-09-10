@@ -1,0 +1,30 @@
+/**
+ * usual head files
+ */
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <socket_app.h>
+#include <socket_base.h>
+#include <socket_property.h>
+
+/*********************************************************
+ **************    Function Declaration    ***************
+ *********************************************************/
+
+/*********************************************************
+ ******************    Main Function    ******************
+ *********************************************************/
+int main(int agrc, char *agrv[])
+{
+    int rt = 0; /* return value of function main */
+    struct socket_impl sck = {0};
+    
+    inet_server_create(&sck, SOCK_STREAM, "127.0.0.1", 5001);
+    while (1);
+
+    return rt;
+}
+
+int tcp_ser()

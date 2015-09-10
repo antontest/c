@@ -1,0 +1,1 @@
+/home/anton/program/c/test/build/bin/CMakeFiles/main.dir

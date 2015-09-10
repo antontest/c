@@ -1,0 +1,1 @@
+wexitstatus.o: wexitstatus.c

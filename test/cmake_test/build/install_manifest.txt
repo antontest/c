@@ -1,0 +1,4 @@
+/home/anton/tools/include/hello.h
+/home/anton/tools/lib/libhello.a
+/home/anton/tools/exec/main
+/home/anton/tools/exec/t

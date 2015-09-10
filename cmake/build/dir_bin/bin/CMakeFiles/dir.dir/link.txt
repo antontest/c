@@ -1,0 +1,1 @@
+/usr/bin/cc     CMakeFiles/dir.dir/main/dir.c.o  -o ../../../dir/dir  -L/home/anton/program/c/cmake/dir/src/lib -rdynamic ../../../dir/src/lib/libdir.a -Wl,-rpath,/home/anton/program/c/cmake/dir/src/lib: 

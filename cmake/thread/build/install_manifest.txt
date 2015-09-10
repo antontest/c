@@ -1,0 +1,2 @@
+/home/anton/tools/include/thread.h
+/home/anton/tools/lib/libthread.a

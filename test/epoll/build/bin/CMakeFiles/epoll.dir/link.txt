@@ -1,0 +1,1 @@
+/usr/bin/cc     CMakeFiles/epoll.dir/main/epoll.c.o  -o ../../epoll  -L/home/anton/program/c/epoll/src/lib -rdynamic -lsocket_app -Wl,-rpath,/home/anton/program/c/epoll/src/lib: 

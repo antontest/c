@@ -1,0 +1,59 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+SIZE_OF_BUFFER	readlog.c	13;"	d	file:
+SIZE_OF_STRING_TIME	readlog.c	11;"	d	file:
+THRESHOLD	readlog.c	9;"	d	file:
+TIME_INTERVAL	readlog.c	7;"	d	file:
+append_data_to_list	readlog.c	/^int append_data_to_list(time_data **head, const int iTimes, const char szTime[]);$/;"	p	file:
+append_data_to_list	readlog.c	/^int append_data_to_list(time_data **head, const int iTimes, const char szTime[]);$/;"	p	file:	signature:(time_data **head, const int iTimes, const char szTime[])
+append_data_to_list	readlog.c	/^int append_data_to_list(time_data **pHead, const int iTimes, const char szTime[])$/;"	f
+append_data_to_list	readlog.c	/^int append_data_to_list(time_data **pHead, const int iTimes, const char szTime[])$/;"	f	signature:(time_data **pHead, const int iTimes, const char szTime[])
+cmp	readlog.c	/^int cmp(const void **p1, const void **p2)$/;"	f
+cmp	readlog.c	/^int cmp(const void **p1, const void **p2)$/;"	f	signature:(const void **p1, const void **p2)
+cmp	readlog.c	/^int cmp(const void **p1, const void **p2);$/;"	p	file:
+cmp	readlog.c	/^int cmp(const void **p1, const void **p2);$/;"	p	file:	signature:(const void **p1, const void **p2)
+destroy_list	readlog.c	/^int destroy_list(p_time_data head)$/;"	f
+destroy_list	readlog.c	/^int destroy_list(p_time_data head)$/;"	f	signature:(p_time_data head)
+destroy_list	readlog.c	/^int destroy_list(p_time_data head);$/;"	p	file:
+destroy_list	readlog.c	/^int destroy_list(p_time_data head);$/;"	p	file:	signature:(p_time_data head)
+get_middle_pointer	readlog.c	/^p_time_data get_middle_pointer(p_time_data pHead)$/;"	f
+get_middle_pointer	readlog.c	/^p_time_data get_middle_pointer(p_time_data pHead)$/;"	f	signature:(p_time_data pHead)
+get_middle_pointer	readlog.c	/^p_time_data get_middle_pointer(p_time_data pHead);$/;"	p	file:
+get_middle_pointer	readlog.c	/^p_time_data get_middle_pointer(p_time_data pHead);$/;"	p	file:	signature:(p_time_data pHead)
+get_time_from_line	readlog.c	/^int get_time_from_line(char *pchInfo, char szTime[], int *iSec)$/;"	f
+get_time_from_line	readlog.c	/^int get_time_from_line(char *pchInfo, char szTime[], int *iSec)$/;"	f	signature:(char *pchInfo, char szTime[], int *iSec)
+get_time_from_line	readlog.c	/^int get_time_from_line(char *pchInfo, char szTime[], int *iSec);$/;"	p	file:
+get_time_from_line	readlog.c	/^int get_time_from_line(char *pchInfo, char szTime[], int *iSec);$/;"	p	file:	signature:(char *pchInfo, char szTime[], int *iSec)
+iTimes	readlog.c	/^        int iTimes;$/;"	m	struct:tag_time_data	file:
+iTimes	readlog.c	/^        int iTimes;$/;"	m	struct:tag_time_data	file:	access:public
+main	readlog.c	/^int main(int argc, char *agrv[])$/;"	f
+main	readlog.c	/^int main(int argc, char *agrv[])$/;"	f	signature:(int argc, char *agrv[])
+merge	readlog.c	/^void merge(time_data **pLeft, p_time_data pRight)$/;"	f
+merge	readlog.c	/^void merge(time_data **pLeft, p_time_data pRight)$/;"	f	signature:(time_data **pLeft, p_time_data pRight)
+merge	readlog.c	/^void merge(time_data **pLeft, p_time_data pRight);$/;"	p	file:
+merge	readlog.c	/^void merge(time_data **pLeft, p_time_data pRight);$/;"	p	file:	signature:(time_data **pLeft, p_time_data pRight)
+merge_sort	readlog.c	/^void merge_sort(time_data **pHead)$/;"	f
+merge_sort	readlog.c	/^void merge_sort(time_data **pHead)$/;"	f	signature:(time_data **pHead)
+merge_sort	readlog.c	/^void merge_sort(time_data **pHead);$/;"	p	file:
+merge_sort	readlog.c	/^void merge_sort(time_data **pHead);$/;"	p	file:	signature:(time_data **pHead)
+pNext	readlog.c	/^        p_time_data pNext;$/;"	m	struct:tag_time_data	file:
+pNext	readlog.c	/^        p_time_data pNext;$/;"	m	struct:tag_time_data	file:	access:public
+p_time_data	readlog.c	/^typedef struct tag_time_data time_data, *p_time_data;$/;"	t	typeref:struct:	file:
+print_list	readlog.c	/^void print_list(p_time_data head);$/;"	p	file:
+print_list	readlog.c	/^void print_list(p_time_data head);$/;"	p	file:	signature:(p_time_data head)
+print_list	readlog.c	/^void print_list(p_time_data pHead)$/;"	f
+print_list	readlog.c	/^void print_list(p_time_data pHead)$/;"	f	signature:(p_time_data pHead)
+szTime	readlog.c	/^        char szTime[SIZE_OF_STRING_TIME];$/;"	m	struct:tag_time_data	file:
+szTime	readlog.c	/^        char szTime[SIZE_OF_STRING_TIME];$/;"	m	struct:tag_time_data	file:	access:public
+tag_time_data	readlog.c	/^struct tag_time_data {$/;"	s	file:
+tag_time_data::iTimes	readlog.c	/^        int iTimes;$/;"	m	struct:tag_time_data	file:
+tag_time_data::iTimes	readlog.c	/^        int iTimes;$/;"	m	struct:tag_time_data	file:	access:public
+tag_time_data::pNext	readlog.c	/^        p_time_data pNext;$/;"	m	struct:tag_time_data	file:
+tag_time_data::pNext	readlog.c	/^        p_time_data pNext;$/;"	m	struct:tag_time_data	file:	access:public
+tag_time_data::szTime	readlog.c	/^        char szTime[SIZE_OF_STRING_TIME];$/;"	m	struct:tag_time_data	file:
+tag_time_data::szTime	readlog.c	/^        char szTime[SIZE_OF_STRING_TIME];$/;"	m	struct:tag_time_data	file:	access:public
+time_data	readlog.c	/^typedef struct tag_time_data time_data, *p_time_data;$/;"	t	typeref:struct:tag_time_data	file:

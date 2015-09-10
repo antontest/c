@@ -1,0 +1,1 @@
+sscanf.o: sscanf.c

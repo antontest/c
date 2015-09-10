@@ -1,0 +1,1 @@
+getnetip.o: getnetip.c

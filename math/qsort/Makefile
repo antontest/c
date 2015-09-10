@@ -1,0 +1,104 @@
+#定义编译器变量
+CC = gcc
+CPP = g++
+
+#最终生成的执行文件
+TARGET=bin
+
+#-I dirname: 将dirname所指出的目录加入到程序头文件目录列表中。如果在预设系统及当前目录中没有找到需要的文件，就到指定的dirname目录中去寻找
+#INCLUDE := /usr/arm-926ejs-linux/include/
+#INCLUDE += -I./src/
+INCLUDE += -I./
+
+#获取工程中所有.c文件名
+#CSRCS := $(wildcard ../../share/*.c)
+#CSRCS += $(wildcard ./src/*.c)
+CSRCS += $(wildcard ./*.c)
+
+#获取工程中所有.cpp文件名
+#CPPSRCS := $(wildcard ../../share/*.cpp)
+#CPPSRCS += $(wildcard ./src/*.cpp)
+CPPSRCS += $(wildcard ./*.cpp)
+
+#根据所有工程源文件名获取.o依赖文件
+COBJS := $(CSRCS:.c=.o)
+CPPOBJS := $(CPPSRCS:.cpp=.o)
+
+#引入库文件
+#-L dirname：将dirname所指出的目录加入到库文件的目录列表中。在默认状态下，连接程序ld在系统的预设路径中(如/usr/lib)寻找所需要的库文件，这个选项告诉连接程序，首先到-L指定的目录中去寻找，然后再到系统预设路径中寻找
+#LIB := -L/usr/arm-926ejs-linux/lib /usr/arm-926ejs-linux/lib/libjrtp.a
+#LIB := ./test.so
+
+#工程编译时所需要的编译参数
+#-g 生成调试信息
+#-pedantic参数与-ansi一起使用 会自动拒绝编译非ANSI程序
+#-fomit-frame-pointer 去除函数框架
+#LPFLAGS:=-lstdc++ -Wall -O2 -fomit-frame-pointer -g -ansi -Werr -lm -lpthread
+
+#生成依赖信息 -MM是只生成自己的头文件信息，-M 包含了标准库头文件信息。
+#-MT 或 -MQ都可以改变生成的依赖  xxx.o:src/xxx.h 为 src/xxx.o:src/xxx.h 当然。前面的 src/xxx.o需自己指定
+#格式为 -MM 输入.c或.cpp  查找依赖路径  -MT或-MQ  生成规则，比如src/xxx.o
+MAKEDEPEND = gcc -MM -MT
+#CFLAGS += $(INCS)
+CFLAGS += -O2 -Wall -g -ansi # -fomit-frame-pointer
+#CPPFLAGS += $(INCS)
+CPPFLAGS += -O2 -Wall -g
+
+#针对每个.c文件的.d依赖文件列表
+CDEF = $(CSRCS:.c=.d)
+CPPDEF = $(CPPSRCS:.cpp=.d)
+
+#最终目标
+all : $(TARGET)
+
+#生成.o的对自己目录中.h .c的依赖信息.d文件到.c所在的路径中
+#$(DEF)文件是.d文件名列表(含目录)，比如tree.d 匹配成功那么%就是tree，然后在尝试%.c，如果成功。则执行规则
+# $(<:.c=.o)是获取此.c文件的名字(含路径)，然后变为.o比如 src/xxx.o。 以形成如下
+# src/xxx.o : src/xxx.c ***.h  ***.h  最前面！！注意。  
+# 此做法是每个.d都和生成他的.c在一个目录里，所以需要这样做。
+# $(<:.c=.o)之类的 。此时的<相当于变量$< 。切记
+# : : :  含义同下
+$(CDEF) : %.d : %.c
+	$(MAKEDEPEND) $(<:.c=.o) $< > $@
+$(CPPDEF) : %.d : %.cpp
+	$(MAKEDEPEND) $(<:.cpp=.o) $< > $@
+
+#先删除依赖信息
+#重新生成依赖信息
+#这里出现了一个 $(MAKE) 没有定义的变量。这个变量是由 Make 自己定义的，它的值即为自己的位置，方便 Make 递归调用自己。
+depend :
+	-rm $(CDEF)
+	-rm $(CPPDEF)
+	$(MAKE) $(CDEF)
+	$(MAKE) $(CPPDEF)
+
+#$(OBJS):%.o :%.c  先用$(OBJS)中的一项，比如foo.o: %.o : %.c  含义为:试着用%.o匹配foo.o。如果成功%就等于foo。如果不成功，
+# Make就会警告，然后。给foo.o添加依赖文件foo.c(用foo替换了%.c里的%)
+# 也可以不要下面的这个生成规则，因为下面的 include $(DEF)  就隐含了。此处为了明了，易懂。故留着s
+$(COBJS) : %.o: %.c
+	$(CC) $(INCLUDE) -c $< -o $@
+$(CPPOBJS) : %.o: %.cpp
+	$(CPP) $(INCLUDE) -c $< -o $@
+
+# $@--目标文件，$^--所有的依赖文件，$<--第一个依赖文件。每次$< $@ 代表的值就是列表中的
+#
+$(TARGET) : $(COBJS) $(CPPOBJS)
+	$(CC) -o $@ $(COBJS) $(CPPOBJS) $(LPFLAGS) $(LIB)
+
+include $(CDEF)
+include $(CPPDEF)
+#sinclude .d
+
+#清除所有目标文件以及生成的最终目标文件
+.PHONY:clean cleanall cleansome build rebuild
+build:all
+rebuild:clean all build
+clean:            
+	-rm $(TARGET) $(COBJS) $(CPPOBJS)
+cleanall :
+	-rm $(CDEF) $(CPPDEF)
+	-rm $(TARGET) $(COBJS) $(CPPOBJS)
+cleansome :
+	-rm $(CDEF) $(CPPDEF)
+	-rm $(COBJS) $(CPPOBJS)
+

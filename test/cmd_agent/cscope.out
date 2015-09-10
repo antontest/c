@@ -1,0 +1,2184 @@
+cscope 15 $HOME/working/program/c/cmd_agent -q 0000000170 0000011470
+	@cmd_agent.c
+
+9 
+	~<°dio.h
+>
+
+10 
+	~<°dlib.h
+>
+
+11 
+	~<°rög.h
+>
+
+12 
+	~<uni°d.h
+>
+
+13 
+	~<f˙é.h
+>
+
+14 
+	~<sys/ty≥s.h
+>
+
+15 
+	~<sys/°©.h
+>
+
+16 
+	~<sig«l.h
+>
+
+17 
+	~<±hªad.h
+>
+
+18 
+	~<£m≠h‹e.h
+>
+
+19 
+	~<°dboﬁ.h
+>
+
+20 
+	~<sys/sysöfo.h
+>
+
+21 
+	~<sys/î∫o.h
+>
+
+22 
+	~<sys/waô.h
+>
+
+23 
+	~<sys/£À˘.h
+>
+
+25 
+	#CMD_AGENT_ERROR
+(...) \
+
+27 
+	`Ârötf
+(
+°dîr
+, "\033[1;35m[ Function %s ] [Üine %d ] \033[0m", \
+
+28 
+__func__
+, 
+__LINE__
+); \
+
+29 
+	`Ârötf
+(
+°dîr
+, ##
+__VA_ARGS__
+); \
+
+30 
+	`Ârötf
+(
+°dîr
+, "\n"); \
+
+31 } 0);
+
+	)
+
+33 
+	#DFL_TASK_Q_NUM
+ 1
+
+	)
+
+34 
+	#DFL_RECENT_TASK_NUM
+ 5
+
+	)
+
+35 
+	#DFL_TASK_TIME_OUT
+ 15
+
+	)
+
+36 
+	#DFL_SELECT_TIME_OUT
+ 5
+
+	)
+
+38 
+	#FIFO_DIR_PATH
+ "./tmp/run/"
+
+	)
+
+40 
+èsk_íåy
+ 
+	tèsk_íåy_t
+;
+
+41 
+èsk_q_íåy
+ 
+	tèsk_q_íåy_t
+;
+
+50 
+	sc⁄f
+ {
+
+54 *
+	mfûe_∑th
+;
+
+59 
+	mèsk_q_num
+;
+
+64 
+	mª˚¡_èsk_num
+;
+
+69 
+	m£À˘_time_out
+;
+
+71 } 
+	gc⁄f
+ = {
+
+72 .
+fûe_∑th
+ = "./cmd_agent.cfg",
+
+73 .
+	gèsk_q_num
+ = 
+DFL_TASK_Q_NUM
+,
+
+74 .
+	gª˚¡_èsk_num
+ = 
+DFL_RECENT_TASK_NUM
+,
+
+75 .
+	g£À˘_time_out
+ = 
+DFL_SELECT_TIME_OUT
+
+
+88 
+	sèsk_íåy
+ {
+
+92 
+	mèsk_t
+;
+
+97 *
+	mcmd
+;
+
+102 
+boﬁ
+ 
+	miskûÀd
+;
+
+107 
+	m¸óã_time
+;
+
+112 
+	m°¨t_exec_time
+;
+
+117 
+	mföish_time
+;
+
+122 
+èsk_íåy_t
+ *
+	m√xt_èsk
+;
+
+140 
+	sèsk_q_íåy
+ {
+
+144 
+	mtŸÆ_èsk_num
+;
+
+149 
+	mèsk_num
+;
+
+154 
+	mèsk_q_time_out
+;
+
+159 
+	mfifo_fd
+;
+
+164 *
+	mfifo_∑th
+;
+
+169 
+£m_t
+ 
+	m£m_q
+;
+
+174 
+boﬁ
+ 
+	m°›_dequeue
+;
+
+179 
+±hªad_t
+ 
+	m±hr_t
+;
+
+184 
+±hªad_muãx_t
+ 
+	mmut
+;
+
+189 
+èsk_íåy_t
+ *
+	mcuº_èsk
+;
+
+194 
+èsk_íåy_t
+ *
+	mfú°_èsk
+;
+
+199 
+èsk_íåy_t
+ *
+	mœ°_èsk
+;
+
+200 } 
+	gèsk_q_íåy
+[4] = {0};
+
+210 
+	$cfg_löe_•lô
+(
+buf
+[], c⁄° *
+£∑øt‹
+, **
+«me
+, **
+vÆue
+)
+
+212 *
+p
+ = 
+NULL
+;
+
+213 
+i
+ = 0, 
+Àn
+ = 0;
+
+215 i‡(
+buf
+ =
+NULL
+ || 
+£∑øt‹
+ =NULL || 
+	`°æí
+(separator) < 1) {
+
+216 
+«me
+ = 
+NULL
+;
+
+217 
+vÆue
+ = 
+NULL
+;
+
+221 
+p
+ = 
+	`°πok
+(
+buf
+, 
+£∑øt‹
+);
+
+222 
+Àn
+ = 
+	`°æí
+(
+p
+);
+
+223 i‡(
+Àn
+ < 1) {
+
+224 
+«me
+ = 
+NULL
+;
+
+225 
+vÆue
+ = 
+NULL
+;
+
+229 *
+«me
+ = 
+buf
+;
+
+230 
+buf
+[
+Àn
+] = '\0';
+
+232 
+p
+ = 
+	`°πok
+(
+NULL
+, 
+£∑øt‹
+);
+
+233 i‡(
+	`°æí
+(
+p
+) < 1) {
+
+234 
+«me
+ = 
+NULL
+;
+
+235 
+vÆue
+ = 
+NULL
+;
+
+239 *
+vÆue
+ = 
+buf
+ + 
+Àn
+ + 1;
+
+240 
+	}
+}
+
+248 
+	$gë_sys_u±ime
+()
+
+250 
+sysöfo
+ 
+u±ime
+ = {0};
+
+252 i‡(!
+	`sysöfo
+(&
+u±ime
+))  uptime.uptime;
+
+254 
+	}
+}
+
+264 
+èsk_íåy_t
+ *
+	$¸óã_èsk
+(c⁄° * 
+cmd
+)
+
+266 
+èsk_íåy_t
+ *
+p_èsk
+;
+
+267 *
+p_cmd
+ = 
+NULL
+;
+
+268 i‡(
+NULL
+ =
+cmd
+)  NULL;
+
+273 
+p_èsk
+ = (
+èsk_íåy_t
+*)
+	`mÆloc
+((task_entry_t));
+
+274 i‡(
+NULL
+ =
+p_èsk
+) {
+
+275 
+	`‰ì
+(
+p_èsk
+);
+
+277 
+	`mem£t
+(
+p_èsk
+, 0, (
+èsk_íåy_t
+));
+
+278 
+p_cmd
+ = 
+	`°rdup
+(
+cmd
+);
+
+280 i‡(!
+p_èsk
+ || (’_èsk->
+¸óã_time
+ = 
+	`gë_sys_u±ime
+()) < 0)) {
+
+281 
+	`‰ì
+(
+p_èsk
+);
+
+282 
+p_èsk
+ = 
+NULL
+;
+
+284 
+p_èsk
+->
+cmd
+ = 
+p_cmd
+;
+
+288  
+p_èsk
+;
+
+289 
+	}
+}
+
+299 
+	$de°‹y_èsk
+(
+èsk_íåy_t
+ *
+èsk
+)
+
+301 i‡(!
+èsk
+)  0;
+
+306 i‡(
+NULL
+ !
+èsk
+->
+cmd
+) {
+
+307 
+	`‰ì
+(
+èsk
+->
+cmd
+);
+
+308 
+èsk
+->
+cmd
+ = 
+NULL
+;
+
+314 
+	`‰ì
+(
+èsk
+);
+
+315 
+èsk
+ = 
+NULL
+;
+
+318 
+	}
+}
+
+328 
+	$exec_èsk
+(
+èsk_íåy_t
+ *
+èsk
+)
+
+330 
+pid_t
+ 
+pid
+ = 0;
+
+331 
+π
+ = 0;
+
+332 i‡(
+èsk
+ =
+NULL
+ ||Åask->
+cmd
+ == NULL)  -1;
+
+337 i‡((
+pid
+ = 
+	`f‹k
+()) < 0) {
+
+338 
+	`¥ötf
+("fork failed.\n");
+
+340 } i‡(
+pid
+ == 0){
+
+341 
+	`£çgΩ
+();
+
+342 i‡(
+	`exe˛
+("/bö/sh", "sh", "-c", 
+èsk
+->
+cmd
+, (*)0)) {
+
+343 
+	`CMD_AGENT_ERROR
+("execleÉrror.");
+
+346 
+	`_exô
+(127);
+
+348 
+èsk
+->
+èsk_t
+ = 
+pid
+;
+
+349 
+èsk
+->
+°¨t_exec_time
+ = 
+	`gë_sys_u±ime
+();
+
+351 
+	`waôpid
+(
+pid
+, 
+NULL
+, 0) < 0) {
+
+352 i‡(
+î∫o
+ !
+EINTR
+)  -1;
+
+358 
+	}
+}
+
+369 
+	$íqueue_èsk_q
+(
+èsk_q_íåy_t
+ *
+èsk_q
+, 
+èsk_íåy_t
+ *
+èsk
+)
+
+371 i‡(
+èsk_q
+ =
+NULL
+ || 
+èsk
+ == NULL)  -1;
+
+373 
+	`±hªad_muãx_lock
+(&
+èsk_q
+->
+mut
+);
+
+374 i‡(
+èsk_q
+->
+fú°_èsk
+ =
+NULL
+) {
+
+375 
+èsk_q
+->
+fú°_èsk
+ = 
+èsk
+;
+
+376 
+èsk_q
+->
+œ°_èsk
+ = 
+èsk
+;
+
+377 
+èsk_q
+->
+œ°_èsk
+->
+√xt_èsk
+ = 
+NULL
+;
+
+379 
+èsk_q
+->
+œ°_èsk
+ = 
+èsk
+;
+
+380 
+èsk_q
+->
+œ°_èsk
+->
+√xt_èsk
+ = 
+èsk
+;
+
+383 
+èsk_q
+->
+èsk_num
+++;
+
+384 
+	`£m_po°
+(&
+èsk_q
+->
+£m_q
+);
+
+385 
+	`±hªad_muãx_u∆ock
+(&
+èsk_q
+->
+mut
+);
+
+388 
+	}
+}
+
+398 
+èsk_íåy_t
+* 
+	$dequeue_èsk_q
+(
+èsk_q_íåy_t
+ *
+èsk_q
+)
+
+400 
+èsk_íåy_t
+ *
+èsk
+ = 
+NULL
+;
+
+402 
+	`£m_waô
+(&
+èsk_q
+->
+£m_q
+);
+
+404 
+	`±hªad_muãx_lock
+(&
+èsk_q
+->
+mut
+);
+
+405 
+èsk
+ = 
+èsk_q
+->
+fú°_èsk
+;
+
+406 
+èsk_q
+->
+fú°_èsk
+ = 
+èsk
+->
+√xt_èsk
+;
+
+407 
+èsk_q
+->
+cuº_èsk
+ = 
+èsk
+;
+
+408 
+èsk_q
+->
+èsk_num
+--;
+
+409 
+	`±hªad_muãx_u∆ock
+(&
+èsk_q
+->
+mut
+);
+
+411  
+èsk
+;
+
+412 
+	}
+}
+
+421 * 
+	$h™dÀ_èsk
+(*
+¨g
+)
+
+423 
+èsk_q_íåy_t
+ *
+èsk_q
+ = (èsk_q_íåy_à*)
+¨g
+;
+
+424 
+èsk_íåy_t
+ *
+èsk
+ = 
+NULL
+;
+
+426 i‡(
+èsk_q
+ =
+NULL
+)  NULL;
+
+428 !
+èsk_q
+->
+°›_dequeue
+) {
+
+429 i‡((
+èsk
+ = 
+	`dequeue_èsk_q
+(
+èsk_q
+)Ë!
+NULL
+) {
+
+430 
+	`exec_èsk
+(
+èsk
+);
+
+431 
+	`de°‹y_èsk
+(
+èsk
+);
+
+432 
+èsk_q
+->
+cuº_èsk
+ = 
+NULL
+;
+
+435 
+	}
+}
+
+445 
+	$öô_èsk_q_íåy
+()
+
+447 
+i
+=0;
+
+449 
+i
+=0; i < 
+c⁄f
+.
+èsk_q_num
+; i++) {
+
+450 
+	`£m_öô
+(&
+èsk_q_íåy
+[
+i
+].
+£m_q
+, 0, 0);
+
+451 
+èsk_q_íåy
+[
+i
+].
+°›_dequeue
+ = 
+Ál£
+;
+
+453 
+	`±hªad_muãx_öô
+(&
+èsk_q_íåy
+[
+i
+].
+mut
+, 
+NULL
+);
+
+454 i‡(
+	`±hªad_¸óã
+(&
+èsk_q_íåy
+[
+i
+].
+±hr_t
+, 
+NULL
+, 
+h™dÀ_èsk
+, &task_q_entry[i])) {
+
+455 
+	`CMD_AGENT_ERROR
+("CreateÅhread failed.");
+
+461 
+	}
+}
+
+470 
+	$de°‹y_èsk_q_íåy
+(
+èsk_q_íåy_t
+ 
+èsk_q
+)
+
+472 
+èsk_íåy_t
+ *
+èsk
+ = 
+NULL
+;
+
+474 
+èsk_q
+.
+èsk_num
+-- > 0) {
+
+475 
+èsk
+ = 
+èsk_q
+.
+fú°_èsk
+;
+
+476 
+èsk_q
+.
+fú°_èsk
+ = 
+èsk
+->
+√xt_èsk
+;
+
+477 
+	`de°‹y_èsk
+(
+èsk
+);
+
+482 
+	}
+}
+
+492 
+	$pﬁl_èsk
+(
+fd_£t
+ 
+fds
+)
+
+494 
+i
+ = 0, 
+π
+ = 0;
+
+495 
+cmd
+[1024] = {0};
+
+496 
+èsk_íåy_t
+ *
+èsk
+ = 
+NULL
+;
+
+498 
+i
+0; i < 
+c⁄f
+.
+èsk_q_num
+; i++) {
+
+499 i‡(
+	`FD_ISSET
+(
+èsk_q_íåy
+[
+i
+].
+fifo_fd
+, &
+fds
+))
+
+503 i‡((
+π
+ = 
+	`ªad
+(
+èsk_q_íåy
+[
+i
+].
+fifo_fd
+, 
+cmd
+, 1024)) == 0)
+
+506 
+cmd
+[
+π
+] = '\n';
+
+507 i‡((
+èsk
+ = 
+	`¸óã_èsk
+(
+cmd
+)Ë=
+NULL
+)  -1;
+
+509 i‡(
+	`íqueue_èsk_q
+(&
+èsk_q_íåy
+[
+i
+], 
+èsk
+) < 0) {
+
+510 
+	`de°‹y_èsk
+(
+èsk
+);
+
+511 
+èsk
+ = 
+NULL
+;
+
+516 
+	}
+}
+
+518 
+	$gë_¨gs
+(
+agrc
+, *
+¨gs
+[])
+
+521 
+	}
+}
+
+530 
+	$ªad_c⁄fig_fûe
+()
+
+532 
+FILE
+* 
+Â
+ = 
+NULL
+;
+
+533 
+buf
+[1024] = {0};
+
+534 *
+«me
+ = 
+NULL
+, *
+vÆue
+ = NULL;
+
+535 
+π
+ = 0, 
+∑øm_cou¡
+ = 0, 
+i
+ = 0;
+
+537 i‡(
+NULL
+ =
+c⁄f
+.
+fûe_∑th
+) {
+
+538 
+	`CMD_AGENT_ERROR
+("Config file'sÖath is NULL.");
+
+551 i‡((
+Â
+ = 
+	`f›í
+(
+c⁄f
+.
+fûe_∑th
+, "r")Ë=
+NULL
+) {
+
+552 
+	`CMD_AGENT_ERROR
+("Open config file failed.");
+
+556 
+	`fgës
+(
+buf
+, (buf), 
+Â
+Ë!
+NULL
+) {
+
+560 
+	`cfg_löe_•lô
+(
+buf
+, "=", &
+«me
+, &
+vÆue
+);
+
+561 i‡(
+«me
+ =
+NULL
+ || 
+vÆue
+ == NULL) ;
+
+566 i‡(!
+	`°∫cmp
+(
+«me
+, "èsk_q_num", 
+	`°æí
+(name))) {
+
+567 
+π
+ = 
+	`©oi
+(
+vÆue
+);
+
+568 if(
+π
+ <0Ëπ = 
+DFL_TASK_Q_NUM
+;
+
+569 
+c⁄f
+.
+èsk_q_num
+ = 
+π
+;
+
+570 
+∑øm_cou¡
+++;
+
+571 } i‡(!
+	`°∫cmp
+(
+«me
+, "ª˚¡_èsk_num", 
+	`°æí
+(name))) {
+
+572 
+π
+ = 
+	`©oi
+(
+vÆue
+);
+
+573 if(
+π
+ <0Ëπ = 
+DFL_RECENT_TASK_NUM
+;
+
+574 
+c⁄f
+.
+ª˚¡_èsk_num
+ = 
+π
+;
+
+575 
+∑øm_cou¡
+++;
+
+581 i‡(!
+	`°∫cmp
+(
+«me
+, "èsk_q_time_out", 
+	`°æí
+(name))) {
+
+582 
+vÆue
+ = 
+	`°πok
+(value, ",");
+
+584 
+i
+ = 0; i < 
+c⁄f
+.
+èsk_q_num
+; i++) {
+
+585 i‡(
+vÆue
+ =
+NULL
+) {
+
+586 
+èsk_q_íåy
+[
+i
+].
+èsk_q_time_out
+ = 
+DFL_TASK_TIME_OUT
+;
+
+588 
+π
+ = 
+	`©oi
+(
+vÆue
+);
+
+589 i‡(
+π
+ <= 0) {
+
+590 
+èsk_q_íåy
+[
+i
+].
+èsk_q_time_out
+ = 
+DFL_TASK_TIME_OUT
+;
+
+592 
+èsk_q_íåy
+[
+i
+].
+èsk_q_time_out
+ = 
+π
+;
+
+595 
+∑øm_cou¡
+++;
+
+597 } i‡(!
+	`°∫cmp
+(
+«me
+, "£À˘_time_out", 
+	`°æí
+(name))) {
+
+598 
+π
+ = 
+	`©oi
+(
+vÆue
+);
+
+599 if(
+π
+ <0Ëπ = 
+DFL_SELECT_TIME_OUT
+;
+
+600 
+c⁄f
+.
+£À˘_time_out
+ = 
+π
+;
+
+601 
+∑øm_cou¡
+++;
+
+605 i‡(
+∑øm_cou¡
+ !–3 + 
+c⁄f
+.
+èsk_q_num
+ )) {
+
+606 
+	`CMD_AGENT_ERROR
+("The configation info isÇot complete.");
+
+607 
+	`f˛o£
+(
+Â
+);
+
+608 
+Â
+ = 
+NULL
+;
+
+612 
+	`f˛o£
+(
+Â
+);
+
+613 
+Â
+ = 
+NULL
+;
+
+616 
+	}
+}
+
+627 
+	$¸óã_mu…i_dú
+(c⁄° *
+dú_∑th
+)
+
+629 
+Àn
+ = 0, 
+i
+ = 0;
+
+630 *
+∑th
+ = 
+NULL
+;
+
+632 if(
+dú_∑th
+ =
+NULL
+)  -1;
+
+633 i‡((
+∑th
+ = 
+	`°rdup
+(
+dú_∑th
+)Ë=
+NULL
+)  -1;
+
+635 
+i
+ = 1; i < 
+Àn
+; i++) {
+
+636 i‡(
+∑th
+[
+i
+] == '/') {
+
+637 
+∑th
+[
+i
+] = '\0';
+
+639 i‡(
+	`ac˚ss
+(
+∑th
+, 
+F_OK
+) < 0) {
+
+640 i‡(
+	`mkdú
+(
+∑th
+, 0777) < 0)  -1;
+
+643 
+∑th
+[
+i
+] = '/';
+
+647 
+	`‰ì
+(
+∑th
+);
+
+648 
+∑th
+ = 
+NULL
+;
+
+651 
+	}
+}
+
+659 
+	$öô_™d_›í_fifo
+()
+
+661 
+i
+ = 0;
+
+662 
+fifo_∑th
+[128] = {0};
+
+663 *
+∑th
+ = 
+NULL
+;
+
+664 
+°©
+ 
+°
+ = {0};
+
+665 
+fd
+ = 0;
+
+667 i‡(
+	`ac˚ss
+(
+FIFO_DIR_PATH
+, 
+F_OK
+) < 0) {
+
+668 i‡(
+	`¸óã_mu…i_dú
+(
+FIFO_DIR_PATH
+) < 0) {
+
+669 
+	`CMD_AGENT_ERROR
+("mkdir FIFO_DIR_PATHÉrror.");
+
+674 i‡(
+	`ac˚ss
+(
+FIFO_DIR_PATH
+, 
+R_OK
+ | 
+W_OK
+) < 0) {
+
+675 
+	`CMD_AGENT_ERROR
+("HaveÇoÑead or writeÖermission of dir FIFO_DIR_PATH.");
+
+679 if(
+	`°©
+(
+FIFO_DIR_PATH
+, &
+°
+) < 0) {
+
+680 
+	`CMD_AGENT_ERROR
+("Can't get stat of dir FIFO_DIR_PATH.");
+
+684 i‡(!
+	`S_ISDIR
+(
+°
+.
+°_mode
+)) {
+
+685 
+	`u∆ök
+(
+FIFO_DIR_PATH
+);
+
+686 i‡(
+	`¸óã_mu…i_dú
+(
+FIFO_DIR_PATH
+) < 0) {
+
+687 
+	`CMD_AGENT_ERROR
+("mkdir FIFO_DIR_PATHÉrror.");
+
+692 
+i
+ = 0; i < 
+c⁄f
+.
+èsk_q_num
+; i++) {
+
+693 
+	`•rötf
+(
+fifo_∑th
+, "%s%d", 
+FIFO_DIR_PATH
+, 
+i
+);
+
+695 i‡(!
+	`ac˚ss
+(
+fifo_∑th
+, 
+F_OK
+))
+
+696 
+	`u∆ök
+(
+fifo_∑th
+);
+
+698 i‡(
+	`mkfifo
+(
+fifo_∑th
+, 0777) < 0) {
+
+699 
+	`CMD_AGENT_ERROR
+("Create FIFO failed.");
+
+703 
+èsk_q_íåy
+[
+i
+].
+fifo_∑th
+ = 
+	`°rdup
+(fifo_path);
+
+704 i‡(
+èsk_q_íåy
+[
+i
+].
+fifo_∑th
+ =
+NULL
+) {
+
+705 
+	`‰ì
+(
+èsk_q_íåy
+[
+i
+].
+fifo_∑th
+);
+
+706 
+	`CMD_AGENT_ERROR
+("Apply for fifoÖath's memeroy failed.");
+
+709 
+	`°r˝y
+(
+èsk_q_íåy
+[
+i
+].
+fifo_∑th
+, fifo_path);
+
+711 i‡(
+	`ac˚ss
+(
+fifo_∑th
+, 
+R_OK
+ ) < 0) {
+
+712 
+	`CMD_AGENT_ERROR
+("HaveÇoÑeadÖermission.");
+
+716 i‡((
+èsk_q_íåy
+[
+i
+].
+fifo_fd
+ = 
+	`›í
+(
+fifo_∑th
+, 
+O_RDONLY
+ | 
+O_NONBLOCK
+)) < 0) {
+
+717 
+	`CMD_AGENT_ERROR
+("Open fifo file failed.");
+
+721 
+	}
+}
+
+729 
+	$unöô_™d_˛o£_fifo
+()
+
+731 
+i
+ = 0;
+
+733 
+i
+ = 0; i < 
+c⁄f
+.
+èsk_q_num
+; i++) {
+
+734 
+	`˛o£
+(
+èsk_q_íåy
+[
+i
+].
+fifo_fd
+);
+
+735 
+	`u∆ök
+(
+èsk_q_íåy
+[
+i
+].
+fifo_∑th
+);
+
+736 
+	`‰ì
+(
+èsk_q_íåy
+[
+i
+].
+fifo_∑th
+);
+
+738 
+	}
+}
+
+745 
+	$¥o˚ss_ovî_h™dÀ
+()
+
+747 
+i
+ = 0;
+
+749 
+i
+ = 0; i < 
+c⁄f
+.
+èsk_q_num
+; i++) {
+
+750 
+èsk_q_íåy
+[
+i
+].
+°›_dequeue
+ = 
+åue
+;
+
+751 
+	`de°‹y_èsk_q_íåy
+(
+èsk_q_íåy
+[
+i
+]);
+
+752 
+	`£m_de°roy
+(&
+èsk_q_íåy
+[
+i
+].
+£m_q
+);
+
+755 
+	`unöô_™d_˛o£_fifo
+();
+
+758 
+	}
+}
+
+765 
+	$kûl_èsk
+()
+
+767 
+i
+ = 0;
+
+768 
+èsk_íåy_t
+ *
+cuº_èsk
+ = 
+NULL
+;
+
+770 
+i
+ = 0; i < 
+c⁄f
+.
+èsk_q_num
+; i++) {
+
+771 i‡((
+cuº_èsk
+ = 
+èsk_q_íåy
+[
+i
+].cuº_èskË=
+NULL
+) ;
+
+773 i‡(
+cuº_èsk
+->
+iskûÀd
+) {
+
+774 
+	`kûl
+(
+cuº_èsk
+->
+èsk_t
+, 
+SIGKILL
+);
+
+778 i‡((
+	`gë_sys_u±ime
+(Ë- 
+cuº_èsk
+->
+°¨t_exec_time
+Ë> 
+èsk_q_íåy
+[
+i
+].
+èsk_q_time_out
+) {
+
+779 
+	`kûl
+(0 - 
+cuº_èsk
+->
+èsk_t
+, 
+SIGTERM
+);
+
+780 
+cuº_èsk
+->
+iskûÀd
+ = 
+åue
+;
+
+785 
+	}
+}
+
+792 
+	$sig«l_h™dÀr
+(
+sig
+)
+
+794 
+sig
+) {
+
+795 
+SIGINT
+:
+
+796 
+SIGTERM
+:
+
+797 
+SIGKILL
+:
+
+798 
+SIGSTOP
+:
+
+799 
+	`¥o˚ss_ovî_h™dÀ
+();
+
+805 
+	`exô
+(0);
+
+806 
+	}
+}
+
+817 
+	$maö
+(
+agrc
+, *
+¨gv
+[])
+
+819 
+timevÆ
+ 
+tv
+ = {0};
+
+820 
+fd_£t
+ 
+fds
+ = {0};
+
+821 
+i
+ = 0, 
+π
+ = 0;
+
+823 
+	`sig«l
+(
+SIGINT
+, 
+sig«l_h™dÀr
+);
+
+824 
+	`sig«l
+(
+SIGTERM
+, 
+sig«l_h™dÀr
+);
+
+825 
+	`sig«l
+(
+SIGKILL
+, 
+sig«l_h™dÀr
+);
+
+826 
+	`sig«l
+(
+SIGSTOP
+, 
+sig«l_h™dÀr
+);
+
+828 i‡(
+	`ªad_c⁄fig_fûe
+() == -1) {
+
+829 
+	`CMD_AGENT_ERROR
+("Read config file failed.");
+
+833 i‡(
+	`öô_™d_›í_fifo
+() < 0) {
+
+834 
+	`CMD_AGENT_ERROR
+("Fifo initánd openÉrror.");
+
+838 i‡(
+	`öô_èsk_q_íåy
+() < 0) {
+
+839 
+	`CMD_AGENT_ERROR
+("Task queue init failed.");
+
+844 
+	`FD_ZERO
+(&
+fds
+);
+
+845 
+i
+ = 0; i < 
+c⁄f
+.
+èsk_q_num
+; i++)
+
+846 
+	`FD_SET
+(
+èsk_q_íåy
+[
+i
+].
+fifo_fd
+, &
+fds
+);
+
+848 
+tv
+.
+tv_£c
+ = 
+c⁄f
+.
+£À˘_time_out
+;
+
+849 
+tv
+.
+tv_u£c
+ = 0;
+
+850 
+π
+ = 
+	`£À˘
+(
+èsk_q_íåy
+[
+c⁄f
+.
+èsk_q_num
+ - 1].
+fifo_fd
+ + 10, \
+
+851 &
+fds
+, 
+NULL
+, NULL, &
+tv
+);
+
+853 
+π
+) {
+
+857 
+	`kûl_èsk
+();
+
+860 
+	`pﬁl_èsk
+(
+fds
+);
+
+866 
+	}
+}
+
+	@
+1
+.
+0
+1
+12
+cmd_agent.c

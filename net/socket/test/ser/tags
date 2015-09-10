@@ -1,0 +1,340 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+DFT_STRING_SIZE	socket_app.h	18;"	d
+MACRO_STR	socket_base.h	28;"	d
+MAX_CLIENT_NUM	socket_app.h	17;"	d
+MOD_ID_TMR	socket_msg.h	/^    MOD_ID_TMR      = 1$/;"	e	enum:__anon2
+MOD_ID_UNKNOW	socket_msg.h	/^    MOD_ID_UNKNOW   = 0,$/;"	e	enum:__anon2
+MOD_MAX	socket_msg.h	15;"	d
+MSG	socket_msg.h	66;"	d
+MSG_DATA	socket_msg.h	70;"	d
+MSG_LEN	socket_msg.h	69;"	d
+MSG_MAX_LEN	socket_msg.h	16;"	d
+MSG_MOD	socket_msg.h	67;"	d
+MSG_MSGID	socket_msg.h	68;"	d
+MSG_RST_FAILURE	socket_msg.h	/^    MSG_RST_FAILURE,$/;"	e	enum:msg_rst
+MSG_RST_INVALID_CFG	socket_msg.h	/^    MSG_RST_INVALID_CFG,$/;"	e	enum:msg_rst
+MSG_RST_INVALID_MOD_ID	socket_msg.h	/^    MSG_RST_INVALID_MOD_ID,$/;"	e	enum:msg_rst
+MSG_RST_QUEUE_FULL	socket_msg.h	/^    MSG_RST_QUEUE_FULL$/;"	e	enum:msg_rst
+MSG_RST_SOCKET_ERROR	socket_msg.h	/^    MSG_RST_SOCKET_ERROR,$/;"	e	enum:msg_rst
+MSG_RST_SUCCESS	socket_msg.h	/^    MSG_RST_SUCCESS = 0,$/;"	e	enum:msg_rst
+MSG_RST_THREAD_ERROR	socket_msg.h	/^    MSG_RST_THREAD_ERROR,$/;"	e	enum:msg_rst
+MSG_SOCKET_DIR	socket_msg.h	17;"	d
+MSG_SRC	socket_msg.h	71;"	d
+SOCKET_DATA_HEADER_SIZE	socket_app.h	20;"	d
+SOCKET_DATA_SIZE	socket_app.h	19;"	d
+SOCKET_ON_ACCEPT	socket_event.h	/^    SOCKET_ON_ACCEPT  = 1,$/;"	e	enum:event_type
+SOCKET_ON_CLOSE	socket_event.h	/^    SOCKET_ON_CLOSE   = 16$/;"	e	enum:event_type
+SOCKET_ON_CONNECT	socket_event.h	/^    SOCKET_ON_CONNECT = 2, $/;"	e	enum:event_type
+SOCKET_ON_RECV	socket_event.h	/^    SOCKET_ON_RECV    = 4,$/;"	e	enum:event_type
+SOCKET_ON_SEND	socket_event.h	/^    SOCKET_ON_SEND    = 8,$/;"	e	enum:event_type
+__SOCKET_APP_H__	socket_app.h	2;"	d
+__SOCKET_BASE_H__	socket_base.h	2;"	d
+__SOCKET_EVENT_H__	socket_event.h	2;"	d
+__SOCKET_MSG_H__	socket_msg.h	2;"	d
+add_socket_to_membership	socket_base.c	/^int add_socket_to_membership(int fd, struct ip_mreq *mrq)$/;"	f	signature:(int fd, struct ip_mreq *mrq)
+add_socket_to_membership	socket_base.h	/^int add_socket_to_membership(int fd, struct ip_mreq *mrq);$/;"	p	signature:(int fd, struct ip_mreq *mrq)
+addr	socket_app.h	/^    } addr;$/;"	m	struct:socket_impl	typeref:union:socket_impl::__anon1	access:public
+arg	socket_event.h	/^    void *arg;        $/;"	m	struct:call_back	access:public
+body	socket_app.h	/^    char body[0];$/;"	m	struct:socket_impl	access:public
+body	socket_msg.h	/^     char body[0];$/;"	m	struct:msg	access:public
+call_back	socket_event.h	/^typedef struct call_back$/;"	s
+call_back::arg	socket_event.h	/^    void *arg;        $/;"	m	struct:call_back	access:public
+call_back::evt_cb	socket_event.h	/^    event_cb evt_cb;   $/;"	m	struct:call_back	access:public
+call_back_t	socket_event.h	/^} call_back_t;$/;"	t	typeref:struct:call_back
+cli_fd	socket_app.h	/^    int cli_fd[MAX_CLIENT_NUM];$/;"	m	struct:socket_impl	access:public
+conn_state	socket_app.h	/^    int conn_state;$/;"	m	struct:socket_impl	access:public
+destructor	socket_msg.h	/^    void (*destructor)(void *);$/;"	m	struct:msg	access:public
+drop_socket_from_membership	socket_base.c	/^int drop_socket_from_membership(int fd, struct ip_mreq *mrq)$/;"	f	signature:(int fd, struct ip_mreq *mrq)
+drop_socket_from_membership	socket_base.h	/^int drop_socket_from_membership(int fd, struct ip_mreq *mrq);$/;"	p	signature:(int fd, struct ip_mreq *mrq)
+dst_id	socket_msg.h	/^    mod_id_t        dst_id;$/;"	m	struct:msg	access:public
+endian	socket_msg.h	/^    unsigned char   endian;$/;"	m	struct:msg	access:public
+error_die	socket_base.c	/^static void error_die(const char *sc)$/;"	f	file:	signature:(const char *sc)
+event_cb	socket_event.h	/^typedef void (*event_cb)(int fd, void *arg);$/;"	t
+event_cb	socket_event.h	/^typedef void (*event_cb)(void *arg);$/;"	t
+event_loop	socket_event.h	/^typedef struct event_loop$/;"	s
+event_loop::on_accept	socket_event.h	/^    struct call_back on_accept;$/;"	m	struct:event_loop	typeref:struct:event_loop::call_back	access:public
+event_loop::on_close	socket_event.h	/^    struct call_back on_close;$/;"	m	struct:event_loop	typeref:struct:event_loop::call_back	access:public
+event_loop::on_connect	socket_event.h	/^    struct call_back on_connect;$/;"	m	struct:event_loop	typeref:struct:event_loop::call_back	access:public
+event_loop::on_recv	socket_event.h	/^    struct call_back on_recv;$/;"	m	struct:event_loop	typeref:struct:event_loop::call_back	access:public
+event_loop::on_send	socket_event.h	/^    struct call_back on_send;$/;"	m	struct:event_loop	typeref:struct:event_loop::call_back	access:public
+event_loop_t	socket_event.h	/^} event_loop_t;$/;"	t	typeref:struct:event_loop
+event_type	socket_event.h	/^typedef enum event_type $/;"	g
+event_type_t	socket_event.h	/^} event_type_t;$/;"	t	typeref:enum:event_type
+evl	socket_app.h	/^    event_loop_t evl;$/;"	m	struct:socket_impl	access:public
+evt_cb	socket_event.h	/^    event_cb evt_cb;   $/;"	m	struct:call_back	access:public
+fd	socket_app.h	/^    int fd;$/;"	m	struct:socket_impl	access:public
+flag	socket_msg.h	/^    int                 flag;$/;"	m	struct:shm_entry	access:public
+free_ptr	socket_msg.h	/^    void            *free_ptr;$/;"	m	struct:msg	access:public
+get_can_read_bytes	socket_base.c	/^int get_can_read_bytes(int fd)$/;"	f	signature:(int fd)
+get_can_read_bytes	socket_base.h	/^int get_can_read_bytes(int fd);$/;"	p	signature:(int fd)
+get_ifname	socket_base.c	/^int get_ifname(char *ifname)$/;"	f	signature:(char *ifname)
+get_ifname	socket_base.h	/^int get_ifname(char *ifname);$/;"	p	signature:(char *ifname)
+get_interface_index	socket_base.c	/^int get_interface_index(int fd, struct ifreq *req)$/;"	f	signature:(int fd, struct ifreq *req)
+get_interface_index	socket_base.h	/^int get_interface_index(int fd, struct ifreq *req);$/;"	p	signature:(int fd, struct ifreq *req)
+get_ip	socket_base.c	/^int get_ip(char ip[])$/;"	f	signature:(char ip[])
+get_ip	socket_base.h	/^int get_ip(char ip[]);$/;"	p	signature:(char ip[])
+get_ip_by_ifname	socket_base.c	/^int get_ip_by_ifname(const char *ifname, char *ip)$/;"	f	signature:(const char *ifname, char *ip)
+get_ip_by_ifname	socket_base.h	/^int get_ip_by_ifname(const char *ifname, char *ip);$/;"	p	signature:(const char *ifname, char *ip)
+get_socket_recv_buf	socket_base.c	/^int get_socket_recv_buf(int fd)$/;"	f	signature:(int fd)
+get_socket_recv_buf	socket_base.h	/^int get_socket_recv_buf(int fd);$/;"	p	signature:(int fd)
+get_socket_recv_timeout	socket_base.c	/^int get_socket_recv_timeout(int fd)$/;"	f	signature:(int fd)
+get_socket_recv_timeout	socket_base.h	/^int get_socket_recv_timeout(int fd);$/;"	p	signature:(int fd)
+get_socket_send_buf	socket_base.c	/^int get_socket_send_buf(int fd)$/;"	f	signature:(int fd)
+get_socket_send_buf	socket_base.h	/^int get_socket_send_buf(int fd);$/;"	p	signature:(int fd)
+get_socket_send_timeout	socket_base.c	/^int get_socket_send_timeout(int fd)$/;"	f	signature:(int fd)
+get_socket_send_timeout	socket_base.h	/^int get_socket_send_timeout(int fd);$/;"	p	signature:(int fd)
+get_socket_type	socket_base.c	/^int get_socket_type(int fd)$/;"	f	signature:(int fd)
+get_socket_type	socket_base.h	/^int get_socket_type(int fd);$/;"	p	signature:(int fd)
+get_socket_type_str	socket_base.c	/^char* get_socket_type_str(int fd)$/;"	f	signature:(int fd)
+get_socket_type_str	socket_base.h	/^char* get_socket_type_str(int fd);$/;"	p	signature:(int fd)
+get_subnet_addr	socket_base.c	/^char * get_subnet_addr(const char *ip, const char *mask)$/;"	f	signature:(const char *ip, const char *mask)
+get_subnet_addr	socket_base.h	/^char * get_subnet_addr(const char *ip, const char *mask);$/;"	p	signature:(const char *ip, const char *mask)
+handler	socket_msg.h	/^    msg_handler_t   handler;        \/* message handler *\/$/;"	m	struct:msg_mod_cfg	access:public
+handler	socket_msg.h	/^    msg_handler_t   handler;$/;"	m	struct:local_msg_entry	access:public
+handling_msg	socket_msg.h	/^    struct msg      *handling_msg;$/;"	m	struct:local_msg_entry	typeref:struct:local_msg_entry::msg	access:public
+hold_cnt	socket_msg.h	/^    unsigned int    hold_cnt;$/;"	m	struct:msg	access:public
+ident	socket_msg.h	/^    msg_ident       ident;$/;"	m	struct:local_msg_entry	access:public
+in_addr	socket_app.h	/^        struct sockaddr_in in_addr;$/;"	m	union:socket_impl::__anon1	typeref:struct:socket_impl::__anon1::sockaddr_in	access:public
+in_addr	socket_msg.h	/^    struct sockaddr_in  in_addr;$/;"	m	struct:shm_entry	typeref:struct:shm_entry::sockaddr_in	access:public
+inet_addr_init	socket_base.c	/^void inet_addr_init(struct sockaddr_in *addr, const char *ip, u_short port)$/;"	f	signature:(struct sockaddr_in *addr, const char *ip, u_short port)
+inet_addr_init	socket_base.h	/^void inet_addr_init(struct sockaddr_in *addr, const char *ip, u_short port);$/;"	p	signature:(struct sockaddr_in *addr, const char *ip, u_short port)
+inet_client_connect	socket_app.c	/^int inet_client_connect(struct socket_impl *sck, \\$/;"	f	signature:(struct socket_impl *sck, \ int type, const char *ip, u_short port)
+inet_client_connect	socket_app.h	/^int inet_client_connect(struct socket_impl *sck, int type, \\$/;"	p	signature:(struct socket_impl *sck, int type, \ const char *ip, u_short port)
+inet_client_time_connect	socket_app.c	/^int inet_client_time_connect(struct socket_impl *sck, int type, \\$/;"	f	signature:(struct socket_impl *sck, int type, \ const char *ip, u_short port, int tm_ms)
+inet_client_time_connect	socket_app.h	/^int inet_client_time_connect(struct socket_impl *sck, int type, \\$/;"	p	signature:(struct socket_impl *sck, int type, \ const char *ip, u_short port, int tm_ms)
+inet_server_create	socket_app.c	/^int inet_server_create(struct socket_impl *sck, int type, const char *ip, u_short port)$/;"	f	signature:(struct socket_impl *sck, int type, const char *ip, u_short port)
+inet_server_create	socket_app.h	/^int inet_server_create(struct socket_impl *sck, int type, \\$/;"	p	signature:(struct socket_impl *sck, int type, \ const char *ip, u_short port)
+ipc_addr_init	socket_msg.c	/^static void ipc_addr_init(struct sockaddr_un *ipc_addr)$/;"	f	file:	signature:(struct sockaddr_un *ipc_addr)
+ipc_fd	socket_msg.h	/^    int         ipc_fd;$/;"	m	struct:msg_ctl	access:public
+ipc_func	socket_msg.c	/^void *ipc_func(void *arg)$/;"	f	signature:(void *arg)
+ipc_init	socket_msg.c	/^static msg_rst_t ipc_init(struct msg_ctl *p_ctl)$/;"	f	file:	signature:(struct msg_ctl *p_ctl)
+ipc_path	ser.c	4;"	d	file:
+ipc_stop	socket_msg.h	/^    int         ipc_stop;$/;"	m	struct:msg_ctl	access:public
+ipc_thread	socket_msg.h	/^    pthread_t   ipc_thread;$/;"	m	struct:msg_ctl	access:public
+is_big_endian	socket_base.c	/^int is_big_endian()$/;"	f
+is_big_endian	socket_base.h	/^int is_big_endian();$/;"	p
+len	socket_msg.h	/^    unsigned int    len;            \/* message body length *\/$/;"	m	struct:msg	access:public
+loc_ctl	socket_msg.h	/^    struct loc_ctl {$/;"	s	struct:msg_ctl	access:public
+local_addr_init	socket_base.c	/^void local_addr_init(struct sockaddr_un *addr, const char *path)$/;"	f	signature:(struct sockaddr_un *addr, const char *path)
+local_addr_init	socket_base.h	/^void local_addr_init(struct sockaddr_un *addr, const char *path);$/;"	p	signature:(struct sockaddr_un *addr, const char *path)
+local_client_connect	socket_app.c	/^int local_client_connect(struct socket_impl *sck, int type, const char *path)$/;"	f	signature:(struct socket_impl *sck, int type, const char *path)
+local_client_connect	socket_app.h	/^int local_client_connect(struct socket_impl *sck, int type, const char *path);$/;"	p	signature:(struct socket_impl *sck, int type, const char *path)
+local_client_time_connect	socket_app.c	/^int local_client_time_connect(struct socket_impl *sck, int type, \\$/;"	f	signature:(struct socket_impl *sck, int type, \ const char *path, int tm_ms)
+local_client_time_connect	socket_app.h	/^int local_client_time_connect(struct socket_impl *sck, int type, const char *path, int tm_ms);$/;"	p	signature:(struct socket_impl *sck, int type, const char *path, int tm_ms)
+local_entry_t	socket_msg.h	/^} local_entry_t;$/;"	t	typeref:struct:local_msg_entry
+local_msg_entry	socket_msg.h	/^typedef struct local_msg_entry {$/;"	s
+local_msg_entry::handler	socket_msg.h	/^    msg_handler_t   handler;$/;"	m	struct:local_msg_entry	access:public
+local_msg_entry::handling_msg	socket_msg.h	/^    struct msg      *handling_msg;$/;"	m	struct:local_msg_entry	typeref:struct:local_msg_entry::msg	access:public
+local_msg_entry::ident	socket_msg.h	/^    msg_ident       ident;$/;"	m	struct:local_msg_entry	access:public
+local_msg_entry::mod_id	socket_msg.h	/^    mod_id_t        mod_id;$/;"	m	struct:local_msg_entry	access:public
+local_msg_entry::mod_reg_sys_uptime	socket_msg.h	/^    unsigned int    mod_reg_sys_uptime;$/;"	m	struct:local_msg_entry	access:public
+local_msg_entry::msg_hdled_total	socket_msg.h	/^    unsigned int    msg_hdled_total;$/;"	m	struct:local_msg_entry	access:public
+local_msg_entry::mtx	socket_msg.h	/^    pthread_mutex_t mtx;$/;"	m	struct:local_msg_entry	access:public
+local_msg_entry::pos	socket_msg.h	/^    int             pos;$/;"	m	struct:local_msg_entry	access:public
+local_msg_entry::proc_stop	socket_msg.h	/^    int             proc_stop;$/;"	m	struct:local_msg_entry	access:public
+local_msg_entry::proc_thread	socket_msg.h	/^    pthread_t       proc_thread;$/;"	m	struct:local_msg_entry	access:public
+local_msg_entry::sem	socket_msg.h	/^    sem_t           sem;$/;"	m	struct:local_msg_entry	access:public
+local_server_create	socket_app.c	/^int local_server_create(struct socket_impl *sck, int type, const char *path)$/;"	f	signature:(struct socket_impl *sck, int type, const char *path)
+local_server_create	socket_app.h	/^int local_server_create(struct socket_impl *sck, int type, const char *path);$/;"	p	signature:(struct socket_impl *sck, int type, const char *path)
+main	ser.c	/^int main(int argc, char *argv[])$/;"	f	signature:(int argc, char *argv[])
+make_listen_socket_reuseable	socket_base.c	/^int make_listen_socket_reuseable(int fd)$/;"	f	signature:(int fd)
+make_listen_socket_reuseable	socket_base.h	/^int make_listen_socket_reuseable(int fd);$/;"	p	signature:(int fd)
+make_socket_block	socket_base.c	/^int make_socket_block(int fd)$/;"	f	signature:(int fd)
+make_socket_block	socket_base.h	/^int make_socket_block(int fd);$/;"	p	signature:(int fd)
+make_socket_broadcast	socket_base.c	/^int make_socket_broadcast(int fd, int on)$/;"	f	signature:(int fd, int on)
+make_socket_broadcast	socket_base.h	/^int make_socket_broadcast(int fd, int on);$/;"	p	signature:(int fd, int on)
+make_socket_close_action	socket_base.c	/^int make_socket_close_action(int fd, int is_on, int tm_s)$/;"	f	signature:(int fd, int is_on, int tm_s)
+make_socket_close_action	socket_base.h	/^int make_socket_close_action(int fd, int is_on, int tm_s);$/;"	p	signature:(int fd, int is_on, int tm_s)
+make_socket_closenexec	socket_base.c	/^int make_socket_closenexec(int fd)$/;"	f	signature:(int fd)
+make_socket_closenexec	socket_base.h	/^int make_socket_closenexec(int fd);$/;"	p	signature:(int fd)
+make_socket_keep_alive	socket_base.c	/^int make_socket_keep_alive(int fd)$/;"	f	signature:(int fd)
+make_socket_keep_alive	socket_base.h	/^int make_socket_keep_alive(int fd);$/;"	p	signature:(int fd)
+make_socket_multicast_loop	socket_base.c	/^int make_socket_multicast_loop(int fd, int on)$/;"	f	signature:(int fd, int on)
+make_socket_multicast_loop	socket_base.h	/^int make_socket_multicast_loop(int fd, int on);$/;"	p	signature:(int fd, int on)
+make_socket_multicast_ttl	socket_base.c	/^int make_socket_multicast_ttl(int fd, int ttl)$/;"	f	signature:(int fd, int ttl)
+make_socket_multicast_ttl	socket_base.h	/^int make_socket_multicast_ttl(int fd, int ttl);$/;"	p	signature:(int fd, int ttl)
+make_socket_nonblock	socket_base.c	/^int make_socket_nonblock(int fd)$/;"	f	signature:(int fd)
+make_socket_nonblock	socket_base.h	/^int make_socket_nonblock(int fd);$/;"	p	signature:(int fd)
+make_socket_promisc	socket_base.c	/^int make_socket_promisc(const char *ifname, int fd, int on)$/;"	f	signature:(const char *ifname, int fd, int on)
+make_socket_promisc	socket_base.h	/^int make_socket_promisc(const char *ifname, int fd, int on);$/;"	p	signature:(const char *ifname, int fd, int on)
+make_socket_recv_timeout	socket_base.c	/^int make_socket_recv_timeout(int fd, int tm_ms)$/;"	f	signature:(int fd, int tm_ms)
+make_socket_recv_timeout	socket_base.h	/^int make_socket_recv_timeout(int fd, int tm_ms);$/;"	p	signature:(int fd, int tm_ms)
+make_socket_send_timeout	socket_base.c	/^int make_socket_send_timeout(int fd, int tm_ms)$/;"	f	signature:(int fd, int tm_ms)
+make_socket_send_timeout	socket_base.h	/^int make_socket_send_timeout(int fd, int tm_ms);$/;"	p	signature:(int fd, int tm_ms)
+mask_to_bits	socket_base.c	/^int mask_to_bits(const char *mask)$/;"	f	signature:(const char *mask)
+mask_to_bits	socket_base.h	/^int mask_to_bits(const char *mask);$/;"	p	signature:(const char *mask)
+match_ip	socket_base.c	/^int match_ip(const char *ip)$/;"	f	signature:(const char *ip)
+match_ip	socket_base.h	/^int match_ip(const char *ip);$/;"	p	signature:(const char *ip)
+mod	socket_msg.h	/^    mod_id_t        mod;            \/* which mod this message belong to *\/$/;"	m	struct:msg	access:public
+mod_id	socket_msg.h	/^    mod_id_t            mod_id;$/;"	m	struct:shm_entry	access:public
+mod_id	socket_msg.h	/^    mod_id_t        mod_id;         \/* module id *\/  $/;"	m	struct:msg_mod_cfg	access:public
+mod_id	socket_msg.h	/^    mod_id_t        mod_id;$/;"	m	struct:local_msg_entry	access:public
+mod_id_t	socket_msg.h	/^typedef unsigned int    mod_id_t;$/;"	t
+mod_reg_sys_uptime	socket_msg.h	/^    unsigned int    mod_reg_sys_uptime;$/;"	m	struct:local_msg_entry	access:public
+msg	socket_msg.h	/^typedef struct msg {$/;"	s
+msg::body	socket_msg.h	/^     char body[0];$/;"	m	struct:msg	access:public
+msg::destructor	socket_msg.h	/^    void (*destructor)(void *);$/;"	m	struct:msg	access:public
+msg::dst_id	socket_msg.h	/^    mod_id_t        dst_id;$/;"	m	struct:msg	access:public
+msg::endian	socket_msg.h	/^    unsigned char   endian;$/;"	m	struct:msg	access:public
+msg::free_ptr	socket_msg.h	/^    void            *free_ptr;$/;"	m	struct:msg	access:public
+msg::hold_cnt	socket_msg.h	/^    unsigned int    hold_cnt;$/;"	m	struct:msg	access:public
+msg::len	socket_msg.h	/^    unsigned int    len;            \/* message body length *\/$/;"	m	struct:msg	access:public
+msg::mod	socket_msg.h	/^    mod_id_t        mod;            \/* which mod this message belong to *\/$/;"	m	struct:msg	access:public
+msg::msg_id	socket_msg.h	/^    unsigned int    msg_id;         \/* msg id, module releated *\/$/;"	m	struct:msg	access:public
+msg::next	socket_msg.h	/^    struct msg      *next;$/;"	m	struct:msg	typeref:struct:msg::msg	access:public
+msg::src_id	socket_msg.h	/^    mod_id_t        src_id;$/;"	m	struct:msg	access:public
+msg_ctl	socket_msg.h	/^typedef struct msg_ctl {$/;"	s
+msg_ctl::ipc_fd	socket_msg.h	/^    int         ipc_fd;$/;"	m	struct:msg_ctl	access:public
+msg_ctl::ipc_stop	socket_msg.h	/^    int         ipc_stop;$/;"	m	struct:msg_ctl	access:public
+msg_ctl::ipc_thread	socket_msg.h	/^    pthread_t   ipc_thread;$/;"	m	struct:msg_ctl	access:public
+msg_ctl::loc_ctl	socket_msg.h	/^    struct loc_ctl {$/;"	s	struct:msg_ctl	access:public
+msg_ctl::loc_ctl::reg_tbl	socket_msg.h	/^        struct local_msg_entry  reg_tbl[ MOD_MAX ];$/;"	m	struct:msg_ctl::loc_ctl	typeref:struct:msg_ctl::loc_ctl::local_msg_entry	access:public
+msg_ctl::loc_ctl::rwlock	socket_msg.h	/^        pthread_rwlock_t        rwlock;$/;"	m	struct:msg_ctl::loc_ctl	access:public
+msg_ctl::p_loc_ctl	socket_msg.h	/^    } *p_loc_ctl;$/;"	m	struct:msg_ctl	typeref:struct:msg_ctl::loc_ctl	access:public
+msg_ctl::p_shm_ctl	socket_msg.h	/^    } *p_shm_ctl;$/;"	m	struct:msg_ctl	typeref:struct:msg_ctl::shm_ctl	access:public
+msg_ctl::shm_ctl	socket_msg.h	/^    struct shm_ctl {$/;"	s	struct:msg_ctl	access:public
+msg_ctl::shm_ctl::reg_tbl	socket_msg.h	/^        struct shm_entry    reg_tbl[ MOD_MAX ];$/;"	m	struct:msg_ctl::shm_ctl	typeref:struct:msg_ctl::shm_ctl::shm_entry	access:public
+msg_ctl::shm_ctl::rwlock	socket_msg.h	/^        pthread_rwlock_t    rwlock;$/;"	m	struct:msg_ctl::shm_ctl	access:public
+msg_ctl_t	socket_msg.h	/^} msg_ctl_t;$/;"	t	typeref:struct:msg_ctl
+msg_deinit	socket_msg.c	/^msg_rst_t msg_deinit()$/;"	f
+msg_flag_t	socket_msg.h	/^typedef unsigned int    msg_flag_t;$/;"	t
+msg_handler_t	socket_msg.h	/^typedef void            ( *msg_handler_t )(struct msg *msg);$/;"	t
+msg_hdled_total	socket_msg.h	/^    unsigned int    msg_hdled_total;$/;"	m	struct:local_msg_entry	access:public
+msg_id	socket_msg.h	/^    unsigned int    msg_id;         \/* msg id, module releated *\/$/;"	m	struct:msg	access:public
+msg_ident	socket_msg.h	/^typedef msg_flag_t      ( *msg_ident )(struct msg *msg);$/;"	t
+msg_init	socket_msg.c	/^msg_rst_t msg_init()$/;"	f
+msg_mod_cfg	socket_msg.h	/^typedef struct msg_mod_cfg {$/;"	s
+msg_mod_cfg::handler	socket_msg.h	/^    msg_handler_t   handler;        \/* message handler *\/$/;"	m	struct:msg_mod_cfg	access:public
+msg_mod_cfg::mod_id	socket_msg.h	/^    mod_id_t        mod_id;         \/* module id *\/  $/;"	m	struct:msg_mod_cfg	access:public
+msg_mod_cfg::name	socket_msg.h	/^    char            *name;          \/* module name *\/$/;"	m	struct:msg_mod_cfg	access:public
+msg_mod_cfg::thread_id	socket_msg.h	/^    pthread_t       thread_id;      \/* thread id *\/$/;"	m	struct:msg_mod_cfg	access:public
+msg_mod_cfg_t	socket_msg.h	/^} msg_mod_cfg_t;$/;"	t	typeref:struct:msg_mod_cfg
+msg_module_reg	socket_msg.c	/^msg_rst_t msg_module_reg(struct msg_mod_cfg *cfg)$/;"	f	signature:(struct msg_mod_cfg *cfg)
+msg_rst	socket_msg.h	/^typedef enum msg_rst {$/;"	g
+msg_rst_t	socket_msg.h	/^} msg_rst_t;$/;"	t	typeref:enum:msg_rst
+msg_t	socket_msg.h	/^} msg_t;$/;"	t	typeref:struct:msg
+mtx	socket_msg.h	/^    pthread_mutex_t mtx;$/;"	m	struct:local_msg_entry	access:public
+name	socket_msg.h	/^    char            *name;          \/* module name *\/$/;"	m	struct:msg_mod_cfg	access:public
+next	socket_msg.h	/^    struct msg      *next;$/;"	m	struct:msg	typeref:struct:msg::msg	access:public
+on_accept	socket_event.h	/^    struct call_back on_accept;$/;"	m	struct:event_loop	typeref:struct:event_loop::call_back	access:public
+on_close	ser.c	/^void on_close(void *arg)$/;"	f	signature:(void *arg)
+on_close	socket_event.h	/^    struct call_back on_close;$/;"	m	struct:event_loop	typeref:struct:event_loop::call_back	access:public
+on_connect	socket_event.h	/^    struct call_back on_connect;$/;"	m	struct:event_loop	typeref:struct:event_loop::call_back	access:public
+on_recv	ser.c	/^void on_recv(void *arg)$/;"	f	signature:(void *arg)
+on_recv	socket_event.h	/^    struct call_back on_recv;$/;"	m	struct:event_loop	typeref:struct:event_loop::call_back	access:public
+on_send	socket_event.h	/^    struct call_back on_send;$/;"	m	struct:event_loop	typeref:struct:event_loop::call_back	access:public
+open_local_socket	socket_msg.c	/^static int open_local_socket(const char *path)$/;"	f	file:	signature:(const char *path)
+p_loc_ctl	socket_msg.h	/^    } *p_loc_ctl;$/;"	m	struct:msg_ctl	typeref:struct:msg_ctl::loc_ctl	access:public
+p_msg_ctl	socket_msg.h	/^struct msg_ctl *p_msg_ctl = NULL;$/;"	v	typeref:struct:msg_ctl
+p_shm_ctl	socket_msg.h	/^    } *p_shm_ctl;$/;"	m	struct:msg_ctl	typeref:struct:msg_ctl::shm_ctl	access:public
+pos	socket_msg.h	/^    int             pos;$/;"	m	struct:local_msg_entry	access:public
+proc_stop	socket_msg.h	/^    int             proc_stop;$/;"	m	struct:local_msg_entry	access:public
+proc_thread	socket_msg.h	/^    pthread_t       proc_thread;$/;"	m	struct:local_msg_entry	access:public
+ptd	socket_app.h	/^    pthread_t ptd;$/;"	m	struct:socket_impl	access:public
+reg_tbl	socket_msg.h	/^        struct local_msg_entry  reg_tbl[ MOD_MAX ];$/;"	m	struct:msg_ctl::loc_ctl	typeref:struct:msg_ctl::loc_ctl::local_msg_entry	access:public
+reg_tbl	socket_msg.h	/^        struct shm_entry    reg_tbl[ MOD_MAX ];$/;"	m	struct:msg_ctl::shm_ctl	typeref:struct:msg_ctl::shm_ctl::shm_entry	access:public
+rwlock	socket_msg.h	/^        pthread_rwlock_t        rwlock;$/;"	m	struct:msg_ctl::loc_ctl	access:public
+rwlock	socket_msg.h	/^        pthread_rwlock_t    rwlock;$/;"	m	struct:msg_ctl::shm_ctl	access:public
+sem	socket_msg.h	/^    sem_t           sem;$/;"	m	struct:local_msg_entry	access:public
+server_stop	socket_app.c	/^void server_stop(struct socket_impl *sck)$/;"	f	signature:(struct socket_impl *sck)
+server_stop	socket_app.h	/^void server_stop(struct socket_impl *sck);$/;"	p	signature:(struct socket_impl *sck)
+set_socket_recv_buf	socket_base.c	/^int set_socket_recv_buf(int fd, int buf_size)$/;"	f	signature:(int fd, int buf_size)
+set_socket_recv_buf	socket_base.h	/^int set_socket_recv_buf(int fd, int buf_size);$/;"	p	signature:(int fd, int buf_size)
+set_socket_send_buf	socket_base.c	/^int set_socket_send_buf(int fd, int buf_size)$/;"	f	signature:(int fd, int buf_size)
+set_socket_send_buf	socket_base.h	/^int set_socket_send_buf(int fd, int buf_size);$/;"	p	signature:(int fd, int buf_size)
+shm_ctl	socket_msg.h	/^    struct shm_ctl {$/;"	s	struct:msg_ctl	access:public
+shm_entry	socket_msg.h	/^typedef struct shm_entry {$/;"	s
+shm_entry::flag	socket_msg.h	/^    int                 flag;$/;"	m	struct:shm_entry	access:public
+shm_entry::in_addr	socket_msg.h	/^    struct sockaddr_in  in_addr;$/;"	m	struct:shm_entry	typeref:struct:shm_entry::sockaddr_in	access:public
+shm_entry::mod_id	socket_msg.h	/^    mod_id_t            mod_id;$/;"	m	struct:shm_entry	access:public
+shm_entry::un_addr	socket_msg.h	/^    struct sockaddr_un  un_addr;$/;"	m	struct:shm_entry	typeref:struct:shm_entry::sockaddr_un	access:public
+shm_entry_t	socket_msg.h	/^} shm_entry_t;$/;"	t	typeref:struct:shm_entry
+shm_init	socket_msg.c	/^static msg_rst_t shm_init(struct msg_ctl *p_ctl)$/;"	f	file:	signature:(struct msg_ctl *p_ctl)
+sock_type	socket_base.c	/^static struct socket_type sock_type[] = {$/;"	v	typeref:struct:socket_type	file:
+socket_accept	socket_base.c	/^int socket_accept(int fd)$/;"	f	signature:(int fd)
+socket_accept	socket_base.h	/^int socket_accept(int fd);$/;"	p	signature:(int fd)
+socket_addr_recvfrom	socket_base.c	/^int socket_addr_recvfrom(int fd, void *buf, int size, void *addr)$/;"	f	signature:(int fd, void *buf, int size, void *addr)
+socket_addr_recvfrom	socket_base.h	/^int socket_addr_recvfrom(int fd, void *buf, int size, void *addr);$/;"	p	signature:(int fd, void *buf, int size, void *addr)
+socket_addr_sendto	socket_base.c	/^int socket_addr_sendto(int fd, void *buf, int size, void *addr)$/;"	f	signature:(int fd, void *buf, int size, void *addr)
+socket_addr_sendto	socket_base.h	/^int socket_addr_sendto(int fd, void *buf, int size, void *addr);$/;"	p	signature:(int fd, void *buf, int size, void *addr)
+socket_bind	socket_base.c	/^int socket_bind(int fd, struct sockaddr *addr)$/;"	f	signature:(int fd, struct sockaddr *addr)
+socket_bind	socket_base.h	/^int socket_bind(int fd, struct sockaddr *addr);$/;"	p	signature:(int fd, struct sockaddr *addr)
+socket_close	socket_base.c	/^int socket_close(int fd)$/;"	f	signature:(int fd)
+socket_close	socket_base.h	/^int socket_close(int fd);$/;"	p	signature:(int fd)
+socket_connect	socket_base.c	/^int socket_connect(int fd, void *cli_addr)$/;"	f	signature:(int fd, void *cli_addr)
+socket_connect	socket_base.h	/^int socket_connect(int fd, void *cli_addr);$/;"	p	signature:(int fd, void *cli_addr)
+socket_create	socket_base.c	/^int socket_create(int domain, int type)$/;"	f	signature:(int domain, int type)
+socket_create	socket_base.h	/^int socket_create(int domain, int type);$/;"	p	signature:(int domain, int type)
+socket_event_add	socket_event.c	/^void socket_event_add(event_loop_t *evl, event_type_t evt, event_cb cb, void *arg)$/;"	f	signature:(event_loop_t *evl, event_type_t evt, event_cb cb, void *arg)
+socket_event_add	socket_event.h	/^void socket_event_add(event_loop_t *evl, event_type_t evt, event_cb cb, void *arg);$/;"	p	signature:(event_loop_t *evl, event_type_t evt, event_cb cb, void *arg)
+socket_event_clearall	socket_event.c	/^void socket_event_clearall(event_loop_t *evl)$/;"	f	signature:(event_loop_t *evl)
+socket_event_clearall	socket_event.h	/^void socket_event_clearall(event_loop_t *evl);$/;"	p	signature:(event_loop_t *evl)
+socket_event_delete	socket_event.c	/^void socket_event_delete(event_loop_t *evl, event_type_t evt)$/;"	f	signature:(event_loop_t *evl, event_type_t evt)
+socket_event_delete	socket_event.h	/^void socket_event_delete(event_loop_t *evl, event_type_t evt);$/;"	p	signature:(event_loop_t *evl, event_type_t evt)
+socket_event_init	socket_event.c	/^void socket_event_init(event_loop_t *evl)$/;"	f	signature:(event_loop_t *evl)
+socket_event_init	socket_event.h	/^void socket_event_init(event_loop_t *evl);$/;"	p	signature:(event_loop_t *evl)
+socket_event_process	socket_event.c	/^void socket_event_process(int fd, struct call_back cb)$/;"	f	signature:(int fd, struct call_back cb)
+socket_event_process	socket_event.c	/^void socket_event_process(struct call_back cb)$/;"	f	signature:(struct call_back cb)
+socket_event_process	socket_event.h	/^void socket_event_process(int fd, struct call_back cb);$/;"	p	signature:(int fd, struct call_back cb)
+socket_event_process	socket_event.h	/^void socket_event_process(struct call_back cb);$/;"	p	signature:(struct call_back cb)
+socket_impl	socket_app.h	/^typedef struct socket_impl$/;"	s
+socket_impl::__anon1::in_addr	socket_app.h	/^        struct sockaddr_in in_addr;$/;"	m	union:socket_impl::__anon1	typeref:struct:socket_impl::__anon1::sockaddr_in	access:public
+socket_impl::__anon1::un_addr	socket_app.h	/^        struct sockaddr_un un_addr;$/;"	m	union:socket_impl::__anon1	typeref:struct:socket_impl::__anon1::sockaddr_un	access:public
+socket_impl::addr	socket_app.h	/^    } addr;$/;"	m	struct:socket_impl	typeref:union:socket_impl::__anon1	access:public
+socket_impl::body	socket_app.h	/^    char body[0];$/;"	m	struct:socket_impl	access:public
+socket_impl::cli_fd	socket_app.h	/^    int cli_fd[MAX_CLIENT_NUM];$/;"	m	struct:socket_impl	access:public
+socket_impl::conn_state	socket_app.h	/^    int conn_state;$/;"	m	struct:socket_impl	access:public
+socket_impl::evl	socket_app.h	/^    event_loop_t evl;$/;"	m	struct:socket_impl	access:public
+socket_impl::fd	socket_app.h	/^    int fd;$/;"	m	struct:socket_impl	access:public
+socket_impl::ptd	socket_app.h	/^    pthread_t ptd;$/;"	m	struct:socket_impl	access:public
+socket_impl_t	socket_app.h	/^} socket_impl_t;$/;"	t	typeref:struct:socket_impl
+socket_listen	socket_base.c	/^int socket_listen(int fd, int backlog)$/;"	f	signature:(int fd, int backlog)
+socket_listen	socket_base.h	/^int socket_listen(int fd, int backlog);$/;"	p	signature:(int fd, int backlog)
+socket_recv	socket_base.c	/^int socket_recv(int fd, void *buf, int size)$/;"	f	signature:(int fd, void *buf, int size)
+socket_recv	socket_base.h	/^int socket_recv(int fd, void *buf, int size);$/;"	p	signature:(int fd, void *buf, int size)
+socket_recvfrom	socket_base.c	/^int socket_recvfrom(int fd, void *buf, int size, const char *ip, int port)$/;"	f	signature:(int fd, void *buf, int size, const char *ip, int port)
+socket_recvfrom	socket_base.h	/^int socket_recvfrom(int fd, void *buf, int size, const char *ip, int port);$/;"	p	signature:(int fd, void *buf, int size, const char *ip, int port)
+socket_send	socket_base.c	/^int socket_send(int fd, void *buf, int size)$/;"	f	signature:(int fd, void *buf, int size)
+socket_send	socket_base.h	/^int socket_send(int fd, void *buf, int size);$/;"	p	signature:(int fd, void *buf, int size)
+socket_sendto	socket_base.c	/^int socket_sendto(int fd, void *buf, int size, const char *ip, int port)$/;"	f	signature:(int fd, void *buf, int size, const char *ip, int port)
+socket_sendto	socket_base.h	/^int socket_sendto(int fd, void *buf, int size, const char *ip, int port);$/;"	p	signature:(int fd, void *buf, int size, const char *ip, int port)
+socket_time_connect	socket_base.c	/^int socket_time_connect(int fd, void *cli_addr, int tm_ms)$/;"	f	signature:(int fd, void *cli_addr, int tm_ms)
+socket_time_connect	socket_base.h	/^int socket_time_connect(int fd, void *cli_addr, int tm_ms);$/;"	p	signature:(int fd, void *cli_addr, int tm_ms)
+socket_time_recv	socket_base.c	/^int socket_time_recv(int fd, void *buf, int size, int time_ms)$/;"	f	signature:(int fd, void *buf, int size, int time_ms)
+socket_time_recv	socket_base.h	/^int socket_time_recv(int fd, void *buf, int size, int time_ms);$/;"	p	signature:(int fd, void *buf, int size, int time_ms)
+socket_time_send	socket_base.c	/^int socket_time_send(int fd, void *buf, int size, int time_ms)$/;"	f	signature:(int fd, void *buf, int size, int time_ms)
+socket_time_send	socket_base.h	/^int socket_time_send(int fd, void *buf, int size, int time_ms);$/;"	p	signature:(int fd, void *buf, int size, int time_ms)
+socket_type	socket_base.h	/^struct socket_type {$/;"	s
+socket_type::type_macro	socket_base.h	/^    int type_macro;$/;"	m	struct:socket_type	access:public
+socket_type::type_name	socket_base.h	/^    char *type_name;$/;"	m	struct:socket_type	access:public
+src_id	socket_msg.h	/^    mod_id_t        src_id;$/;"	m	struct:msg	access:public
+startup_inet_client	socket_base.c	/^int startup_inet_client(int type, struct sockaddr_in *addr, \\$/;"	f	signature:(int type, struct sockaddr_in *addr, \ const char *ip, u_short port)
+startup_inet_client	socket_base.h	/^int startup_inet_client(int type, struct sockaddr_in *addr, \\$/;"	p	signature:(int type, struct sockaddr_in *addr, \ const char *ip, u_short port)
+startup_inet_server	socket_base.c	/^int startup_inet_server(int type, const char *ip, \\$/;"	f	signature:(int type, const char *ip, \ u_short port)
+startup_inet_server	socket_base.h	/^int startup_inet_server(int type, const char *ip, \\$/;"	p	signature:(int type, const char *ip, \ u_short port)
+startup_local_client	socket_base.c	/^int startup_local_client(int type, struct sockaddr_un *addr, const char *path)$/;"	f	signature:(int type, struct sockaddr_un *addr, const char *path)
+startup_local_client	socket_base.h	/^int startup_local_client(int type, struct sockaddr_un *addr, const char *path);$/;"	p	signature:(int type, struct sockaddr_un *addr, const char *path)
+startup_local_server	socket_base.c	/^int startup_local_server(int type, const char *path)$/;"	f	signature:(int type, const char *path)
+startup_local_server	socket_base.h	/^int startup_local_server(int type, const char *path);$/;"	p	signature:(int type, const char *path)
+tcp_client_backup_service	socket_app.c	/^static void* tcp_client_backup_service(void *sock)$/;"	f	file:	signature:(void *sock)
+tcp_server_backup_service	socket_app.c	/^static  void* tcp_server_backup_service(void *sock)$/;"	f	file:	signature:(void *sock)
+thread_id	socket_msg.h	/^    pthread_t       thread_id;      \/* thread id *\/$/;"	m	struct:msg_mod_cfg	access:public
+thread_runtine	socket_app.h	/^typedef void* (*thread_runtine)(void *arg);$/;"	t
+type_macro	socket_base.h	/^    int type_macro;$/;"	m	struct:socket_type	access:public
+type_name	socket_base.h	/^    char *type_name;$/;"	m	struct:socket_type	access:public
+udp_backup_service	socket_app.c	/^static void* udp_backup_service(void *sock)$/;"	f	file:	signature:(void *sock)
+udp_broadcast_recv	socket_app.c	/^int udp_broadcast_recv(const char *cast_ip, int port, int cast_times,\\$/;"	f	signature:(const char *cast_ip, int port, int cast_times,\ char *cast_info, int size)
+udp_broadcast_recv	socket_app.h	/^int udp_broadcast_recv(const char *cast_ip, int port, int cast_times,\\$/;"	p	signature:(const char *cast_ip, int port, int cast_times,\ char *cast_info, int size)
+udp_broadcast_send	socket_app.c	/^int udp_broadcast_send(const char *cast_ip, int port, int cast_times,\\$/;"	f	signature:(const char *cast_ip, int port, int cast_times,\ const char *cast_info)
+udp_broadcast_send	socket_app.h	/^int udp_broadcast_send(const char *cast_ip, int port, int cast_times,\\$/;"	p	signature:(const char *cast_ip, int port, int cast_times,\ const char *cast_info)
+udp_multicast_recv	socket_app.c	/^int udp_multicast_recv(const char *cast_ip, int port, int cast_times,\\$/;"	f	signature:(const char *cast_ip, int port, int cast_times,\ char *cast_info, int size)
+udp_multicast_recv	socket_app.h	/^int udp_multicast_recv(const char *cast_ip, int port, int cast_times,\\$/;"	p	signature:(const char *cast_ip, int port, int cast_times,\ char *cast_info, int size)
+udp_multicast_send	socket_app.c	/^int udp_multicast_send(const char *cast_ip, int port, int cast_times,\\$/;"	f	signature:(const char *cast_ip, int port, int cast_times,\ const char *cast_info)
+udp_multicast_send	socket_app.h	/^int udp_multicast_send(const char *cast_ip, int port, int cast_times,\\$/;"	p	signature:(const char *cast_ip, int port, int cast_times,\ const char *cast_info)
+un_addr	socket_app.h	/^        struct sockaddr_un un_addr;$/;"	m	union:socket_impl::__anon1	typeref:struct:socket_impl::__anon1::sockaddr_un	access:public
+un_addr	socket_msg.h	/^    struct sockaddr_un  un_addr;$/;"	m	struct:shm_entry	typeref:struct:shm_entry::sockaddr_un	access:public

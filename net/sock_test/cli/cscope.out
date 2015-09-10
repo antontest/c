@@ -1,0 +1,188 @@
+cscope 15 $HOME/working/program/c/sock_test/cli -q 0000000029 0000000953
+	@cli.c
+
+1 
+	~<sock.h
+>
+
+3 
+	$Ú_cÚÃù
+(
+fd
+, *
+¬g
+)
+
+5 
+	`´štf
+("on connect\n");
+
+8 
+	}
+}
+
+10 
+	$Ú_»cv
+(
+fd
+, *
+¬g
+)
+
+15 
+	}
+}
+
+17 
+	$Ú_şo£
+(
+fd
+, *
+¬g
+)
+
+19 
+	`´štf
+("on close\n");
+
+22 
+	}
+}
+
+24 
+	$maš
+(
+agrc
+, *
+agrv
+[])
+
+26 
+sock‘
+ 
+şi
+ = {0};
+
+28 
+
+[20] = {0};
+
+30 
+v®ue
+ = 111;
+
+36 
+	`g‘_loÿl_
+(
+
+);
+
+38 
+	`udp_muÉiÿ¡_£nd
+("224.0.0.1", 5001, 10, 
+
+);
+
+41 
+	`g‘_loÿl_
+(
+
+);
+
+44 
+	`sock‘_ev’t_add
+(&
+şi
+.
+evl
+, 
+SOCKET_ON_RECV
+, 
+Ú_»cv
+, "recv");
+
+45 
+	`sock‘_ev’t_add
+(&
+şi
+.
+evl
+, 
+SOCKET_ON_CONNECT
+, 
+Ú_cÚÃù
+, "connect");
+
+46 
+	`sock‘_ev’t_add
+(&
+şi
+.
+evl
+, 
+SOCKET_ON_CLOSE
+, 
+Ú_şo£
+, "close");
+
+47 
+	`ş›Á_cÚÃù
+(&
+şi
+, 
+AF_INET
+, 
+SOCK_STREAM
+, 
+
+, 5001);
+
+48 
+	`¦“p
+(1);
+
+60 
+	`sock‘_d©a_£nd
+(
+şi
+.
+fd
+, 
+INT
+, &
+v®ue
+, ());
+
+62 
+	`sock‘_d©a_»cv
+(
+şi
+.
+fd
+, 
+NULL
+, &
+v®ue
+, ());
+
+64 
+	`´štf
+("v®uğ%d\n", 
+v®ue
+);
+
+67 
+	`¦“p
+(1);
+
+76 
+	}
+}
+
+	@
+1
+.
+0
+1
+6
+cli.c

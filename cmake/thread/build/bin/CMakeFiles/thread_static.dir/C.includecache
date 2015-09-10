@@ -1,0 +1,22 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/anton/program/c/cmake/thread/src/thread/thread.c
+thread.h
+-
+
+/home/anton/tools/include/thread.h
+stdio.h
+-
+unistd.h
+-
+pthread.h
+-
+sys/select.h
+-
+

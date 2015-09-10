@@ -1,0 +1,628 @@
+cscope 15 $HOME/working/program/c/list -q 0000000035 0000002441
+	@list.c
+
+1 
+	~<¡dio.h
+>
+
+2 
+	~<¡ršg.h
+>
+
+3 
+	~<¡dlib.h
+>
+
+5 
+gTimeD©a
+ 
+	tTimeD©a
+,*
+	tpTimeD©a
+;
+
+7 
+	sgTimeD©a
+
+
+9 
+	mnTimes
+;
+
+10 
+	mnId
+;
+
+11 
+pTimeD©a
+ 
+	mpNext
+;
+
+14 
+	$š™Li¡
+(
+TimeD©a
+ **
+L
+)
+
+16 *
+L
+ = (
+pTimeD©a
+)
+	`m®loc
+((
+TimeD©a
+));
+
+17 if(
+NULL
+ =ð*
+L
+)  -1;
+
+18 (*
+L
+)->
+pNext
+ = 
+NULL
+;
+
+19 
+	}
+}
+
+21 
+	$addD©aToLi¡
+(
+TimeD©a
+ **
+L
+,
+id
+)
+
+23 
+pTimeD©a
+ 
+pH—d
+ = *
+L
+,
+pTmp
+ = *L,
+pIn£¹
+;
+
+24 if(
+NULL
+ =ð
+pH—d
+)
+
+26 
+pIn£¹
+ = (
+pTimeD©a
+)
+	`m®loc
+((
+TimeD©a
+));
+
+27 if(
+NULL
+ =ð
+pIn£¹
+)  -1;
+
+28 
+pIn£¹
+->
+nId
+ = 
+id
+;
+
+29 
+pIn£¹
+->
+pNext
+ = 
+NULL
+;
+
+30 *
+L
+ = 
+pIn£¹
+;
+
+34 
+pIn£¹
+ = (
+pTimeD©a
+)
+	`m®loc
+((
+TimeD©a
+));
+
+35 if(
+NULL
+ =ð
+pIn£¹
+)  -1;
+
+36 
+	`mem£t
+(
+pIn£¹
+,0,(
+TimeD©a
+));
+
+37 
+pIn£¹
+->
+nId
+ = 
+id
+;
+
+38 
+pIn£¹
+->
+pNext
+ = 
+NULL
+;
+
+40 
+NULL
+ !ð
+pH—d
+->
+pNext
+)
+
+42 
+pH—d
+ =…H—d->
+pNext
+;
+
+44 
+pH—d
+->
+pNext
+ = 
+pIn£¹
+;
+
+45 *
+L
+ = 
+pTmp
+;
+
+47 
+	}
+}
+
+49 
+	$de¡royLi¡
+(
+pTimeD©a
+ 
+L
+)
+
+51 
+pTimeD©a
+ 
+p
+;
+
+52 
+NULL
+ !ð
+L
+)
+
+54 
+p
+ = 
+L
+->
+pNext
+;
+
+55 
+	`ä“
+(
+L
+);
+
+56 
+L
+ = 
+p
+;
+
+60 
+	}
+}
+
+62 
+	$g‘Ëngth
+(
+pTimeD©a
+ 
+L
+)
+
+64 
+pTimeD©a
+ 
+pTmp
+ = 
+L
+;
+
+65 
+couÁ
+ = 0;
+
+66 
+NULL
+ !ð
+pTmp
+)
+
+68 
+couÁ
+++;
+
+69 
+pTmp
+ =…Tmp->
+pNext
+;
+
+72  
+couÁ
+;
+
+73 
+	}
+}
+
+75 
+pTimeD©a
+ 
+	$bubbËSÜt
+(
+pTimeD©a
+ 
+h—d
+)
+
+77 
+pTimeD©a
+ 
+p
+,
+p1
+,
+p2
+,
+p3
+;
+
+78 
+TimeD©a
+ 
+h
+, 
+t
+;
+
+79 if(
+h—d
+ =ð
+NULL
+)  NULL;
+
+80 
+h
+.
+pNext
+=
+h—d
+;
+
+81 
+p
+=&
+h
+;
+
+82 
+p
+->
+pNext
+!=
+NULL
+)
+
+84 
+p
+õ->
+pNext
+;
+
+86 
+p
+õ->
+pNext
+=&
+t
+;
+
+87 
+p
+!=
+h
+.
+pNext
+)
+
+89 
+p3
+=&
+h
+;
+
+90 
+p1
+=
+p3
+->
+pNext
+;
+
+91 
+p2
+=
+p1
+->
+pNext
+;
+
+92 
+p2
+!=
+p
+)
+
+94 ià((
+p1
+->
+nId
+)>(
+p2
+->nId))
+
+96 
+p1
+->
+pNext
+=
+p2
+->pNext;
+
+97 
+p2
+->
+pNext
+=
+p1
+;
+
+98 
+p3
+->
+pNext
+=
+p2
+;
+
+100 
+p3
+=
+p2
+;
+
+101 
+p2
+=
+p1
+->
+pNext
+;
+
+106 
+p3
+=
+p1
+;
+
+107 
+p1
+=
+p2
+;
+
+108 
+p2
+õ2->
+pNext
+;
+
+111 
+p
+=
+p1
+;
+
+113 
+p
+->
+pNext
+!=&
+t
+)
+
+115 
+p
+õ->
+pNext
+;
+
+117 
+p
+->
+pNext
+=
+NULL
+;
+
+118  
+h
+.
+pNext
+;
+
+119 
+	}
+}
+
+121 
+	$´štfLi¡
+(
+pTimeD©a
+ 
+L
+)
+
+123 
+pTimeD©a
+ 
+p
+ = 
+L
+;
+
+124 
+NULL
+ !ð
+p
+)
+
+126 
+	`´štf
+("%d ",
+p
+->
+nId
+);
+
+127 
+p
+ =…->
+pNext
+;
+
+129 
+	`´štf
+("\n");
+
+130 
+	}
+}
+
+132 
+	$maš
+()
+
+134 
+pTimeD©a
+ 
+pD©aH—d
+ = 
+NULL
+;
+
+135 
+	`addD©aToLi¡
+(&
+pD©aH—d
+,1);
+
+136 
+	`addD©aToLi¡
+(&
+pD©aH—d
+,4);
+
+137 
+	`addD©aToLi¡
+(&
+pD©aH—d
+,3);
+
+138 
+	`addD©aToLi¡
+(&
+pD©aH—d
+,5);
+
+139 
+	`´štfLi¡
+(
+pD©aH—d
+);
+
+140 
+	`bubbËSÜt
+(
+pD©aH—d
+);
+
+143 
+	`´štfLi¡
+(
+pD©aH—d
+);
+
+144 
+	`de¡royLi¡
+(
+pD©aH—d
+);
+
+147 
+	}
+}
+
+	@
+1
+.
+0
+1
+7
+list.c

@@ -1,0 +1,202 @@
+cscope 15 $HOME/working/program/c/read_config -q 0000000026 0000001062
+	@read_config.c
+
+1 
+	~<¡dio.h
+>
+
+2 
+	~<¡dlib.h
+>
+
+3 
+	~<¡ršg.h
+>
+
+5 
+	$»ad_cÚfig
+(
+num
+,cÚ¡ *
+·th
+)
+
+7 
+FILE
+ *
+å
+ = 
+NULL
+;
+
+8 
+i
+ = 0;
+
+9 
+buf
+[1024] = {0};
+
+10 
+Çme_buf
+[128] = {0};
+
+11 *
+Çme
+ = 
+NULL
+, *
+v®ue
+ = NULL;
+
+13 ià(
+NULL
+ =ğ
+·th
+) {
+
+14 
+	`´štf
+("path is‚ull.\n");
+
+18 ià((
+å
+ = 
+	`fİ’
+(
+·th
+, "r")è=ğ
+NULL
+) {
+
+19 
+	`´štf
+("fopen failed.\n");
+
+20 
+	`fşo£
+(
+å
+);
+
+25 
+	`fg‘s
+(
+buf
+, 1024, 
+å
+è!ğ
+NULL
+) {
+
+26 
+Çme
+ = 
+	`¡¹ok
+(
+buf
+, "=");
+
+27 
+v®ue
+ = 
+	`¡¹ok
+(
+NULL
+, "=");
+
+28 ià(
+Çme
+ =ğ
+NULL
+ || 
+v®ue
+ == NULL) ;
+
+30 
+	`¥rštf
+(
+Çme_buf
+, "sk_q[%d].sk_q_time_out", 
+i
+);
+
+31 ià(
+	`¡ºcmp
+(
+Çme
+, 
+Çme_buf
+, 
+	`¡¾’
+(name)) == 0) {
+
+32 ià(
+i
+ >ğ
+num
+) ;
+
+33 
+	`´štf
+("v®uğ%s", 
+v®ue
+);
+
+34 
+i
+++;
+
+35 } ià(
+	`¡ºcmp
+(
+Çme
+, "£Ëù_time_out", 
+	`¡¾’
+(name)) == 0) {
+
+36 
+	`´štf
+("v®uğ%s", 
+v®ue
+);
+
+41 
+	}
+}
+
+43 
+	$maš
+(
+agrc
+, *
+agrv
+[])
+
+45 ià(
+agrc
+ < 3) {
+
+46 
+	`´štf
+("param is‚ot valid.\n");
+
+50 
+	`»ad_cÚfig
+(
+	`©oi
+(
+agrv
+[1]),‡grv[2]);
+
+53 
+	}
+}
+
+	@
+1
+.
+0
+1
+14
+read_config.c

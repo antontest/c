@@ -1,0 +1,18 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/anton/working/program/c/cmake_test/src/t/t.c
+stdio.h
+-
+stdlib.h
+-
+string.h
+-
+unistd.h
+-
+

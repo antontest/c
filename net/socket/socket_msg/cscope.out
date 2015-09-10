@@ -1,0 +1,1283 @@
+cscope 15 $HOME/program/c/socket/socket_msg -q 0000000146 0000006740
+	@socket_msg.c
+
+1 
+	~"sock‘_msg.h
+"
+
+3 
+msg_r¡_t
+ 
+	$shm_š™
+(
+msg_ùl
+ *
+p_ùl
+)
+
+5 
+key_t
+ 
+key
+ = -1;
+
+6 
+shm_exi¡
+ = 0;
+
+7 
+shmid
+ = -1;
+
+8 *
+shmaddr
+ = 
+NULL
+;
+
+9 
+±h»ad_rwlock©Œ_t
+ 
+©Œ
+;
+
+11 ià((
+key
+ = 
+	`áok
+("/tmp", 0x0369)è=ğ-1è 
+MSG_RST_FAILURE
+;
+
+12 ià((
+shmid
+ = 
+	`shmg‘
+(
+key
+, (
+shm_ùl
+), 
+IPC_CREAT
+ | 
+IPC_EXCL
+ | 0x600)) == -1)
+
+14 ià(
+”ºo
+ =ğ
+EEXIST
+)
+
+16 
+shm_exi¡
+ = 1;
+
+17 
+shmid
+ = 
+	`shmg‘
+(
+key
+, (
+shm_ùl
+), 0x600);
+
+18 ià(
+shmid
+ =ğ-1è 
+MSG_RST_FAILURE
+;
+
+20  
+MSG_RST_FAILURE
+;
+
+23 
+shmaddr
+ = 
+	`shm©
+(
+shmid
+, 
+NULL
+, 0);
+
+24 ià((*)-1 =ğ
+shmaddr
+)
+
+26 ià(!
+shm_exi¡
+è
+	`shmùl
+(
+shmid
+, 
+IPC_RMID
+, 0);
+
+27  
+MSG_RST_FAILURE
+;
+
+30 
+p_msg_ùl
+->
+p_shm_ùl
+ = 
+shmaddr
+;
+
+31 ià(!
+shm_exi¡
+)
+
+33 
+	`mem£t
+(
+p_msg_ùl
+->
+p_shm_ùl
+, 0, (
+shm_ùl
+));
+
+34 
+	`±h»ad_rwlock©Œ_š™
+(&
+©Œ
+);
+
+35 
+	`±h»ad_rwlock©Œ_£sh¬ed
+(&
+©Œ
+, 
+PTHREAD_PROCESS_SHARED
+);
+
+36 
+	`±h»ad_rwlock_š™
+(&(
+p_msg_ùl
+->
+p_shm_ùl
+->
+rwlock
+), &
+©Œ
+);
+
+37 
+	`±h»ad_rwlock©Œ_de¡roy
+(&
+©Œ
+);
+
+40  
+MSG_RST_SUCCESS
+;
+
+41 
+	}
+}
+
+43 
+	$İ’_loÿl_sock‘
+(cÚ¡ *
+·th
+)
+
+45 
+fd
+ = -1;
+
+46 
+»t
+ = -1;
+
+47 
+sockaddr_un
+ 
+addr
+ = {0};
+
+49 
+fd
+ = 
+	`sock‘_ü—‹
+(
+PF_UNIX
+, 
+SOCK_DGRAM
+);
+
+50 ià(
+fd
+ =ğ-1è 
+»t
+;
+
+52 
+	`mem£t
+(&
+addr
+, 0, (
+sockaddr_un
+));
+
+53 
+addr
+.
+sun_çmy
+ = 
+AF_UNIX
+;
+
+54 
+	`¡ºıy
+(
+addr
+.
+sun_·th
+, 
+·th
+, (addr.sun_path));
+
+55 
+addr
+.
+sun_·th
+[(addr.sun_path) - 1] = '\0';
+
+56 
+	`uÆšk
+(
+addr
+.
+sun_·th
+) ;
+
+58 
+»t
+ = 
+	`bšd
+(
+fd
+, (
+sockaddr
+ *)&
+addr
+, (addr));
+
+59 ià(
+»t
+ == -1)
+
+61 
+	`şo£
+(
+fd
+);
+
+62  
+»t
+;
+
+65  
+fd
+;
+
+66 
+	}
+}
+
+68 
+	$c_addr_š™
+(
+sockaddr_un
+ *
+c_addr
+)
+
+70 
+	`mem£t
+(
+c_addr
+, 0, (
+sockaddr_un
+));
+
+71 
+c_addr
+->
+sun_çmy
+ = 
+AF_UNIX
+;
+
+72 
+	`¢´štf
+(
+c_addr
+->
+sun_·th
+, (c_addr->sun_·th), "%s%d", 
+MSG_SOCKET_DIR
+, 
+	`g‘pid
+());
+
+73 
+c_addr
+->
+sun_·th
+[(ipc_addr->sun_path) - 1] = '\0';
+
+76 
+	}
+}
+
+78 *
+	$c_func
+(*
+¬g
+)
+
+80 
+msg
+ *msg = 
+NULL
+;
+
+81 
+Ën
+ = 0;
+
+83 
+p_msg_ùl
+->
+c_¡İ
+)
+
+85 ià(
+NULL
+ =ğ(
+msg
+ = 
+	`m®loc
+(
+MSG_MAX_LEN
+)))
+
+87 
+	`şo£
+(
+p_msg_ùl
+->
+c_fd
+);
+
+91 
+Ën
+ = 
+	`»ad
+(
+p_msg_ùl
+->
+c_fd
+, 
+msg
+, 
+MSG_MAX_LEN
+);
+
+92 ià(
+Ën
+ < (
+msg
+))
+
+94 
+	`ä“
+(
+msg
+);
+
+98 
+msg
+->
+de¡ruùÜ
+ = 
+NULL
+;
+
+99 
+msg
+->
+ä“_±r
+ = 
+NULL
+;
+
+100 
+msg
+->
+hŞd_út
+ = 1;
+
+103  
+NULL
+;
+
+104 
+	}
+}
+
+106 
+msg_r¡_t
+ 
+	$c_š™
+(
+msg_ùl
+ *
+p_ùl
+)
+
+111 
+sockaddr_un
+ 
+c_addr
+ = {0};
+
+113 
+	`c_addr_š™
+(&
+c_addr
+);
+
+114 
+p_msg_ùl
+->
+c_fd
+ = 
+	`İ’_loÿl_sock‘
+(
+c_addr
+.
+sun_·th
+);
+
+115 ià(
+p_msg_ùl
+->
+c_fd
+ =ğ-1è 
+MSG_RST_FAILURE
+;
+
+117 ià(
+	`±h»ad_ü—‹
+(&
+p_msg_ùl
+->
+c_th»ad
+, 
+NULL
+, 
+c_func
+, NULL) != 0)
+
+119 
+	`şo£
+(
+p_msg_ùl
+->
+c_fd
+);
+
+120  
+MSG_RST_FAILURE
+;
+
+123  
+MSG_RST_SUCCESS
+;
+
+124 
+	}
+}
+
+126 
+msg_r¡_t
+ 
+	$msg_š™
+()
+
+128 ià(
+p_msg_ùl
+ !ğ
+NULL
+è 
+MSG_RST_SUCCESS
+;
+
+131 
+p_msg_ùl
+ = (
+msg_ùl
+ *)
+	`m®loc
+((msg_ctl));
+
+132 ià(
+p_msg_ùl
+ =ğ
+NULL
+) ;
+
+133 
+	`mem£t
+(
+p_msg_ùl
+, 0, (
+msg_ùl
+));
+
+135 
+p_msg_ùl
+->
+p_loc_ùl
+ = (
+loc_ùl
+ *)
+	`m®loc
+((loc_ctl));
+
+136 ià(
+p_msg_ùl
+->
+p_loc_ùl
+ =ğ
+NULL
+) ;
+
+137 
+	`mem£t
+(
+p_msg_ùl
+->
+p_loc_ùl
+, 0, (
+loc_ùl
+));
+
+139 ià(
+	`shm_š™
+(
+p_msg_ùl
+è!ğ
+MSG_RST_SUCCESS
+è 
+MSG_RST_FAILURE
+;
+
+140 ià(
+	`c_š™
+(
+p_msg_ùl
+è!ğ
+MSG_RST_SUCCESS
+è 
+MSG_RST_FAILURE
+;
+
+143  
+MSG_RST_SUCCESS
+;
+
+146 ià(
+p_msg_ùl
+->
+p_loc_ùl
+ !ğ
+NULL
+è
+	`ä“
+(p_msg_ctl->p_loc_ctl);
+
+147 ià(
+p_msg_ùl
+ !ğ
+NULL
+è
+	`ä“
+(p_msg_ctl);
+
+149  
+MSG_RST_FAILURE
+;
+
+150 
+	}
+}
+
+152 
+msg_r¡_t
+ 
+	$msg_deš™
+()
+
+154 ià(
+p_msg_ùl
+ =ğ
+NULL
+è 
+MSG_RST_SUCCESS
+;
+
+156 ià(
+p_msg_ùl
+->
+p_loc_ùl
+)
+
+158 
+	`±h»ad_rwlock_de¡roy
+(&
+p_msg_ùl
+->
+p_loc_ùl
+->
+rwlock
+);
+
+159 
+	`ä“
+(
+p_msg_ùl
+->
+p_loc_ùl
+);
+
+162 
+	`ä“
+(
+p_msg_ùl
+);
+
+163 
+p_msg_ùl
+ = 
+NULL
+;
+
+165  
+MSG_RST_SUCCESS
+;
+
+166 
+	}
+}
+
+168 
+msg_r¡_t
+ 
+	$msg_moduË_»g
+(
+msg_mod_cfg
+ *
+cfg
+)
+
+170 
+i
+ = 0;
+
+171 
+loc_ùl
+ *
+p_loc_ùl
+ = 
+p_msg_ùl
+->p_loc_ctl;
+
+172 
+loÿl_msg_’Œy
+ *
+p_’Œy
+ = 
+NULL
+;
+
+174 ià(
+cfg
+ =ğ
+NULL
+ || cfg->
+hªdËr
+ =ğNULL || 
+p_msg_ùl
+ == NULL)
+
+175  
+MSG_RST_FAILURE
+;
+
+177 
+	`±h»ad_rwlock_w¾ock
+(&
+p_loc_ùl
+->
+rwlock
+);
+
+178 
+i
+ = 0; i < 32; i++)
+
+180 ià(
+p_loc_ùl
+->
+»g_tbl
+[
+i
+].
+mod_id
+ =ğ
+cfg
+->mod_id)
+
+182 
+p_’Œy
+ = &
+p_loc_ùl
+->
+»g_tbl
+[
+i
+];
+
+185 ià(!
+p_’Œy
+ && 
+p_loc_ùl
+->
+»g_tbl
+[
+i
+].
+mod_id
+ =ğ
+MOD_ID_UNKNOW
+)
+
+186 
+p_’Œy
+ = &(
+p_loc_ùl
+->
+»g_tbl
+[
+i
+]);
+
+190 ià(
+p_’Œy
+ =ğ
+NULL
+)
+
+192 
+	`±h»ad_rwlock_uÆock
+(&
+p_loc_ùl
+->
+rwlock
+);
+
+193  
+MSG_RST_FAILURE
+;
+
+196 ià(
+p_’Œy
+->
+mod_id
+ =ğ
+cfg
+->mod_id)
+
+198 
+	`±h»ad_rwlock_uÆock
+(&
+p_loc_ùl
+->
+rwlock
+);
+
+199  
+MSG_RST_SUCCESS
+;
+
+205  
+MSG_RST_SUCCESS
+;
+
+206 
+	}
+}
+
+	@socket_msg.h
+
+1 #iâdeà
+__SOCKET_MSG_H__
+
+
+2 
+	#__SOCKET_MSG_H__
+
+
+	)
+
+4 #iâdeà
+__SOCKET_BASE_H__
+
+
+5 
+	~<sock‘_ba£.h
+>
+
+8 
+	~<sys/shm.h
+>
+
+9 
+	~<£m­hÜe.h
+>
+
+10 
+	~<±h»ad.h
+>
+
+15 
+	#MOD_MAX
+ 32
+
+	)
+
+16 
+	#MSG_MAX_LEN
+ (1024 * 32)
+
+	)
+
+17 
+	#MSG_SOCKET_DIR
+ "/v¬/msg/"
+
+	)
+
+22 
+	tmod_id_t
+;
+
+23 
+	tmsg_æag_t
+;
+
+29 
+	emsg_r¡
+ {
+
+30 
+	mMSG_RST_SUCCESS
+ = 0,
+
+31 
+	mMSG_RST_FAILURE
+,
+
+32 
+	mMSG_RST_INVALID_CFG
+,
+
+33 
+	mMSG_RST_INVALID_MOD_ID
+,
+
+34 
+	mMSG_RST_SOCKET_ERROR
+,
+
+35 
+	mMSG_RST_THREAD_ERROR
+,
+
+36 
+	mMSG_RST_QUEUE_FULL
+
+
+37 } 
+	tmsg_r¡_t
+;
+
+40 
+	mMOD_ID_UNKNOW
+ = 0,
+
+41 
+	mMOD_ID_TMR
+ = 1
+
+47 
+	smsg
+ {
+
+48 
+	m’dŸn
+;
+
+49 
+mod_id_t
+ 
+	m¤c_id
+;
+
+50 
+mod_id_t
+ 
+	md¡_id
+;
+
+51 
+mod_id_t
+ 
+	mmod
+;
+
+52 
+	mmsg_id
+;
+
+53 
+	mËn
+;
+
+54 
+	mhŞd_út
+;
+
+56 (*
+	mde¡ruùÜ
+)(*);
+
+57 *
+	mä“_±r
+;
+
+58 
+msg
+ *
+	mÃxt
+;
+
+63 
+	mbody
+[0];
+
+64 } 
+	tmsg_t
+;
+
+66 
+	#MSG
+(
+p
+è((
+msg
+ *)Õ))
+
+	)
+
+67 
+	#MSG_MOD
+(
+p
+èĞ
+	`MSG
+Õ)->
+mod
+ )
+
+	)
+
+68 
+	#MSG_MSGID
+(
+p
+èĞ
+	`MSG
+Õ)->
+msg_id
+ )
+
+	)
+
+69 
+	#MSG_LEN
+(
+p
+èĞ
+	`MSG
+Õ)->
+Ën
+ )
+
+	)
+
+70 
+	#MSG_DATA
+(
+p
+èĞ
+	`MSG
+Õ)->
+body
+ )
+
+	)
+
+71 
+	#MSG_SRC
+(
+p
+èĞ
+	`MSG
+Õ)->
+¤c_id
+ )
+
+	)
+
+73 Ğ*
+	tmsg_hªdËr_t
+ )(
+	tmsg
+ *msg);
+
+74 
+	$msg_æag_t
+ ( *
+	tmsg_id’t
+ )(
+	tmsg
+ *msg);
+
+82 
+	smsg_mod_cfg
+ {
+
+83 *
+Çme
+;
+
+84 
+mod_id_t
+ 
+mod_id
+;
+
+85 
+±h»ad_t
+ 
+th»ad_id
+;
+
+86 
+msg_hªdËr_t
+ 
+hªdËr
+;
+
+87 } 
+	tmsg_mod_cfg_t
+;
+
+90 
+	sloÿl_msg_’Œy
+ {
+
+94 
+mod_id_t
+ 
+mod_id
+;
+
+99 
+pos
+;
+
+100 
+£m_t
+ 
+£m
+;
+
+101 
+±h»ad_mu‹x_t
+ 
+mtx
+;
+
+102 
+msg
+ *
+hªdlšg_msg
+;
+
+107 
+msg_id’t
+ 
+id’t
+;
+
+108 
+msg_hªdËr_t
+ 
+hªdËr
+;
+
+109 
+±h»ad_t
+ 
+´oc_th»ad
+;
+
+110 
+´oc_¡İ
+;
+
+115 
+msg_hdËd_tÙ®
+;
+
+116 
+mod_»g_sys_u±ime
+;
+
+117 } 
+	tloÿl_’Œy_t
+;
+
+119 
+	sshm_’Œy
+ {
+
+120 
+mod_id_t
+ 
+mod_id
+;
+
+121 
+æag
+;
+
+122 
+sockaddr_š
+ 
+š_addr
+;
+
+123 
+sockaddr_un
+ 
+un_addr
+;
+
+124 } 
+	tshm_’Œy_t
+;
+
+126 
+	smsg_ùl
+ {
+
+130 
+	sloc_ùl
+ {
+
+131 
+±h»ad_rwlock_t
+ 
+rwlock
+;
+
+132 
+loÿl_msg_’Œy
+ 
+»g_tbl
+[ 
+MOD_MAX
+ ];
+
+133 } *
+p_loc_ùl
+;
+
+138 
+	sshm_ùl
+ {
+
+139 
+±h»ad_rwlock_t
+ 
+rwlock
+;
+
+140 
+shm_’Œy
+ 
+»g_tbl
+[ 
+MOD_MAX
+ ];
+
+141 } *
+p_shm_ùl
+;
+
+146 
+c_fd
+;
+
+147 
+±h»ad_t
+ 
+c_th»ad
+;
+
+148 
+c_¡İ
+;
+
+149 } 
+	tmsg_ùl_t
+;
+
+151 
+msg_ùl
+ *
+p_msg_ùl
+;
+
+	@
+1
+.
+0
+2
+26
+socket_msg.c
+socket_msg.h

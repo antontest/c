@@ -1,0 +1,2 @@
+/usr/bin/ar cq ../../src/lib/libsocket_property.a  CMakeFiles/socket_property.dir/socket_property/socket_property.c.o
+/usr/bin/ranlib ../../src/lib/libsocket_property.a

@@ -1,0 +1,1 @@
+regcomp.o: regcomp.c

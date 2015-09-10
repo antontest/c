@@ -1,0 +1,11 @@
+/home/anton/tools/include/socket/socket_base.h
+/home/anton/tools/include/socket/socket_property.h
+/home/anton/tools/include/socket/socket_app.h
+/home/anton/tools/include/socket/socket_event.h
+/home/anton/tools/include/socket/socket_header.h
+/home/anton/tools/include/socket/socket_arp.h
+/home/anton/tools/lib/libsocket_base.a
+/home/anton/tools/lib/libsocket_property.a
+/home/anton/tools/lib/libsocket_app.so
+/home/anton/tools/lib/libsocket_arp.so
+/home/anton/tools/exec/socket

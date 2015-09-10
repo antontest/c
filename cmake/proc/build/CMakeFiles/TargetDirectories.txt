@@ -1,0 +1,2 @@
+/home/anton/program/c/cmake/proc/build/bin/CMakeFiles/proc_static.dir
+/home/anton/program/c/cmake/proc/build/bin/CMakeFiles/proc.dir

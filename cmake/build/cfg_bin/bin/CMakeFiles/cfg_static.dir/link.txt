@@ -1,0 +1,2 @@
+/usr/bin/ar cq ../../../cfg/src/lib/libcfg.a  CMakeFiles/cfg_static.dir/cfg/cfg.c.o
+/usr/bin/ranlib ../../../cfg/src/lib/libcfg.a

@@ -1,0 +1,1 @@
+srandom.o: srandom.c

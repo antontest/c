@@ -1,0 +1,1 @@
+fscanf.o: fscanf.c

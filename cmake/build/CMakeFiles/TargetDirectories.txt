@@ -1,0 +1,17 @@
+/home/anton/program/c/cmake/build/cfg_bin/bin/CMakeFiles/cfg.dir
+/home/anton/program/c/cmake/build/socket_bin/bin/CMakeFiles/socket_base.dir
+/home/anton/program/c/cmake/build/print_bin/bin/CMakeFiles/print_static.dir
+/home/anton/program/c/cmake/build/proc_bin/bin/CMakeFiles/proc_static.dir
+/home/anton/program/c/cmake/build/timer_bin/bin/CMakeFiles/timer_static.dir
+/home/anton/program/c/cmake/build/dir_bin/bin/CMakeFiles/dir.dir
+/home/anton/program/c/cmake/build/dir_bin/bin/CMakeFiles/dir_static.dir
+/home/anton/program/c/cmake/build/socket_bin/bin/CMakeFiles/socket_msg.dir
+/home/anton/program/c/cmake/build/thread_bin/bin/CMakeFiles/thread_static.dir
+/home/anton/program/c/cmake/build/print_bin/bin/CMakeFiles/print.dir
+/home/anton/program/c/cmake/build/proc_bin/bin/CMakeFiles/proc.dir
+/home/anton/program/c/cmake/build/socket_bin/bin/CMakeFiles/socket.dir
+/home/anton/program/c/cmake/build/socket_bin/bin/CMakeFiles/socket_app.dir
+/home/anton/program/c/cmake/build/cfg_bin/bin/CMakeFiles/cfg_static.dir
+/home/anton/program/c/cmake/build/socket_bin/bin/CMakeFiles/socket_property.dir
+/home/anton/program/c/cmake/build/thread_bin/bin/CMakeFiles/thread.dir
+/home/anton/program/c/cmake/build/timer_bin/bin/CMakeFiles/timer.dir

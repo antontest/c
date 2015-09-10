@@ -1,0 +1,2 @@
+/home/anton/tools/include/print.h
+/home/anton/tools/lib/libprint.a
