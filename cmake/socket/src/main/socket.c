@@ -461,7 +461,7 @@ static void print_usage()
 static int parser_args(int agrc, char *agrv[])
 {
     int opt = 0;
-    const char *optstr = "hcsb:ra:i:p:t:w:m:e:g::d::n:";
+    const char *optstr = "hcsb:ra:i:p:t:w:m:eg::d::n:";
     struct option opts[] = {
         { "help"     , 0, 0, 'h'},
         { "agreement", 1, 0, 'a'},

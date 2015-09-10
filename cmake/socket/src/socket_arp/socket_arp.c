@@ -298,7 +298,7 @@ int arp_cheat(const char *iifname, const char *iattack_ip,
  */
 int arp_cheating(char *dstip)
 {
-    int fd, ret, len;
+    int fd, len;
     struct sockaddr addr;
     struct frame_arp snd_buf, recv_buf, reply_snd_buf;
     char ifname[10] = {0};
@@ -324,10 +324,6 @@ int arp_cheating(char *dstip)
     ip2arr(gw_ip_buf, gw_ip);
     ip2arr(src_ip_buf, src_ip);
     ip2arr(dstip, dst_ip);
-    printf("ifname: %s\n", ifname);
-    print_ipv4(src_ip, "src_ip");
-    print_ipv4(dst_ip, "dst_ip");
-    print_ipv4(gw_ip, "gw_ip");
 
     /**
      * init addr
@@ -355,35 +351,24 @@ int arp_cheating(char *dstip)
     /**
      * init arp request packet
      */
-    while (1) {
-        len = sizeof(struct sockaddr);
-        ret = recvfrom(fd, &recv_buf, sizeof(recv_buf), 0, &addr, (socklen_t *)&len);
-
-        if (ntohs(recv_buf.ah.ar_op) != ARPOP_REQUEST)
-            continue;
-
-        break;
-    }
-    memcpy(&snd_buf, &recv_buf, sizeof(recv_buf));
     memcpy(snd_buf.fh.src_mac, src_mac, 6);
     memcpy(snd_buf.src_mac, src_mac, 6);
     memset(snd_buf.fh.dst_mac, -1, 6);
     memset(snd_buf.dst_mac, 0, 6);
+    snd_buf.fh.proto_type = htons(ETH_P_ARP);
+    snd_buf.ah.ar_hrd = htons(ARPHRD_ETHER);
+    snd_buf.ah.ar_pro = htons(ETH_P_IP);
+    snd_buf.ah.ar_hln = 6;
+    snd_buf.ah.ar_pln = 4;
+    snd_buf.ah.ar_op = htons(ARPOP_REQUEST);
     memcpy(snd_buf.dst_ip, dst_ip, 4);
     memcpy(snd_buf.src_ip, src_ip, 4);
 
-    memcpy(&reply_snd_buf, &recv_buf, sizeof(recv_buf));
-    memcpy(reply_snd_buf.fh.src_mac, src_mac, 6);
-    memcpy(reply_snd_buf.src_mac, src_mac, 6);
-    memcpy(reply_snd_buf.dst_ip, dst_ip, 4);
-    memcpy(reply_snd_buf.src_ip, gw_ip, 4);
-
+    len = sizeof(struct sockaddr);
     sendto(fd, &snd_buf, sizeof(snd_buf), 0, &addr, len);
     printf("\033[0;32msuccess send arp request to %d.%d.%d.%d\n\033[0m", 
             dst_ip[0], dst_ip[1], dst_ip[2], dst_ip[3]);
 
-    //gettimeofday(&s, NULL);
-    //printf("time: %d, s.tc_sec: %d, s.tv_usec: %d\n", tuse, (int)s.tv_sec, (int)s.tv_usec);
     FD_ZERO(&set);
     FD_SET(fd, &set);
     while (1) {
@@ -392,7 +377,6 @@ int arp_cheating(char *dstip)
         FD_ZERO(&set);
         FD_SET(fd, &set);
 
-        //sendto(fd, &snd_buf, sizeof(snd_buf), 0, &addr, len);
         select(fd + 1, &set, NULL, NULL, &tv);
         if (FD_ISSET(fd, &set))
         {
@@ -430,15 +414,6 @@ int arp_cheating(char *dstip)
         }
     }
     
-    //gettimeofday(&e, NULL);
-    //printf("time: %d, e.tc_sec: %d, e.tv_usec: %d\n", tuse, (int)e.tv_sec, (int)e.tv_usec);
-    //tuse = 1000000 * (e.tv_sec - s.tv_sec) + e.tv_usec - s.tv_usec;
-    //print_ipv4(recv_buf.src_ip, NULL);
-    //print_mac(mac, NULL);
-    //printf("time: %d, e.tv_usec: %d\n", tuse, (int)e.tv_usec);
-    //printf("%d:%d:%d:%d's mac address: %02x:%02x:%02x:%02x:%02x:%02x, used %d.%03ds\n", 
-    //        dst_ip[0], dst_ip[1], dst_ip[2], dst_ip[3], mac[0], mac[1], mac[2], mac[3], 
-    //        mac[4], mac[5], (int)tuse / 1000000, (int)tuse % 1000000);
     return 0;
 }
 

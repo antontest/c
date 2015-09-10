@@ -1,6 +1,0 @@
-/home/anton/program/c/cmake/socket/build/bin/CMakeFiles/socket_base.dir
-/home/anton/program/c/cmake/socket/build/bin/CMakeFiles/socket_msg.dir
-/home/anton/program/c/cmake/socket/build/bin/CMakeFiles/socket.dir
-/home/anton/program/c/cmake/socket/build/bin/CMakeFiles/socket_app.dir
-/home/anton/program/c/cmake/socket/build/bin/CMakeFiles/socket_arp.dir
-/home/anton/program/c/cmake/socket/build/bin/CMakeFiles/socket_property.dir

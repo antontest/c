@@ -1177,7 +1177,7 @@ int get_interface_state(int fd, const char *ifname)
  */
 int get_net_mac(char *dstip, unsigned char mac[6])
 {
-    int fd, ret, len;
+    int fd, len;
     struct sockaddr addr;
     struct frame_arp snd_buf, recv_buf;
     char ifname[64];
@@ -1187,8 +1187,6 @@ int get_net_mac(char *dstip, unsigned char mac[6])
     unsigned char dst_ip[6];
     char src_ip_buf[20];
     struct timeval tv = {0};
-    //int tuse = 0;
-    //struct timeval s = {0}, e = {0};
     fd_set set;
 
     if (dstip == NULL || mac == NULL) return -1;
@@ -1234,28 +1232,21 @@ int get_net_mac(char *dstip, unsigned char mac[6])
     /**
      * init arp request packet
      */
-    while (1) {
-        len = sizeof(struct sockaddr);
-        ret = recvfrom(fd, &recv_buf, sizeof(recv_buf), 0, &addr, (socklen_t *)&len);
-
-        if (ntohs(recv_buf.ah.ar_op) != ARPOP_REQUEST)
-            continue;
-
-        break;
-    }
-    memcpy(&snd_buf, &recv_buf, sizeof(recv_buf));
     memcpy(snd_buf.fh.src_mac, src_mac, 6);
     memcpy(snd_buf.src_mac, src_mac, 6);
     memset(snd_buf.fh.dst_mac, -1, 6);
     memset(snd_buf.dst_mac, 0, 6);
-
+    snd_buf.fh.proto_type = htons(ETH_P_ARP);
+    snd_buf.ah.ar_hrd = htons(ARPHRD_ETHER);
+    snd_buf.ah.ar_pro = htons(ETH_P_IP);
+    snd_buf.ah.ar_hln = 6;
+    snd_buf.ah.ar_pln = 4;
+    snd_buf.ah.ar_op = htons(ARPOP_REQUEST);
     memcpy(snd_buf.dst_ip, dst_ip, 4);
     memcpy(snd_buf.src_ip, src_ip, 4);
 
+    len = sizeof(struct sockaddr);
     sendto(fd, &snd_buf, sizeof(snd_buf), 0, &addr, len);
-
-    //gettimeofday(&s, NULL);
-    //printf("time: %d, s.tc_sec: %d, s.tv_usec: %d\n", tuse, (int)s.tv_sec, (int)s.tv_usec);
     FD_ZERO(&set);
     FD_SET(fd, &set);
     while (1) {
@@ -1277,15 +1268,6 @@ int get_net_mac(char *dstip, unsigned char mac[6])
         }
     }
     
-    //gettimeofday(&e, NULL);
-    //printf("time: %d, e.tc_sec: %d, e.tv_usec: %d\n", tuse, (int)e.tv_sec, (int)e.tv_usec);
-    //tuse = 1000000 * (e.tv_sec - s.tv_sec) + e.tv_usec - s.tv_usec;
-    //print_ipv4(recv_buf.src_ip, NULL);
-    //print_mac(mac, NULL);
-    //printf("time: %d, e.tv_usec: %d\n", tuse, (int)e.tv_usec);
-    //printf("%d:%d:%d:%d's mac address: %02x:%02x:%02x:%02x:%02x:%02x, used %d.%03ds\n", 
-    //        dst_ip[0], dst_ip[1], dst_ip[2], dst_ip[3], mac[0], mac[1], mac[2], mac[3], 
-    //        mac[4], mac[5], (int)tuse / 1000000, (int)tuse % 1000000);
     return 0;
 }
 
