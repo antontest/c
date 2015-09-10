@@ -1,0 +1,1 @@
+/home/anton/working/program/sqlite/sql/build/bin/CMakeFiles/sql.dir

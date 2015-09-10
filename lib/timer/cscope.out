@@ -1,0 +1,647 @@
+cscope 15 $HOME/working/program/lib/timer -q 0000000057 0000002998
+	@timer.c
+
+1 
+	~<tim”.h
+>
+
+8 *
+	$tim”_routše
+(*
+tim”
+)
+
+10 
+timev®
+ 
+tv
+ = {0};
+
+11 
+tim”_im¶
+ *
+im¶
+ = 
+NULL
+;
+
+13 ià(
+tim”
+ =ð
+NULL
+)  NULL;
+
+14 
+im¶
+ = ((
+tim”
+ *)timer)->impl;
+
+17 
+tv
+.
+tv_£c
+ = 0;
+
+18 
+tv
+.
+tv_u£c
+ = 1000 * 
+TIMER_ACCURACY
+;
+
+20 
+	`£Ëù
+(0, 
+NULL
+, NULL, NULL, &
+tv
+);
+
+21 ià(
+im¶
+->
+d–‘e
+) ;
+
+22 ià(!
+im¶
+->
+aùive
+) ;
+
+24 
+im¶
+->
+time_r
+ -ð
+TIMER_ACCURACY
+;
+
+25 ià(
+im¶
+->
+time_r
+ <= 0) {
+
+26 ià(
+im¶
+->
+»³©
+èim¶->
+time_r
+ = im¶->
+time_b
+;
+
+27 
+im¶
+->
+d–‘e
+ = 1;
+
+29 
+im¶
+->
+	`cb
+(
+tim”
+);
+
+33 ià(
+im¶
+ !ð
+NULL
+è
+	`ä“
+(impl);
+
+34 ià(
+tim”
+ !ð
+NULL
+è
+	`ä“
+(timer);
+
+35 
+im¶
+ = 
+NULL
+;
+
+36 
+tim”
+ = 
+NULL
+;
+
+38  
+NULL
+;
+
+39 
+	}
+}
+
+49 
+tim”
+ * 
+	$tim”_ü—t
+(
+tm_ms
+, 
+tim”_cb
+ 
+cb
+, 
+boÞ
+ 
+»³©
+)
+
+51 
+tim”
+ *tim” = 
+NULL
+;
+
+52 
+tim”_im¶
+ *
+im¶
+ = 
+NULL
+;
+
+53 
+»t
+ = 0;
+
+55 
+im¶
+ = (
+tim”_im¶
+ *)
+	`m®loc
+((timer_impl));
+
+56 ià(
+im¶
+ =ð
+NULL
+è
+TIMER_CREATE_FAIL
+;
+
+58 
+tim”
+ = (tim” *)
+	`m®loc
+((timer));
+
+59 ià(
+tim”
+ =ð
+NULL
+è
+TIMER_CREATE_FAIL
+;
+
+61 
+im¶
+->
+aùive
+ = 0;
+
+62 
+im¶
+->
+»³©
+ =„epeat;
+
+63 
+im¶
+->
+d–‘e
+ = 0;
+
+64 
+im¶
+->
+time_b
+ = 
+tm_ms
+;
+
+65 
+im¶
+->
+time_r
+ = 
+tm_ms
+;
+
+66 
+im¶
+->
+cb
+ = cb;
+
+67 
+tim”
+->
+im¶
+ = impl;
+
+69 
+»t
+ = 
+	`±h»ad_ü—‹
+(&
+im¶
+->
+th»ad
+, 
+NULL
+, 
+tim”_routše
+, 
+tim”
+);
+
+70 ià(
+»t
+ !ð0è
+TIMER_CREATE_FAIL
+;
+
+71 
+	`±h»ad_d‘ach
+(
+im¶
+->
+th»ad
+);
+
+73  
+tim”
+;
+
+75 
+TIMER_CREATE_FAIL
+:
+
+76 ià(
+im¶
+ !ð
+NULL
+è
+	`ä“
+(impl);
+
+77 ià(
+tim”
+ !ð
+NULL
+è
+	`ä“
+(timer);
+
+78 
+im¶
+ = 
+NULL
+;
+
+79 
+tim”
+ = 
+NULL
+;
+
+81  
+NULL
+;
+
+82 
+	}
+}
+
+89 
+	$tim”_¡¬t
+(
+tim”
+ *timer)
+
+91 ià(
+tim”
+ =ð
+NULL
+) ;
+
+93 
+tim”
+->
+im¶
+->
+time_r
+ =im”->im¶->
+time_b
+;
+
+94 
+tim”
+->
+im¶
+->
+aùive
+ = 1;
+
+97 
+	}
+}
+
+104 
+	$tim”_¡Ý
+(
+tim”
+ *timer)
+
+106 ià(
+tim”
+ =ð
+NULL
+) ;
+
+108 
+tim”
+->
+im¶
+->
+aùive
+ = 0;
+
+111 
+	}
+}
+
+118 
+	$tim”_de¡roy
+(
+tim”
+ *timer)
+
+120 ià(
+tim”
+ =ð
+NULL
+) ;
+
+122 
+tim”
+->
+im¶
+->
+d–‘e
+ = 1;
+
+123 
+	}
+}
+
+130 
+	$tim”_»£t
+(
+tim”
+ *timer)
+
+132 ià(
+tim”
+ =ð
+NULL
+) ;
+
+134 
+tim”
+->
+im¶
+->
+time_r
+ =im”->im¶->
+time_b
+;
+
+137 
+	}
+}
+
+	@timer.h
+
+1 #iâdeà
+__LIBSC_TIMER_H__
+
+
+2 
+	#__LIBSC_TIMER_H__
+
+
+	)
+
+4 
+	~<¡dio.h
+>
+
+5 
+	~<¡dlib.h
+>
+
+6 
+	~<¡ršg.h
+>
+
+7 
+	~<uni¡d.h
+>
+
+8 
+	~<fúŽ.h
+>
+
+9 
+	~<sys/ty³s.h
+>
+
+10 
+	~<sys/¡©.h
+>
+
+11 
+	~<sigÇl.h
+>
+
+12 
+	~<±h»ad.h
+>
+
+13 
+	~<£m­hÜe.h
+>
+
+14 
+	~<¡dboÞ.h
+>
+
+15 
+	~<sys/sysšfo.h
+>
+
+16 
+	~<sys/”ºo.h
+>
+
+17 
+	~<sys/wa™.h
+>
+
+18 
+	~<sys/£Ëù.h
+>
+
+19 
+	~<g‘Ýt.h
+>
+
+20 
+	~<time.h
+>
+
+22 
+	#TIMER_ACCURACY
+ 100
+
+	)
+
+32 
+	stim”
+ {
+
+39 
+	mi
+;
+
+40 
+	mc
+;
+
+41 *
+	mp
+;
+
+47 
+tim”_im¶
+ *
+	mim¶
+;
+
+48 }
+	ttim”
+;
+
+60 (*
+	ttim”_cb
+)(
+	ttim”
+ *
+	ttm
+);
+
+65 
+	stim”_im¶
+ {
+
+69 
+aùive
+;
+
+74 
+»³©
+;
+
+79 
+d–‘e
+;
+
+84 
+time_r
+;
+
+89 
+time_b
+;
+
+94 
+tim”_cb
+ 
+cb
+;
+
+99 
+±h»ad_t
+ 
+th»ad
+;
+
+100 }
+	ttim”_im¶_t
+;
+
+110 
+tim”
+ * 
+	`tim”_ü—t
+(
+tm_ms
+, 
+tim”_cb
+ 
+cb
+, 
+boÞ
+ 
+»³©
+);
+
+117 
+	`tim”_¡¬t
+(
+tim”
+ *timer);
+
+124 
+	`tim”_¡Ý
+(
+tim”
+ *timer);
+
+131 
+	`tim”_de¡roy
+(
+tim”
+ *timer);
+
+138 
+	`tim”_»£t
+(
+tim”
+ *timer);
+
+	@
+1
+.
+0
+2
+16
+timer.c
+timer.h

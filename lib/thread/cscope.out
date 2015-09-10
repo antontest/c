@@ -1,0 +1,1661 @@
+cscope 15 $HOME/working/program/lib/thread -q 0000000058 0000007721
+	@bak/thread.c
+
+1 
+	~<thªad.h
+>
+
+10 *
+	$thªad_ru¡öe
+(*
+¨g
+)
+
+12 
+thªad_t
+ *
+im∂
+ = (thªad_à*)
+¨g
+;
+
+13 
+±hªad_w‹kî_t
+ *
+w‹kî
+ = &
+im∂
+->worker;
+
+15 
+im∂
+->
+a˘ive
+)
+
+17 i‡(!
+im∂
+->
+run
+) ;
+
+18 i‡(
+im∂
+->
+dñëe
+) ;
+
+20 i‡(
+w‹kî
+->
+ru¡öe
+ !
+NULL
+ && 
+im∂
+->
+run
+)
+
+22 
+w‹kî
+->
+	`ru¡öe
+(w‹kî->
+¨g
+);
+
+24 
+w‹kî
+->
+ru¡öe
+ = 
+NULL
+;
+
+25 
+w‹kî
+->
+¨g
+ = 
+NULL
+;
+
+26 
+im∂
+->
+d⁄e
+ = 1;
+
+29 i‡(!
+im∂
+->
+kìp
+) ;
+
+32 
+im∂
+->
+a˘ive
+ = 0;
+
+33 
+im∂
+->
+dñëe
+ = 1;
+
+34 
+im∂
+->
+d⁄e
+ = 1;
+
+35 
+im∂
+->
+run
+ = 0;
+
+37 
+	`±hªad_muãx_de°roy
+(&
+im∂
+->
+lock
+);
+
+38 
+	`±hªad_c⁄d_de°roy
+(&
+im∂
+->
+ªady
+);
+
+40  
+NULL
+;
+
+41 
+	}
+}
+
+52 
+	$±hªad_°¨t
+(
+thªad_t
+ *
+im∂
+, 
+±hªad_ru¡öe
+ 
+ru¡öe
+, *
+¨g
+, 
+run
+, 
+kìp
+)
+
+54 i‡(
+im∂
+ =
+NULL
+ || im∂->
+a˘ive
+)  -1;
+
+56 
+im∂
+->
+w‹kî
+.
+ru¡öe
+ =Ñuntine;
+
+57 
+im∂
+->
+w‹kî
+.
+¨g
+ =árg;
+
+59 
+im∂
+->
+run
+ =Ñun;
+
+60 
+im∂
+->
+kìp
+ = keep;
+
+61 
+im∂
+->
+d⁄e
+ = 0;
+
+62 
+im∂
+->
+dñëe
+ = 0;
+
+63 
+im∂
+->
+a˘ive
+ = 1;
+
+65 
+	`±hªad_muãx_öô
+(&
+im∂
+->
+lock
+, 
+NULL
+);
+
+66 
+	`±hªad_c⁄d_öô
+(&
+im∂
+->
+ªady
+, 
+NULL
+);
+
+68  
+	`±hªad_¸óã
+(&
+im∂
+->
+pid
+, 
+NULL
+, 
+thªad_ru¡öe
+, impl);
+
+69 
+	}
+}
+
+76 
+	$±hªad_run
+(
+thªad_t
+ *
+im∂
+)
+
+78 i‡(
+im∂
+ =
+NULL
+ || !im∂->
+a˘ive
+) ;
+
+80 
+im∂
+->
+run
+ = 1;
+
+83 
+	}
+}
+
+92 
+	$±hªad_exec
+(
+thªad_t
+ *
+im∂
+, 
+±hªad_ru¡öe
+ 
+ru¡öe
+, *
+¨g
+)
+
+94 i‡(
+im∂
+ =
+NULL
+ || !im∂->
+a˘ive
+) ;
+
+96 
+im∂
+->
+w‹kî
+.
+ru¡öe
+ =Ñuntine;
+
+97 
+im∂
+->
+w‹kî
+.
+¨g
+ =árg;
+
+99 
+im∂
+->
+run
+ = 1;
+
+100 
+im∂
+->
+d⁄e
+ = 0;
+
+103 
+	}
+}
+
+112 
+	$±hªad_lock
+(
+thªad_t
+ *
+im∂
+)
+
+114 i‡(
+im∂
+ =
+NULL
+ || im∂->
+a˘ive
+)  -1;
+
+116  
+	`±hªad_muãx_lock
+(&
+im∂
+->
+lock
+);
+
+117 
+	}
+}
+
+126 
+	$±hªad_åylock
+(
+thªad_t
+ *
+im∂
+)
+
+128 i‡(
+im∂
+ =
+NULL
+ && !im∂->
+a˘ive
+)  -1;
+
+130  
+	`±hªad_muãx_åylock
+(&
+im∂
+->
+lock
+);
+
+131 
+	}
+}
+
+140 
+	$±hªad_u∆ock
+(
+thªad_t
+ *
+im∂
+)
+
+142 i‡(
+im∂
+ =
+NULL
+ && !im∂->
+a˘ive
+)  -1;
+
+144  
+	`±hªad_muãx_u∆ock
+(&
+im∂
+->
+lock
+);
+
+145 
+	}
+}
+
+154 
+	$±hªad_dñëe
+(
+thªad_t
+ *
+im∂
+)
+
+156 
+waô_tm
+ = 10 * 100;
+
+157 i‡(
+im∂
+ =
+NULL
+ || !im∂->
+a˘ive
+)  -1;
+
+159 i‡(
+im∂
+->
+run
+)
+
+161 
+waô_tm
+-- > 0)
+
+163 i‡(
+im∂
+->
+d⁄e
+) ;
+
+164 
+	`u¶ìp
+(10);
+
+168 
+im∂
+->
+dñëe
+ = 1;
+
+169 
+	`¶ìp
+(1);
+
+171 i‡(!
+im∂
+->
+d⁄e
+)
+
+173 
+	`±hªad_ˇn˚l
+(
+im∂
+->
+pid
+);
+
+174 
+	`±hªad_muãx_de°roy
+(&
+im∂
+->
+lock
+);
+
+175 
+	`±hªad_c⁄d_de°roy
+(&
+im∂
+->
+ªady
+);
+
+179 
+	}
+}
+
+186 
+	$±hªad_waô_ovî
+(
+thªad_t
+ *
+im∂
+)
+
+188 i‡(
+im∂
+ =
+NULL
+ || !im∂->
+a˘ive
+) ;
+
+190 
+	`±hªad_joö
+(
+im∂
+->
+pid
+, 
+NULL
+);
+
+193 
+	}
+}
+
+200 
+	$±hªad_time_waô_ovî
+(
+thªad_t
+ *
+im∂
+, 
+tm_ms
+)
+
+202 
+timevÆ
+ 
+tv
+ = {0};
+
+203 
+timî_accuøcy
+ = 100;
+
+204 i‡(
+im∂
+ =
+NULL
+ || !im∂->
+a˘ive
+) ;
+
+208 
+tv
+.
+tv_£c
+ = 0;
+
+209 
+tv
+.
+tv_u£c
+ = 1000 * 
+timî_accuøcy
+;
+
+211 
+	`£À˘
+(0, 
+NULL
+, NULL, NULL, &
+tv
+);
+
+212 i‡(!
+im∂
+->
+run
+)
+
+217 
+tm_ms
+ -
+timî_accuøcy
+;
+
+218 i‡(
+tm_ms
+ <= 0)
+
+220 i‡(
+im∂
+->
+run
+Ë
+	`±hªad_ˇn˚l
+(im∂->
+pid
+);
+
+226 
+	}
+}
+
+	@bak/thread.h
+
+1 #i‚de‡
+__THREAD_H__
+
+
+2 
+	#__THREAD_H__
+
+
+	)
+
+3 
+	~<°dio.h
+>
+
+4 
+	~<uni°d.h
+>
+
+5 
+	~<±hªad.h
+>
+
+6 
+	~<sys/£À˘.h
+>
+
+12 * (*
+	t±hªad_ru¡öe
+)(*);
+
+14 
+	s±hªad_w‹kî
+
+
+16 
+±hªad_ru¡öe
+ 
+	mru¡öe
+;
+
+17 *
+	m¨g
+;
+
+18 } 
+	t±hªad_w‹kî_t
+;
+
+20 
+	sthªad_im∂
+
+
+22 
+	ma˘ive
+;
+
+23 
+	mkìp
+;
+
+24 
+	mrun
+;
+
+25 
+	mdñëe
+;
+
+26 
+	md⁄e
+;
+
+27 
+±hªad_t
+ 
+	mpid
+;
+
+28 
+±hªad_w‹kî_t
+ 
+	mw‹kî
+;
+
+29 
+±hªad_muãx_t
+ 
+	mlock
+;
+
+30 
+±hªad_c⁄d_t
+ 
+	mªady
+;
+
+31 } 
+	tthªad_t
+;
+
+42 
+±hªad_°¨t
+(
+thªad_t
+ *
+im∂
+, 
+±hªad_ru¡öe
+ 
+ru¡öe
+, *
+¨g
+, 
+run
+, 
+kìp
+);
+
+51 
+±hªad_exec
+(
+thªad_t
+ *
+im∂
+, 
+±hªad_ru¡öe
+ 
+ru¡öe
+, *
+¨g
+);
+
+58 
+±hªad_run
+(
+thªad_t
+ *
+im∂
+);
+
+67 
+±hªad_lock
+(
+thªad_t
+ *
+im∂
+);
+
+76 
+±hªad_åylock
+(
+thªad_t
+ *
+im∂
+);
+
+85 
+±hªad_u∆ock
+(
+thªad_t
+ *
+im∂
+);
+
+94 
+±hªad_dñëe
+(
+thªad_t
+ *
+im∂
+);
+
+101 
+±hªad_waô_ovî
+(
+thªad_t
+ *
+im∂
+);
+
+108 
+±hªad_time_waô_ovî
+(
+thªad_t
+ *
+im∂
+, 
+tm_ms
+);
+
+	@thread.c
+
+1 
+	~<thªad.h
+>
+
+10 *
+	$thªad_ru¡öe
+(*
+¨g
+)
+
+12 
+thªad_t
+ *
+im∂
+ = (thªad_à*)
+¨g
+;
+
+13 
+±hªad_w‹kî_t
+ *
+w‹kî
+ = &
+im∂
+->worker;
+
+15 
+im∂
+->
+a˘ive
+)
+
+17 i‡(!
+im∂
+->
+run
+) ;
+
+19 i‡(
+w‹kî
+->
+ru¡öe
+ !
+NULL
+ && 
+im∂
+->
+run
+)
+
+21 
+w‹kî
+->
+	`ru¡öe
+(w‹kî->
+¨g
+);
+
+23 
+w‹kî
+->
+ru¡öe
+ = 
+NULL
+;
+
+24 
+w‹kî
+->
+¨g
+ = 
+NULL
+;
+
+25 
+im∂
+->
+d⁄e
+ = 1;
+
+28 i‡(!
+im∂
+->
+kìp
+) ;
+
+29 i‡(
+im∂
+->
+dñëe
+) ;
+
+32 
+	`¥ötf
+("pthread over\n");
+
+33 
+im∂
+->
+a˘ive
+ = 0;
+
+34 
+im∂
+->
+dñëe
+ = 1;
+
+35 
+im∂
+->
+d⁄e
+ = 1;
+
+36 
+im∂
+->
+run
+ = 0;
+
+38 
+	`±hªad_muãx_de°roy
+(&
+im∂
+->
+lock
+);
+
+39 
+	`±hªad_c⁄d_de°roy
+(&
+im∂
+->
+ªady
+);
+
+41  
+NULL
+;
+
+42 
+	}
+}
+
+53 
+±hªad_°¨t
+(
+thªad_t
+ *
+im∂
+, 
+±hªad_ru¡öe
+ 
+ru¡öe
+, *
+¨g
+,\
+
+54 
+run
+, 
+kìp
+)
+
+56 i‡(
+	gim∂
+ =
+NULL
+ || 
+im∂
+->
+a˘ive
+)  -1;
+
+58 
+	gim∂
+->
+	gw‹kî
+.
+	gru¡öe
+ = 
+ru¡öe
+;
+
+59 
+	gim∂
+->
+	gw‹kî
+.
+	g¨g
+ = 
+¨g
+;
+
+61 
+	gim∂
+->
+	grun
+ = 
+run
+;
+
+62 
+	gim∂
+->
+	gkìp
+ = 
+kìp
+;
+
+63 
+	gim∂
+->
+	gd⁄e
+ = 0;
+
+64 
+	gim∂
+->
+	gdñëe
+ = 0;
+
+65 
+	gim∂
+->
+	ga˘ive
+ = 1;
+
+67 
+±hªad_muãx_öô
+(&
+im∂
+->
+lock
+, 
+NULL
+);
+
+68 
+±hªad_c⁄d_öô
+(&
+im∂
+->
+ªady
+, 
+NULL
+);
+
+70  
+±hªad_¸óã
+(&
+im∂
+->
+pid
+, 
+NULL
+, 
+thªad_ru¡öe
+, impl);
+
+78 
+	$±hªad_run
+(
+thªad_t
+ *
+im∂
+)
+
+80 i‡(
+im∂
+ =
+NULL
+ || !im∂->
+a˘ive
+) ;
+
+82 
+im∂
+->
+run
+ = 1;
+
+83 
+im∂
+->
+d⁄e
+ = 0;
+
+86 
+	}
+}
+
+95 
+	$±hªad_exec
+(
+thªad_t
+ *
+im∂
+, 
+±hªad_ru¡öe
+ 
+ru¡öe
+, *
+¨g
+)
+
+97 i‡(
+im∂
+ =
+NULL
+ || !im∂->
+a˘ive
+ || !im∂->
+kìp
+) ;
+
+99 !
+im∂
+->
+d⁄e
+Ë
+	`u¶ìp
+(10);
+
+100 
+im∂
+->
+run
+ = 0;
+
+101 
+im∂
+->
+w‹kî
+.
+ru¡öe
+ =Ñuntine;
+
+102 
+im∂
+->
+w‹kî
+.
+¨g
+ =árg;
+
+104 
+im∂
+->
+run
+ = 1;
+
+105 
+im∂
+->
+d⁄e
+ = 0;
+
+108 
+	}
+}
+
+117 
+	$±hªad_lock
+(
+thªad_t
+ *
+im∂
+)
+
+119 i‡(
+im∂
+ =
+NULL
+ || im∂->
+a˘ive
+)  -1;
+
+121  
+	`±hªad_muãx_lock
+(&
+im∂
+->
+lock
+);
+
+122 
+	}
+}
+
+131 
+	$±hªad_åylock
+(
+thªad_t
+ *
+im∂
+)
+
+133 i‡(
+im∂
+ =
+NULL
+ && !im∂->
+a˘ive
+)  -1;
+
+135  
+	`±hªad_muãx_åylock
+(&
+im∂
+->
+lock
+);
+
+136 
+	}
+}
+
+145 
+	$±hªad_u∆ock
+(
+thªad_t
+ *
+im∂
+)
+
+147 i‡(
+im∂
+ =
+NULL
+ && !im∂->
+a˘ive
+)  -1;
+
+149  
+	`±hªad_muãx_u∆ock
+(&
+im∂
+->
+lock
+);
+
+150 
+	}
+}
+
+159 
+	$±hªad_dñëe
+(
+thªad_t
+ *
+im∂
+)
+
+161 
+waô_tm
+ = 10 * 100;
+
+162 i‡(
+im∂
+ =
+NULL
+ || !im∂->
+a˘ive
+)  -1;
+
+165 i‡(
+im∂
+->
+run
+)
+
+167 
+waô_tm
+-- > 0)
+
+169 i‡(
+im∂
+->
+d⁄e
+) ;
+
+170 
+	`u¶ìp
+(10);
+
+175 
+im∂
+->
+dñëe
+ = 1;
+
+178 i‡(
+im∂
+->
+run
+)
+
+180 
+waô_tm
+-- > 0)
+
+182 i‡(
+im∂
+->
+d⁄e
+) ;
+
+183 
+	`u¶ìp
+(10);
+
+188 i‡(!
+im∂
+->
+d⁄e
+)
+
+190 
+	`±hªad_ˇn˚l
+(
+im∂
+->
+pid
+);
+
+191 
+	`±hªad_muãx_de°roy
+(&
+im∂
+->
+lock
+);
+
+192 
+	`±hªad_c⁄d_de°roy
+(&
+im∂
+->
+ªady
+);
+
+196 
+	}
+}
+
+203 
+	$±hªad_waô_ovî
+(
+thªad_t
+ *
+im∂
+)
+
+205 i‡(
+im∂
+ =
+NULL
+ || !im∂->
+a˘ive
+) ;
+
+207 
+	`±hªad_joö
+(
+im∂
+->
+pid
+, 
+NULL
+);
+
+210 
+	}
+}
+
+217 
+	$±hªad_time_waô_ovî
+(
+thªad_t
+ *
+im∂
+, 
+tm_ms
+)
+
+219 
+timevÆ
+ 
+tv
+ = {0};
+
+220 
+timî_accuøcy
+ = 100;
+
+221 i‡(
+im∂
+ =
+NULL
+ || !im∂->
+a˘ive
+) ;
+
+225 
+tv
+.
+tv_£c
+ = 0;
+
+226 
+tv
+.
+tv_u£c
+ = 1000 * 
+timî_accuøcy
+;
+
+228 
+	`£À˘
+(0, 
+NULL
+, NULL, NULL, &
+tv
+);
+
+229 i‡(!
+im∂
+->
+run
+)
+
+234 
+tm_ms
+ -
+timî_accuøcy
+;
+
+235 i‡(
+tm_ms
+ <= 0)
+
+237 i‡(
+im∂
+->
+run
+Ë
+	`±hªad_ˇn˚l
+(im∂->
+pid
+);
+
+243 
+	}
+}
+
+	@thread.h
+
+1 #i‚de‡
+__THREAD_H__
+
+
+2 
+	#__THREAD_H__
+
+
+	)
+
+3 
+	~<°dio.h
+>
+
+4 
+	~<uni°d.h
+>
+
+5 
+	~<±hªad.h
+>
+
+6 
+	~<sys/£À˘.h
+>
+
+12 * (*
+	t±hªad_ru¡öe
+)(*);
+
+14 
+	s±hªad_w‹kî
+
+
+16 
+±hªad_ru¡öe
+ 
+	mru¡öe
+;
+
+17 *
+	m¨g
+;
+
+18 } 
+	t±hªad_w‹kî_t
+;
+
+20 
+	sthªad_im∂
+
+
+22 
+	ma˘ive
+;
+
+23 
+	mkìp
+;
+
+24 
+	mrun
+;
+
+25 
+	mdñëe
+;
+
+26 
+	md⁄e
+;
+
+27 
+±hªad_t
+ 
+	mpid
+;
+
+28 
+±hªad_w‹kî_t
+ 
+	mw‹kî
+;
+
+29 
+±hªad_muãx_t
+ 
+	mlock
+;
+
+30 
+±hªad_c⁄d_t
+ 
+	mªady
+;
+
+31 } 
+	tthªad_t
+;
+
+42 
+±hªad_°¨t
+(
+thªad_t
+ *
+im∂
+, 
+±hªad_ru¡öe
+ 
+ru¡öe
+, *
+¨g
+, 
+run
+, 
+kìp
+);
+
+51 
+±hªad_exec
+(
+thªad_t
+ *
+im∂
+, 
+±hªad_ru¡öe
+ 
+ru¡öe
+, *
+¨g
+);
+
+58 
+±hªad_run
+(
+thªad_t
+ *
+im∂
+);
+
+67 
+±hªad_lock
+(
+thªad_t
+ *
+im∂
+);
+
+76 
+±hªad_åylock
+(
+thªad_t
+ *
+im∂
+);
+
+85 
+±hªad_u∆ock
+(
+thªad_t
+ *
+im∂
+);
+
+94 
+±hªad_dñëe
+(
+thªad_t
+ *
+im∂
+);
+
+101 
+±hªad_waô_ovî
+(
+thªad_t
+ *
+im∂
+);
+
+108 
+±hªad_time_waô_ovî
+(
+thªad_t
+ *
+im∂
+, 
+tm_ms
+);
+
+	@
+1
+.
+0
+4
+44
+bak/thread.c
+bak/thread.h
+thread.c
+thread.h

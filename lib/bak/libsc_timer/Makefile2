@@ -1,0 +1,102 @@
+#/*************************************************************        
+#FileName : makefile   
+#FileFunc : Linux编译链接源程序,生成目标文件,库或者可执行代码      
+#Version  : V0.1        
+#Author   : Sunrier        
+#Date     : 2012-06-14   
+#Descp    : Linux下makefile模板       
+#*************************************************************/     
+# Make command to use for dependencies
+MAKE=make
+RM=rm
+MKDIR=mkdir
+CC = gcc
+
+# exec namae
+ifndef NAME
+NAME=$(notdir $(shell pwd))
+endif
+
+# target
+TARGET=$(NAME)
+
+# include
+INC_PATH=.
+INC=$(addprefix -I ,$(INC_PATH))
+
+# search the lib which complied by myself
+CFG_LIB_PATH=. 
+CFG_LIB=$(wildcard $(addsuffix /*.a,$(CFG_LIB_PATH)))
+CFG_LIB+=$(wildcard $(addsuffix /*.so,$(CFG_LIB_PATH)))
+# other librarys
+OTH_LIB=-lpthread
+# Library of compling
+LIB_PATH=$(addprefix -L ,$(CFG_LIB_PATH))
+LIB:=$(LIBPATH) $(CFG_LIB) $(OTH_LIB)
+
+# source of .c and .o
+SRC_PATH=. t main
+SRC=$(wildcard $(addsuffix /*.c,$(SRC_PATH)))
+CFG_OBJ=$(patsubst %.c,%.o,$(notdir $(SRC)))
+OBJ=$(SRC:.c=.o)
+
+# dependent files .d
+CDEF = $(SRC:.c=.d)
+
+# Warning
+WARNING=-Wall#-Wno-unused -Wno-format
+CFLAGS+=$(WARNING) -O2 -Werror
+
+#Configuration: Debug or Release
+ifndef CFG
+CFG=debug
+endif
+
+OUTDIR=
+ifeq "$(CFG)" "debug"
+OUTDIR=debug
+CFLAGS+=-g
+else
+OUTDIR=release/
+endif
+
+# complie
+COMPILE=$(CC) $(CFLAGS) $(INC) $(LIB) -c $< -o $(OUTDIR)/$(*F).o
+LINK=$(CC) $(CFLAGS) -o $@ $(OUTDIR)/*.o $(LIB) #$(OBJ) 
+
+all:$(TARGET)
+
+$(CDEF) : %.d : %.c
+	$(MAKEDEPEND) $(<:.c=.o) $< > $@
+depend :
+	-rm -f $(CDEF)
+	$(MAKE) $(CDEF)
+$(CFG_OBJ) : $(SRC)
+	$(COMPILE)
+$(OUTDIR) :
+	$(MKDIR) -p debug
+$(TARGET) : $(OUTDIR) $(CFG_OBJ)
+	$(LINK)
+	#$(CC) -o $@ $(OBJ) $(CFLAGS) $(LIB)
+
+include $(CDEF)
+include $(CPPDEF)
+
+PHONY=rebuild clean cleanall install
+.PHONY : $(PHONY)
+# Rebuild this project
+rebuild : cleanall all
+#
+# Clean this project
+clean :
+	-$(RM) -f $(OBJ)
+	-$(RM) -f $(TARGET)
+
+# Clean this project and all dependencies
+cleanall : clean
+	#-$(RM) cscope.*
+	#-$(RM) tags
+
+# Install lib or share
+install:
+	$(INSTALL_CMD)

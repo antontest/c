@@ -1,0 +1,103 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+__THREAD_H__	bak/thread.h	2;"	d
+__THREAD_H__	thread.h	2;"	d
+active	bak/thread.h	/^    int active;$/;"	m	struct:thread_impl	access:public
+active	thread.h	/^    int active;$/;"	m	struct:thread_impl	access:public
+arg	bak/thread.h	/^    void *arg;$/;"	m	struct:pthread_worker	access:public
+arg	thread.h	/^    void *arg;$/;"	m	struct:pthread_worker	access:public
+delete	bak/thread.h	/^    int delete;$/;"	m	struct:thread_impl	access:public
+delete	thread.h	/^    int delete;$/;"	m	struct:thread_impl	access:public
+done	bak/thread.h	/^    int done;$/;"	m	struct:thread_impl	access:public
+done	thread.h	/^    int done;$/;"	m	struct:thread_impl	access:public
+keep	bak/thread.h	/^    int keep;$/;"	m	struct:thread_impl	access:public
+keep	thread.h	/^    int keep;$/;"	m	struct:thread_impl	access:public
+lock	bak/thread.h	/^    pthread_mutex_t lock;$/;"	m	struct:thread_impl	access:public
+lock	thread.h	/^    pthread_mutex_t lock;$/;"	m	struct:thread_impl	access:public
+pid	bak/thread.h	/^    pthread_t pid;$/;"	m	struct:thread_impl	access:public
+pid	thread.h	/^    pthread_t pid;$/;"	m	struct:thread_impl	access:public
+pthread_delete	bak/thread.c	/^int pthread_delete(thread_t *impl)$/;"	f	signature:(thread_t *impl)
+pthread_delete	bak/thread.h	/^int pthread_delete(thread_t *impl);$/;"	p	signature:(thread_t *impl)
+pthread_delete	thread.c	/^int pthread_delete(thread_t *impl)$/;"	f	signature:(thread_t *impl)
+pthread_delete	thread.h	/^int pthread_delete(thread_t *impl);$/;"	p	signature:(thread_t *impl)
+pthread_exec	bak/thread.c	/^void pthread_exec(thread_t *impl, pthread_runtine runtine, void *arg)$/;"	f	signature:(thread_t *impl, pthread_runtine runtine, void *arg)
+pthread_exec	bak/thread.h	/^void pthread_exec(thread_t *impl, pthread_runtine runtine, void *arg);$/;"	p	signature:(thread_t *impl, pthread_runtine runtine, void *arg)
+pthread_exec	thread.c	/^void pthread_exec(thread_t *impl, pthread_runtine runtine, void *arg)$/;"	f	signature:(thread_t *impl, pthread_runtine runtine, void *arg)
+pthread_exec	thread.h	/^void pthread_exec(thread_t *impl, pthread_runtine runtine, void *arg);$/;"	p	signature:(thread_t *impl, pthread_runtine runtine, void *arg)
+pthread_lock	bak/thread.c	/^int pthread_lock(thread_t *impl)$/;"	f	signature:(thread_t *impl)
+pthread_lock	bak/thread.h	/^int pthread_lock(thread_t *impl);$/;"	p	signature:(thread_t *impl)
+pthread_lock	thread.c	/^int pthread_lock(thread_t *impl)$/;"	f	signature:(thread_t *impl)
+pthread_lock	thread.h	/^int pthread_lock(thread_t *impl);$/;"	p	signature:(thread_t *impl)
+pthread_run	bak/thread.c	/^void pthread_run(thread_t *impl)$/;"	f	signature:(thread_t *impl)
+pthread_run	bak/thread.h	/^void pthread_run(thread_t *impl);$/;"	p	signature:(thread_t *impl)
+pthread_run	thread.c	/^void pthread_run(thread_t *impl)$/;"	f	signature:(thread_t *impl)
+pthread_run	thread.h	/^void pthread_run(thread_t *impl);$/;"	p	signature:(thread_t *impl)
+pthread_runtine	bak/thread.h	/^typedef void* (*pthread_runtine)(void*);$/;"	t
+pthread_runtine	thread.h	/^typedef void* (*pthread_runtine)(void*);$/;"	t
+pthread_start	bak/thread.c	/^int pthread_start(thread_t *impl, pthread_runtine runtine, void *arg, int run, int keep)$/;"	f	signature:(thread_t *impl, pthread_runtine runtine, void *arg, int run, int keep)
+pthread_start	bak/thread.h	/^int pthread_start(thread_t *impl, pthread_runtine runtine, void *arg, int run, int keep);$/;"	p	signature:(thread_t *impl, pthread_runtine runtine, void *arg, int run, int keep)
+pthread_start	thread.c	/^int pthread_start(thread_t *impl, pthread_runtine runtine, void *arg, int run)$/;"	f	signature:(thread_t *impl, pthread_runtine runtine, void *arg, int run)
+pthread_start	thread.c	/^int pthread_start(thread_t *impl, pthread_runtine runtine, void *arg, int run, int keep)$/;"	f	signature:(thread_t *impl, pthread_runtine runtine, void *arg, int run, int keep)
+pthread_start	thread.c	/^int pthread_start(thread_t *impl, pthread_runtine runtine, void *arg,\\$/;"	f	signature:(thread_t *impl, pthread_runtine runtine, void *arg,\ int run, int keep)
+pthread_start	thread.h	/^int pthread_start(thread_t *impl, pthread_runtine runtine, void *arg, int run);$/;"	p	signature:(thread_t *impl, pthread_runtine runtine, void *arg, int run)
+pthread_start	thread.h	/^int pthread_start(thread_t *impl, pthread_runtine runtine, void *arg, int run, int keep);$/;"	p	signature:(thread_t *impl, pthread_runtine runtine, void *arg, int run, int keep)
+pthread_time_wait_over	bak/thread.c	/^void pthread_time_wait_over(thread_t *impl, int tm_ms)$/;"	f	signature:(thread_t *impl, int tm_ms)
+pthread_time_wait_over	bak/thread.h	/^void pthread_time_wait_over(thread_t *impl, int tm_ms);$/;"	p	signature:(thread_t *impl, int tm_ms)
+pthread_time_wait_over	thread.c	/^void pthread_time_wait_over(thread_t *impl, int tm_ms)$/;"	f	signature:(thread_t *impl, int tm_ms)
+pthread_time_wait_over	thread.h	/^void pthread_time_wait_over(thread_t *impl, int tm_ms);$/;"	p	signature:(thread_t *impl, int tm_ms)
+pthread_trylock	bak/thread.c	/^int pthread_trylock(thread_t *impl)$/;"	f	signature:(thread_t *impl)
+pthread_trylock	bak/thread.h	/^int pthread_trylock(thread_t *impl);$/;"	p	signature:(thread_t *impl)
+pthread_trylock	thread.c	/^int pthread_trylock(thread_t *impl)$/;"	f	signature:(thread_t *impl)
+pthread_trylock	thread.h	/^int pthread_trylock(thread_t *impl);$/;"	p	signature:(thread_t *impl)
+pthread_unlock	bak/thread.c	/^int pthread_unlock(thread_t *impl)$/;"	f	signature:(thread_t *impl)
+pthread_unlock	bak/thread.h	/^int pthread_unlock(thread_t *impl);$/;"	p	signature:(thread_t *impl)
+pthread_unlock	thread.c	/^int pthread_unlock(thread_t *impl)$/;"	f	signature:(thread_t *impl)
+pthread_unlock	thread.h	/^int pthread_unlock(thread_t *impl);$/;"	p	signature:(thread_t *impl)
+pthread_wait_over	bak/thread.c	/^void pthread_wait_over(thread_t *impl)$/;"	f	signature:(thread_t *impl)
+pthread_wait_over	bak/thread.h	/^void pthread_wait_over(thread_t *impl);$/;"	p	signature:(thread_t *impl)
+pthread_wait_over	thread.c	/^void pthread_wait_over(thread_t *impl)$/;"	f	signature:(thread_t *impl)
+pthread_wait_over	thread.h	/^void pthread_wait_over(thread_t *impl);$/;"	p	signature:(thread_t *impl)
+pthread_worker	bak/thread.h	/^typedef struct pthread_worker $/;"	s
+pthread_worker	thread.h	/^typedef struct pthread_worker $/;"	s
+pthread_worker::arg	bak/thread.h	/^    void *arg;$/;"	m	struct:pthread_worker	access:public
+pthread_worker::arg	thread.h	/^    void *arg;$/;"	m	struct:pthread_worker	access:public
+pthread_worker::runtine	bak/thread.h	/^    pthread_runtine runtine;$/;"	m	struct:pthread_worker	access:public
+pthread_worker::runtine	thread.h	/^    pthread_runtine runtine;$/;"	m	struct:pthread_worker	access:public
+pthread_worker_t	bak/thread.h	/^} pthread_worker_t;$/;"	t	typeref:struct:pthread_worker
+pthread_worker_t	thread.h	/^} pthread_worker_t;$/;"	t	typeref:struct:pthread_worker
+ready	bak/thread.h	/^    pthread_cond_t ready;$/;"	m	struct:thread_impl	access:public
+ready	thread.h	/^    pthread_cond_t ready;$/;"	m	struct:thread_impl	access:public
+run	bak/thread.h	/^    int run;$/;"	m	struct:thread_impl	access:public
+run	thread.h	/^    int run;$/;"	m	struct:thread_impl	access:public
+runtine	bak/thread.h	/^    pthread_runtine runtine;$/;"	m	struct:pthread_worker	access:public
+runtine	thread.h	/^    pthread_runtine runtine;$/;"	m	struct:pthread_worker	access:public
+thread_impl	bak/thread.h	/^typedef struct thread_impl $/;"	s
+thread_impl	thread.h	/^typedef struct thread_impl $/;"	s
+thread_impl::active	bak/thread.h	/^    int active;$/;"	m	struct:thread_impl	access:public
+thread_impl::active	thread.h	/^    int active;$/;"	m	struct:thread_impl	access:public
+thread_impl::delete	bak/thread.h	/^    int delete;$/;"	m	struct:thread_impl	access:public
+thread_impl::delete	thread.h	/^    int delete;$/;"	m	struct:thread_impl	access:public
+thread_impl::done	bak/thread.h	/^    int done;$/;"	m	struct:thread_impl	access:public
+thread_impl::done	thread.h	/^    int done;$/;"	m	struct:thread_impl	access:public
+thread_impl::keep	bak/thread.h	/^    int keep;$/;"	m	struct:thread_impl	access:public
+thread_impl::keep	thread.h	/^    int keep;$/;"	m	struct:thread_impl	access:public
+thread_impl::lock	bak/thread.h	/^    pthread_mutex_t lock;$/;"	m	struct:thread_impl	access:public
+thread_impl::lock	thread.h	/^    pthread_mutex_t lock;$/;"	m	struct:thread_impl	access:public
+thread_impl::pid	bak/thread.h	/^    pthread_t pid;$/;"	m	struct:thread_impl	access:public
+thread_impl::pid	thread.h	/^    pthread_t pid;$/;"	m	struct:thread_impl	access:public
+thread_impl::ready	bak/thread.h	/^    pthread_cond_t ready;$/;"	m	struct:thread_impl	access:public
+thread_impl::ready	thread.h	/^    pthread_cond_t ready;$/;"	m	struct:thread_impl	access:public
+thread_impl::run	bak/thread.h	/^    int run;$/;"	m	struct:thread_impl	access:public
+thread_impl::run	thread.h	/^    int run;$/;"	m	struct:thread_impl	access:public
+thread_impl::worker	bak/thread.h	/^    pthread_worker_t worker;$/;"	m	struct:thread_impl	access:public
+thread_impl::worker	thread.h	/^    pthread_worker_t worker;$/;"	m	struct:thread_impl	access:public
+thread_runtine	bak/thread.c	/^void *thread_runtine(void *arg)$/;"	f	signature:(void *arg)
+thread_runtine	thread.c	/^void *thread_runtine(void *arg)$/;"	f	signature:(void *arg)
+thread_t	bak/thread.h	/^} thread_t;$/;"	t	typeref:struct:thread_impl
+thread_t	thread.h	/^} thread_t;$/;"	t	typeref:struct:thread_impl
+worker	bak/thread.h	/^    pthread_worker_t worker;$/;"	m	struct:thread_impl	access:public
+worker	thread.h	/^    pthread_worker_t worker;$/;"	m	struct:thread_impl	access:public

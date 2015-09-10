@@ -1,0 +1,2 @@
+/home/anton/tools/include/queue.h
+/home/anton/tools/lib/libqueue.a

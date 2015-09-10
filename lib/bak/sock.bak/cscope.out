@@ -1,0 +1,1109 @@
+cscope 15 $HOME/working/program/lib/sock -q 0000000109 0000005166
+	@sock.c
+
+1 
+	~"sock.h
+"
+
+10 
+	$g‘_loÿl_
+(
+
+[])
+
+12 
+içddrs
+ *
+içddr
+ = 
+NULL
+;
+
+13 *
+tmp_addr
+ = 
+NULL
+;
+
+14 
+tmp_
+[20] = {0};
+
+15 *
+hÇme
+ = 
+NULL
+;
+
+17 ià(
+
+ =ğ
+NULL
+)  -1;
+
+19 
+	`g‘içddrs
+(&
+içddr
+);
+
+20 
+içddr
+ !ğ
+NULL
+)
+
+22 ià(
+içddr
+->
+iç_addr
+->
+§_çmy
+ =ğ
+AF_INET
+)
+
+24 
+tmp_addr
+ = &((
+sockaddr_š
+ *)
+içddr
+->
+iç_addr
+)->
+sš_addr
+;
+
+25 
+	`š‘_Áİ
+(
+AF_INET
+, 
+tmp_addr
+, 
+tmp_
+, 
+INET_ADDRSTRLEN
+);
+
+26 
+hÇme
+ = 
+içddr
+->
+iç_Çme
+;
+
+27 ià(
+hÇme
+[0] !ğ'l'è
+	`¡ºıy
+(
+
+, 
+tmp_
+, 20);
+
+30 
+içddr
+ = içddr->
+iç_Ãxt
+;
+
+33 
+	`ä“içddrs
+(
+içddr
+);
+
+36 
+	}
+}
+
+47 
+	$sock‘_ü—‹
+(
+domaš
+, 
+ty³
+)
+
+49  
+	`sock‘
+(
+domaš
+, 
+ty³
+, 0);
+
+50 
+	}
+}
+
+59 
+	$sock‘_š™
+(
+sockaddr_š
+ *
+addr
+, cÚ¡ *
+
+, 
+pÜt
+)
+
+65 
+addr
+->
+sš_çmy
+ = 
+AF_INET
+;
+
+66 
+addr
+->
+sš_addr
+.
+s_addr
+ = 
+	`š‘_addr
+(
+
+);
+
+67 
+addr
+->
+sš_pÜt
+ = 
+	`htÚs
+(
+pÜt
+);
+
+70 
+	}
+}
+
+82 
+	$sock‘_bšd
+(
+fd
+, 
+pÜt
+, cÚ¡ *
+
+, 
+sockaddr_š
+ *
+addr
+)
+
+84 ià(
+fd
+ < 0 || 
+addr
+ =ğ
+NULL
+)  -1;
+
+86 
+	`sock‘_š™
+(
+addr
+, 
+
+, 
+pÜt
+);
+
+88  
+	`bšd
+(
+fd
+,(
+sockaddr
+ *)
+addr
+,(
+sockaddr_š
+));
+
+89 
+	}
+}
+
+99 
+	$sock‘_li¡’
+(
+fd
+, 
+backlog
+)
+
+101 ià(
+fd
+ < 0)  -1;
+
+102  
+	`li¡’
+(
+fd
+, 
+backlog
+);
+
+103 
+	}
+}
+
+113 
+	$sock‘_acû±
+(
+fd
+, 
+sockaddr_š
+ *
+şi_addr
+)
+
+115 
+sockËn_t
+ 
+Ën
+ = (
+sockaddr
+);
+
+117 ià(
+fd
+ < 0)  -1;
+
+118  
+	`acû±
+(
+fd
+, (
+sockaddr
+ *)
+şi_addr
+, &
+Ën
+);
+
+119 
+	}
+}
+
+129 
+	$sock‘_cÚÃù
+(
+fd
+, 
+sockaddr_š
+ *
+şi_addr
+)
+
+131 ià(
+fd
+ < 0)  -1;
+
+132  
+	`cÚÃù
+(
+fd
+, (
+sockaddr
+ *)
+şi_addr
+, (sockaddr));
+
+133 
+	}
+}
+
+142 
+	$sock‘_şo£
+(
+fd
+)
+
+144  
+	`şo£
+(
+fd
+);
+
+145 
+	}
+}
+
+154 * 
+	$sock_ruÁše
+(*
+¬gs
+)
+
+156 
+sock
+ *
+sck
+ = (sock *)
+¬gs
+;
+
+157 
+sockaddr_š
+ 
+şŸddr
+;
+
+158 
+fd_£t
+ 
+£t
+;
+
+159 
+fd_£t
+ 
+®l£t
+;
+
+160 
+şifd
+ = -1;
+
+161 
+£rfd
+ = 
+sck
+->
+fd
+;
+
+162 
+maxfd
+ = 
+sck
+->
+fd
+;
+
+163 
+fd
+ = -1;
+
+164 
+maxi
+ = -1;
+
+165 
+i
+ = 0;
+
+166 
+Ä—dy
+ = 0;
+
+167 
+sockËn_t
+ 
+Ën
+ = -1;
+
+168 
+»cvbuf
+[128] = {0};
+
+170 ià(
+¬gs
+ =ğ
+NULL
+)  NULL;
+
+172 
+i
+ = 0; i < 
+MAX_CLIENT_NUM
+; i++)
+
+173 
+sck
+->
+şi_fd
+[
+i
+] = -1;
+
+175 
+	`FD_ZERO
+(&
+®l£t
+);
+
+176 
+	`FD_SET
+(
+£rfd
+, &
+®l£t
+);
+
+179 
+£t
+ = 
+®l£t
+;
+
+180 
+Ä—dy
+ = 
+	`£Ëù
+(
+maxfd
+ + 1, &
+£t
+, 
+NULL
+, NULL, NULL);
+
+182 ià(
+	`FD_ISSET
+(
+£rfd
+, &
+£t
+))
+
+184 
+Ën
+ = (
+sockaddr_š
+);
+
+185 
+şifd
+ = 
+	`acû±
+(
+£rfd
+, (
+sockaddr
+ *)&
+şŸddr
+, &
+Ën
+);
+
+187 
+i
+ = 0; i < 
+MAX_CLIENT_NUM
+; i++)
+
+189 ià(
+sck
+->
+şi_fd
+[
+i
+] < 0)
+
+191 
+sck
+->
+şi_fd
+[
+i
+] = 
+şifd
+;
+
+196 ià(
+i
+ =ğ
+MAX_CLIENT_NUM
+)
+
+197 
+	`´štf
+("too many client!\n");
+
+199 
+	`FD_SET
+(
+şifd
+, &
+®l£t
+);
+
+200 ià(
+şifd
+ > 
+maxfd
+) maxfd = clifd;
+
+201 ià(
+i
+ > 
+maxi
+) maxi = i;
+
+203 ià(--
+Ä—dy
+ <= 0) ;
+
+206 
+i
+ = 0; i <ğ
+maxi
+; i++)
+
+208 ià((
+fd
+ = 
+sck
+->
+şi_fd
+[
+i
+]) < 0) ;
+
+210 ià(
+	`FD_ISSET
+(
+fd
+, &
+£t
+))
+
+212 ià(
+	`»ad
+(
+fd
+, 
+»cvbuf
+, 128) == 0)
+
+214 
+	`şo£
+(
+fd
+);
+
+215 
+	`FD_CLR
+(
+fd
+, &
+®l£t
+);
+
+216 
+sck
+->
+şi_fd
+[
+i
+] = -1;
+
+220 
+	`´štf
+("Recv: %s\n", 
+»cvbuf
+);
+
+223 ià(--
+Ä—dy
+ <= 0) ;
+
+228  
+NULL
+;
+
+229 
+	}
+}
+
+239 
+	$tı_£rv”_ü—‹
+(
+sock
+ *
+sck
+, 
+pÜt
+)
+
+241 
+
+[20] = {0};
+
+242 ià(
+sck
+->
+aùive
+)  -1;
+
+244 
+	`g‘_loÿl_
+(
+
+);
+
+245 
+sck
+->
+fd
+ = 
+	`sock‘_ü—‹
+(
+AF_INET
+, 
+SOCK_STREAM
+);
+
+246 
+	`sock‘_bšd
+(
+sck
+->
+fd
+, 
+pÜt
+, 
+
+, &sck->
+addr
+);
+
+247 
+	`sock‘_li¡’
+(
+sck
+->
+fd
+, 5);
+
+249 ià(
+	`±h»ad_ü—‹
+(&
+sck
+->
+±h»ad
+, 
+NULL
+, 
+sock_ruÁše
+, sck))
+
+251 
+	`´štf
+("tcp server create failed.\n");
+
+256 
+	}
+}
+
+267 
+	$tı_ş›Á_cÚÃù
+(
+sock
+ *
+sck
+, cÚ¡ *
+
+, 
+pÜt
+)
+
+269 ià(
+sck
+->
+aùive
+)  -1;
+
+271 
+sck
+->
+fd
+ = 
+	`sock‘_ü—‹
+(
+AF_INET
+, 
+SOCK_STREAM
+);
+
+272 
+	`sock‘_š™
+(&
+sck
+->
+addr
+, 
+
+, 
+pÜt
+);
+
+274  
+	`sock‘_cÚÃù
+(
+sck
+->
+fd
+, &sck->
+addr
+);
+
+275 
+	}
+}
+
+286 
+	$sock‘_£nd
+(
+sock
+ *
+sck
+, *
+buf
+, 
+size
+)
+
+288  
+	`£nd
+(
+sck
+->
+fd
+, 
+buf
+, 
+size
+, 0);
+
+289 
+	}
+}
+
+300 
+	$sock‘_»cv
+(
+sock
+ *
+sck
+, *
+buf
+, 
+size
+)
+
+302  
+	`»cv
+(
+sck
+->
+fd
+, 
+buf
+, 
+size
+, 0);
+
+303 
+	}
+}
+
+305 
+	$maš
+()
+
+307 
+sock
+ 
+£r
+ = {0};
+
+308 
+	`tı_£rv”_ü—‹
+(&
+£r
+, 5001);
+
+309 
+	`¦“p
+(180);
+
+312 
+	}
+}
+
+	@sock.h
+
+1 #iâdeà
+__SOCK_H__
+
+
+2 
+	#__SOCK_H__
+
+
+	)
+
+3 
+	~<¡dio.h
+>
+
+4 
+	~<¡dlib.h
+>
+
+5 
+	~<¡ršg.h
+>
+
+6 
+	~<uni¡d.h
+>
+
+7 
+	~<fú.h
+>
+
+8 
+	~<sys/ty³s.h
+>
+
+9 
+	~<±h»ad.h
+>
+
+10 
+	~<¡dboŞ.h
+>
+
+11 
+	~<sys/sysšfo.h
+>
+
+12 
+	~<sys/”ºo.h
+>
+
+13 
+	~<sys/£Ëù.h
+>
+
+14 
+	~<sys/sock‘.h
+>
+
+15 
+	~<Ãtš‘/š.h
+>
+
+16 
+	~<¬·/š‘.h
+>
+
+17 
+	~<Ãtdb.h
+>
+
+18 
+	~<içddrs.h
+>
+
+20 
+	#MAX_CLIENT_NUM
+ 10
+
+	)
+
+22 
+	ssock
+
+
+24 
+	mfd
+;
+
+25 
+	mşi_fd
+[
+MAX_CLIENT_NUM
+];
+
+26 
+	mcÚn_æag
+;
+
+27 
+	maùive
+;
+
+29 
+	mi
+;
+
+30 *
+	msz
+;
+
+31 *
+	mp
+;
+
+33 
+±h»ad_t
+ 
+	m±h»ad
+;
+
+34 
+sockaddr_š
+ 
+	maddr
+;
+
+44 
+g‘_loÿl_
+(
+
+[]);
+
+55 
+sock‘_ü—‹
+(
+domaš
+, 
+ty³
+);
+
+64 
+sock‘_š™
+(
+sockaddr_š
+ *
+addr
+, cÚ¡ *
+
+, 
+pÜt
+);
+
+76 
+sock‘_bšd
+(
+fd
+, 
+pÜt
+, cÚ¡ *
+
+, 
+sockaddr_š
+ *
+addr
+);
+
+86 
+sock‘_li¡’
+(
+fd
+, 
+backlog
+);
+
+96 
+sock‘_acû±
+(
+fd
+, 
+sockaddr_š
+ *
+şi_addr
+);
+
+106 
+sock‘_cÚÃù
+(
+fd
+, 
+sockaddr_š
+ *
+şi_addr
+);
+
+115 
+sock‘_şo£
+(
+fd
+);
+
+124 * 
+sock_ruÁše
+(*
+¬gs
+);
+
+134 
+tı_£rv”_ü—‹
+(
+sock
+ *
+sck
+, 
+pÜt
+);
+
+145 
+tı_ş›Á_cÚÃù
+(
+sock
+ *
+sck
+, cÚ¡ *
+
+, 
+pÜt
+);
+
+147 
+sock‘_£nd
+(
+sock
+ *
+sck
+, *
+buf
+, 
+size
+);
+
+148 
+sock‘_»cv
+(
+sock
+ *
+sck
+, *
+buf
+, 
+size
+);
+
+	@
+1
+.
+0
+2
+14
+sock.c
+sock.h

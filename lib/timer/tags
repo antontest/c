@@ -1,0 +1,112 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+TIMER_ACCURACY	timer.c	19;"	d	file:
+TIMER_ACCURACY	timer.h	21;"	d
+TIMER_ACCURACY	timer.h	22;"	d
+__LIBSC_TIMER_H__	timer.h	2;"	d
+active	timer.c	/^    int active;$/;"	m	struct:libsc_timer_impl	file:	access:public
+active	timer.h	/^    int active;$/;"	m	struct:libsc_timer_impl	access:public
+active	timer.h	/^    int active;$/;"	m	struct:timer_impl	access:public
+c	timer.c	/^        char c;$/;"	m	union:libsc_timer::__anon2	file:	access:public
+c	timer.h	/^        char c;$/;"	m	union:libsc_timer::__anon1	access:public
+c	timer.h	/^        char c;$/;"	m	union:timer::__anon1	access:public
+cb	timer.c	/^    timer_cb cb;$/;"	m	struct:libsc_timer_impl	file:	access:public
+cb	timer.h	/^    timer_cb cb;$/;"	m	struct:libsc_timer_impl	access:public
+cb	timer.h	/^    timer_cb cb;$/;"	m	struct:timer_impl	access:public
+delete	timer.c	/^    int delete;$/;"	m	struct:libsc_timer_impl	file:	access:public
+delete	timer.h	/^    int delete;$/;"	m	struct:libsc_timer_impl	access:public
+delete	timer.h	/^    int delete;$/;"	m	struct:timer_impl	access:public
+i	timer.c	/^        int i;$/;"	m	union:libsc_timer::__anon2	file:	access:public
+i	timer.h	/^        int i;$/;"	m	union:libsc_timer::__anon1	access:public
+i	timer.h	/^        int i;$/;"	m	union:timer::__anon1	access:public
+impl	timer.c	/^    struct libsc_timer_impl *impl;$/;"	m	struct:libsc_timer	typeref:struct:libsc_timer::libsc_timer_impl	file:	access:public
+impl	timer.h	/^    struct libsc_timer_impl *impl;$/;"	m	struct:libsc_timer	typeref:struct:libsc_timer::libsc_timer_impl	access:public
+impl	timer.h	/^    struct timer_impl *impl;$/;"	m	struct:timer	typeref:struct:timer::timer_impl	access:public
+libsc_timer	timer.c	/^struct libsc_timer {$/;"	s	file:
+libsc_timer	timer.h	/^struct libsc_timer {$/;"	s
+libsc_timer::__anon1::c	timer.h	/^        char c;$/;"	m	union:libsc_timer::__anon1	access:public
+libsc_timer::__anon1::i	timer.h	/^        int i;$/;"	m	union:libsc_timer::__anon1	access:public
+libsc_timer::__anon1::p	timer.h	/^        void *p;$/;"	m	union:libsc_timer::__anon1	access:public
+libsc_timer::__anon2::c	timer.c	/^        char c;$/;"	m	union:libsc_timer::__anon2	file:	access:public
+libsc_timer::__anon2::i	timer.c	/^        int i;$/;"	m	union:libsc_timer::__anon2	file:	access:public
+libsc_timer::__anon2::p	timer.c	/^        void *p;$/;"	m	union:libsc_timer::__anon2	file:	access:public
+libsc_timer::impl	timer.c	/^    struct libsc_timer_impl *impl;$/;"	m	struct:libsc_timer	typeref:struct:libsc_timer::libsc_timer_impl	file:	access:public
+libsc_timer::impl	timer.h	/^    struct libsc_timer_impl *impl;$/;"	m	struct:libsc_timer	typeref:struct:libsc_timer::libsc_timer_impl	access:public
+libsc_timer_create	timer.c	/^struct libsc_timer * libsc_timer_create(int tm_ms, timer_cb cb, bool repeat)$/;"	f	signature:(int tm_ms, timer_cb cb, bool repeat)
+libsc_timer_create	timer.h	/^struct libsc_timer * libsc_timer_create(int tm_ms, timer_cb cb, bool repeat);$/;"	p	signature:(int tm_ms, timer_cb cb, bool repeat)
+libsc_timer_delete	timer.c	/^void libsc_timer_delete(struct libsc_timer *timer)$/;"	f	signature:(struct libsc_timer *timer)
+libsc_timer_delete	timer.h	/^void libsc_timer_delete(struct libsc_timer *timer);$/;"	p	signature:(struct libsc_timer *timer)
+libsc_timer_impl	timer.c	/^struct libsc_timer_impl {$/;"	s	file:
+libsc_timer_impl	timer.h	/^struct libsc_timer_impl {$/;"	s
+libsc_timer_impl::active	timer.c	/^    int active;$/;"	m	struct:libsc_timer_impl	file:	access:public
+libsc_timer_impl::active	timer.h	/^    int active;$/;"	m	struct:libsc_timer_impl	access:public
+libsc_timer_impl::cb	timer.c	/^    timer_cb cb;$/;"	m	struct:libsc_timer_impl	file:	access:public
+libsc_timer_impl::cb	timer.h	/^    timer_cb cb;$/;"	m	struct:libsc_timer_impl	access:public
+libsc_timer_impl::delete	timer.c	/^    int delete;$/;"	m	struct:libsc_timer_impl	file:	access:public
+libsc_timer_impl::delete	timer.h	/^    int delete;$/;"	m	struct:libsc_timer_impl	access:public
+libsc_timer_impl::repeat	timer.c	/^    int repeat;$/;"	m	struct:libsc_timer_impl	file:	access:public
+libsc_timer_impl::repeat	timer.h	/^    int repeat;$/;"	m	struct:libsc_timer_impl	access:public
+libsc_timer_impl::thread	timer.c	/^    pthread_t thread;$/;"	m	struct:libsc_timer_impl	file:	access:public
+libsc_timer_impl::thread	timer.h	/^    pthread_t thread;$/;"	m	struct:libsc_timer_impl	access:public
+libsc_timer_impl::time_b	timer.c	/^    int time_b;$/;"	m	struct:libsc_timer_impl	file:	access:public
+libsc_timer_impl::time_b	timer.h	/^    int time_b;$/;"	m	struct:libsc_timer_impl	access:public
+libsc_timer_impl::time_r	timer.c	/^    int time_r;$/;"	m	struct:libsc_timer_impl	file:	access:public
+libsc_timer_impl::time_r	timer.h	/^    int time_r;$/;"	m	struct:libsc_timer_impl	access:public
+libsc_timer_reset	timer.c	/^void libsc_timer_reset(struct libsc_timer *timer)$/;"	f	signature:(struct libsc_timer *timer)
+libsc_timer_reset	timer.h	/^void libsc_timer_reset(struct libsc_timer *timer);$/;"	p	signature:(struct libsc_timer *timer)
+libsc_timer_start	timer.c	/^void libsc_timer_start(struct libsc_timer *timer)$/;"	f	signature:(struct libsc_timer *timer)
+libsc_timer_start	timer.h	/^void libsc_timer_start(struct libsc_timer *timer);$/;"	p	signature:(struct libsc_timer *timer)
+libsc_timer_stop	timer.c	/^void libsc_timer_stop(struct libsc_timer *timer)$/;"	f	signature:(struct libsc_timer *timer)
+libsc_timer_stop	timer.h	/^void libsc_timer_stop(struct libsc_timer *timer);$/;"	p	signature:(struct libsc_timer *timer)
+p	timer.c	/^        void *p;$/;"	m	union:libsc_timer::__anon2	file:	access:public
+p	timer.h	/^        void *p;$/;"	m	union:libsc_timer::__anon1	access:public
+p	timer.h	/^        void *p;$/;"	m	union:timer::__anon1	access:public
+repeat	timer.c	/^    int repeat;$/;"	m	struct:libsc_timer_impl	file:	access:public
+repeat	timer.h	/^    int repeat;$/;"	m	struct:libsc_timer_impl	access:public
+repeat	timer.h	/^    int repeat;$/;"	m	struct:timer_impl	access:public
+thread	timer.c	/^    pthread_t thread;$/;"	m	struct:libsc_timer_impl	file:	access:public
+thread	timer.h	/^    pthread_t thread;$/;"	m	struct:libsc_timer_impl	access:public
+thread	timer.h	/^    pthread_t thread;$/;"	m	struct:timer_impl	access:public
+time_b	timer.c	/^    int time_b;$/;"	m	struct:libsc_timer_impl	file:	access:public
+time_b	timer.h	/^    int time_b;$/;"	m	struct:libsc_timer_impl	access:public
+time_b	timer.h	/^    int time_b;$/;"	m	struct:timer_impl	access:public
+time_r	timer.c	/^    int time_r;$/;"	m	struct:libsc_timer_impl	file:	access:public
+time_r	timer.h	/^    int time_r;$/;"	m	struct:libsc_timer_impl	access:public
+time_r	timer.h	/^    int time_r;$/;"	m	struct:timer_impl	access:public
+timer	timer.h	/^typedef struct timer {$/;"	s
+timer	timer.h	/^}timer;$/;"	t	typeref:struct:timer
+timer::__anon1::c	timer.h	/^        char c;$/;"	m	union:timer::__anon1	access:public
+timer::__anon1::i	timer.h	/^        int i;$/;"	m	union:timer::__anon1	access:public
+timer::__anon1::p	timer.h	/^        void *p;$/;"	m	union:timer::__anon1	access:public
+timer::impl	timer.h	/^    struct timer_impl *impl;$/;"	m	struct:timer	typeref:struct:timer::timer_impl	access:public
+timer_cb	timer.c	/^typedef void (*timer_cb)(struct libsc_timer *tm);$/;"	t	file:
+timer_cb	timer.h	/^typedef void (*timer_cb)(struct libsc_timer *tm);$/;"	t
+timer_cb	timer.h	/^typedef void (*timer_cb)(struct timer *tm);$/;"	t
+timer_creat	timer.c	/^struct timer * timer_creat(int tm_ms, timer_cb cb, bool repeat)$/;"	f	signature:(int tm_ms, timer_cb cb, bool repeat)
+timer_creat	timer.h	/^struct timer * timer_creat(int tm_ms, timer_cb cb, bool repeat);$/;"	p	signature:(int tm_ms, timer_cb cb, bool repeat)
+timer_destroy	timer.c	/^void timer_destroy(struct timer *timer)$/;"	f	signature:(struct timer *timer)
+timer_destroy	timer.h	/^void timer_destroy(struct timer *timer);$/;"	p	signature:(struct timer *timer)
+timer_impl	timer.h	/^typedef struct timer_impl {$/;"	s
+timer_impl::active	timer.h	/^    int active;$/;"	m	struct:timer_impl	access:public
+timer_impl::cb	timer.h	/^    timer_cb cb;$/;"	m	struct:timer_impl	access:public
+timer_impl::delete	timer.h	/^    int delete;$/;"	m	struct:timer_impl	access:public
+timer_impl::repeat	timer.h	/^    int repeat;$/;"	m	struct:timer_impl	access:public
+timer_impl::thread	timer.h	/^    pthread_t thread;$/;"	m	struct:timer_impl	access:public
+timer_impl::time_b	timer.h	/^    int time_b;$/;"	m	struct:timer_impl	access:public
+timer_impl::time_r	timer.h	/^    int time_r;$/;"	m	struct:timer_impl	access:public
+timer_impl_t	timer.h	/^}timer_impl_t;$/;"	t	typeref:struct:timer_impl
+timer_reset	timer.c	/^void timer_reset(struct timer *timer)$/;"	f	signature:(struct timer *timer)
+timer_reset	timer.h	/^void timer_reset(struct timer *timer);$/;"	p	signature:(struct timer *timer)
+timer_routine	timer.c	/^void *timer_routine(void *timer)$/;"	f	signature:(void *timer)
+timer_run	timer.c	/^void timer_run(struct timer *timer)$/;"	f	signature:(struct timer *timer)
+timer_run	timer.h	/^void timer_run(struct timer *timer);$/;"	p	signature:(struct timer *timer)
+timer_start	timer.c	/^struct timer * timer_start(int tm_ms, timer_cb cb, bool repeat)$/;"	f	signature:(int tm_ms, timer_cb cb, bool repeat)
+timer_start	timer.c	/^void timer_start(struct timer *timer)$/;"	f	signature:(struct timer *timer)
+timer_start	timer.h	/^struct timer * timer_start(int tm_ms, timer_cb cb, bool repeat);$/;"	p	signature:(int tm_ms, timer_cb cb, bool repeat)
+timer_start	timer.h	/^void timer_start(struct timer *timer);$/;"	p	signature:(struct timer *timer)
+timer_stop	timer.c	/^void timer_stop(struct timer *timer)$/;"	f	signature:(struct timer *timer)
+timer_stop	timer.h	/^void timer_stop(struct timer *timer);$/;"	p	signature:(struct timer *timer)

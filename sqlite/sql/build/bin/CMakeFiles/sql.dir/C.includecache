@@ -1,0 +1,20 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/anton/working/program/sqlite/sql/src/main/sql.c
+stdio.h
+-
+stdlib.h
+-
+string.h
+-
+unistd.h
+-
+sqlite3.h
+-
+

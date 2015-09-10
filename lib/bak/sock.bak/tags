@@ -1,0 +1,54 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+MAX_CLIENT_NUM	sock.h	20;"	d
+__SOCK_H__	sock.h	2;"	d
+active	sock.h	/^    int active;$/;"	m	struct:sock	access:public
+addr	sock.h	/^    struct sockaddr_in addr;$/;"	m	struct:sock	typeref:struct:sock::sockaddr_in	access:public
+cli_fd	sock.h	/^    int cli_fd[MAX_CLIENT_NUM];$/;"	m	struct:sock	access:public
+conn_flag	sock.h	/^    int conn_flag;$/;"	m	struct:sock	access:public
+fd	sock.h	/^    int fd;$/;"	m	struct:sock	access:public
+get_local_ip	sock.c	/^int get_local_ip(char ip[])$/;"	f	signature:(char ip[])
+get_local_ip	sock.h	/^int get_local_ip(char ip[]);$/;"	p	signature:(char ip[])
+i	sock.h	/^        int i;$/;"	m	union:sock::__anon1	access:public
+main	sock.c	/^int main()$/;"	f
+p	sock.h	/^        void *p;$/;"	m	union:sock::__anon1	access:public
+pthread	sock.h	/^    pthread_t pthread;$/;"	m	struct:sock	access:public
+sock	sock.h	/^struct sock$/;"	s
+sock::__anon1::i	sock.h	/^        int i;$/;"	m	union:sock::__anon1	access:public
+sock::__anon1::p	sock.h	/^        void *p;$/;"	m	union:sock::__anon1	access:public
+sock::__anon1::sz	sock.h	/^        char *sz;$/;"	m	union:sock::__anon1	access:public
+sock::active	sock.h	/^    int active;$/;"	m	struct:sock	access:public
+sock::addr	sock.h	/^    struct sockaddr_in addr;$/;"	m	struct:sock	typeref:struct:sock::sockaddr_in	access:public
+sock::cli_fd	sock.h	/^    int cli_fd[MAX_CLIENT_NUM];$/;"	m	struct:sock	access:public
+sock::conn_flag	sock.h	/^    int conn_flag;$/;"	m	struct:sock	access:public
+sock::fd	sock.h	/^    int fd;$/;"	m	struct:sock	access:public
+sock::pthread	sock.h	/^    pthread_t pthread;$/;"	m	struct:sock	access:public
+sock_runtine	sock.c	/^void* sock_runtine(void *args)$/;"	f	signature:(void *args)
+sock_runtine	sock.h	/^void* sock_runtine(void *args);$/;"	p	signature:(void *args)
+socket_accept	sock.c	/^int socket_accept(int fd, struct sockaddr_in *cli_addr)$/;"	f	signature:(int fd, struct sockaddr_in *cli_addr)
+socket_accept	sock.h	/^int socket_accept(int fd, struct sockaddr_in *cli_addr);$/;"	p	signature:(int fd, struct sockaddr_in *cli_addr)
+socket_bind	sock.c	/^int socket_bind(int fd, int port, const char *ip, struct sockaddr_in *addr)$/;"	f	signature:(int fd, int port, const char *ip, struct sockaddr_in *addr)
+socket_bind	sock.h	/^int socket_bind(int fd, int port, const char *ip, struct sockaddr_in *addr);$/;"	p	signature:(int fd, int port, const char *ip, struct sockaddr_in *addr)
+socket_close	sock.c	/^int socket_close(int fd)$/;"	f	signature:(int fd)
+socket_close	sock.h	/^int socket_close(int fd);$/;"	p	signature:(int fd)
+socket_connect	sock.c	/^int socket_connect(int fd, struct sockaddr_in *cli_addr)$/;"	f	signature:(int fd, struct sockaddr_in *cli_addr)
+socket_connect	sock.h	/^int socket_connect(int fd, struct sockaddr_in *cli_addr);$/;"	p	signature:(int fd, struct sockaddr_in *cli_addr)
+socket_create	sock.c	/^int socket_create(int domain, int type)$/;"	f	signature:(int domain, int type)
+socket_create	sock.h	/^int socket_create(int domain, int type);$/;"	p	signature:(int domain, int type)
+socket_init	sock.c	/^void socket_init(struct sockaddr_in *addr, const char *ip, int port)$/;"	f	signature:(struct sockaddr_in *addr, const char *ip, int port)
+socket_init	sock.h	/^void socket_init(struct sockaddr_in *addr, const char *ip, int port);$/;"	p	signature:(struct sockaddr_in *addr, const char *ip, int port)
+socket_listen	sock.c	/^int socket_listen(int fd, int backlog)$/;"	f	signature:(int fd, int backlog)
+socket_listen	sock.h	/^int socket_listen(int fd, int backlog);$/;"	p	signature:(int fd, int backlog)
+socket_recv	sock.c	/^int socket_recv(struct sock *sck, void *buf, int size)$/;"	f	signature:(struct sock *sck, void *buf, int size)
+socket_recv	sock.h	/^int socket_recv(struct sock *sck, void *buf, int size);$/;"	p	signature:(struct sock *sck, void *buf, int size)
+socket_send	sock.c	/^int socket_send(struct sock *sck, void *buf, int size)$/;"	f	signature:(struct sock *sck, void *buf, int size)
+socket_send	sock.h	/^int socket_send(struct sock *sck, void *buf, int size);$/;"	p	signature:(struct sock *sck, void *buf, int size)
+sz	sock.h	/^        char *sz;$/;"	m	union:sock::__anon1	access:public
+tcp_client_connect	sock.c	/^int tcp_client_connect(struct sock *sck, const char *ip, int port)$/;"	f	signature:(struct sock *sck, const char *ip, int port)
+tcp_client_connect	sock.h	/^int tcp_client_connect(struct sock *sck, const char *ip, int port);$/;"	p	signature:(struct sock *sck, const char *ip, int port)
+tcp_server_create	sock.c	/^int tcp_server_create(struct sock *sck, int port)$/;"	f	signature:(struct sock *sck, int port)
+tcp_server_create	sock.h	/^int tcp_server_create(struct sock *sck, int port);$/;"	p	signature:(struct sock *sck, int port)

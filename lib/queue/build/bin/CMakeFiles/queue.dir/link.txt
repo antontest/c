@@ -1,0 +1,2 @@
+/usr/bin/ar cq ../../src/lib/libqueue.a  CMakeFiles/queue.dir/main/queue.c.o
+/usr/bin/ranlib ../../src/lib/libqueue.a

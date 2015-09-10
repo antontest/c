@@ -1,0 +1,1543 @@
+cscope 15 $HOME/working/program/lib/dir -q 0000000076 0000007365
+	@bak/dir.c
+
+1 
+	~"dœ.h
+"
+
+13 
+fže_ty³
+ 
+	$g‘_fže_ty³
+(cÚ¡ *
+·thÇme
+)
+
+15 
+¡©
+ 
+¡
+ = {0};
+
+17 ià(
+·thÇme
+ =ð
+NULL
+è 
+F_UNKNOWN
+;
+
+18 ià(
+	`l¡©
+(
+·thÇme
+, &
+¡
+è< 0è 
+F_UNKNOWN
+;
+
+20 ià(
+	`S_ISREG
+(
+¡
+.
+¡_mode
+)è 
+F_REG
+;
+
+21 ià(
+	`S_ISDIR
+(
+¡
+.
+¡_mode
+)è 
+F_DIR
+;
+
+22 ià(
+	`S_ISCHR
+(
+¡
+.
+¡_mode
+)è 
+F_CHR
+;
+
+23 ià(
+	`S_ISBLK
+(
+¡
+.
+¡_mode
+)è 
+F_BLK
+;
+
+24 ià(
+	`S_ISFIFO
+(
+¡
+.
+¡_mode
+)è 
+F_FIFO
+;
+
+25 ià(
+	`S_ISSOCK
+(
+¡
+.
+¡_mode
+)è 
+F_SOCK
+;
+
+26 ià(
+	`S_ISLNK
+(
+¡
+.
+¡_mode
+)è 
+F_LNK
+;
+
+27  
+F_UNKNOWN
+;
+
+28 
+	}
+}
+
+37 
+	$g‘_dœ_size
+(cÚ¡ *
+·thÇme
+)
+
+39 
+dœ’t
+ *
+dœ
+ = 
+NULL
+;
+
+40 
+¡©
+ 
+¡
+ = {0};
+
+41 
+DIR
+ *
+d
+ = 
+NULL
+;
+
+42 
+tÙ®_size
+ = 0;
+
+43 
+buf
+[512] = {0};
+
+45 ià(
+·thÇme
+ =ð
+NULL
+)  -1;
+
+46 ià(
+	`l¡©
+(
+·thÇme
+, &
+¡
+) < 0)  -1;
+
+47 ià(!
+	`S_ISDIR
+(
+¡
+.
+¡_mode
+))  -1;
+
+48 ià((
+d
+ = 
+	`Ý’dœ
+(
+·thÇme
+)è=ð
+NULL
+)  -1;
+
+50 (
+dœ
+ = 
+	`»addœ
+(
+d
+)è!ð
+NULL
+)
+
+52 ià(!
+	`¡rcmp
+(
+dœ
+->
+d_Çme
+, ".") || !strcmp(dir->d_name, "..")) ;
+
+54 
+	`¥rštf
+(
+buf
+, "%s/%s", 
+·thÇme
+, 
+dœ
+->
+d_Çme
+);
+
+55 ià(
+	`l¡©
+(
+buf
+, &
+¡
+) >= 0)
+
+57 ià(
+	`S_ISDIR
+(
+¡
+.
+¡_mode
+))
+
+59 
+tÙ®_size
+ +ð
+	`g‘_dœ_size
+(
+dœ
+->
+d_Çme
+);
+
+61 
+tÙ®_size
+ +ð
+¡
+.
+¡_size
+;
+
+64 
+	`þo£dœ
+(
+d
+);
+
+66  
+tÙ®_size
+;
+
+67 
+	}
+}
+
+76 
+	$g‘_fže_size
+(cÚ¡ *
+·thÇme
+)
+
+78 
+¡©
+ 
+¡
+ = {0};
+
+80 ià(
+·thÇme
+ =ð
+NULL
+)  -1;
+
+81 ià(
+	`l¡©
+(
+·thÇme
+, &
+¡
+) < 0)  -1;
+
+83 ià(
+	`S_ISDIR
+(
+¡
+.
+¡_mode
+)è 
+	`g‘_dœ_size
+(
+·thÇme
+);
+
+84  
+¡
+.
+¡_size
+;
+
+87 
+	}
+}
+
+96 
+	$fže_is_exi¡
+(cÚ¡ *
+·thÇme
+)
+
+98 ià(
+·thÇme
+ =ð
+NULL
+)  -1;
+
+100 ià(!
+	`acûss
+(
+·thÇme
+, 
+F_OK
+))  1;
+
+103 
+	}
+}
+
+110 
+	$´št_dœ
+(cÚ¡ *
+·thÇme
+)
+
+112 
+DIR
+ *
+dœ
+ = 
+NULL
+;
+
+113 
+dœ’t
+ *
+’Œy
+ = 
+NULL
+;
+
+114 
+¡©
+ 
+¡
+ = {0};
+
+116 ià(
+·thÇme
+ =ð
+NULL
+) ;
+
+118 ià(
+	`l¡©
+(
+·thÇme
+, &
+¡
+) < 0) ;
+
+119 ià(!
+	`S_ISDIR
+(
+¡
+.
+¡_mode
+)) ;
+
+121 ià((
+dœ
+ = 
+	`Ý’dœ
+(
+·thÇme
+)è=ð
+NULL
+) ;
+
+122 ià(
+	`chdœ
+(
+·thÇme
+) !=0 ) ;
+
+124 (
+’Œy
+ = 
+	`»addœ
+(
+dœ
+)è!ð
+NULL
+) {
+
+125 
+	`´štf
+("%s\n", 
+’Œy
+->
+d_Çme
+);
+
+128 
+	`þo£dœ
+(
+dœ
+);
+
+131 
+	}
+}
+
+141 
+	$make_dœ
+(*
+·thÇme
+, 
+mode_t
+ 
+mode
+)
+
+143 
+i
+;
+
+144 
+size
+ = (
+·thÇme
+ !ð
+NULL
+è? 
+	`¡¾’
+(pathname) : -1;
+
+145 ià(
+size
+ <= 0)  -1;
+
+147 
+i
+ = 1; i < 
+size
+; i++)
+
+149 ià(
+·thÇme
+[
+i
+] == '/')
+
+151 
+·thÇme
+[
+i
+] = '\0';
+
+152 ià(
+	`fže_is_exi¡
+(
+·thÇme
+) != 1)
+
+153 
+	`mkdœ
+(
+·thÇme
+, 
+mode
+);
+
+154 
+·thÇme
+[
+i
+] = '/';
+
+158 ià(
+	`fže_is_exi¡
+(
+·thÇme
+) != 1)
+
+159 
+	`mkdœ
+(
+·thÇme
+, 
+mode
+);
+
+161 ià(
+	`fže_is_exi¡
+(
+·thÇme
+) == 1)  0;
+
+164 
+	}
+}
+
+	@bak/dir.h
+
+1 #iâdeà
+__DIR_H__
+
+
+2 
+	#_DIR_H__
+
+
+	)
+
+4 
+	~<¡dio.h
+>
+
+5 
+	~<¡dlib.h
+>
+
+6 
+	~<¡ršg.h
+>
+
+7 
+	~<uni¡d.h
+>
+
+8 
+	~<sys/¡©.h
+>
+
+9 
+	~<sys/”ºo.h
+>
+
+10 
+	~<dœ’t.h
+>
+
+12 
+	efže_ty³
+ {
+
+13 
+	mF_UNKNOWN
+ = -1,
+
+14 
+	mF_REG
+ = 0 ,
+
+15 
+	mF_DIR
+ ,
+
+16 
+	mF_CHR
+ ,
+
+17 
+	mF_BLK
+ ,
+
+18 
+	mF_FIFO
+ ,
+
+19 
+	mF_LNK
+ ,
+
+20 
+	mF_SOCK
+
+
+21 } 
+	tfže_ty³
+;
+
+30 
+fže_ty³
+ 
+g‘_fže_ty³
+(cÚ¡ *
+·thÇme
+);
+
+39 
+g‘_dœ_size
+(cÚ¡ *
+·thÇme
+);
+
+48 
+g‘_fže_size
+(cÚ¡ *
+·thÇme
+);
+
+57 
+fže_is_exi¡
+(cÚ¡ *
+·thÇme
+);
+
+64 
+´št_dœ
+(cÚ¡ *
+·thÇme
+);
+
+74 
+make_dœ
+(*
+·thÇme
+, 
+mode_t
+ 
+mode
+);
+
+	@dir.c
+
+1 
+	~"dœ.h
+"
+
+13 
+fže_ty³
+ 
+	$g‘_fže_ty³
+(cÚ¡ *
+·thÇme
+)
+
+15 
+¡©
+ 
+¡
+ = {0};
+
+17 ià(
+·thÇme
+ =ð
+NULL
+è 
+F_UNKNOWN
+;
+
+18 ià(
+	`l¡©
+(
+·thÇme
+, &
+¡
+è< 0è 
+F_UNKNOWN
+;
+
+20 ià(
+	`S_ISREG
+(
+¡
+.
+¡_mode
+)è 
+F_REG
+;
+
+21 ià(
+	`S_ISDIR
+(
+¡
+.
+¡_mode
+)è 
+F_DIR
+;
+
+22 ià(
+	`S_ISCHR
+(
+¡
+.
+¡_mode
+)è 
+F_CHR
+;
+
+23 ià(
+	`S_ISBLK
+(
+¡
+.
+¡_mode
+)è 
+F_BLK
+;
+
+24 ià(
+	`S_ISFIFO
+(
+¡
+.
+¡_mode
+)è 
+F_FIFO
+;
+
+25 ià(
+	`S_ISSOCK
+(
+¡
+.
+¡_mode
+)è 
+F_SOCK
+;
+
+26 ià(
+	`S_ISLNK
+(
+¡
+.
+¡_mode
+)è 
+F_LNK
+;
+
+27  
+F_UNKNOWN
+;
+
+28 
+	}
+}
+
+37 
+	$g‘_dœ_size
+(cÚ¡ *
+·thÇme
+)
+
+39 
+dœ’t
+ *
+dœ
+ = 
+NULL
+;
+
+40 
+¡©
+ 
+¡
+ = {0};
+
+41 
+DIR
+ *
+d
+ = 
+NULL
+;
+
+42 
+tÙ®_size
+ = 0;
+
+43 
+buf
+[512] = {0};
+
+45 ià(
+·thÇme
+ =ð
+NULL
+)  -1;
+
+46 ià(
+	`l¡©
+(
+·thÇme
+, &
+¡
+) < 0)  -1;
+
+47 ià(!
+	`S_ISDIR
+(
+¡
+.
+¡_mode
+))  -1;
+
+48 ià((
+d
+ = 
+	`Ý’dœ
+(
+·thÇme
+)è=ð
+NULL
+)  -1;
+
+50 (
+dœ
+ = 
+	`»addœ
+(
+d
+)è!ð
+NULL
+)
+
+52 ià(!
+	`¡rcmp
+(
+dœ
+->
+d_Çme
+, ".") || !strcmp(dir->d_name, "..")) ;
+
+54 
+	`¥rštf
+(
+buf
+, "%s/%s", 
+·thÇme
+, 
+dœ
+->
+d_Çme
+);
+
+55 ià(
+	`l¡©
+(
+buf
+, &
+¡
+) >= 0)
+
+57 ià(
+	`S_ISDIR
+(
+¡
+.
+¡_mode
+))
+
+59 
+tÙ®_size
+ +ð
+	`g‘_dœ_size
+(
+dœ
+->
+d_Çme
+);
+
+61 
+tÙ®_size
+ +ð
+¡
+.
+¡_size
+;
+
+64 
+	`þo£dœ
+(
+d
+);
+
+66  
+tÙ®_size
+;
+
+67 
+	}
+}
+
+76 
+	$g‘_fže_size
+(cÚ¡ *
+·thÇme
+)
+
+78 
+¡©
+ 
+¡
+ = {0};
+
+80 ià(
+·thÇme
+ =ð
+NULL
+)  -1;
+
+81 ià(
+	`l¡©
+(
+·thÇme
+, &
+¡
+) < 0)  -1;
+
+83 ià(
+	`S_ISDIR
+(
+¡
+.
+¡_mode
+)è 
+	`g‘_dœ_size
+(
+·thÇme
+);
+
+84  
+¡
+.
+¡_size
+;
+
+87 
+	}
+}
+
+96 
+	$fže_is_exi¡
+(cÚ¡ *
+·thÇme
+)
+
+98 ià(
+·thÇme
+ =ð
+NULL
+)  -1;
+
+100 ià(!
+	`acûss
+(
+·thÇme
+, 
+F_OK
+))  1;
+
+103 
+	}
+}
+
+110 
+	$´št_dœ
+(cÚ¡ *
+·thÇme
+)
+
+112 
+DIR
+ *
+dœ
+ = 
+NULL
+;
+
+113 
+dœ’t
+ *
+’Œy
+ = 
+NULL
+;
+
+114 
+¡©
+ 
+¡
+ = {0};
+
+116 ià(
+·thÇme
+ =ð
+NULL
+) ;
+
+118 ià(
+	`l¡©
+(
+·thÇme
+, &
+¡
+) < 0) ;
+
+119 ià(!
+	`S_ISDIR
+(
+¡
+.
+¡_mode
+)) ;
+
+121 ià((
+dœ
+ = 
+	`Ý’dœ
+(
+·thÇme
+)è=ð
+NULL
+) ;
+
+122 ià(
+	`chdœ
+(
+·thÇme
+) !=0 ) ;
+
+124 (
+’Œy
+ = 
+	`»addœ
+(
+dœ
+)è!ð
+NULL
+) {
+
+125 
+	`´štf
+("%s\n", 
+’Œy
+->
+d_Çme
+);
+
+128 
+	`þo£dœ
+(
+dœ
+);
+
+131 
+	}
+}
+
+141 
+	$make_dœ
+(*
+·thÇme
+, 
+mode_t
+ 
+mode
+)
+
+143 
+i
+;
+
+144 
+size
+ = (
+·thÇme
+ !ð
+NULL
+è? 
+	`¡¾’
+(pathname) : -1;
+
+145 ià(
+size
+ <= 0)  -1;
+
+147 
+i
+ = 1; i < 
+size
+; i++)
+
+149 ià(
+·thÇme
+[
+i
+] == '/')
+
+151 
+·thÇme
+[
+i
+] = '\0';
+
+152 ià(
+	`fže_is_exi¡
+(
+·thÇme
+) != 1)
+
+153 
+	`mkdœ
+(
+·thÇme
+, 
+mode
+);
+
+154 
+·thÇme
+[
+i
+] = '/';
+
+158 ià(
+	`fže_is_exi¡
+(
+·thÇme
+) != 1)
+
+159 
+	`mkdœ
+(
+·thÇme
+, 
+mode
+);
+
+161 ià(
+	`fže_is_exi¡
+(
+·thÇme
+) == 1)  0;
+
+164 
+	}
+}
+
+173 
+	$»move_dœ
+(cÚ¡ *
+·thÇme
+)
+
+175 
+dœ’t
+ *
+dœ
+ = 
+NULL
+;
+
+176 
+¡©
+ 
+¡
+ = {0};
+
+177 
+DIR
+ *
+d
+ = 
+NULL
+;
+
+178 
+buf
+[512] = {0};
+
+180 ià(
+·thÇme
+ =ð
+NULL
+)  -1;
+
+181 ià(
+	`l¡©
+(
+·thÇme
+, &
+¡
+) < 0)  -1;
+
+182 ià(!
+	`S_ISDIR
+(
+¡
+.
+¡_mode
+))  -1;
+
+183 ià((
+d
+ = 
+	`Ý’dœ
+(
+·thÇme
+)è=ð
+NULL
+)  -1;
+
+185 (
+dœ
+ = 
+	`»addœ
+(
+d
+)è!ð
+NULL
+)
+
+187 ià(!
+	`¡rcmp
+(
+dœ
+->
+d_Çme
+, ".") || !strcmp(dir->d_name, "..")) ;
+
+189 
+	`¥rštf
+(
+buf
+, "%s/%s", 
+·thÇme
+, 
+dœ
+->
+d_Çme
+);
+
+190 ià(
+	`l¡©
+(
+buf
+, &
+¡
+) >= 0)
+
+192 ià(
+	`S_ISDIR
+(
+¡
+.
+¡_mode
+))
+
+194 
+	`»move_dœ
+(
+buf
+);
+
+195 
+	`rmdœ
+(
+buf
+);
+
+197 
+	`»move
+(
+buf
+);
+
+200 ià(
+	`fže_is_exi¡
+(
+·thÇme
+è=ð1è
+	`rmdœ
+(pathname);
+
+201 
+	`þo£dœ
+(
+d
+);
+
+203 ià(
+	`fže_is_exi¡
+(
+·thÇme
+) == 1)  -1;
+
+206 
+	}
+}
+
+215 
+	$»move_fže
+(cÚ¡ *
+·thÇme
+)
+
+217 
+¡©
+ 
+¡
+ = {0};
+
+218 ià(
+·thÇme
+ =ð
+NULL
+)  -1;
+
+219 ià(
+	`l¡©
+(
+·thÇme
+, &
+¡
+) < 0)  -1;
+
+221 ià(
+	`S_ISDIR
+(
+¡
+.
+¡_mode
+)è 
+	`»move_dœ
+(
+·thÇme
+);
+
+222 
+	`»move
+(
+·thÇme
+);
+
+225 
+	}
+}
+
+	@dir.h
+
+1 #iâdeà
+__DIR_H__
+
+
+2 
+	#_DIR_H__
+
+
+	)
+
+4 
+	~<¡dio.h
+>
+
+5 
+	~<¡dlib.h
+>
+
+6 
+	~<¡ršg.h
+>
+
+7 
+	~<uni¡d.h
+>
+
+8 
+	~<fúŽ.h
+>
+
+9 
+	~<sys/ty³s.h
+>
+
+10 
+	~<sys/¡©.h
+>
+
+11 
+	~<sigÇl.h
+>
+
+12 
+	~<£m­hÜe.h
+>
+
+13 
+	~<¡dboÞ.h
+>
+
+14 
+	~<sys/sysšfo.h
+>
+
+15 
+	~<sys/”ºo.h
+>
+
+16 
+	~<sys/wa™.h
+>
+
+17 
+	~<sys/£Ëù.h
+>
+
+18 
+	~<g‘Ýt.h
+>
+
+19 
+	~<time.h
+>
+
+20 
+	~<dœ’t.h
+>
+
+22 
+	efže_ty³
+ {
+
+23 
+	mF_UNKNOWN
+ = -1,
+
+24 
+	mF_REG
+ = 0 ,
+
+25 
+	mF_DIR
+ ,
+
+26 
+	mF_CHR
+ ,
+
+27 
+	mF_BLK
+ ,
+
+28 
+	mF_FIFO
+ ,
+
+29 
+	mF_LNK
+ ,
+
+30 
+	mF_SOCK
+
+
+31 } 
+	tfže_ty³
+;
+
+40 
+fže_ty³
+ 
+g‘_fže_ty³
+(cÚ¡ *
+·thÇme
+);
+
+49 
+g‘_dœ_size
+(cÚ¡ *
+·thÇme
+);
+
+58 
+g‘_fže_size
+(cÚ¡ *
+·thÇme
+);
+
+67 
+fže_is_exi¡
+(cÚ¡ *
+·thÇme
+);
+
+74 
+´št_dœ
+(cÚ¡ *
+·thÇme
+);
+
+84 
+make_dœ
+(*
+·thÇme
+, 
+mode_t
+ 
+mode
+);
+
+93 
+»move_dœ
+(cÚ¡ *
+·thÇme
+);
+
+102 
+»move_fže
+(cÚ¡ *
+·thÇme
+);
+
+	@
+1
+.
+0
+4
+32
+bak/dir.c
+bak/dir.h
+dir.c
+dir.h

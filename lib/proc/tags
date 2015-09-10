@@ -1,0 +1,45 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+__PROC_H__	proc.h	2;"	d
+arr_size	macro.h	55;"	d
+check_proc_unique	proc.c	/^int check_proc_unique(const char *name)$/;"	f	signature:(const char *name)
+check_proc_unique	proc.h	/^int check_proc_unique(const char *name);$/;"	p	signature:(const char *name)
+cmd_exec	proc.c	/^int cmd_exec(const char *cmd, int *pid)$/;"	f	signature:(const char *cmd, int *pid)
+cmd_exec	proc.h	/^int cmd_exec(const char *cmd, int *pid);$/;"	p	signature:(const char *cmd, int *pid)
+container_of	macro.h	45;"	d
+debug_error	macro.h	22;"	d
+debug_info	macro.h	32;"	d
+func_name	macro.h	14;"	d
+get_cmdline	proc.c	/^int get_cmdline(int pid, char *cmdline, int size)$/;"	f	signature:(int pid, char *cmdline, int size)
+get_cmdline	proc.h	/^int get_cmdline(int pid, char *cmdline, int size);$/;"	p	signature:(int pid, char *cmdline, int size)
+get_exe_path_by_pid	proc.c	/^int get_exe_path_by_pid(pid_t pid, char *path, int size)$/;"	f	signature:(pid_t pid, char *path, int size)
+get_exe_path_by_pid	proc.h	/^int get_exe_path_by_pid(pid_t pid, char *path, int size);$/;"	p	signature:(pid_t pid, char *path, int size)
+get_file_path	proc.c	/^int get_file_path(int fd, int pid, char *path, int size)$/;"	f	signature:(int fd, int pid, char *path, int size)
+get_file_path	proc.h	/^int get_file_path(int fd, int pid, char *path, int size);$/;"	p	signature:(int fd, int pid, char *path, int size)
+get_id_by_name	proc.c	/^int get_id_by_name(const char *name)$/;"	f	signature:(const char *name)
+get_id_by_name	proc.h	/^int get_id_by_name(const char *name);$/;"	p	signature:(const char *name)
+get_name_by_pid	proc.c	/^int get_name_by_pid(pid_t pid, char *name, int size)$/;"	f	signature:(pid_t pid, char *name, int size)
+get_name_by_pid	proc.h	/^int get_name_by_pid(pid_t pid, char *name, int size);$/;"	p	signature:(pid_t pid, char *name, int size)
+get_pid_by_name	proc.c	/^int get_pid_by_name(const char *proc_name)$/;"	f	signature:(const char *proc_name)
+get_pid_by_name	proc.h	/^int get_pid_by_name(const char *proc_name);$/;"	p	signature:(const char *proc_name)
+get_ppid	proc.c	/^int get_ppid(pid_t pid)$/;"	f	signature:(pid_t pid)
+get_ppid	proc.h	/^int get_ppid(pid_t pid);$/;"	p	signature:(pid_t pid)
+get_proc_name	proc.c	/^const char* get_proc_name(const char *name)$/;"	f	signature:(const char *name)
+get_proc_name_by_pid	proc.c	/^int get_proc_name_by_pid(pid_t pid, char *proc_name, int size)$/;"	f	signature:(pid_t pid, char *proc_name, int size)
+get_proc_name_by_pid	proc.h	/^int get_proc_name_by_pid(pid_t pid, char *proc_name, int size);$/;"	p	signature:(pid_t pid, char *proc_name, int size)
+get_shell_result	proc.c	/^int get_shell_result(const char *cmd, char *result, int size)$/;"	f	signature:(const char *cmd, char *result, int size)
+get_shell_result	proc.h	/^int get_shell_result(const char *cmd, char *result, int size);$/;"	p	signature:(const char *cmd, char *result, int size)
+get_shell_return	proc.c	/^int get_shell_return(const char *cmd, char *result, int size)$/;"	f	signature:(const char *cmd, char *result, int size)
+get_shell_return	proc.h	/^int get_shell_return(const char *cmd, char *result, int size);$/;"	p	signature:(const char *cmd, char *result, int size)
+is_proc_unique	proc.c	/^int is_proc_unique(const char *proc_name)$/;"	f	signature:(const char *proc_name)
+is_proc_unique	proc.h	/^int is_proc_unique(const char *proc_name);$/;"	p	signature:(const char *proc_name)
+line_num	macro.h	18;"	d
+macro_cat	macro.h	10;"	d
+macro_to_str	macro.h	6;"	d
+main	proc.c	/^int main(int agrc, char *agrv[])$/;"	f	signature:(int agrc, char *agrv[])
+offset_of	macro.h	41;"	d
+swap	macro.h	51;"	d
