@@ -1,1 +1,0 @@
-/home/anton/program/c/cmake/t/build/src_bin/CMakeFiles/t.dir
