@@ -58,7 +58,7 @@ netpacket/packet.h
 stdarg.h
 -
 socket_header.h
--
+../src/include/socket_header.h
 
 /home/anton/program/c/cmake/socket/src/socket_property/socket_property.c
 socket_property.h

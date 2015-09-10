@@ -6,6 +6,8 @@
 
 #IncludeRegexTransform: 
 
+../socket/src/include/socket_header.h
+
 ../socket/src/include/socket_property.h
 stdio.h
 -
@@ -39,6 +41,8 @@ sys/un.h
 -
 net/if.h
 -
+net/if_arp.h
+-
 linux/if_ether.h
 -
 linux/sockios.h
@@ -48,6 +52,12 @@ netinet/tcp.h
 netinet/sctp.h
 -
 linux/rtnetlink.h
+-
+netpacket/packet.h
+-
+stdarg.h
+-
+socket_header.h
 -
 
 /home/anton/program/c/cmake/socket/src/socket_property/socket_property.c

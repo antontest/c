@@ -25,7 +25,7 @@
 #include <linux/rtnetlink.h>
 #include <netpacket/packet.h>
 #include <stdarg.h>
-#include <socket_header.h>
+#include "socket_header.h"
 
 /*************************************************************
 *************************  macro  ****************************
@@ -452,6 +452,16 @@ int xioctl(int fd, unsigned int request, void *argp, const char *fmt, ...);
  * @return 1, if up; 0, if down
  */
 int get_interface_state(int fd, const char *ifname);
+
+/**
+ * @brief get_net_mac 
+ *
+ * @param ip     [in]  target ip address
+ * @param mac[6] [out] target mac address
+ *
+ * @return 0, if uscc; -1, if failed
+ */
+int get_net_mac(char *dstip, unsigned char mac[6]);
 
 
 /*************************************************************

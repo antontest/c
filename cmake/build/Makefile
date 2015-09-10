@@ -170,6 +170,19 @@ socket_app/fast:
 .PHONY : socket_app/fast
 
 #=============================================================================
+# Target rules for targets named socket_arp
+
+# Build rule for target.
+socket_arp: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 socket_arp
+.PHONY : socket_arp
+
+# fast build rule for target.
+socket_arp/fast:
+	$(MAKE) -f socket_bin/bin/CMakeFiles/socket_arp.dir/build.make socket_bin/bin/CMakeFiles/socket_arp.dir/build
+.PHONY : socket_arp/fast
+
+#=============================================================================
 # Target rules for targets named socket_base
 
 # Build rule for target.
@@ -380,6 +393,7 @@ help:
 	@echo "... socket_msg"
 	@echo "... socket"
 	@echo "... socket_app"
+	@echo "... socket_arp"
 	@echo "... socket_property"
 	@echo "... dir"
 	@echo "... dir_static"

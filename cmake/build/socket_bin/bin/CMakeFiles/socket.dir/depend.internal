@@ -3,6 +3,7 @@
 
 socket_bin/bin/CMakeFiles/socket.dir/main/socket.c.o
  ../socket/src/include/socket_app.h
+ ../socket/src/include/socket_arp.h
  ../socket/src/include/socket_base.h
  ../socket/src/include/socket_event.h
  ../socket/src/include/socket_header.h

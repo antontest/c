@@ -38,8 +38,8 @@ TARGET_LINK_LIBRARIES(socket_arp pthread pcap timer socket_property)
 ADD_DEPENDENCIES(socket_app socket_base socket_property pthread pcap timer)
 TARGET_LINK_LIBRARIES(socket_app socket_base socket_property pthread pcap timer)
 # SET_TARGET_PROPERTIES(socket_app_static PROPERTIES OUTPUT_NAME "socket_app")
-ADD_DEPENDENCIES(socket socket_app socket_arp)
-TARGET_LINK_LIBRARIES(socket socket_app socket_arp)
+ADD_DEPENDENCIES(socket socket_app socket_property socket_arp)
+TARGET_LINK_LIBRARIES(socket socket_app socket_property socket_arp)
 
 # -------------- INSTALL -------------- #
 # install path setting

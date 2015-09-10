@@ -34,6 +34,30 @@ net/if_arp.h
 pcap.h
 -
 
+../socket/src/include/socket_arp.h
+socket_header.h
+../socket/src/include/socket_header.h
+socket_property.h
+../socket/src/include/socket_property.h
+pthread.h
+-
+netpacket/packet.h
+-
+sys/socket.h
+-
+linux/netlink.h
+-
+linux/rtnetlink.h
+-
+netinet/sctp.h
+-
+net/if.h
+-
+net/if_arp.h
+-
+pcap.h
+-
+
 ../socket/src/include/socket_base.h
 stdio.h
 -
@@ -103,6 +127,8 @@ sys/un.h
 -
 net/if.h
 -
+net/if_arp.h
+-
 linux/if_ether.h
 -
 linux/sockios.h
@@ -112,6 +138,12 @@ netinet/tcp.h
 netinet/sctp.h
 -
 linux/rtnetlink.h
+-
+netpacket/packet.h
+-
+stdarg.h
+-
+socket_header.h
 -
 
 /home/anton/program/c/cmake/socket/src/main/socket.c
@@ -127,4 +159,6 @@ getopt.h
 -
 socket_app.h
 /home/anton/program/c/cmake/socket/src/main/socket_app.h
+socket_arp.h
+/home/anton/program/c/cmake/socket/src/main/socket_arp.h
 

@@ -201,6 +201,9 @@ proc_static_LIB_DEPENDS:STATIC=
 //Dependencies for the target
 socket_app_LIB_DEPENDS:STATIC=general;socket_base;general;socket_property;general;pthread;general;pcap;general;timer;
 
+//Dependencies for the target
+socket_arp_LIB_DEPENDS:STATIC=general;pthread;general;pcap;general;timer;general;socket_property;
+
 //Dependencies for target
 socket_base_LIB_DEPENDS:STATIC=
 

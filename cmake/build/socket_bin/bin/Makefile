@@ -172,6 +172,20 @@ socket_app/fast:
 .PHONY : socket_app/fast
 
 # Convenience name for target.
+socket_bin/bin/CMakeFiles/socket_arp.dir/rule:
+	cd /home/anton/program/c/cmake/build && $(MAKE) -f CMakeFiles/Makefile2 socket_bin/bin/CMakeFiles/socket_arp.dir/rule
+.PHONY : socket_bin/bin/CMakeFiles/socket_arp.dir/rule
+
+# Convenience name for target.
+socket_arp: socket_bin/bin/CMakeFiles/socket_arp.dir/rule
+.PHONY : socket_arp
+
+# fast build rule for target.
+socket_arp/fast:
+	cd /home/anton/program/c/cmake/build && $(MAKE) -f socket_bin/bin/CMakeFiles/socket_arp.dir/build.make socket_bin/bin/CMakeFiles/socket_arp.dir/build
+.PHONY : socket_arp/fast
+
+# Convenience name for target.
 socket_bin/bin/CMakeFiles/socket_base.dir/rule:
 	cd /home/anton/program/c/cmake/build && $(MAKE) -f CMakeFiles/Makefile2 socket_bin/bin/CMakeFiles/socket_base.dir/rule
 .PHONY : socket_bin/bin/CMakeFiles/socket_base.dir/rule
@@ -285,6 +299,30 @@ socket_app/socket_event.c.s:
 	cd /home/anton/program/c/cmake/build && $(MAKE) -f socket_bin/bin/CMakeFiles/socket_app.dir/build.make socket_bin/bin/CMakeFiles/socket_app.dir/socket_app/socket_event.c.s
 .PHONY : socket_app/socket_event.c.s
 
+socket_arp/socket_arp.o: socket_arp/socket_arp.c.o
+.PHONY : socket_arp/socket_arp.o
+
+# target to build an object file
+socket_arp/socket_arp.c.o:
+	cd /home/anton/program/c/cmake/build && $(MAKE) -f socket_bin/bin/CMakeFiles/socket_arp.dir/build.make socket_bin/bin/CMakeFiles/socket_arp.dir/socket_arp/socket_arp.c.o
+.PHONY : socket_arp/socket_arp.c.o
+
+socket_arp/socket_arp.i: socket_arp/socket_arp.c.i
+.PHONY : socket_arp/socket_arp.i
+
+# target to preprocess a source file
+socket_arp/socket_arp.c.i:
+	cd /home/anton/program/c/cmake/build && $(MAKE) -f socket_bin/bin/CMakeFiles/socket_arp.dir/build.make socket_bin/bin/CMakeFiles/socket_arp.dir/socket_arp/socket_arp.c.i
+.PHONY : socket_arp/socket_arp.c.i
+
+socket_arp/socket_arp.s: socket_arp/socket_arp.c.s
+.PHONY : socket_arp/socket_arp.s
+
+# target to generate assembly for a file
+socket_arp/socket_arp.c.s:
+	cd /home/anton/program/c/cmake/build && $(MAKE) -f socket_bin/bin/CMakeFiles/socket_arp.dir/build.make socket_bin/bin/CMakeFiles/socket_arp.dir/socket_arp/socket_arp.c.s
+.PHONY : socket_arp/socket_arp.c.s
+
 socket_base/socket_base.o: socket_base/socket_base.c.o
 .PHONY : socket_base/socket_base.o
 
@@ -373,6 +411,7 @@ help:
 	@echo "... list_install_components"
 	@echo "... socket"
 	@echo "... socket_app"
+	@echo "... socket_arp"
 	@echo "... socket_property"
 	@echo "... main/socket.o"
 	@echo "... main/socket.i"
@@ -383,6 +422,9 @@ help:
 	@echo "... socket_app/socket_event.o"
 	@echo "... socket_app/socket_event.i"
 	@echo "... socket_app/socket_event.s"
+	@echo "... socket_arp/socket_arp.o"
+	@echo "... socket_arp/socket_arp.i"
+	@echo "... socket_arp/socket_arp.s"
 	@echo "... socket_base/socket_base.o"
 	@echo "... socket_base/socket_base.i"
 	@echo "... socket_base/socket_base.s"

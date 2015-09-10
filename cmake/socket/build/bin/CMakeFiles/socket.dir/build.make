@@ -82,6 +82,7 @@ socket_EXTERNAL_OBJECTS =
 ../socket: bin/CMakeFiles/socket.dir/main/socket.c.o
 ../socket: bin/CMakeFiles/socket.dir/build.make
 ../socket: ../src/lib/libsocket_app.so
+../socket: ../src/lib/libsocket_property.a
 ../socket: ../src/lib/libsocket_arp.so
 ../socket: ../src/lib/libsocket_base.a
 ../socket: ../src/lib/libsocket_property.a

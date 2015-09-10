@@ -58,8 +58,6 @@ int main(int agrc, char *agrv[])
 {
     int rt = 0; /* return value of function main */
 
-    //return 0;
-    
     /**
      * Get paramters from the command line
      */
@@ -75,11 +73,16 @@ int main(int agrc, char *agrv[])
      */
     if (netmac_flag) {
         unsigned char buf[6];
+        struct timeval start = {0}, end = {0};
+        int tuse = 0;
 
-        if (!get_net_mac(ip, buf))
-            printf("\033[0;32m%s mac: \033[0;35m%02x:%02x:%02x:%02x:%02x:%02x\n\033[0m", ip, 
-                    buf[0], buf[1], buf[2], buf[3], buf[4], buf[5]);
-        else {
+        gettimeofday(&start, NULL);
+        if (!get_net_mac(ip, buf)) {
+            gettimeofday(&end, NULL);
+            tuse = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_usec - start.tv_usec);
+            printf("\033[0;m%s MAC Address: \033[0;35m%02x:%02x:%02x:%02x:%02x:%02x\033[0m, used %d.%03ds.\n", ip, 
+                    buf[0], buf[1], buf[2], buf[3], buf[4], buf[5], (int)tuse/ 1000000, (int)(tuse % 1000000));
+        } else {
             printf("\033[0;31mget %s net mac failed\n\033[0m", ip);
             return -1;
         }

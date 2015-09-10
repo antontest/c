@@ -297,6 +297,7 @@ int arp_cheat(const char *iifname, const char *iattack_ip,
  *
  * @return 0, if uscc; -1, if failed
  */
+/*
 int get_net_mac(const char *dstip, unsigned char mac[6])
 {
     int fd; 
@@ -311,26 +312,18 @@ int get_net_mac(const char *dstip, unsigned char mac[6])
     char *ifname_save = (char *)ifname;
     char buf[1024] = {0};
 
-    /**
-     * check ifname
-     */
     if (ip == NULL) return -1;
     get_ifname(ifname);
     ifname_save = strtok(ifname, " ");
     if (ifname_save == NULL) return -1;
 
-    /**
-     * check ip
-     */
     if (!inet_aton(dstip, &addr)) {
         fprintf(stderr, "invalid ip address %s\n", ip);
         exit(1);
     }
 
-    //if ((fd = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ARP))) < 0) {
     if ((fd = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ARP))) < 0) {
         perror("WARNING socket()");
-        //exit(1);
     }
 
     addr_ll.sll_family = AF_PACKET;
@@ -348,8 +341,8 @@ int get_net_mac(const char *dstip, unsigned char mac[6])
     arp_request_send(fd, (struct sockaddr *)&addr_ll, dst_ip, src_ip, src_mac);
     unsigned char from[4];
     while (1) {
-        socklen_t len = sizeof(he);
         struct sockaddr_ll he;
+        socklen_t len = sizeof(he);
         struct frame_hdr *fh;
         struct arp_hdr *ah;
         char *p = NULL;
@@ -369,8 +362,10 @@ int get_net_mac(const char *dstip, unsigned char mac[6])
 		break;
 	}
 
-    print_ipv4(from, "from ip");
     close(fd);
 
     return 0;
 }
+*/
+
+
