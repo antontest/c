@@ -1,0 +1,2 @@
+/usr/bin/ar cq ../../src/lib/libsocket_msg.a  CMakeFiles/socket_msg.dir/socket_msg/socket_msg.c.o
+/usr/bin/ranlib ../../src/lib/libsocket_msg.a

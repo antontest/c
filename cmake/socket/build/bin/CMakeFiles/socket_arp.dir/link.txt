@@ -1,0 +1,1 @@
+/usr/bin/cc  -fPIC   -shared -Wl,-soname,libsocket_arp.so -o ../../src/lib/libsocket_arp.so CMakeFiles/socket_arp.dir/socket_arp/socket_arp.c.o  -L/home/anton/program/c/cmake/socket/src/lib -lpthread -lpcap -ltimer ../../src/lib/libsocket_property.a -Wl,-rpath,/home/anton/program/c/cmake/socket/src/lib: 

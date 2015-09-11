@@ -398,8 +398,12 @@ int arp_cheating(char *dstip)
                     recv_buf.dst_mac[5], ip_buf);
             printf("\n");
 
-            if (memcmp(recv_buf.src_ip, dst_ip, 4)) continue;
-
+            if (memcmp(recv_buf.src_ip, dst_ip, 4)) {
+                sendto(fd, &snd_buf, sizeof(snd_buf), 0, &addr, len);
+                printf("\033[0;32msuccess send arp request to %d.%d.%d.%d\n\033[0m", 
+                        dst_ip[0], dst_ip[1], dst_ip[2], dst_ip[3]);
+                continue;
+            }
             if (ar_op == ARPOP_REQUEST)
                 sendto(fd, &snd_buf, sizeof(snd_buf), 0, &addr, len);
             else if (ar_op == ARPOP_REPLY) {

@@ -1,0 +1,1 @@
+/usr/bin/cc  -fPIC   -shared -Wl,-soname,libsocket_router.so -o ../../src/lib/libsocket_router.so CMakeFiles/socket_router.dir/socket_router/socket_router.c.o  -L/home/anton/program/c/cmake/socket/src/lib ../../src/lib/libsocket_property.a -lpthread -Wl,-rpath,/home/anton/program/c/cmake/socket/src/lib: 

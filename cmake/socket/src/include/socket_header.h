@@ -67,6 +67,33 @@ struct arp_hdr
 };
 #endif
 
+#ifndef __LITTLE_ENDIAN
+#define __LITTLE_ENDIAN 1
+#endif
+#ifndef __BYTE_ORDER
+#define __BYTE_ORDER __LITTLE_ENDIAN
+#endif
+
+struct ip_hdr
+{
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+    unsigned char ihl:4;
+    unsigned char version:4;
+#elif __BYTE_ORDER == __BIG_ENDIAN
+    unsigned char version:4;
+    unsigned char ihl:4;
+#else
+    #error "Please fix <bits/endian.h>" ;
+#endif
+    unsigned char tos;
+    unsigned short tot_len;
+    unsigned short id;
+    unsigned short frag_off;
+    unsigned char ttl;
+    unsigned char protocol;
+    unsigned short check;
+};
+
 #ifndef FRAME_ARP
 #define FRAME_ARP
 //all frame 14+8+20 bytes
@@ -79,5 +106,13 @@ struct frame_arp {
     unsigned char dst_ip[4];
 };
 #endif
+
+struct frame_ip {
+    struct frame_hdr fh;
+    struct ip_hdr ih;
+    unsigned char src_ip[4];
+    unsigned char dst_ip[4];
+};
+
 
 #endif

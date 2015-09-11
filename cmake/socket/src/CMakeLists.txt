@@ -18,6 +18,7 @@ SET(PROPERTY_SRC socket_property/socket_property.c)
 SET(APP_SRC socket_app/socket_app.c socket_app/socket_event.c)
 SET(MSG_SRC socket_msg/socket_msg.c)
 SET(ARP_SRC socket_arp/socket_arp.c)
+SET(ROUTER_SRC socket_router/socket_router.c)
 
 # lib generation
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/src/lib)
@@ -26,6 +27,7 @@ ADD_LIBRARY(socket_property STATIC ${PROPERTY_SRC})
 ADD_LIBRARY(socket_app SHARED ${APP_SRC})
 ADD_LIBRARY(socket_msg STATIC ${MSG_SRC})
 ADD_LIBRARY(socket_arp SHARED ${ARP_SRC})
+ADD_LIBRARY(socket_router SHARED ${ROUTER_SRC})
 # ADD_LIBRARY(socket_app_static STATIC ${APP_SRC})
 
 # generat exec
@@ -37,9 +39,11 @@ ADD_DEPENDENCIES(socket_arp timer pthread pcap socket_proerty)
 TARGET_LINK_LIBRARIES(socket_arp pthread pcap timer socket_property)
 ADD_DEPENDENCIES(socket_app socket_base socket_property pthread pcap timer)
 TARGET_LINK_LIBRARIES(socket_app socket_base socket_property pthread pcap timer)
+ADD_DEPENDENCIES(socket_router socket_property pthread)
+TARGET_LINK_LIBRARIES(socket_router socket_property pthread)
 # SET_TARGET_PROPERTIES(socket_app_static PROPERTIES OUTPUT_NAME "socket_app")
-ADD_DEPENDENCIES(socket socket_app socket_property socket_arp)
-TARGET_LINK_LIBRARIES(socket socket_app socket_property socket_arp)
+ADD_DEPENDENCIES(socket socket_app socket_property socket_arp socket_router)
+TARGET_LINK_LIBRARIES(socket socket_app socket_property socket_arp socket_router)
 
 # -------------- INSTALL -------------- #
 # install path setting
@@ -55,6 +59,7 @@ INSTALL(FILES include/socket_app.h DESTINATION include/socket)
 INSTALL(FILES include/socket_event.h DESTINATION include/socket)
 INSTALL(FILES include/socket_header.h DESTINATION include/socket)
 INSTALL(FILES include/socket_arp.h DESTINATION include/socket)
+INSTALL(FILES include/socket_router.h DESTINATION include/socket)
 #INSTALL(FILES socket_msg/socket_msg.h DESTINATION include/socket)
     
 # install library
@@ -62,6 +67,7 @@ INSTALL(TARGETS socket_base ARCHIVE DESTINATION lib)
 INSTALL(TARGETS socket_property ARCHIVE DESTINATION lib)
 INSTALL(TARGETS socket_app LIBRARY DESTINATION lib)
 INSTALL(TARGETS socket_arp LIBRARY DESTINATION lib)
+INSTALL(TARGETS socket_router LIBRARY DESTINATION lib)
 # INSTALL(TARGETS socket_msg ARCHIVE DESTINATION lib)
 # INSTALL(TARGETS socket_app_static ARCHIVE DESTINATION lib)
 

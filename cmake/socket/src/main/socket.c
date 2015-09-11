@@ -8,6 +8,7 @@
 #include <getopt.h>
 #include "socket_app.h"
 #include "socket_arp.h"
+#include "socket_router.h"
 
 /*********************************************************
  *****************    Global Variable    *****************
@@ -29,6 +30,7 @@ static int eth_flag = 0;
 static int cheat_flag = 0;
 static int gateway_flag = 0;
 static int netmac_flag = 0;
+static int router_flag = 0;
 
 /*********************************************************
  *****************    Macro Defination    ****************
@@ -170,6 +172,11 @@ int main(int agrc, char *agrv[])
                 return -1;
             }
         }
+    }
+
+    if (router_flag) {
+        route(ip);
+        return 0;
     }
 
     if (!strlen(ip)) strcpy(ip, "127.0.0.1");
@@ -461,7 +468,7 @@ static void print_usage()
 static int parser_args(int agrc, char *agrv[])
 {
     int opt = 0;
-    const char *optstr = "hcsb:ra:i:p:t:w:m:eg::d::n:";
+    const char *optstr = "hcsb:a:i:p:q:w:m:eg::d::n:r:";
     struct option opts[] = {
         { "help"     , 0, 0, 'h'},
         { "agreement", 1, 0, 'a'},
@@ -475,9 +482,10 @@ static int parser_args(int agrc, char *agrv[])
         { "message"  , 1, 0, 'm'},
         { "gateway"  , 2, 0, 'g'},
         { "hardware" , 2, 0, 'd'},
-        { "interact" , 0, 0, 'r'},
+        { "interact" , 0, 0, 'q'},
         { "bam"      , 0, 0, 'b'},
         { "net_mac"  , 0, 0, 'n'},
+        { "router"   , 0, 0, 'r'},
         {     0      , 0, 0,  0 }
     };
 
@@ -501,6 +509,12 @@ static int parser_args(int agrc, char *agrv[])
                 break;
             case 'q':
                 interact_flag = 1; 
+                if (optarg != NULL) strcpy(ip, optarg);
+                break;
+            case 'r':
+                router_flag = 1; 
+                if (optarg != NULL) strcpy(ip, optarg);
+                printf("ip: %s\n", ip);
                 break;
             case 'i':
                 if (optarg != NULL) strcpy(ip, optarg);
