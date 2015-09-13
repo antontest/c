@@ -1,4 +1,5 @@
 #include "socket_property.h"
+#include <sys/time.h>
 
 /*************************************************************
 *****  Function Declaration Of Socket Property Settings  *****
@@ -1175,7 +1176,7 @@ int get_interface_state(int fd, const char *ifname)
  *
  * @return 0, if uscc; -1, if failed
  */
-int get_net_mac(char *dstip, unsigned char mac[6])
+int get_net_mac(char *dstip, unsigned char mac[6], int timeout)
 {
     int fd, len;
     struct sockaddr addr;
@@ -1188,6 +1189,9 @@ int get_net_mac(char *dstip, unsigned char mac[6])
     char src_ip_buf[20];
     struct timeval tv = {0};
     fd_set set;
+    struct timeval start = {0}, end = {0};
+    int time_use = 0;
+    int found_flag = 0;
 
     if (dstip == NULL || mac == NULL) return -1;
 
@@ -1205,6 +1209,10 @@ int get_net_mac(char *dstip, unsigned char mac[6])
     ip2arr(src_ip_buf, src_ip);
     ip2arr(dstip, dst_ip);
     get_mac_addr(if_save, src_mac);
+    if (!memcmp(dst_ip, src_ip, 4)) {
+        memcpy(mac, src_mac, 6);
+        return 1;
+    }
 
     /**
      * init addr
@@ -1249,26 +1257,38 @@ int get_net_mac(char *dstip, unsigned char mac[6])
     sendto(fd, &snd_buf, sizeof(snd_buf), 0, &addr, len);
     FD_ZERO(&set);
     FD_SET(fd, &set);
+    gettimeofday(&start, NULL);
     while (1) {
         tv.tv_sec = 0;
-        tv.tv_usec = 1000 * 100;
+        tv.tv_usec = 1000 * 500;
         FD_ZERO(&set);
         FD_SET(fd, &set);
 
         sendto(fd, &snd_buf, sizeof(snd_buf), 0, &addr, len);
-        select(fd + 1, &set, NULL, NULL, &tv);
-        if (FD_ISSET(fd, &set))
+        select(fd, &set, NULL, NULL, &tv);
+        //if (FD_ISSET(fd, &set))
         {
             recvfrom(fd, &recv_buf, sizeof(recv_buf), 0, NULL, NULL);
             if (!memcmp(recv_buf.src_ip, dst_ip, 4)) 
             {
                 memcpy(mac, recv_buf.src_mac, 6);
+                found_flag = 1;
                 break;
             }
         }
+
+        gettimeofday(&end, NULL);
+        time_use = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_usec - start.tv_usec);
+        if (timeout > 0 && (time_use / 1000000) >= timeout) 
+        {
+            break;
+        }
     }
+    gettimeofday(&end, NULL);
+    time_use = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_usec - start.tv_usec);
     
-    return 0;
+    if (!found_flag) return found_flag;
+    return time_use;
 }
 
 /**

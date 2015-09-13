@@ -131,7 +131,7 @@ int route(char *dstip)
     ip2arr(gw_ip_buf, gw_ip);
     ip2arr(src_ip_buf, src_ip);
     ip2arr(dstip, dst_ip);
-    get_net_mac(gw_ip_buf, gw_mac);
+    get_net_mac(gw_ip_buf, gw_mac, 0);
 
     /**
      * init addr
@@ -156,23 +156,6 @@ int route(char *dstip)
         exit(1);
     }
 
-    /**
-     * init arp request packet
-     */
-    /*
-    memcpy(snd_buf.fh.src_mac, src_mac, 6);
-    memcpy(snd_buf.src_mac, src_mac, 6);
-    memset(snd_buf.fh.dst_mac, -1, 6);
-    memset(snd_buf.dst_mac, 0, 6);
-    snd_buf.fh.proto_type = htons(ETH_P_ARP);
-    snd_buf.ah.ar_hrd = htons(ARPHRD_ETHER);
-    snd_buf.ah.ar_pro = htons(ETH_P_IP);
-    snd_buf.ah.ar_hln = 6;
-    snd_buf.ah.ar_pln = 4;
-    snd_buf.ah.ar_op = htons(ARPOP_REQUEST);
-    memcpy(snd_buf.dst_ip, dst_ip, 4);
-    memcpy(snd_buf.src_ip, src_ip, 4);
-    */
     print_ipv4(gw_ip, "gw_ip");
     print_ipv4(dst_ip, "dst_ip");
     print_mac(gw_mac, "gw_mac");
@@ -195,14 +178,16 @@ int route(char *dstip)
 
             if (!memcmp(recv_buf.src_ip, dst_ip, 4)) 
             {
+                /*
                 printf("package coming. type: %04x\n", ntohs(recv_buf.fh.proto_type));
                 print_mac(recv_buf.fh.src_mac, "src_mac");
                 print_ipv4(recv_buf.src_ip, "src_ip");
                 print_ipv4(recv_buf.dst_ip, "dst_ip");
                 printf("ip protocol: %d\n", recv_buf.ih.protocol);
                 printf("ip len: %d\n", ntohs(recv_buf.ih.tot_len));
+                */
                 memcpy(recv_buf.fh.dst_mac, gw_mac, 6);
-                memcpy(recv_buf.dst_ip, gw_ip, 4);
+                //memcpy(recv_buf.dst_ip, gw_ip, 4);
                 print_ipv4(recv_buf.src_ip, "pakcage from: ");
                 sendto(fd, &recv_buf, sizeof(recv_buf), 0, &addr, len);
             }
@@ -211,3 +196,4 @@ int route(char *dstip)
     
     return 0;
 }
+

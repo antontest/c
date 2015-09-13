@@ -112,6 +112,7 @@ struct frame_ip {
     struct ip_hdr ih;
     unsigned char src_ip[4];
     unsigned char dst_ip[4];
+    unsigned char data[2048];
 };
 
 

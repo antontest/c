@@ -77,13 +77,14 @@ int main(int agrc, char *agrv[])
         unsigned char buf[6];
         struct timeval start = {0}, end = {0};
         int tuse = 0;
+        int ret = 0;
 
         gettimeofday(&start, NULL);
-        if (!get_net_mac(ip, buf)) {
+        if ((ret = get_net_mac(ip, buf, 0)) > 0) {
             gettimeofday(&end, NULL);
             tuse = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_usec - start.tv_usec);
             printf("\033[0;m%s MAC Address: \033[0;35m%02x:%02x:%02x:%02x:%02x:%02x\033[0m, used %d.%03ds.\n", ip, 
-                    buf[0], buf[1], buf[2], buf[3], buf[4], buf[5], (int)tuse/ 1000000, (int)(tuse % 1000000));
+                    buf[0], buf[1], buf[2], buf[3], buf[4], buf[5], (int)ret/ 1000000, (int)(ret % 1000000));
         } else {
             printf("\033[0;31mget %s net mac failed\n\033[0m", ip);
             return -1;
@@ -175,7 +176,8 @@ int main(int agrc, char *agrv[])
     }
 
     if (router_flag) {
-        route(ip);
+        if (strlen(ip)) route(ip);
+        else router_info();
         return 0;
     }
 
@@ -221,6 +223,7 @@ int main(int agrc, char *agrv[])
             break;
         case '?':
         default:
+            return -1;
             break;
     }
 
@@ -468,7 +471,7 @@ static void print_usage()
 static int parser_args(int agrc, char *agrv[])
 {
     int opt = 0;
-    const char *optstr = "hcsb:a:i:p:q:w:m:eg::d::n:r:";
+    const char *optstr = "hcsb:a:i:p:q:w:m:eg::d::n:r";
     struct option opts[] = {
         { "help"     , 0, 0, 'h'},
         { "agreement", 1, 0, 'a'},
@@ -513,8 +516,7 @@ static int parser_args(int agrc, char *agrv[])
                 break;
             case 'r':
                 router_flag = 1; 
-                if (optarg != NULL) strcpy(ip, optarg);
-                printf("ip: %s\n", ip);
+                //if (optarg != NULL) strcpy(ip, optarg);
                 break;
             case 'i':
                 if (optarg != NULL) strcpy(ip, optarg);
