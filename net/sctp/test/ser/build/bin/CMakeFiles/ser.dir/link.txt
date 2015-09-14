@@ -1,1 +1,0 @@
-/usr/bin/cc     CMakeFiles/ser.dir/main/ser.c.o  -o ../../ser  -L"\$LIB_PATH"  -L/home/anton/program/c/sctp/test/ser/src/lib -rdynamic -lsocket_app -Wl,-rpath,"\$LIB_PATH:/home/anton/program/c/sctp/test/ser/src/lib" 

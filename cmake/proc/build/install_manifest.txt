@@ -1,4 +1,0 @@
-/home/anton/tools/include/proc.h
-/home/anton/tools/include/macro.h
-/home/anton/tools/lib/libproc.a
-/home/anton/tools/exec/proc

@@ -1,2 +1,0 @@
-/usr/bin/ar cq ../../src/lib/libthread.a  CMakeFiles/thread_static.dir/thread/thread.c.o
-/usr/bin/ranlib ../../src/lib/libthread.a

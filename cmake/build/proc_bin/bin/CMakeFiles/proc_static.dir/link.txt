@@ -1,2 +1,0 @@
-/usr/bin/ar cq ../../../proc/src/lib/libproc.a  CMakeFiles/proc_static.dir/proc/proc.c.o
-/usr/bin/ranlib ../../../proc/src/lib/libproc.a

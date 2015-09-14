@@ -1,2 +1,0 @@
-/home/anton/program/c/cmake/print/build/bin/CMakeFiles/print_static.dir
-/home/anton/program/c/cmake/print/build/bin/CMakeFiles/print.dir

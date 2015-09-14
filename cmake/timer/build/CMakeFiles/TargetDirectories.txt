@@ -1,2 +1,0 @@
-/home/anton/program/c/cmake/timer/build/bin/CMakeFiles/timer_static.dir
-/home/anton/program/c/cmake/timer/build/bin/CMakeFiles/timer.dir

@@ -19,6 +19,7 @@ SET(APP_SRC socket_app/socket_app.c socket_app/socket_event.c)
 SET(MSG_SRC socket_msg/socket_msg.c)
 SET(ARP_SRC socket_arp/socket_arp.c)
 SET(ROUTER_SRC socket_router/socket_router.c)
+SET(ICMP_SRC socket_icmp/socket_icmp.c)
 
 # lib generation
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/src/lib)
@@ -28,6 +29,7 @@ ADD_LIBRARY(socket_app SHARED ${APP_SRC})
 ADD_LIBRARY(socket_msg STATIC ${MSG_SRC})
 ADD_LIBRARY(socket_arp SHARED ${ARP_SRC})
 ADD_LIBRARY(socket_router SHARED ${ROUTER_SRC})
+ADD_LIBRARY(socket_icmp STATIC ${ICMP_SRC})
 # ADD_LIBRARY(socket_app_static STATIC ${APP_SRC})
 
 # generat exec
@@ -60,6 +62,7 @@ INSTALL(FILES include/socket_event.h DESTINATION include/socket)
 INSTALL(FILES include/socket_header.h DESTINATION include/socket)
 INSTALL(FILES include/socket_arp.h DESTINATION include/socket)
 INSTALL(FILES include/socket_router.h DESTINATION include/socket)
+INSTALL(FILES include/socket_icmp.h DESTINATION include/socket)
 #INSTALL(FILES socket_msg/socket_msg.h DESTINATION include/socket)
     
 # install library
@@ -68,6 +71,7 @@ INSTALL(TARGETS socket_property ARCHIVE DESTINATION lib)
 INSTALL(TARGETS socket_app LIBRARY DESTINATION lib)
 INSTALL(TARGETS socket_arp LIBRARY DESTINATION lib)
 INSTALL(TARGETS socket_router LIBRARY DESTINATION lib)
+INSTALL(TARGETS socket_icmp ARCHIVE DESTINATION lib)
 # INSTALL(TARGETS socket_msg ARCHIVE DESTINATION lib)
 # INSTALL(TARGETS socket_app_static ARCHIVE DESTINATION lib)
 

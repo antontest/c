@@ -1,1 +1,0 @@
-/usr/bin/cc     CMakeFiles/cli.dir/main/cli.c.o  -o ../../cli  -L/home/anton/program/c/sctp/tcp/cli/src/lib -rdynamic -lsocket_app -Wl,-rpath,/home/anton/program/c/sctp/tcp/cli/src/lib 

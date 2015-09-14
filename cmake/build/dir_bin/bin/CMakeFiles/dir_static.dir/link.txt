@@ -1,2 +1,0 @@
-/usr/bin/ar cq ../../../dir/src/lib/libdir.a  CMakeFiles/dir_static.dir/dir/dir.c.o
-/usr/bin/ranlib ../../../dir/src/lib/libdir.a

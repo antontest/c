@@ -1,1 +1,0 @@
-/usr/bin/cc     CMakeFiles/timer.dir/main/timer.c.o  -o ../../timer  -L/home/anton/program/c/cmake/timer/src/lib -rdynamic ../../src/lib/libtimer.a -Wl,-rpath,/home/anton/program/c/cmake/timer/src/lib 

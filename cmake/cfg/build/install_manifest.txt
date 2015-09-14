@@ -1,3 +1,0 @@
-/home/anton/tools/include/cfg.h
-/home/anton/tools/lib/libcfg.a
-/home/anton/tools/exec/cfg

@@ -1,2 +1,0 @@
-/home/anton/program/c/cmake/cfg/build/bin/CMakeFiles/cfg.dir
-/home/anton/program/c/cmake/cfg/build/bin/CMakeFiles/cfg_static.dir

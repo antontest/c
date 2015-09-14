@@ -1,3 +1,0 @@
-/home/anton/working/program/c/cmake_test/build/bin/CMakeFiles/main.dir
-/home/anton/working/program/c/cmake_test/build/bin/CMakeFiles/hello.dir
-/home/anton/working/program/c/cmake_test/build/bin/CMakeFiles/t.dir

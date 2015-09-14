@@ -1,2 +1,0 @@
-/usr/bin/ar cq ../../../socket/src/lib/libsocket_base.a  CMakeFiles/socket_base.dir/socket_base/socket_base.c.o
-/usr/bin/ranlib ../../../socket/src/lib/libsocket_base.a

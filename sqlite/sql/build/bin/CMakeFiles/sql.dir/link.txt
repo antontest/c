@@ -1,1 +1,0 @@
-/usr/bin/cc     CMakeFiles/sql.dir/main/sql.c.o  -o ../../sql  -L/home/anton/working/program/sqlite/sql/src/lib -rdynamic 

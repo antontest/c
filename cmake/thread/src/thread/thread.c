@@ -29,7 +29,7 @@ void *thread_runtine(void *arg)
         if (impl->delete) break;
     }
 
-    printf("pthread over\n");
+    if (impl->on_exit.runtine != NULL) impl->on_exit.runtine(arg);
     impl->active = 0;
     impl->delete = 1;
     impl->done = 1;
@@ -50,7 +50,7 @@ void *thread_runtine(void *arg)
  *
  * @return 0, if succ; -1, if failed.
  */
-int pthread_start(thread_t *impl, pthread_runtine runtine, void *arg,\
+int thread_start(thread_t *impl, pthread_runtine runtine, void *arg,\
         int run, int keep)
 {
     if (impl == NULL || impl->active) return -1;
@@ -75,7 +75,7 @@ int pthread_start(thread_t *impl, pthread_runtine runtine, void *arg,\
  *
  * @param impl [in] 
  */
-void pthread_run(thread_t *impl)
+void thread_run(thread_t *impl)
 {
     if (impl == NULL || !impl->active) return;
 
@@ -92,7 +92,7 @@ void pthread_run(thread_t *impl)
  * @param pr   [in] callback
  * @param arg  [in]
  */
-void pthread_exec(thread_t *impl, pthread_runtine runtine, void *arg)
+void thread_exec(thread_t *impl, pthread_runtine runtine, void *arg)
 {
     if (impl == NULL || !impl->active || !impl->keep) return;
 
@@ -108,13 +108,31 @@ void pthread_exec(thread_t *impl, pthread_runtine runtine, void *arg)
 }
 
 /**
+ * @brief exec function when pthread over
+ *
+ * @param impl [in]
+ * @param pr   [in] callback
+ * @param arg  [in]
+ */
+void thread_onexit(thread_t *impl, pthread_runtine runtine, void *arg)
+{
+    if (impl == NULL || !impl->active || !impl->keep) return;
+
+    impl->on_exit.runtine = runtine;
+    impl->on_exit.arg = arg;
+
+    return;
+}
+
+
+/**
  * @brief lock a thread
  * 
  * @param mtx [in] mutex
  *
  * @return 0, if succ; -1, if falied.
  */
-int pthread_lock(thread_t *impl)
+int thread_lock(thread_t *impl)
 {
     if (impl == NULL || impl->active) return -1;
 
@@ -128,7 +146,7 @@ int pthread_lock(thread_t *impl)
  *
  * @return 0, if succ; -1, if falied.
  */
-int pthread_trylock(thread_t *impl)
+int thread_trylock(thread_t *impl)
 {
     if (impl == NULL && !impl->active) return -1;
 
@@ -142,7 +160,7 @@ int pthread_trylock(thread_t *impl)
  *
  * @return 0, if succ; -1, if falied.
  */
-int pthread_unlock(thread_t *impl)
+int thread_unlock(thread_t *impl)
 {
     if (impl == NULL && !impl->active) return -1;
 
@@ -156,7 +174,7 @@ int pthread_unlock(thread_t *impl)
  *
  * @return 0, if succ; -1, if falied.
  */
-int pthread_delete(thread_t *impl)
+int thread_delete(thread_t *impl)
 {
     int wait_tm = 10 * 100;
     if (impl == NULL || !impl->active) return -1;
@@ -200,7 +218,7 @@ int pthread_delete(thread_t *impl)
  *
  * @param impl [in]
  */
-void pthread_wait_over(thread_t *impl)
+void thread_wait_over(thread_t *impl)
 {
     if (impl == NULL || !impl->active) return;
 
@@ -214,7 +232,7 @@ void pthread_wait_over(thread_t *impl)
  *
  * @param impl [in]
  */
-void pthread_time_wait_over(thread_t *impl, int tm_ms)
+void thread_time_wait_over(thread_t *impl, int tm_ms)
 {
     struct timeval tv = {0};
     long timer_accuracy = 100;

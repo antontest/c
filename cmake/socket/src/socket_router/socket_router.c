@@ -63,17 +63,17 @@ int router(char *srcip, char *dstip, char *gateway)
      * init arp request packet
      */
     memcpy(snd_buf.fh.src_mac, src_mac, 6);
-    memcpy(snd_buf.src_mac, src_mac, 6);
+    memcpy(snd_buf.ah.src_mac, src_mac, 6);
     memset(snd_buf.fh.dst_mac, -1, 6);
-    memset(snd_buf.dst_mac, 0, 6);
-    snd_buf.fh.proto_type = htons(ETH_P_ARP);
+    memset(snd_buf.ah.dst_mac, 0, 6);
+    snd_buf.fh.protocol = htons(ETH_P_ARP);
     snd_buf.ah.ar_hrd = htons(ARPHRD_ETHER);
     snd_buf.ah.ar_pro = htons(ETH_P_IP);
     snd_buf.ah.ar_hln = 6;
     snd_buf.ah.ar_pln = 4;
     snd_buf.ah.ar_op = htons(ARPOP_REQUEST);
-    memcpy(snd_buf.dst_ip, dst_ip, 4);
-    memcpy(snd_buf.src_ip, src_ip, 4);
+    memcpy(snd_buf.ah.dst_ip, dst_ip, 4);
+    memcpy(snd_buf.ah.src_ip, src_ip, 4);
 
     len = sizeof(struct sockaddr);
     sendto(fd, &snd_buf, sizeof(snd_buf), 0, &addr, len);
@@ -89,10 +89,10 @@ int router(char *srcip, char *dstip, char *gateway)
         if (FD_ISSET(fd, &set))
         {
             recvfrom(fd, &recv_buf, sizeof(recv_buf), 0, NULL, NULL);
-            if (!memcmp(recv_buf.src_ip, dst_ip, 4)) 
+            if (!memcmp(recv_buf.ah.src_ip, dst_ip, 4)) 
             {
                 memcpy(recv_buf.fh.dst_mac, gw_mac, 6);
-                memcpy(recv_buf.dst_mac, gw_mac, 6);
+                memcpy(recv_buf.ah.dst_mac, gw_mac, 6);
                 sendto(fd, &recv_buf, sizeof(recv_buf), 0, &addr, len);
                 break;
             }
@@ -174,9 +174,9 @@ int route(char *dstip)
         if (FD_ISSET(fd, &set))
         {
             recvfrom(fd, &recv_buf, sizeof(recv_buf), 0, NULL, NULL);
-            if (ntohs(recv_buf.fh.proto_type) == 0x0806) continue;
+            if (ntohs(recv_buf.fh.protocol) == 0x0806) continue;
 
-            if (!memcmp(recv_buf.src_ip, dst_ip, 4)) 
+            if (!memcmp(recv_buf.ih.src_ip, dst_ip, 4)) 
             {
                 /*
                 printf("package coming. type: %04x\n", ntohs(recv_buf.fh.proto_type));
@@ -188,7 +188,7 @@ int route(char *dstip)
                 */
                 memcpy(recv_buf.fh.dst_mac, gw_mac, 6);
                 //memcpy(recv_buf.dst_ip, gw_ip, 4);
-                print_ipv4(recv_buf.src_ip, "pakcage from: ");
+                print_ipv4(recv_buf.ih.src_ip, "pakcage from: ");
                 sendto(fd, &recv_buf, sizeof(recv_buf), 0, &addr, len);
             }
         }

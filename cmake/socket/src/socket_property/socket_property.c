@@ -1241,17 +1241,17 @@ int get_net_mac(char *dstip, unsigned char mac[6], int timeout)
      * init arp request packet
      */
     memcpy(snd_buf.fh.src_mac, src_mac, 6);
-    memcpy(snd_buf.src_mac, src_mac, 6);
+    memcpy(snd_buf.ah.src_mac, src_mac, 6);
     memset(snd_buf.fh.dst_mac, -1, 6);
-    memset(snd_buf.dst_mac, 0, 6);
-    snd_buf.fh.proto_type = htons(ETH_P_ARP);
+    memset(snd_buf.ah.dst_mac, 0, 6);
+    snd_buf.fh.protocol = htons(ETH_P_ARP);
     snd_buf.ah.ar_hrd = htons(ARPHRD_ETHER);
     snd_buf.ah.ar_pro = htons(ETH_P_IP);
     snd_buf.ah.ar_hln = 6;
     snd_buf.ah.ar_pln = 4;
     snd_buf.ah.ar_op = htons(ARPOP_REQUEST);
-    memcpy(snd_buf.dst_ip, dst_ip, 4);
-    memcpy(snd_buf.src_ip, src_ip, 4);
+    memcpy(snd_buf.ah.dst_ip, dst_ip, 4);
+    memcpy(snd_buf.ah.src_ip, src_ip, 4);
 
     len = sizeof(struct sockaddr);
     sendto(fd, &snd_buf, sizeof(snd_buf), 0, &addr, len);
@@ -1269,9 +1269,9 @@ int get_net_mac(char *dstip, unsigned char mac[6], int timeout)
         //if (FD_ISSET(fd, &set))
         {
             recvfrom(fd, &recv_buf, sizeof(recv_buf), 0, NULL, NULL);
-            if (!memcmp(recv_buf.src_ip, dst_ip, 4)) 
+            if (!memcmp(recv_buf.ah.src_ip, dst_ip, 4)) 
             {
-                memcpy(mac, recv_buf.src_mac, 6);
+                memcpy(mac, recv_buf.ah.src_mac, 6);
                 found_flag = 1;
                 break;
             }

@@ -26,6 +26,7 @@ typedef struct thread_impl
     int done;
     pthread_t pid;
     pthread_worker_t worker;
+    pthread_worker_t on_exit;
     pthread_mutex_t lock;
     pthread_cond_t ready;
 } thread_t;
@@ -39,7 +40,7 @@ typedef struct thread_impl
  *
  * @return 0, if succ; -1, if failed.
  */
-int pthread_start(thread_t *impl, pthread_runtine runtine, void *arg, int run, int keep);
+int thread_start(thread_t *impl, pthread_runtine runtine, void *arg, int run, int keep);
 
 /**
  * @brief pthread exec another function
@@ -48,14 +49,23 @@ int pthread_start(thread_t *impl, pthread_runtine runtine, void *arg, int run, i
  * @param pr   [in] callback
  * @param arg  [in]
  */
-void pthread_exec(thread_t *impl, pthread_runtine runtine, void *arg);
+void thread_exec(thread_t *impl, pthread_runtine runtine, void *arg);
+
+/**
+ * @brief exec function when pthread over
+ *
+ * @param impl [in]
+ * @param pr   [in] callback
+ * @param arg  [in]
+ */
+void thread_onexit(thread_t *impl, pthread_runtine runtine, void *arg);
 
 /**
  * @brief let pthread run
  *
  * @param impl [in] 
  */
-void pthread_run(thread_t *impl);
+void thread_run(thread_t *impl);
 
 /**
  * @brief lock a thread
@@ -64,7 +74,7 @@ void pthread_run(thread_t *impl);
  *
  * @return 0, if succ; -1, if falied.
  */
-int pthread_lock(thread_t *impl);
+int thread_lock(thread_t *impl);
 
 /**
  * @brief lock a thread
@@ -73,7 +83,7 @@ int pthread_lock(thread_t *impl);
  *
  * @return 0, if succ; -1, if falied.
  */
-int pthread_trylock(thread_t *impl);
+int thread_trylock(thread_t *impl);
 
 /**
  * @brief unlock a thread
@@ -82,7 +92,7 @@ int pthread_trylock(thread_t *impl);
  *
  * @return 0, if succ; -1, if falied.
  */
-int pthread_unlock(thread_t *impl);
+int thread_unlock(thread_t *impl);
 
 /**
  * @brief destroy a lock of a thread
@@ -91,20 +101,20 @@ int pthread_unlock(thread_t *impl);
  *
  * @return 0, if succ; -1, if falied.
  */
-int pthread_delete(thread_t *impl);
+int thread_delete(thread_t *impl);
 
 /**
  * @brief wait pthread over 
  *
  * @param impl [in]
  */
-void pthread_wait_over(thread_t *impl);
+void thread_wait_over(thread_t *impl);
 
 /**
  * @brief wait pthread over 
  *
  * @param impl [in]
  */
-void pthread_time_wait_over(thread_t *impl, int tm_ms);
+void thread_time_wait_over(thread_t *impl, int tm_ms);
 
 #endif

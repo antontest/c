@@ -1,1 +1,0 @@
-/usr/bin/cc     CMakeFiles/proc.dir/main/proc.c.o  -o ../../../proc/proc  -L/home/anton/program/c/cmake/proc/src/lib -rdynamic ../../../proc/src/lib/libproc.a -Wl,-rpath,/home/anton/program/c/cmake/proc/src/lib: 

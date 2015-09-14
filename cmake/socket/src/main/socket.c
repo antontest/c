@@ -13,6 +13,7 @@
 /*********************************************************
  *****************    Global Variable    *****************
  *********************************************************/
+//struct protoent *proto = NULL;
 static char ip[256] = {0};
 static unsigned short protocol = 0;
 static unsigned short port = 5001;
@@ -31,6 +32,9 @@ static int cheat_flag = 0;
 static int gateway_flag = 0;
 static int netmac_flag = 0;
 static int router_flag = 0;
+static int up_flag = 0;
+static char up_range[20] = {0};
+static int proto_flag = 0;
 
 /*********************************************************
  *****************    Macro Defination    ****************
@@ -177,54 +181,62 @@ int main(int agrc, char *agrv[])
 
     if (router_flag) {
         if (strlen(ip)) route(ip);
-        else router_info();
+        return 0;
+    }
+
+    if (up_flag) {
+        router_info(up_range);
         return 0;
     }
 
     if (!strlen(ip)) strcpy(ip, "127.0.0.1");
-    printf("\033[1;31mConfiguration: \n");
-    printf("\033[1;35m  protocol    : \033[1;32m%s\n", proto_str);
-    printf("\033[1;35m  ip          : \033[1;32m%s\n", ip);
-    printf("\033[1;35m  port        : \033[1;32m%d\n", port);
-    printf("\033[1;35m  ser         : \033[1;32m%d\n", ser_flag);
-    printf("\033[1;35m  cli         : \033[1;32m%d\n", cli_flag);
-    printf("\033[1;35m  times       : \033[1;32m%d\n", times);
-    printf("\033[1;35m  wait  time  : \033[1;32m%d\n", sleep_time);
-    printf("\033[0m\n");
+    if (proto_flag) {
+        printf("\033[1;31mConfiguration: \n");
+        printf("\033[1;35m  protocol    : \033[1;32m%s\n", proto_str);
+        printf("\033[1;35m  ip          : \033[1;32m%s\n", ip);
+        printf("\033[1;35m  port        : \033[1;32m%d\n", port);
+        printf("\033[1;35m  ser         : \033[1;32m%d\n", ser_flag);
+        printf("\033[1;35m  cli         : \033[1;32m%d\n", cli_flag);
+        printf("\033[1;35m  times       : \033[1;32m%d\n", times);
+        printf("\033[1;35m  wait  time  : \033[1;32m%d\n", sleep_time);
+        printf("\033[0m\n");
 
-    switch (protocol)
-    {
-        case PROTO_TCP:
-            if (ser_flag) net_tcp_ser(ip, port);
-            else if (cli_flag) net_tcp_cli(ip, port);
-            break;
-        case PROTO_UDP:
-            if (ser_flag) net_udp_ser(ip, port);
-            else if (cli_flag) net_udp_cli(ip, port);
-            break;
-        case PROTO_BROADCAST:
-            if (ser_flag) udp_broadcast_recv(ip, port, times, NULL, 0);
-            else if (cli_flag)
-            {
-                if (strlen(message))
-                    udp_broadcast_send(ip, port, times, message);
-                else 
-                    udp_broadcast_send(ip, port, times, NULL);
-            }
-        case PROTO_MULTICAST:
-            if (ser_flag) udp_multicast_recv(ip, port, times, NULL, 0);
-            else if (cli_flag)
-            {
-                if (strlen(message))
-                    udp_multicast_send(ip, port, times, message);
-                else 
-                    udp_multicast_send(ip, port, times, NULL);
-            }
-            break;
-        case '?':
-        default:
-            return -1;
-            break;
+        switch (protocol)
+        {
+            case PROTO_TCP:
+                if (ser_flag) net_tcp_ser(ip, port);
+                else if (cli_flag) net_tcp_cli(ip, port);
+                break;
+            case PROTO_UDP:
+                if (ser_flag) net_udp_ser(ip, port);
+                else if (cli_flag) net_udp_cli(ip, port);
+                break;
+            case PROTO_BROADCAST:
+                if (ser_flag) udp_broadcast_recv(ip, port, times, NULL, 0);
+                else if (cli_flag)
+                {
+                    if (strlen(message))
+                        udp_broadcast_send(ip, port, times, message);
+                    else 
+                        udp_broadcast_send(ip, port, times, NULL);
+                }
+            case PROTO_MULTICAST:
+                if (ser_flag) udp_multicast_recv(ip, port, times, NULL, 0);
+                else if (cli_flag)
+                {
+                    if (strlen(message))
+                        udp_multicast_send(ip, port, times, message);
+                    else 
+                        udp_multicast_send(ip, port, times, NULL);
+                }
+                break;
+            case '?':
+            default:
+                return -1;
+                break;
+        }
+
+        return 0;
     }
 
 error:
@@ -451,11 +463,13 @@ static void print_usage()
     printf("\033[0;31mUsage : \033[0;32m-i|--ip         <ip address>    -p|--port <port>\033[0m\n");  
     printf("\033[0;31mUsage : \033[0;32m-t|--times      <message_send_times> -w|--wait <wait time>\033[0m\n");  
     printf("\033[0;31mUsage : \033[0;32m-m|--message    <message_to_send>\033[0m\n");  
-    printf("\033[0;31mUsage : \033[0;32m-e|--ether      <interface_name>\033[0m\n");  
+    printf("\033[0;31mUsage : \033[0;32m-e|--ether      [<interface_name>]\033[0m\n");  
     printf("\033[0;31mUsage : \033[0;32m-q|--interact   --whether interact to each other\033[0m\n");  
     printf("\033[0;31mUsage : \033[0;32m-b|--bam        --arp cheating\033[0m\n");  
     printf("\033[0;31mUsage : \033[0;32m-d|--hardware   --get mac address\033[0m\n");  
     printf("\033[0;31mUsage : \033[0;32m-g|--gateway    --get gateway ip address \033[0m\n");  
+    printf("\033[0;31mUsage : \033[0;32m-r|--router     --router transfrom\033[0m\n");  
+    printf("\033[0;31mUsage : \033[0;32m-u|--up         [<ip/netmask>]      --detect ip is up in the router\033[0m\n");  
     printf("\033[0;31m/********************Program Usage***********************/\033[0m\n");  
 } 
 
@@ -471,24 +485,25 @@ static void print_usage()
 static int parser_args(int agrc, char *agrv[])
 {
     int opt = 0;
-    const char *optstr = "hcsb:a:i:p:q:w:m:eg::d::n:r";
+    const char *optstr = "a:b:cd::eg::hi:m:n:p:q:rsu:w:";
     struct option opts[] = {
-        { "help"     , 0, 0, 'h'},
         { "agreement", 1, 0, 'a'},
-        { "client"   , 0, 0, 'c'},
-        { "server"   , 0, 0, 's'},
-        { "ip"       , 1, 0, 'i'},
-        { "ether"    , 2, 0, 'e'},
-        { "port"     , 1, 0, 'o'},
-        { "times"    , 1, 0, 't'},
-        { "wait"     , 1, 0, 'w'},
-        { "message"  , 1, 0, 'm'},
-        { "gateway"  , 2, 0, 'g'},
-        { "hardware" , 2, 0, 'd'},
-        { "interact" , 0, 0, 'q'},
         { "bam"      , 0, 0, 'b'},
+        { "client"   , 0, 0, 'c'},
+        { "hardware" , 2, 0, 'd'},
+        { "ether"    , 2, 0, 'e'},
+        { "gateway"  , 2, 0, 'g'},
+        { "help"     , 0, 0, 'h'},
+        { "ip"       , 1, 0, 'i'},
+        { "message"  , 1, 0, 'm'},
         { "net_mac"  , 0, 0, 'n'},
+        { "port"     , 1, 0, 'o'},
+        { "interact" , 0, 0, 'q'},
         { "router"   , 0, 0, 'r'},
+        { "server"   , 0, 0, 's'},
+        { "times"    , 1, 0, 't'},
+        { "up"       , 1, 0, 'u'},
+        { "wait"     , 1, 0, 'w'},
         {     0      , 0, 0,  0 }
     };
 
@@ -500,6 +515,13 @@ static int parser_args(int agrc, char *agrv[])
                 print_usage();
                 exit(1);
                 break;
+                /*
+            case 'a':
+                printf("aaa\n");
+                if (optarg != NULL)
+                    proto = getprotobyname(optarg);
+                break;
+                */
             case 'b':
                 cheat_flag = 1; 
                 if (optarg != NULL) strcpy(ip, optarg);
@@ -507,16 +529,17 @@ static int parser_args(int agrc, char *agrv[])
             case 'c':
                 cli_flag = 1; 
                 break;
-            case 's':
-                ser_flag = 1; 
+            case 'd':
+                mac_flag = 1;
+                if (optarg != NULL) strcpy(ether, optarg);
                 break;
-            case 'q':
-                interact_flag = 1; 
-                if (optarg != NULL) strcpy(ip, optarg);
+            case 'e':
+                eth_flag = 1;
+                if (optarg != NULL) strcpy(ether, optarg);
                 break;
-            case 'r':
-                router_flag = 1; 
-                //if (optarg != NULL) strcpy(ip, optarg);
+            case 'g':
+                gateway_flag = 1;
+                if (optarg != NULL) strcpy(gateway_ip, optarg);
                 break;
             case 'i':
                 if (optarg != NULL) strcpy(ip, optarg);
@@ -526,14 +549,6 @@ static int parser_args(int agrc, char *agrv[])
                         exit(1);
                     }
                 }
-                break;
-            case 'e':
-                eth_flag = 1;
-                if (optarg != NULL) strcpy(ether, optarg);
-                break;
-            case 'g':
-                gateway_flag = 1;
-                if (optarg != NULL) strcpy(gateway_ip, optarg);
                 break;
             case 'm':
                 if (optarg != NULL) strcpy(message, optarg);
@@ -550,19 +565,31 @@ static int parser_args(int agrc, char *agrv[])
                     exit(1);
                 }
                 break;
-            case 'w':
-                if (optarg != NULL)
-                    sleep_time = atoi(optarg);
+            case 'q':
+                interact_flag = 1; 
+                if (optarg != NULL) strcpy(ip, optarg);
+                break;
+            case 'r':
+                router_flag = 1; 
+                //if (optarg != NULL) strcpy(ip, optarg);
+                break;
+            case 's':
+                ser_flag = 1; 
                 break;
             case 't':
                 if (optarg != NULL)
                     times = atoi(optarg);
                 break;
-            case 'd':
-                mac_flag = 1;
-                if (optarg != NULL) strcpy(ether, optarg);
+            case 'u':
+                up_flag = 1;
+                strcpy(up_range, optarg);
+                break;
+            case 'w':
+                if (optarg != NULL)
+                    sleep_time = atoi(optarg);
                 break;
             case 'a':
+                proto_flag = 1;
                 if (!strcasecmp(optarg, "t") || !strcasecmp(optarg, "tcp")) {
                     protocol = PROTO_TCP;
                     strcpy(proto_str, "TCP");

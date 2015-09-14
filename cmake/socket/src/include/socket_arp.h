@@ -120,6 +120,6 @@ int arp_cheat(const char *ifname, const char *attack_ip,
  */
 int arp_cheating(char *dstip);
 
-void router_info();
+void router_info(char *info);
 
 #endif
