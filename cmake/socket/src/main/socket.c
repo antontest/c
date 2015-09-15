@@ -57,13 +57,18 @@ int net_tcp_cli(const char *ip, const unsigned short port);
 int net_udp_ser(const char *ip, unsigned short port);
 int net_udp_cli(const char *ip, unsigned short port);
 
+int router_ip_up(char *dstip, int timeout);
+
 /*********************************************************
  ******************    Main Function    ******************
  *********************************************************/
 int main(int agrc, char *agrv[])
 {
     int rt = 0; /* return value of function main */
+    
+    router_ip_up(NULL, 2);
 
+    return 0;
     /**
      * Get paramters from the command line
      */

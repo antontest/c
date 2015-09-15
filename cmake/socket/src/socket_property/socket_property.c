@@ -1264,9 +1264,9 @@ int get_net_mac(char *dstip, unsigned char mac[6], int timeout)
         FD_ZERO(&set);
         FD_SET(fd, &set);
 
-        sendto(fd, &snd_buf, sizeof(snd_buf), 0, &addr, len);
-        select(fd, &set, NULL, NULL, &tv);
-        //if (FD_ISSET(fd, &set))
+        //sendto(fd, &snd_buf, sizeof(snd_buf), 0, &addr, len);
+        select(fd + 1, &set, NULL, NULL, &tv);
+        if (FD_ISSET(fd, &set))
         {
             recvfrom(fd, &recv_buf, sizeof(recv_buf), 0, NULL, NULL);
             if (!memcmp(recv_buf.ah.src_ip, dst_ip, 4)) 
