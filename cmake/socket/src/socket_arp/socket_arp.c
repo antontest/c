@@ -489,13 +489,14 @@ void router_info(char *info)
 }
 
 struct recv_info {
-    int get;
-    int timeuse;
     unsigned char ip[4];
     unsigned char mac[6];
+    int get;
+    int timeuse;
 };
 
 static struct recv_info rcv_info[255];
+static int total_ip = 0;
 struct ip_up_info {
     int fd;
     struct sockaddr addr;
@@ -510,13 +511,13 @@ void *send_arp_request(void *arg)
 {
     struct ip_up_info info;
     long ip = 0, tmp = 0;
-    int i = 3;
+    int i = 3, j = 0;
     socklen_t len = sizeof(struct sockaddr);
 
     memcpy(&info, (struct ip_up_info *)arg, sizeof(info));
     while (i-- > 0)
     {
-        for (ip = info.start_ip; ip <= info.end_ip; ip++)
+        for (ip = info.start_ip, j = 0; j < total_ip; j++, ip++)
         {
             tmp = htonl(ip);
             memcpy(info.snd.ah.dst_ip, &tmp, 4);
@@ -524,7 +525,7 @@ void *send_arp_request(void *arg)
             usleep(500);
         }
 
-        sleep(1);
+        sleep(2);
     }
 
     return NULL;
@@ -539,36 +540,50 @@ void *arp_recv(void *arg)
 {
     struct ip_up_info info;
     struct frame_arp recv_buf;
-    struct timeval start = {0}, end = {0};
+    struct timeval start = {0}, end = {0}, tv = {0};
     socklen_t len = sizeof(struct sockaddr);
     int timeuse = 0;
-    int i = 0;
+    int i = 0, ret = 0;
     int scan_cnt = 0;
     char str_ip[20] = {0};
     char str_mac[20] = {0};
+    fd_set set;
 
     pthread_mutex_lock(&mtx);
     memcpy(&info, (struct ip_up_info *)arg, sizeof(info));
     pthread_cond_signal(&cnd);
     pthread_mutex_unlock(&mtx);
     
+    //print_ipv4(info.cur_ip, "cur_ip");
     gettimeofday(&start, NULL);
     while (1)
     {
-        recvfrom(info.fd, &recv_buf, sizeof(recv_buf), 0, &info.addr, &len);
+        FD_ZERO(&set);
+        FD_SET(info.fd, &set);
+        tv.tv_sec = 0;
+        tv.tv_usec = 1000 * 100;
 
-        if (ntohs(recv_buf.fh.protocol) != 0x0806) continue;
+        ret = select(info.fd + 1, &set, NULL, NULL, &tv);
+        if (ret < 0) break;
+        if (ret == 0) goto timeout;
+
+        recvfrom(info.fd, &recv_buf, sizeof(recv_buf), 0, &info.addr, &len);
+        //if (ntohs(recv_buf.fh.protocol) != 0x0806) continue;
         
         i = recv_buf.ah.src_ip[3] -1 ;
-        if (!memcmp(&recv_buf.ah.src_ip, info.cur_ip, 3) && !rcv_info[i].get) 
+        if (memcmp(&recv_buf.ah.src_ip, &info.start_ip, 4) < 0) continue;
+        if (memcmp(&recv_buf.ah.src_ip, &info.end_ip, 4) < 0) continue;
+        if (!rcv_info[i].get)
         {
             rcv_info[i].get = 1;
             memcpy(rcv_info[i].ip, recv_buf.ah.src_ip, 4);
+
             memcpy(rcv_info[i].mac, recv_buf.ah.src_mac, 6);
             gettimeofday(&end, NULL);
             rcv_info[i].timeuse = (int)((end.tv_sec - start.tv_sec) * 1000000 + end.tv_usec - start.tv_usec) / 1000000;
         }
 
+timeout:
         gettimeofday(&end, NULL);
         timeuse = ((end.tv_sec - start.tv_sec) * 1000000 + end.tv_usec - start.tv_usec) / 1000000;
         if (timeuse >= info.timeout) break;
@@ -581,29 +596,48 @@ void *arp_recv(void *arg)
         {
             arr2ip(rcv_info[i].ip, str_ip);
             arr2mac(rcv_info[i].mac, str_mac);
-            printf("%s [%s] is up, used %02d.%04ds\n", str_ip, str_mac, 
+            //printf("%s [%s] is up, used %d.%03ds\n", str_ip, str_mac, 
+            //        rcv_info[i].timeuse / 1000000, rcv_info[i].timeuse % 1000000);
+            printf("%d.%d.%d.%d [%s] is up, used %d.%03ds\n", rcv_info[i].ip[0], 
+                    rcv_info[i].ip[1], rcv_info[i].ip[2], rcv_info[i].ip[3],str_mac, 
                     rcv_info[i].timeuse / 1000000, rcv_info[i].timeuse % 1000000);
             scan_cnt++;
         }
     }
 
-    printf("IP Scan done: 256 IP Address (%d hosts up) scanned in %ds\n", 
-            scan_cnt, 1);
+    gettimeofday(&end, NULL);
+    timeuse = ((end.tv_sec - start.tv_sec) * 1000000 + end.tv_usec - start.tv_usec) / 1000000;
+    printf("IP Scan done: %d IP Address (%d hosts up) scanned in %d.%03ds\n", total_ip, 
+            scan_cnt, timeuse / 1000000, timeuse % 1000000);
 
     return NULL;
 }
 
-void router_ip_up(const char *info, const int timeout)
+void router_ip_up(char *ip_info, const int timeout)
 {
     int fd = 0;
+    int mask = 0;
     pthread_t pid = -1;
     char local_ip[20] = {0};
     unsigned char ip[4] = {0};
     char ifname[20] = {0};
     char *if_save = NULL;
+    char *start_ip = NULL;
+    char *end_ip = NULL;
     unsigned char local_mac[6];
     struct sockaddr addr;
     struct ip_up_info up_info = {0};
+    char info[64] = {0};
+
+    if (ip_info == NULL) return;
+    strcpy(info, ip_info);
+    start_ip = strtok(info, "/");
+    if (start_ip == NULL) return;
+    end_ip = strtok(NULL, "/");
+    if (end_ip == NULL) return;
+    mask = 32 - atoi(end_ip);
+    total_ip = 1;
+    while (mask-- > 0) total_ip *= 2;
 
     if (get_ifname(ifname)) return;
     if_save = strtok(ifname, " ");
@@ -630,16 +664,14 @@ void router_ip_up(const char *info, const int timeout)
     ip2arr(local_ip, ip);
     up_info.fd = fd;
     up_info.timeout = timeout;
-    up_info.start_ip = htonl(inet_addr("172.21.34.1"));
-    up_info.end_ip = htonl(inet_addr("172.21.34.255"));
+    up_info.start_ip = htonl(inet_addr(start_ip));
+    up_info.end_ip = htonl(inet_addr(start_ip)) + total_ip;
     arp_request_package(&up_info.snd, ip, local_mac, ip);
     memcpy(&up_info.addr, &addr, sizeof(addr));
 
     pthread_mutex_init(&mtx, NULL);
     pthread_cond_init(&cnd, NULL);
     pthread_create(&pid, NULL, send_arp_request, &up_info);
-    unsigned char dip[4];
-    memcpy(dip, ip, 3);
 
     memcpy(&up_info.cur_ip, ip, 4);
     pthread_create(&pid, NULL, arp_recv, &up_info);

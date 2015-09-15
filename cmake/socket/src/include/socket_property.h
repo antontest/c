@@ -481,7 +481,7 @@ void ip2arr(const char *ip, unsigned char arr[4]);
  * @param ip_arri [in] array of ip address
  * @param ip     [out] string of ip address
  */
-void arr2ip(unsigned char *ip_arr, char *ip);
+void arr2ip(unsigned char ip_arr[], char *ip);
 
 /**
  * @brief arr2mac

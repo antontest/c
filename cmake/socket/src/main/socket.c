@@ -66,9 +66,6 @@ int main(int agrc, char *agrv[])
 {
     int rt = 0; /* return value of function main */
     
-    router_ip_up(NULL, 2);
-
-    return 0;
     /**
      * Get paramters from the command line
      */
@@ -190,7 +187,8 @@ int main(int agrc, char *agrv[])
     }
 
     if (up_flag) {
-        router_info(up_range);
+        //router_info(up_range);
+        router_ip_up(up_range, 4);
         return 0;
     }
 
