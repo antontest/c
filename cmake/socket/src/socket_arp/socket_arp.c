@@ -472,6 +472,8 @@ static void *send_arp_request(void *arg)
         for (j = 0; j < total_ip; j++)
         {
             ip[3] += j;
+            if (scanned_info[ip[3] - 1].get) continue;
+            if (scan_over) break;
             memcpy(info.snd.ah.dst_ip, ip, 4);
             sendto(info.fd, &info.snd, sizeof(info.snd), 0, &info.addr, len);
             usleep(500);
@@ -581,7 +583,7 @@ timeout:
             arr2mac(scanned_info[i].mac, str_mac);
             printf("%d.%d.%d.%d [%s] is up, used %d.%03ds\n", scanned_info[i].ip[0], 
                     scanned_info[i].ip[1], scanned_info[i].ip[2], scanned_info[i].ip[3],str_mac, 
-                    scanned_info[i].timeuse / 1000000, scanned_info[i].timeuse % 1000000);
+                    scanned_info[i].timeuse / 1000000, scanned_info[i].timeuse % 1000000 / 1000);
             scan_cnt++;
         }
     }
@@ -592,7 +594,7 @@ timeout:
     gettimeofday(&end, NULL);
     timeuse = ((end.tv_sec - start.tv_sec) * 1000000 + end.tv_usec - start.tv_usec);
     printf("IP Scan done: %d IP Address (%d hosts up) scanned in %d.%03ds\n", total_ip, 
-            scan_cnt, timeuse / 1000000, timeuse % 1000000);
+            scan_cnt, timeuse / 1000000, timeuse % 1000000 / 1000);
 
     return NULL;
 }
