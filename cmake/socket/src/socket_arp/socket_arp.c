@@ -677,13 +677,15 @@ int scan_router_ip_up(char *ip_info, const int timeout)
     up_info.end_ip[3] = ((up_info.start_ip[3] + total_ip) >= 255) ? 255 : (up_info.start_ip[3] + total_ip);
     arp_request_package(&up_info.snd, ip, local_mac, ip);
     memcpy(&up_info.addr, &addr, sizeof(addr));
-    local_ip_num = ip[3] - 1;
 
     /**
      * local scanned info
      */
-    if (!memcmp(up_info.start_ip, ip, 3)) 
+    if (!memcmp(up_info.start_ip, ip, 3) && 
+        ip[3] >= up_info.start_ip[3] && 
+        ip[3] <= up_info.end_ip[3]) 
     {
+        local_ip_num = ip[3] - 1;
         scanned_info[local_ip_num].get = 1;
         scanned_info[local_ip_num].timeuse = 1;
         memcpy(scanned_info[local_ip_num].ip, ip, 4);
