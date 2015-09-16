@@ -120,6 +120,14 @@ int arp_cheat(const char *ifname, const char *attack_ip,
  */
 int arp_cheating(char *dstip);
 
-void router_info(char *info);
+/**
+ * @brief scan_router_ip_up 
+ *
+ * @param ip_info [in] like 172.21.34.100/30
+ * @param timeout [in] timeout of scanning, not zero
+ *
+ * @return 0, if succ; -1, if failed
+ */
+int scan_router_ip_up(char *ip_info, const int timeout);
 
 #endif

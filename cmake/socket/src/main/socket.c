@@ -57,8 +57,6 @@ int net_tcp_cli(const char *ip, const unsigned short port);
 int net_udp_ser(const char *ip, unsigned short port);
 int net_udp_cli(const char *ip, unsigned short port);
 
-int router_ip_up(char *dstip, int timeout);
-
 /*********************************************************
  ******************    Main Function    ******************
  *********************************************************/
@@ -187,8 +185,7 @@ int main(int agrc, char *agrv[])
     }
 
     if (up_flag) {
-        //router_info(up_range);
-        router_ip_up(up_range, 4);
+        scan_router_ip_up(up_range, 4);
         return 0;
     }
 
