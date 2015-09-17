@@ -86,6 +86,19 @@ void thread_run(thread_t *impl)
 }
 
 /**
+ * @brief thread_stop 
+ *
+ * @param impl [in]
+ */
+void thread_stop(thread_t *impl)
+{
+    if (impl == NULL || !impl->active || !impl->run) return;
+    
+    impl->run = 0;
+    impl->done = 0;
+}
+
+/**
  * @brief pthread exec another function
  *
  * @param impl [in]

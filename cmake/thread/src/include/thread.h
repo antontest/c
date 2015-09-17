@@ -68,6 +68,13 @@ void thread_onexit(thread_t *impl, pthread_runtine runtine, void *arg);
 void thread_run(thread_t *impl);
 
 /**
+ * @brief let pthread stop
+ *
+ * @param impl [in] 
+ */
+void thread_stop(thread_t *impl);
+
+/**
  * @brief lock a thread
  * 
  * @param mtx [in] mutex
