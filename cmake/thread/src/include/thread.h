@@ -7,6 +7,7 @@
 #include <pthread.h>
 #include <signal.h>
 #include <sys/select.h>
+#include <sys/sysinfo.h>
 
 typedef enum thread_status {
     THREAD_IDLE      = 0,
@@ -76,6 +77,7 @@ typedef struct thread_pool {
     int thread_total_cnt;
     int thread_max_cnt;
     int thread_idle_cnt;
+    int thread_mini_cnt;
     int active;
 
     pthread_t           pid;
@@ -294,5 +296,32 @@ void pthread_unwait(int thread_id);
  * @brief pthread_info 
  */
 void pthread_info();
+
+/**
+ * @brief pthread_pool_init 
+ *
+ * @param max_cnt  [in] mac count of thread in pthread pool
+ * @param init_cnt [in] init count of thread in pthread pool
+ *
+ * @return 0, if succ; -1, if failed
+ */
+int pthread_pool_init(int max_cnt, int mini_cnt, int init_cnt);
+
+/**
+ * @brief get_idle_thread 
+ *
+ * @return thread, if succ; NULL, if failed
+ */
+struct thread * get_idle_thread();
+
+/**
+ * @brief pthread_pool_add 
+ *
+ * @param handler [in] pthread callback
+ * @param arg     [in]
+ *
+ * @return 0, if succ; -1, if failed
+ */
+int pthread_pool_add(thread_handler handler, void *arg);
 
 #endif

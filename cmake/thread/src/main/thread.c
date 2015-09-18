@@ -53,6 +53,8 @@ void *pthread(void *arg)
 int main(int agrc, char *agrv[])
 {
     int rt = 0; /* return value of function main */
+
+    /*
     struct thread_cfg cfg = {0};
 
     thread_create("sayhello", sayhello, NULL, 1, 0);
@@ -76,8 +78,20 @@ int main(int agrc, char *agrv[])
 
     rt = pthread_start(&cfg);
     pthread_info();
+    */
 
+    pthread_pool_init(10, 2, 5);
+    pthread_pool_add(sayhello, NULL);
+    pthread_pool_add(sayhi, NULL);
+    pthread_pool_add(sayhello, NULL);
+    pthread_pool_add(sayhi, NULL);
+    pthread_pool_add(sayhi, NULL);
+    pthread_pool_add(sayhello, NULL);
+    pthread_pool_add(sayhi, NULL);
     sleep(5);
+    pthread_pool_add(sayhi, NULL);
+
+    sleep(50);
             
     return rt;
 }
