@@ -1,12 +1,12 @@
 #include "thread.h"
 
 static int thread_id = 1;
-//static struct thread_queue *qthread = NULL;
+//static struct thread_pool *qthread = NULL;
 
 /**
  * @brief pthread handler
  *
- * @param arg [in] struct pthread_impl pointer
+ * @param arg [in] struct pthread pointer
  *
  * @return 
  */
@@ -20,14 +20,8 @@ void *thread_runtine(void *arg)
     {
         if (!impl->run) continue;
 
-        if (worker->handler != NULL && impl->run)
-        {
+        if (worker->handler != NULL)
             worker->handler(worker->arg);
-
-            worker->handler = NULL;
-            worker->arg = NULL;
-            impl->done = 1;
-        }
 
         if (!impl->repeat) break;
         if (impl->delete) break;
@@ -53,7 +47,8 @@ void *thread_runtine(void *arg)
  *
  * @return 0, if succ; -1, if failed.
  */
-int thread_start(thread_t *impl, thread_handler handler, void *arg, int run, int repeat)
+int thread_start(thread_t *impl, thread_handler handler, void *arg, 
+        int run, int repeat)
 {
     if (impl == NULL || impl->active) return -1;
 
@@ -61,9 +56,9 @@ int thread_start(thread_t *impl, thread_handler handler, void *arg, int run, int
     impl->worker.handler = handler;
     impl->worker.arg = arg;
 
-    impl->run = run;
+    impl->run    = run;
     impl->repeat = repeat;
-    impl->done = 0;
+    impl->done   = 0;
     impl->delete = 0;
     impl->active = 1;
 
@@ -287,13 +282,13 @@ void thread_time_wait_over(thread_t *impl, int tm_ms)
 }
 
 /**
- * @brief thread_queue_handler 
+ * @brief thread_pool_handler 
  *
  * @param arg
  *
  * @return 
  */
-void *thread_queue_handler(void *arg)
+void *thread_pool_handler(void *arg)
 {
     thread_t *pthread = qthread->head;
     thread_t *pre = NULL, *pnext = NULL;
@@ -373,7 +368,6 @@ static void sig_deal(int signum)
             while (pthread != NULL)
             {
                 qthread->thread_total_cnt--;
-                thread_id--;
                 p = pthread;
                 pthread = pthread->next;
                 printf("sig free name: %s\n", p->name);
@@ -409,7 +403,6 @@ static void exit_cleanup()
         p = pthread;
         printf("exit free name: %s\n", p->name);
         pthread = pthread->next;
-        thread_id--;
         free(p);
     }
     pthread_mutex_unlock(&qthread->lock);
@@ -434,19 +427,19 @@ static void exit_cleanup()
 int thread_create(const char *name, thread_handler handler, void *arg, 
         int run, int repeat)
 {
-    struct thread_impl *new_thread = NULL;
+    struct thread *new_thread = NULL;
     struct sigaction sa;
 
     if (name == NULL)   return -1;
     if (qthread == NULL) { 
-        qthread = (struct thread_queue *)malloc(sizeof(struct thread_queue));
-        memset(qthread, 0, sizeof(struct thread_queue));
+        qthread = (struct thread_pool *)malloc(sizeof(struct thread_pool));
+        memset(qthread, 0, sizeof(struct thread_pool));
     }
     if (qthread == NULL) return -1;
-    if ((new_thread = (struct thread_impl *)malloc(sizeof(struct thread_impl))) == NULL)
+    if ((new_thread = (struct thread *)malloc(sizeof(struct thread))) == NULL)
         return -1;
 
-    memset(new_thread, 0, sizeof(struct thread_impl));
+    memset(new_thread, 0, sizeof(struct thread));
     new_thread->name  = name;
     new_thread->id    = thread_id++;
     new_thread->worker.handler    = handler;
@@ -496,7 +489,7 @@ int thread_create(const char *name, thread_handler handler, void *arg,
         sigaction(SIGABRT, &sa, NULL);
 
         atexit(exit_cleanup);
-        pthread_create(&qthread->pid, NULL, thread_queue_handler, qthread);
+        pthread_create(&qthread->pid, NULL, thread_pool_handler, qthread);
     }
 
     return new_thread->id;
@@ -511,19 +504,19 @@ int thread_create(const char *name, thread_handler handler, void *arg,
  */
 int pthread_start(struct thread_cfg *cfg)
 {
-    struct thread_impl *new_thread = NULL;
+    struct thread *new_thread = NULL;
     struct sigaction sa;
 
     if (cfg == NULL)   return -1;
     if (qthread == NULL) { 
-        qthread = (struct thread_queue *)malloc(sizeof(struct thread_queue));
-        memset(qthread, 0, sizeof(struct thread_queue));
+        qthread = (struct thread_pool *)malloc(sizeof(struct thread_pool));
+        memset(qthread, 0, sizeof(struct thread_pool));
     }
     if (qthread == NULL) return -1;
-    if ((new_thread = (struct thread_impl *)malloc(sizeof(struct thread_impl))) == NULL)
+    if ((new_thread = (struct thread *)malloc(sizeof(struct thread))) == NULL)
         return -1;
 
-    memset(new_thread, 0, sizeof(struct thread_impl));
+    memset(new_thread, 0, sizeof(struct thread));
     new_thread->name   = cfg->name;
     new_thread->id     = thread_id++;
     new_thread->worker = cfg->worker;
@@ -534,6 +527,7 @@ int pthread_start(struct thread_cfg *cfg)
     new_thread->done   = 0;
     new_thread->delete = 0;
     new_thread->hold   = 0;
+    new_thread->st     = THREAD_CREATING;
 
     pthread_mutex_init(&new_thread->lock, NULL);
     pthread_cond_init(&new_thread->ready, NULL);
@@ -572,7 +566,7 @@ int pthread_start(struct thread_cfg *cfg)
         sigaction(SIGABRT, &sa, NULL);
 
         atexit(exit_cleanup);
-        pthread_create(&qthread->pid, NULL, thread_queue_handler, qthread);
+        pthread_create(&qthread->pid, NULL, thread_pool_handler, qthread);
     }
 
     return new_thread->id;
@@ -585,9 +579,9 @@ int pthread_start(struct thread_cfg *cfg)
  *
  * @return thread impl, if succ; NULL, if failed
  */
-struct thread_impl * get_pthread(int thread_id)
+struct thread * get_pthread(int thread_id)
 {
-    struct thread_impl *pthread = qthread->head;
+    struct thread *pthread = qthread->head;
 
     while (pthread != NULL && pthread->id != thread_id)
         pthread = pthread->next;
@@ -727,3 +721,156 @@ void pthread_unwait(int thread_id)
     }
 }
 
+/**
+ * @brief pthread_info 
+ */
+void pthread_info()
+{
+    thread_t *pthread = NULL;
+    const char *state[] = {   
+        "idle", 
+        "creating", 
+        "running", 
+        "stopped", 
+        "locked", 
+        "waiting", 
+        "over"
+    };
+ 
+    for (pthread = qthread->head; pthread != NULL; 
+         pthread = pthread->next)
+    {
+        printf("id: %d ---> name: %s ---> status: %s\n", 
+                pthread->id, pthread->name, state[pthread->st]);
+    }
+}
+
+/**
+ * @brief pthread_pool_runtine 
+ *
+ * @param arg
+ *
+ * @return 
+ */
+static void * pthread_pool_runtine(void *arg)
+{
+    struct thread *pthread = NULL;
+
+    while (pool->active) 
+    {
+        pthread = pool->head;
+        while (pthread != NULL)
+        {
+            if (pthread->worker.handler != NULL)
+                pthread->worker.handler(pthread->worker.arg);
+        }
+    }
+
+    return NULL;
+}
+
+/**
+ * @brief pthread_pool_init 
+ *
+ * @param max_cnt  [in] mac count of thread in pthread pool
+ * @param init_cnt [in] init count of thread in pthread pool
+ *
+ * @return 0, if succ; -1, if failed
+ */
+int pthread_pool_init(int max_cnt, int init_cnt)
+{
+    struct thread *pthread = NULL;
+
+    if (pool != NULL) return 0;
+    pool = (struct thread_pool *)malloc(sizeof(struct thread_pool));
+    if (pool == NULL) return -1;
+    memset(pool, 0, sizeof(struct thread_pool));
+    pool->thread_max_cnt = max_cnt;
+
+    while (init_cnt-- > 0)
+    {
+        pthread = (struct thread *)malloc(sizeof(struct thread));
+        if (pthread == NULL) continue;
+        memset(pthread, 0, sizeof(struct thread));
+        pthread->active = 1;
+        pthread->repeat = 1;
+
+        if (pool->head == NULL) {
+            pool->head = pthread;
+        } else {
+            pool->tail->next = NULL;
+        }
+        pool->tail = pthread;
+        pool->thread_total_cnt++;
+        pool->thread_idle_cnt++;
+    }
+
+    pthread_create(&pool->pid, NULL, pthread_pool_runtine, pool);
+    return 0;
+}
+
+/**
+ * @brief get_idle_thread 
+ *
+ * @return thread, if succ; NULL, if failed
+ */
+struct thread * get_idle_thread()
+{
+    struct thread *pthread = NULL;
+
+    for (pthread = pool->head; pthread != NULL; 
+        pthread = pthread->next)
+    {
+        if (pthread->active && pthread->done) break;
+    }
+
+    return pthread;
+}
+
+/**
+ * @brief pthread_pool_add 
+ *
+ * @param handler [in] pthread callback
+ * @param arg     [in]
+ *
+ * @return 0, if succ; -1, if failed
+ */
+int pthread_pool_add(thread_handler handler, void *arg)
+{
+    struct thread *pthread = NULL;
+    if (pool->thread_total_cnt >= pool->thread_max_cnt) 
+        return -1;
+
+    if (pool->thread_idle_cnt < pool->thread_total_cnt)
+    {
+        pthread = get_idle_thread();
+        if (pthread == NULL) return -1;
+        pthread->worker.handler = handler;
+        pthread->worker.arg = arg;
+        return 0;
+    }
+
+    pthread = (struct thread *)malloc(sizeof(struct thread));
+    if (pthread == NULL) return -1;
+    memset(pthread, 0, sizeof(struct thread));
+    pthread->active = 1;
+    pthread->repeat = 1;
+    pthread->worker.handler = handler;
+    pthread->worker.arg = arg;
+    if (pthread_create(&pthread->pid, NULL, thread_runtine, pthread) < 0)
+    {
+        free(pthread);
+        pthread = NULL;
+        return -1;
+    }
+
+    if (pool->head == NULL) {
+        pool->head = pthread;
+    } else {
+        pool->tail->next = NULL;
+    }
+    pool->tail = pthread;
+    pool->thread_total_cnt++;
+
+    return 0;
+}

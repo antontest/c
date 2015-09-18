@@ -36,7 +36,7 @@ typedef struct thread_worker
 /**
  * @brief thread info package
  */
-typedef struct thread_impl 
+typedef struct thread 
 {
     /**
      * control parameters
@@ -66,22 +66,24 @@ typedef struct thread_impl
     thread_worker_t     worker;
     thread_worker_t     free;
 
-    struct thread_impl  *next;
+    struct thread  *next;
 } thread_t;
 
 /**
  * @brief info of thread queue
  */
-typedef struct thread_queue {
+typedef struct thread_pool {
     int thread_total_cnt;
-    int max_thread;
+    int thread_max_cnt;
+    int thread_idle_cnt;
+    int active;
 
     pthread_t           pid;
     pthread_mutex_t     lock;
     pthread_cond_t      ready;
-    struct thread_impl  *head;
-    struct thread_impl  *tail;
-} thread_queue_t;
+    struct thread  *head;
+    struct thread  *tail;
+} thread_pool_t;
 
 /**
  * @brief thread configure
@@ -95,7 +97,11 @@ typedef struct thread_cfg {
     thread_worker_t free;
 } thread_cfg_t;
 
-struct thread_queue *qthread;
+/**
+ * global variable
+ */ 
+struct thread_pool *qthread;
+struct thread_pool *pool;
 
 /**
  * @brief start a pthread
@@ -219,7 +225,7 @@ int pthread_start(struct thread_cfg *cfg);
  *
  * @return thread impl, if succ; NULL, if failed
  */
-struct thread_impl * get_pthread(int thread_id);
+struct thread * get_pthread(int thread_id);
 
 /**
  * @brief pthread_run 
@@ -283,5 +289,10 @@ void pthread_wait(int thread_id);
  * @param thread_id [in] thread id
  */
 void pthread_unwait(int thread_id);
+
+/**
+ * @brief pthread_info 
+ */
+void pthread_info();
 
 #endif

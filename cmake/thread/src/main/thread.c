@@ -62,14 +62,20 @@ int main(int agrc, char *agrv[])
 
     cfg.run = 1;
     cfg.name = "pthread";
-
     cfg.worker.handler = pthread;
+    cfg.worker.arg = NULL;
+    rt = pthread_start(&cfg);
+    pthread_hold(rt);
+    pthread_info();
+
+    sleep(1);
+    thread_create("sayhi", sayhi, NULL, 1, 0);
+    cfg.name = "sayhello";
+    cfg.worker.handler = sayhello;
     cfg.worker.arg = NULL;
 
     rt = pthread_start(&cfg);
-    pthread_hold(99);
-    sleep(1);
-    thread_create("sayhi", sayhi, NULL, 1, 0);
+    pthread_info();
 
     sleep(5);
             
