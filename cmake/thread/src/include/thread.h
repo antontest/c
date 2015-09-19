@@ -8,11 +8,13 @@
 #include <signal.h>
 #include <sys/select.h>
 #include <sys/sysinfo.h>
+#include <semaphore.h>
 
 typedef enum thread_status {
     THREAD_IDLE      = 0,
     THREAD_CREATING     ,
     THREAD_RUNNING      ,
+    THREAD_BUSY         ,
     THREAD_STOPPED      ,
     THREAD_LOCK         ,
     THREAD_WAIT         ,
@@ -30,8 +32,9 @@ typedef void* (*thread_handler)(void*);
  */
 typedef struct thread_worker 
 {
-    thread_handler handler;
-    void *arg;
+    void                 *arg;
+    thread_handler       handler;
+    struct thread_worker *next;
 } thread_worker_t;
 
 /**
@@ -70,6 +73,12 @@ typedef struct thread
     struct thread  *next;
 } thread_t;
 
+typedef struct task_pool {
+    int             task_cnt;
+    struct thread   *head;
+    struct thread   *tail;
+} task_pool_t;
+
 /**
  * @brief info of thread queue
  */
@@ -80,11 +89,16 @@ typedef struct thread_pool {
     int thread_mini_cnt;
     int active;
 
-    pthread_t           pid;
-    pthread_mutex_t     lock;
-    pthread_cond_t      ready;
-    struct thread  *head;
-    struct thread  *tail;
+    pthread_t        pid;
+    pthread_mutex_t  lock;
+    pthread_cond_t   ready;
+    sem_t            sem;
+    struct task_pool task_pool;
+    struct task_pool idle_pool;
+    struct task_pool run_pool;
+    struct task_pool del_pool;
+    //struct thread       *head;
+    //struct thread       *tail;
 } thread_pool_t;
 
 /**
@@ -323,5 +337,14 @@ struct thread * get_idle_thread();
  * @return 0, if succ; -1, if failed
  */
 int pthread_pool_add(thread_handler handler, void *arg);
+
+/**
+ * @brief dequeue_pool 
+ *
+ * @param pool
+ *
+ * @return 
+ */
+struct thread * dequeue_pool(struct task_pool *pool);
 
 #endif

@@ -26,14 +26,15 @@ void* sayhi(void *arg)
 
 void* waitsleep(void *arg)
 {
-    sleep(9);
-
+    sleep(5);
+    printf("sleep 5\n");
     return NULL;
 }
 
 void* waitsleep1(void *arg)
 {
     sleep(2);
+    printf("sleep 2\n");
 
     return NULL;
 }
@@ -80,18 +81,19 @@ int main(int agrc, char *agrv[])
     pthread_info();
     */
 
-    pthread_pool_init(10, 2, 5);
-    pthread_pool_add(sayhello, NULL);
-    pthread_pool_add(sayhi, NULL);
-    pthread_pool_add(sayhello, NULL);
+    pthread_pool_init(5, 2, 3);
+    
     pthread_pool_add(sayhi, NULL);
     pthread_pool_add(sayhi, NULL);
-    pthread_pool_add(sayhello, NULL);
     pthread_pool_add(sayhi, NULL);
-    sleep(5);
     pthread_pool_add(sayhi, NULL);
+    pthread_pool_add(sayhi, NULL);
+    pthread_pool_add(sayhi, NULL);
+    pthread_pool_add(waitsleep, NULL);
+    pthread_pool_add(waitsleep, NULL);
+    while (rt++ < 5) pthread_pool_add(sayhello, NULL);
 
-    sleep(50);
+    sleep(8);
             
     return rt;
 }
