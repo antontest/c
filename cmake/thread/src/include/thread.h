@@ -10,15 +10,17 @@
 #include <sys/sysinfo.h>
 #include <semaphore.h>
 
+#define DFT_THREAD_TIMEOUT 10
+
 typedef enum thread_status {
-    THREAD_IDLE      = 0,
-    THREAD_CREATING     ,
-    THREAD_RUNNING      ,
-    THREAD_BUSY         ,
-    THREAD_STOPPED      ,
-    THREAD_LOCK         ,
-    THREAD_WAIT         ,
-    THREAD_OVER         
+    THREAD_IDLE      = 0,  /* at thread init and execute task over */
+    THREAD_CREATING     ,  /* at creating thread */
+    THREAD_RUNNING      ,  /* at getting into thread runtine, but before execute */
+    THREAD_BUSY         ,  /* at executing thread task */
+    THREAD_STOPPED      ,  /* at stopped */
+    THREAD_LOCK         ,  /* at locked */
+    THREAD_WAIT         ,  /* at waiting other thread */
+    THREAD_OVER            /* at thread over */
 } thread_status;
 
 /**
@@ -45,36 +47,38 @@ typedef struct thread
     /**
      * control parameters
      */
-    int     active;
-    int     run;
-    int     repeat;
-    int     delete;
-    int     done;
-    int     hold;
-    long    create_time;
-    long    delete_time;
+    int     active;      /* active thread */
+    int     run;         /* control thread run or pause */
+    int     repeat;      /* thread can repeat any times */
+    int     delete;      /* destroy this thread */
+    int     done;        /* thead state */
+    int     hold;        /* keep this thread in memory */
+    long    create_time; /* create time */
+    long    delete_time; /* delete time */
+    thread_status state; /* thead state */
 
     /**
      * info of thread
      */
-    int           id;
-    const char    *name;
-    thread_status st;
+    int         id;      /* everyone has a diffrent id */
+    const char  *name;   /* can give thread a name */
 
     /**
      * thread
      */
-    pthread_t           pid;
-    pthread_mutex_t     lock;
-    pthread_cond_t      ready;
-    thread_worker_t     worker;
-    thread_worker_t     free;
+    pthread_t           pid;    /* pthread id, gived by pthread_create*/
+    pthread_mutex_t     lock;   /* pthread mutex */
+    pthread_cond_t      ready;  /* pthread cond */
+    thread_worker_t     worker; /* pthread callback function, pthread main task */
+    thread_worker_t     free;   /* happened when thread delete */
 
     struct thread  *next;
 } thread_t;
 
+/**
+ * @brief task pool
+ */
 typedef struct task_pool {
-    int             task_cnt;
     struct thread   *head;
     struct thread   *tail;
 } task_pool_t;
@@ -83,34 +87,31 @@ typedef struct task_pool {
  * @brief info of thread queue
  */
 typedef struct thread_pool {
-    int thread_total_cnt;
-    int thread_max_cnt;
-    int thread_idle_cnt;
-    int thread_mini_cnt;
-    int active;
+    int active;                  /* active thread pool runtine */
+    int free_time;               /* thread timeout when idle  */
+    int thread_max_cnt;          /* max count of thread pool  */
+    int thread_mini_cnt;         /* mini count of idle thread */
+    int thread_total_cnt;        /* all threads count in pool */
 
-    pthread_t        pid;
-    pthread_mutex_t  lock;
-    pthread_cond_t   ready;
-    sem_t            sem;
-    struct task_pool task_pool;
-    struct task_pool idle_pool;
-    struct task_pool run_pool;
-    struct task_pool del_pool;
-    //struct thread       *head;
-    //struct thread       *tail;
+    pthread_t        pid;        /* pid of thread pool */
+    pthread_mutex_t  lock;       /* pthread mutex */
+    pthread_cond_t   ready;      /* pthread cond */
+    sem_t            sem;        /* signal */
+    struct task_pool task_pool;  /* thread task queue */
+    struct task_pool idle_pool;  /* idle thread queue */
+    struct task_pool run_pool;   /* trhead work queue */
 } thread_pool_t;
 
 /**
  * @brief thread configure
  */
 typedef struct thread_cfg {
-    char *name;
-    int  repeat;
-    int  run;
+    char *name;  /* can give thread a name */
+    int  repeat; /* can repeat thread task */
+    int  run;    /* let thread start to execute task */
     
-    thread_worker_t worker;
-    thread_worker_t free;
+    thread_worker_t worker; /* thread callback */
+    thread_worker_t free;   /* executed when destroyed thread */
 } thread_cfg_t;
 
 /**
@@ -119,6 +120,117 @@ typedef struct thread_cfg {
 struct thread_pool *qthread;
 struct thread_pool *pool;
 
+
+/******************************************************
+*************** Pthread Basic Function ****************
+*******************************************************/
+/**
+ * @brief pstart -- start a thread
+ *
+ * @param handler [in] callback
+ * @param arg     [in] arg
+ *
+ * @return pid of thread, if succ; -1, if failed
+ */
+pthread_t pstart(thread_handler handler, void *arg);
+
+/**
+ * @brief lock -- lock thread
+ *
+ * @param mtx [in] pthread mutex
+ */
+void plock(pthread_mutex_t *mtx);
+
+/**
+ * @brief ptrylock -- lock thread
+ *
+ * @param mtx [in] pthread mutex
+ */
+void ptrylock(pthread_mutex_t *mtx);
+
+/**
+ * @brief unlock -- unlock thread
+ *
+ * @param mtx [in] pthread mutex
+ */
+void punlock(pthread_mutex_t *mtx);
+
+/**
+ * @brief wait -- wait another thread
+ *
+ * @param cond [in] pthread cond
+ * @param mtx  [in] pthred mutex
+ */
+void pwait(pthread_cond_t *cond, pthread_mutex_t *mtx);
+
+/**
+ * @brief wait -- let another thread go on
+ *
+ * @param cond [in] pthread cond
+ */
+void pcontinue(pthread_cond_t *cond);
+
+/**
+ * @brief wait pthread over 
+ *
+ * @param pthread [in]
+ */
+void pjoin(pthread_t pid);
+
+/**
+ * @brief pexit -- wait for thread over safely 
+ *
+ * @param rval [out] thread return value
+ */
+void pexit(void *rval);
+
+/**
+ * @brief pkill -- kill thread
+ *
+ * @param pid    [in] pid
+ * @param signal [in] signal number
+ *
+ * @return 0, if thread exit and succ; EINVAL or ESRCH, if failed
+ */
+int pkill(pthread_t pid, int signal);
+
+/**
+ * @brief pcancel 
+ *
+ * @param pid [in] id
+ *
+ * @return 
+ */
+int pcancel(pthread_t pid);
+
+
+/******************************************************
+*************** Pthread Attribute Function ************
+******************************************************/
+/**
+ * @brief enable_cancel 
+ */
+void enable_cancel();
+
+/**
+ * @brief enable_cancel 
+ */
+void disable_cancel();
+
+/**
+ * @brief set_cancel_asyn 
+ */
+void set_cancel_asyn();
+
+/**
+ * @brief set_cancel_asyn 
+ */
+void set_cancel_defe();
+
+
+/******************************************************
+*************** Pthread Manage Function ****************
+******************************************************/
 /**
  * @brief start a pthread
  *
@@ -128,39 +240,39 @@ struct thread_pool *pool;
  *
  * @return 0, if succ; -1, if failed.
  */
-int thread_start(thread_t *impl, thread_handler handler, void *arg, int run, int repeat);
+int pthread_start(thread_handler handler, void *arg, int run, int repeat);
 
 /**
  * @brief pthread exec another function
  *
- * @param impl [in]
+ * @param pthread [in]
  * @param pr   [in] callback
  * @param arg  [in]
  */
-void thread_exec(thread_t *impl, thread_handler handler, void *arg);
+void pthread_exec(thread_t *pthread, thread_handler handler, void *arg);
 
 /**
  * @brief exec function when pthread over
  *
- * @param impl [in]
+ * @param pthread [in]
  * @param pr   [in] callback
  * @param arg  [in]
  */
-void thread_on_exit(thread_t *impl, thread_handler handler, void *arg);
+void pthread_on_exit(thread_t *pthread, thread_handler handler, void *arg);
 
 /**
  * @brief let pthread run
  *
- * @param impl [in] 
+ * @param pthread [in] 
  */
-void thread_run(thread_t *impl);
+void pthread_run(thread_t *pthread);
 
 /**
  * @brief let pthread stop
  *
- * @param impl [in] 
+ * @param pthread [in] 
  */
-void thread_stop(thread_t *impl);
+void pthread_stop(thread_t *pthread);
 
 /**
  * @brief lock a thread
@@ -169,7 +281,7 @@ void thread_stop(thread_t *impl);
  *
  * @return 0, if succ; -1, if falied.
  */
-int thread_lock(thread_t *impl);
+int pthread_lock(thread_t *pthread);
 
 /**
  * @brief lock a thread
@@ -178,7 +290,7 @@ int thread_lock(thread_t *impl);
  *
  * @return 0, if succ; -1, if falied.
  */
-int thread_trylock(thread_t *impl);
+int pthread_trylock(thread_t *pthread);
 
 /**
  * @brief unlock a thread
@@ -187,7 +299,7 @@ int thread_trylock(thread_t *impl);
  *
  * @return 0, if succ; -1, if falied.
  */
-int thread_unlock(thread_t *impl);
+int pthread_unlock(thread_t *pthread);
 
 /**
  * @brief destroy a lock of a thread
@@ -196,21 +308,14 @@ int thread_unlock(thread_t *impl);
  *
  * @return 0, if succ; -1, if falied.
  */
-int thread_delete(thread_t *impl);
+int pthread_delete(thread_t *pthread);
 
 /**
  * @brief wait pthread over 
  *
- * @param impl [in]
+ * @param pthread [in]
  */
-void thread_wait_over(thread_t *impl);
-
-/**
- * @brief wait pthread over 
- *
- * @param impl [in]
- */
-void thread_time_wait_over(thread_t *impl, int tm_ms);
+void pthread_time_wait_over(thread_t *pthread, int tm_ms);
 
 /**
  * @brief pthread_create 
@@ -223,7 +328,7 @@ void thread_time_wait_over(thread_t *impl, int tm_ms);
  *
  * @return 0, if succ; -1, if failed 
  */
-int thread_create(const char *name, thread_handler handler, void *arg, int run, int repeat);
+//int thread_create(const char *name, thread_handler handler, void *arg, int run, int repeat);
 
 /**
  * @brief pthread_start 
@@ -232,14 +337,14 @@ int thread_create(const char *name, thread_handler handler, void *arg, int run, 
  *
  * @return pthread_id, if succ; -1, if failed
  */
-int pthread_start(struct thread_cfg *cfg);
+//int pthread_start(struct thread_cfg *cfg);
 
 /**
  * @brief get_thread 
  *
  * @param thread_idi [in] thread id
  *
- * @return thread impl, if succ; NULL, if failed
+ * @return thread pthread, if succ; NULL, if failed
  */
 struct thread * get_pthread(int thread_id);
 
@@ -248,85 +353,94 @@ struct thread * get_pthread(int thread_id);
  *
  * @param thread_id [in] thread id
  */
-void pthread_run(int thread_id);
+void thread_run(int thread_id);
 
 /**
  * @brief pthread_stop 
  *
  * @param thread_id [in] thread id
  */
-void pthread_stop(int thread_id);
+void thread_stop(int thread_id);
 
 /**
  * @brief pthread_delete
  *
  * @param thread_id [in] thread id
  */
-void pthread_delete(int thread_id);
+void thread_delete(int thread_id);
 
 /**
  * @brief pthread_run 
  *
  * @param thread_id [in] thread id
  */
-void pthread_hold(int thread_id);
+void thread_hold(int thread_id);
 
 /**
  * @brief pthread_unhold 
  *
  * @param thread_id [in] thread id
  */
-void pthread_unhold(int thread_id);
+void thread_unhold(int thread_id);
 
 /**
  * @brief pthread_lock 
  *
  * @param thread_id [in] thread id
  */
-void pthread_lock(int thread_id);
+void thread_lock(int thread_id);
 
 /**
  * @brief pthread_unlock 
  *
  * @param thread_id [in] thread id
  */
-void pthread_unlock(int thread_id);
+void thread_unlock(int thread_id);
 
 /**
  * @brief pthread_wait 
  *
  * @param thread_id [in] thread id
  */
-void pthread_wait(int thread_id);
+void thread_wait(int thread_id);
 
 /**
  * @brief pthread_unwait 
  *
  * @param thread_id [in] thread id
  */
-void pthread_unwait(int thread_id);
+void thread_unwait(int thread_id);
 
 /**
  * @brief pthread_info 
  */
-void pthread_info();
+void thread_info(struct task_pool *task_pool);
+
+
+/******************************************************
+****************       Pthread Pool    ****************
+*******************************************************/
+/**
+ * @brief get_pool_size 
+ *
+ * @param pool
+ *
+ * @return 
+ */
+int get_pool_size(struct task_pool *pool);
 
 /**
  * @brief pthread_pool_init 
  *
  * @param max_cnt  [in] mac count of thread in pthread pool
+ * @param mini_cnt [in] mini count of thread in pthread pool
  * @param init_cnt [in] init count of thread in pthread pool
+ * @param tm       [in] timeout of thread in pthread pool
  *
  * @return 0, if succ; -1, if failed
  */
-int pthread_pool_init(int max_cnt, int mini_cnt, int init_cnt);
+int pthread_pool_init(int max_cnt, int mini_cnt, int init_cnt, int tm);
 
-/**
- * @brief get_idle_thread 
- *
- * @return thread, if succ; NULL, if failed
- */
-struct thread * get_idle_thread();
 
 /**
  * @brief pthread_pool_add 

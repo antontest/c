@@ -39,12 +39,26 @@ void* waitsleep1(void *arg)
     return NULL;
 }
 
+void clean(void *arg)
+{
+    printf("clean up\n");
+}
+
 void *pthread(void *arg)
 {
     printf("pthrad\n");
+    struct thread *pthread = (struct thread *)arg;
+    printf("d: %d, r: %d\n", pthread->delete, pthread->run);
 
-    sleep(1);
+    pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+    pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
+    pthread_cleanup_push(clean, NULL);
+    pthread_testcancel();
+    sleep(5);
+    pthread_testcancel();
 
+    printf("pthread be canceled\n");
+    pthread_cleanup_pop(0);
     return NULL;
 }
 
@@ -54,6 +68,27 @@ void *pthread(void *arg)
 int main(int agrc, char *agrv[])
 {
     int rt = 0; /* return value of function main */
+    
+    pthread_t pid;
+    struct thread t = {0};
+    t.run = 1;
+    t.done = 1;
+
+    //pid = pstart(pthread, &t);
+    pthread_create(&pid, NULL, pthread, &t);
+    sleep(2);
+    pthread_cancel(pid);
+    sleep(5);
+   
+    /*
+    pid = pstart(sayhi, &t);
+    pid = pstart(sayhi, &t);
+    pid = pstart(sayhi, &t);
+    pid = pstart(sayhi, &t);
+    sleep(3);
+
+    return 0;
+    */
 
     /*
     struct thread_cfg cfg = {0};
@@ -81,7 +116,7 @@ int main(int agrc, char *agrv[])
     pthread_info();
     */
 
-    pthread_pool_init(5, 2, 3);
+    pthread_pool_init(5, 3, 2, 4);
     
     pthread_pool_add(sayhi, NULL);
     pthread_pool_add(sayhi, NULL);
