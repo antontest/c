@@ -50,16 +50,18 @@ void *pthread(void *arg)
     //struct thread *pthread = (struct thread *)arg;
     //printf("d: %d, r: %d\n", pthread->delete, pthread->run);
 
+    /*
     pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
     pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
     pthread_cleanup_push(clean, NULL);
     pthread_testcancel();
+    */
     sleep(5);
     printf("pthread sleep 5\n");
     //pthread_testcancel();
 
     //printf("pthread be canceled\n");
-    pthread_cleanup_pop(0);
+    //pthread_cleanup_pop(0);
     return NULL;
 }
 
@@ -75,9 +77,9 @@ int main(int agrc, char *agrv[])
     t.run = 1;
 
     //pid = pstart(waitsleep, NULL);
-    //pid = pstart(pthread, &t);
+    pid = pstart(pthread, &t);
     //sleep(2);
-    //pthread_cancel(pid);
+    pthread_cancel(pid);
     pid = pstart(pthread, NULL);
     //printf("size: %d\n", get_pool_size(&qthread->run_pool));
     //sleep(2);
@@ -86,9 +88,9 @@ int main(int agrc, char *agrv[])
     //pid = pcreate(pthread, NULL);
     //pjoin(pid);
     //qthread->active = 0;
-    pexit(NULL);
+    //pexit(NULL);
    
-    return 0;
+    //return 0;
     //pthread_create(&pid, NULL, pthread, &t);
     /*
     pid = pstart(sayhi, &t);
@@ -138,7 +140,7 @@ int main(int agrc, char *agrv[])
     pthread_pool_add(waitsleep, NULL);
     while (rt++ < 5) pthread_pool_add(sayhello, NULL);
 
-    sleep(9);
+    pexit(NULL);
             
     return rt;
 }

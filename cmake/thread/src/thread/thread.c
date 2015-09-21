@@ -17,13 +17,12 @@ void cleanup_runtine(void *arg)
      * default thread cancel dealing
      */
     pthread = (thread_t *)arg;
+    if (pthread->clean.handler != NULL)
+        pthread->clean.handler(pthread->clean.arg);
     pthread->run = 0;
     pthread->delete = 1;
     pthread->state = THREAD_OVER;
-    printf("thread %d be canceled, start to clean\n", pthread->id);
-    
-    if (pthread->clean.handler != NULL)
-        pthread->clean.handler(pthread->clean.arg);
+    //printf("thread %d be canceled, start to clean\n", pthread->id);
 
     return;
 }
@@ -91,7 +90,7 @@ void *thread_runtine(void *arg)
         if (!pthread->hold) break;
     }
 
-    printf("thread %d over\n", pthread->id);
+    //printf("thread %d over\n", pthread->id);
     if (pthread->clean.handler != NULL) 
         pthread->clean.handler(pthread->clean.arg);
     pthread->run = 0;
@@ -418,6 +417,7 @@ wait:
         usleep(10);
     }
 
+    //0printf("pstart runtine over\n");
     return NULL;
 }
 
@@ -571,17 +571,48 @@ void pjoin(pthread_t pid)
  */
 void pexit(void *rval)
 {
+    struct thread *pthread = NULL;
     if (qthread != NULL) {
         pthread_mutex_lock(&qthread->lock);
         qthread->active = 0;
         pthread_mutex_unlock(&qthread->lock);
     }
+
     if (pool != NULL) {
+        while (1) {
+            pthread_mutex_lock(&pool->lock);
+            if (pool->task_pool.head == NULL) {
+                pthread_mutex_unlock(&pool->lock);
+                break;
+            }
+            pthread_mutex_unlock(&pool->lock);
+            usleep(10);
+        }
+
+        while (1) {
+            pthread_mutex_lock(&pool->lock);
+            if (pool->run_pool.head == NULL) {
+                pthread_mutex_unlock(&pool->lock);
+                break;
+            }
+            pthread_mutex_unlock(&pool->lock);
+            usleep(10);
+        }
+        
+        pthread = pool->idle_pool.head;
+        while (1) {
+            if (pthread == NULL) break;
+            pthread_mutex_lock(&pool->lock);
+            pthread->delete = 1;
+            pthread = pthread->next;
+            pthread_mutex_unlock(&pool->lock);
+            usleep(10);
+        }
+         
         pthread_mutex_lock(&pool->lock);
         pool->active = 0;
         pthread_mutex_unlock(&pool->lock);
     }
-    pthread_exit(rval);
 }
 
 /**
@@ -1256,6 +1287,7 @@ unlock:
 
     }
 
+    //printf("thread pool runtine over\n");
     return NULL;
 }
 
@@ -1287,6 +1319,7 @@ unlock:
         usleep(10);
     }
         
+    //printf("move to idle thread over\n");
     return NULL;
 }
 
