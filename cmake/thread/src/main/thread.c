@@ -72,15 +72,27 @@ int main(int agrc, char *agrv[])
 {
     int rt = 0; /* return value of function main */
     
+    /*
     pthread_t pid;
     struct thread t = {0};
     t.run = 1;
 
     //pid = pstart(waitsleep, NULL);
-    pid = pstart(pthread, &t);
+    //pid = pstart(pthread, &t);
     //sleep(2);
-    pthread_cancel(pid);
-    pid = pstart(pthread, NULL);
+    //pthread_cancel(pid);
+    //pid = pstart(pthread, NULL);
+    pid = pstart(sayhi, NULL);
+    pid = pstart(sayhi, NULL);
+    pid = pstart(sayhi, NULL);
+    pid = pstart(sayhi, NULL);
+    pid = pstart(sayhello, NULL);
+    pid = pstart(sayhello, NULL);
+    pid = pstart(sayhello, NULL);
+    pid = pstart(sayhello, NULL);
+    pid = pstart(sayhello, NULL);
+    pid = pstart(sayhello, NULL);
+
     //printf("size: %d\n", get_pool_size(&qthread->run_pool));
     //sleep(2);
     //pthread_cancel(pid);
@@ -90,7 +102,9 @@ int main(int agrc, char *agrv[])
     //qthread->active = 0;
     //pexit(NULL);
    
-    //return 0;
+    return 0;
+    */
+
     //pthread_create(&pid, NULL, pthread, &t);
     /*
     pid = pstart(sayhi, &t);
@@ -137,9 +151,10 @@ int main(int agrc, char *agrv[])
     pthread_pool_add(sayhi, NULL);
     pthread_pool_add(sayhi, NULL);
     pthread_pool_add(waitsleep, NULL);
-    pthread_pool_add(waitsleep, NULL);
+    //pthread_pool_add(waitsleep, NULL);
     while (rt++ < 5) pthread_pool_add(sayhello, NULL);
 
+    //sleep(6);
     pexit(NULL);
             
     return rt;

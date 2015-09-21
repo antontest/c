@@ -100,15 +100,27 @@ typedef struct task_pool {
  */
 typedef struct thread_pool {
     int active;                  /* active thread pool runtine */
+    int state;                   /* thread pool state */
+
+    /**
+     * pool info
+     */
     int free_time;               /* thread timeout when idle  */
     int thread_max_cnt;          /* max count of thread pool  */
     int thread_mini_cnt;         /* mini count of idle thread */
     int thread_total_cnt;        /* all threads count in pool */
 
+    /**
+     * thread control
+     */
     pthread_t        pid;        /* pid of thread pool */
     pthread_mutex_t  lock;       /* pthread mutex */
     pthread_cond_t   ready;      /* pthread cond */
     sem_t            sem;        /* signal */
+    
+    /**
+     * pool
+     */
     struct task_pool task_pool;  /* thread task queue */
     struct task_pool idle_pool;  /* idle thread queue */
     struct task_pool run_pool;   /* trhead work queue */
