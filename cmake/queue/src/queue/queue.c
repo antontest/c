@@ -121,3 +121,40 @@ int jump_queue(void *queue, void *ele1, void *ele2)
 
     return 0;
 }
+
+/**
+ * @brief del_element -- delete element from queue
+ *
+ * @param queue [in] queue 
+ * @param ele   [in] element
+ *
+ * @return 0, if succ; -1, if failed
+ */
+int del_element(void *queue, void *ele)
+{
+    struct common_queue *pqueue = NULL;
+    struct element *pele = NULL;
+    struct element *pele_pre = NULL;
+    
+    if (queue == NULL || ele == NULL) return -1;
+
+    pqueue = (struct common_queue *)queue;
+
+    pele = pqueue->head;
+    while (1) {
+        if (pele == NULL) break;
+        if (pele == ele) break;
+        pele_pre = pele;
+        pele = pele->next;
+    }
+    
+    if (pele == NULL) return -1;
+    if (pele_pre == NULL) {
+        pqueue->head = pqueue->head->next;
+    } else {
+        pele_pre->next = pele->next;
+    }
+    free(ele);
+
+    return 0;
+}

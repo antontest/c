@@ -54,4 +54,4 @@ else()
 endif()
 
 # install target
-INSTALL(TARGETS queue RUNTIME DESTINATION exec)
+# INSTALL(TARGETS queue RUNTIME DESTINATION exec)

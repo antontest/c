@@ -49,6 +49,9 @@ int main(int agrc, char *agrv[])
     ele1->id = 5;
     jump_queue(&q, ele2, ele1); 
 
+    del_element(&q, ele2);
+    del_element(&q, q.head);
+
     while ((ele = dequeue(&q)) != NULL) {
         printf("id: %d\n", ele->id);
         free(ele);

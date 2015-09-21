@@ -1,3 +1,6 @@
+#ifndef __QUEUE_H__
+#define __QUEUE_H__
+
 /**
  * usual head files
  */
@@ -70,3 +73,15 @@ int jump_head(void *queue, void *ele);
  * @return 0, if succ; -1, if failed
  */
 int jump_queue(void *queue, void *ele1, void *ele2);
+
+/**
+ * @brief del_element -- delete element from queue
+ *
+ * @param queue [in] queue 
+ * @param ele   [in] element
+ *
+ * @return 0, if succ; -1, if failed
+ */
+int del_element(void *queue, void *ele);
+
+#endif
