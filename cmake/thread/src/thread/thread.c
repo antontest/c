@@ -49,10 +49,10 @@ void *thread_runtine(void *arg)
     /**
      * set thread can be canceled
      */
-    //enable_cancel();
-    //set_cancel_defe();
-    //pthread_cleanup_push(cleanup_runtine, arg);
-    //pthread_testcancel();
+    enable_cancel();
+    set_cancel_defe();
+    pthread_cleanup_push(cleanup_runtine, arg);
+    pthread_testcancel();
 
     /**
      * thread thread dealing function
@@ -97,7 +97,7 @@ void *thread_runtine(void *arg)
     pthread->run = 0;
     pthread->delete = 1;
     pthread->state = THREAD_OVER;
-    //pthread_cleanup_pop(0);
+    pthread_cleanup_pop(0);
 
     return NULL;
 }
@@ -334,11 +334,22 @@ static void abnormal_event_add()
 static void exit_cleanup()
 {
     if (qthread != NULL) {
+        /**
+         * stop main thread
+         */
+        qthread->active = 0;
+        usleep(100);
+
+        /**
+         * free memory of thread pool
+         */
         pthread_mutex_lock(&qthread->lock);
         printf("qthread clean idle\n");
         destroy_pool(&qthread->idle_pool);
+
         printf("qthread clean run\n");
         destroy_pool(&qthread->run_pool);
+
         printf("qthread clean task\n");
         destroy_pool(&qthread->task_pool);
         pthread_mutex_unlock(&qthread->lock);
@@ -351,11 +362,22 @@ static void exit_cleanup()
         qthread = NULL;
     }
     if (pool != NULL) {
+        /**
+         * stop main thread
+         */
+        pool->active = 0;
+        usleep(100);
+
+        /**
+         * free memory of thread pool
+         */
         pthread_mutex_lock(&pool->lock);
         printf("pool clean idle\n");
         destroy_pool(&pool->idle_pool);
+
         printf("pool clean run\n");
         destroy_pool(&pool->run_pool);
+
         printf("pool clean task\n");
         destroy_pool(&pool->task_pool);
         pthread_mutex_unlock(&pool->lock);
@@ -549,6 +571,16 @@ void pjoin(pthread_t pid)
  */
 void pexit(void *rval)
 {
+    if (qthread != NULL) {
+        pthread_mutex_lock(&qthread->lock);
+        qthread->active = 0;
+        pthread_mutex_unlock(&qthread->lock);
+    }
+    if (pool != NULL) {
+        pthread_mutex_lock(&pool->lock);
+        pool->active = 0;
+        pthread_mutex_unlock(&pool->lock);
+    }
     pthread_exit(rval);
 }
 
