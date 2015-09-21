@@ -30,6 +30,16 @@ typedef enum thread_status {
 typedef void* (*thread_handler)(void*);
 
 /**
+ * @brief define function pointer
+ * @function used when thread canceled for cleaning up
+ */
+typedef void (*cleanup_handler)(void*);
+
+
+/******************************************************
+ ********************* Struct *************************
+ ******************************************************/
+/**
  * @brief callback of thread
  */
 typedef struct thread_worker 
@@ -51,7 +61,6 @@ typedef struct thread
     int     run;         /* control thread run or pause */
     int     repeat;      /* thread can repeat any times */
     int     delete;      /* destroy this thread */
-    int     done;        /* thead state */
     int     hold;        /* keep this thread in memory */
     long    create_time; /* create time */
     long    delete_time; /* delete time */
@@ -67,11 +76,14 @@ typedef struct thread
      * thread
      */
     pthread_t           pid;    /* pthread id, gived by pthread_create*/
-    pthread_mutex_t     lock;   /* pthread mutex */
-    pthread_cond_t      ready;  /* pthread cond */
     thread_worker_t     worker; /* pthread callback function, pthread main task */
-    thread_worker_t     free;   /* happened when thread delete */
+    thread_worker_t     clean;  /* happened when thread be deleted or canceled*/
+    //pthread_mutex_t     lock; /* pthread mutex */
+    //pthread_cond_t      ready;/* pthread cond */
 
+    /**
+     * pointer to next thread
+     */
     struct thread  *next;
 } thread_t;
 
@@ -111,7 +123,7 @@ typedef struct thread_cfg {
     int  run;    /* let thread start to execute task */
     
     thread_worker_t worker; /* thread callback */
-    thread_worker_t free;   /* executed when destroyed thread */
+    thread_worker_t clean;  /* executed when destroyed thread */
 } thread_cfg_t;
 
 /**
@@ -122,8 +134,8 @@ struct thread_pool *pool;
 
 
 /******************************************************
-*************** Pthread Basic Function ****************
-*******************************************************/
+ ************** Pthread Basic Function ****************
+ ******************************************************/
 /**
  * @brief pstart -- start a thread
  *
@@ -133,6 +145,16 @@ struct thread_pool *pool;
  * @return pid of thread, if succ; -1, if failed
  */
 pthread_t pstart(thread_handler handler, void *arg);
+
+/**
+ * @brief pcreate 
+ *
+ * @param handler [in] callback
+ * @param arg     [in] arg
+ *
+ * @return pid, if succ; -1, if failed
+ */
+pthread_t pcreate(thread_handler handler, void *arg);
 
 /**
  * @brief lock -- lock thread
@@ -164,7 +186,7 @@ void punlock(pthread_mutex_t *mtx);
 void pwait(pthread_cond_t *cond, pthread_mutex_t *mtx);
 
 /**
- * @brief wait -- let another thread go on
+ * @brief pcontinue -- let another thread go on
  *
  * @param cond [in] pthread cond
  */
@@ -210,22 +232,36 @@ int pcancel(pthread_t pid);
 /**
  * @brief enable_cancel 
  */
-void enable_cancel();
+int enable_cancel();
 
 /**
  * @brief enable_cancel 
  */
-void disable_cancel();
+int disable_cancel();
 
 /**
  * @brief set_cancel_asyn 
  */
-void set_cancel_asyn();
+int set_cancel_asyn();
 
 /**
  * @brief set_cancel_asyn 
  */
-void set_cancel_defe();
+int set_cancel_defe();
+
+/**
+ * @brief set_joinable -- set thread joinable
+ *
+ * @return 0, if succ; -1, if failed
+ */
+int set_joinable();
+
+/**
+ * @brief set_detach -- set thread detached
+ *
+ * @return 0, if succ; -1, if failed
+ */
+int set_detach();
 
 
 /******************************************************
@@ -273,33 +309,6 @@ void pthread_run(thread_t *pthread);
  * @param pthread [in] 
  */
 void pthread_stop(thread_t *pthread);
-
-/**
- * @brief lock a thread
- * 
- * @param mtx [in] mutex
- *
- * @return 0, if succ; -1, if falied.
- */
-int pthread_lock(thread_t *pthread);
-
-/**
- * @brief lock a thread
- * 
- * @param mtx [in] mutex
- *
- * @return 0, if succ; -1, if falied.
- */
-int pthread_trylock(thread_t *pthread);
-
-/**
- * @brief unlock a thread
- * 
- * @param mtx [in] mutex
- *
- * @return 0, if succ; -1, if falied.
- */
-int pthread_unlock(thread_t *pthread);
 
 /**
  * @brief destroy a lock of a thread

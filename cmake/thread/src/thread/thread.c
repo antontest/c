@@ -4,6 +4,31 @@ static int thread_id = 1;
 static int cleanup_event_init = 0;
 
 /**
+ * @brief cleanup_runtine -- happened thread be canceled 
+ *
+ * @param arg
+ */
+void cleanup_runtine(void *arg)
+{
+    thread_t *pthread = NULL;
+    if (arg == NULL) return;
+
+    /**
+     * default thread cancel dealing
+     */
+    pthread = (thread_t *)arg;
+    pthread->run = 0;
+    pthread->delete = 1;
+    pthread->state = THREAD_OVER;
+    printf("thread %d be canceled, start to clean\n", pthread->id);
+    
+    if (pthread->clean.handler != NULL)
+        pthread->clean.handler(pthread->clean.arg);
+
+    return;
+}
+
+/**
  * @brief pthread handler
  *
  * @param arg [in] struct pthread pointer
@@ -12,10 +37,26 @@ static int cleanup_event_init = 0;
  */
 void *thread_runtine(void *arg)
 {
-    thread_t *pthread = (thread_t *)arg;
+    /**
+     * thread parameter init
+     */
+    thread_t *pthread = NULL;
+    if (arg == NULL) return NULL;
+    pthread = (thread_t *)arg;
     thread_worker_t *worker = &pthread->worker;
-
     pthread->state = THREAD_RUNNING;
+
+    /**
+     * set thread can be canceled
+     */
+    //enable_cancel();
+    //set_cancel_defe();
+    //pthread_cleanup_push(cleanup_runtine, arg);
+    //pthread_testcancel();
+
+    /**
+     * thread thread dealing function
+     */
     while (pthread->active) 
     {
         if (pthread->delete) break;
@@ -50,14 +91,14 @@ void *thread_runtine(void *arg)
         if (!pthread->hold) break;
     }
 
-    if (pthread->free.handler != NULL) pthread->free.handler(arg);
+    printf("thread %d over\n", pthread->id);
+    if (pthread->clean.handler != NULL) 
+        pthread->clean.handler(pthread->clean.arg);
+    pthread->run = 0;
     pthread->delete = 1;
-    pthread->done = 1;
-
-    pthread_mutex_destroy(&pthread->lock);
-    pthread_cond_destroy(&pthread->ready);
-
     pthread->state = THREAD_OVER;
+    //pthread_cleanup_pop(0);
+
     return NULL;
 }
 
@@ -97,8 +138,8 @@ struct thread * create_thread()
     new_thread->id          = thread_id++;
     new_thread->create_time = get_localtime();
 
-    pthread_mutex_init(&new_thread->lock, NULL);
-    pthread_cond_init(&new_thread->ready, NULL);
+    //pthread_mutex_init(&new_thread->lock, NULL);
+    //pthread_cond_init(&new_thread->ready, NULL);
 
     return new_thread;
 }
@@ -112,8 +153,8 @@ void thread_destroy(struct thread *pthread)
 {
     if (pthread == NULL) return;
 
-    pthread_mutex_destroy(&pthread->lock);
-    pthread_cond_destroy(&pthread->ready);
+    //pthread_mutex_destroy(&pthread->lock);
+    //pthread_cond_destroy(&pthread->ready);
 
     free(pthread);
     pthread = NULL;
@@ -418,6 +459,22 @@ pthread_t pstart(thread_handler handler, void *arg)
 } 
 
 /**
+ * @brief pcreate 
+ *
+ * @param handler [in] callback
+ * @param arg     [in] arg
+ *
+ * @return pid, if succ; -1, if failed
+ */
+pthread_t pcreate(thread_handler handler, void *arg)
+{
+    pthread_t pid = 0;
+
+    pthread_create(&pid, NULL, handler, arg);
+    return pid;
+}
+
+/**
  * @brief lock -- lock thread
  *
  * @param mtx [in] pthread mutex
@@ -463,7 +520,7 @@ void pwait(pthread_cond_t *cond, pthread_mutex_t *mtx)
 }
 
 /**
- * @brief wait -- let another thread go on
+ * @brief pcontinue -- let another thread go on
  *
  * @param cond [in] pthread cond
  */
@@ -520,41 +577,67 @@ int pcancel(pthread_t pid)
     return pthread_cancel(pid);
 }
 
+
 /******************************************************
 *************** Pthread Attribute Function ************
 ******************************************************/
 /**
  * @brief enable_cancel 
  */
-void enable_cancel()
+int enable_cancel()
 {
-    pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+    return pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
 }
 
 /**
  * @brief enable_cancel 
  */
-void disable_cancel()
+int disable_cancel()
 {
-    pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
+    return pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
 }
 
 /**
  * @brief set_cancel_asyn 
  */
-void set_cancel_asyn()
+int set_cancel_asyn()
 {
-    pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
+    return pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
 }
 
 /**
  * @brief set_cancel_asyn 
  */
-void set_cancel_defe()
+int set_cancel_defe()
 {
-    pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
+    return pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
 }
 
+/**
+ * @brief set_joinable -- set thread joinable
+ *
+ * @return 0, if succ; -1, if failed
+ */
+int set_joinable()
+{
+    pthread_attr_t attr;
+
+    pthread_attr_init(&attr);
+    return pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+}
+
+/**
+ * @brief set_detach -- set thread detached
+ *
+ * @return 0, if succ; -1, if failed
+ */
+int set_detach()
+{
+    pthread_attr_t attr;
+
+    pthread_attr_init(&attr);
+    return pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+}
 
 /******************************************************
 *************** Pthread Manage Function ****************
@@ -614,8 +697,7 @@ int pthread_start(thread_handler handler, void *arg, int run, int repeat)
 struct thread * get_thread(int thread_id)
 {
     struct thread *pthread = NULL;
-    
-    if (thread_id < 0) goto over;
+    if (thread_id < 0 || pool == NULL) goto over;
     
     pthread = qthread->run_pool.head;
     while (pthread != NULL)
@@ -639,7 +721,6 @@ void pthread_run(thread_t *pthread)
     if (pthread == NULL || !pthread->active) return;
 
     pthread->run = 1;
-    pthread->done = 0;
     pthread->state = THREAD_RUNNING;
 
     return;
@@ -655,7 +736,6 @@ void pthread_stop(thread_t *pthread)
     if (pthread == NULL || !pthread->active || !pthread->run) return;
     
     pthread->run = 0;
-    pthread->done = 0;
     pthread->state = THREAD_STOPPED;
 
     return;
@@ -672,13 +752,12 @@ void pthread_exec(thread_t *pthread, thread_handler handler, void *arg)
 {
     if (pthread == NULL || !pthread->active || !pthread->repeat) return;
 
-    while (!pthread->done) usleep(10);
+    while (pthread->run) usleep(10);
     pthread->run = 0;
     pthread->worker.handler = handler;
     pthread->worker.arg = arg;
 
     pthread->run = 1;
-    pthread->done = 0;
 
     return;
 }
@@ -694,8 +773,8 @@ void pthread_on_exit(thread_t *pthread, thread_handler handler, void *arg)
 {
     if (pthread == NULL || !pthread->active || !pthread->repeat) return;
 
-    pthread->free.handler = handler;
-    pthread->free.arg     = arg;
+    pthread->clean.handler = handler;
+    pthread->clean.arg     = arg;
 
     return;
 }
@@ -708,6 +787,7 @@ void pthread_on_exit(thread_t *pthread, thread_handler handler, void *arg)
  *
  * @return 0, if succ; -1, if falied.
  */
+/*
 int pthread_lock(thread_t *pthread)
 {
     if (pthread == NULL || pthread->active) return -1;
@@ -715,6 +795,7 @@ int pthread_lock(thread_t *pthread)
 
     return pthread_mutex_lock(&pthread->lock);
 }
+*/
 
 /**
  * @brief lock a thread
@@ -723,6 +804,7 @@ int pthread_lock(thread_t *pthread)
  *
  * @return 0, if succ; -1, if falied.
  */
+/*
 int pthread_trylock(thread_t *pthread)
 {
     if (pthread == NULL && !pthread->active) return -1;
@@ -730,6 +812,7 @@ int pthread_trylock(thread_t *pthread)
 
     return pthread_mutex_trylock(&pthread->lock);
 }
+*/
 
 /**
  * @brief unlock a thread
@@ -738,6 +821,7 @@ int pthread_trylock(thread_t *pthread)
  *
  * @return 0, if succ; -1, if falied.
  */
+/*
 int pthread_unlock(thread_t *pthread)
 {
     if (pthread == NULL && !pthread->active) return -1;
@@ -745,6 +829,7 @@ int pthread_unlock(thread_t *pthread)
 
     return pthread_mutex_unlock(&pthread->lock);
 }
+*/
 
 /**
  * @brief destroy a lock of a thread
@@ -763,7 +848,7 @@ int pthread_delete(thread_t *pthread)
     {
         while(wait_tm-- > 0)
         {
-            if (pthread->done) break;
+            if (!pthread->run) break;
             else usleep(10);
         }
     }
@@ -776,17 +861,17 @@ int pthread_delete(thread_t *pthread)
     {
         while(wait_tm-- > 0)
         {
-            if (pthread->done) break;
+            if (!pthread->run) break;
             else usleep(10);
         }
     }
 
     /* if thread don't end, then call pthread_cancel to end it. */
-    if (!pthread->done)
+    if (pthread->run)
     {
         pthread_cancel(pthread->pid);
-        pthread_mutex_destroy(&pthread->lock);
-        pthread_cond_destroy(&pthread->ready);
+        //pthread_mutex_destroy(&pthread->lock);
+        //pthread_cond_destroy(&pthread->ready);
     }
     pthread->state = THREAD_OVER;
 
@@ -907,6 +992,7 @@ void thread_unhold(int thread_id)
  *
  * @param thread_id [in] thread id
  */
+/*
 void thread_lock(int thread_id)
 {
     thread_t *pthread = get_thread(thread_id);
@@ -916,12 +1002,14 @@ void thread_lock(int thread_id)
         pthread_mutex_lock(&pthread->lock);
     }
 }
+*/
 
 /**
  * @brief pthread_unlock 
  *
  * @param thread_id [in] thread id
  */
+/*
 void thread_unlock(int thread_id)
 {
     thread_t *pthread = get_thread(thread_id);
@@ -931,12 +1019,14 @@ void thread_unlock(int thread_id)
         pthread_mutex_unlock(&pthread->lock);
     }
 }
+*/
 
 /**
  * @brief pthread_wait 
  *
  * @param thread_id [in] thread id
  */
+/*
 void thread_wait(int thread_id)
 {
     thread_t *pthread = get_thread(thread_id);
@@ -946,12 +1036,14 @@ void thread_wait(int thread_id)
         pthread_cond_wait(&pthread->ready, &pthread->lock);
     }
 }
+*/
 
 /**
  * @brief pthread_unwait 
  *
  * @param thread_id [in] thread id
  */
+/*
 void thread_unwait(int thread_id)
 {
     thread_t *pthread = get_thread(thread_id);
@@ -961,6 +1053,7 @@ void thread_unwait(int thread_id)
         pthread_cond_signal(&pthread->ready);
     }
 }
+*/
 
 /**
  * @brief pthread_info 
