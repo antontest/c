@@ -41,8 +41,8 @@ void *dequeue(void *q)
     if (q == NULL) return NULL;
     queue = (struct common_queue *)q;
     ele = queue->head;
-    if (queue->head == NULL) return NULL;
-    queue->head = queue->head->next;
+    if (ele != NULL)
+        queue->head = queue->head->next;
 
     return ele;
 }
@@ -71,14 +71,10 @@ void queue_destroy(void *q)
  */
 int jump_head(void *q, void *ele)
 {
-    struct common_queue *queue = NULL;
-    struct element *pele = NULL;
     if (q == NULL || ele == NULL) return -1;
     
-    queue = (struct common_queue *)q;
-    pele = (struct element *)ele;
-    pele->next = queue->head;
-    queue->head = pele;
+    ((struct element *)ele)->next = ((struct common_queue *)q)->head;
+    ((struct common_queue *)q)->head = ele;
 
     return 0;
 }
@@ -94,30 +90,31 @@ int jump_head(void *q, void *ele)
  */
 int jump_queue(void *q, void *ele1, void *ele2)
 {
-    struct common_queue *queue = NULL;
-    struct element *pele = NULL, *pele1 = NULL, *pele2 = NULL;
-    struct element *pele_pre = NULL;
+    struct common_queue queue = {0};;
+    struct element *ele = NULL;
     
     if (q == NULL || ele2 == NULL) return -1;
     if (ele1 == NULL) return jump_head(q, ele2);
 
-    queue = (struct common_queue *)q;
-    pele1 = (struct element *)ele1;
-    pele2 = (struct element *)ele2;
-
-    pele = queue->head;
-    while (1) {
-        if (pele == NULL) break;
-        if (pele == pele1) break;
-        pele_pre = pele;
-        pele = pele->next;
+    /**
+     * if found ele1, then insert ele2 before ele1
+     */
+    while ((ele = dequeue(q)) != NULL) {
+        if (ele == ele1) {
+            enqueue(&queue, ele2);
+            enqueue(&queue, ele);
+            break;
+        } else enqueue(&queue, ele);
     }
-    
-    if (pele == NULL) return -1;
-    if (pele_pre == NULL) return jump_head(q, ele2);
 
-    pele_pre->next = pele2;
-    pele2->next = pele;
+    /**
+     * if found ele1, then merge queue
+     */
+    if (ele != NULL) {
+        queue.tail->next = ((struct common_queue *)q)->head;
+        queue.tail = ((struct common_queue *)q)->tail;
+    }
+    ((struct common_queue *)q)->head = queue.head;
 
     return 0;
 }
