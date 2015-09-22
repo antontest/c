@@ -1,111 +1,111 @@
 #include <queue.h>
 
 /**
- * @brief enqueue 
+ * @brief enq 
  *
- * @param queue [in] queue
- * @param ele   [in] element of queue
+ * @param q [in] q
+ * @param ele   [in] element of q
  * 
  * @return 0, if succ; -1, if faile
  */
-int enqueue(void *queue, void *ele)
+int enqueue(void *q, void *ele)
 {
-    struct common_queue *pqueue = NULL;
-    if (queue == NULL || ele == NULL) return -1;
+    struct common_queue *queue = NULL;
+    if (q == NULL || ele == NULL) return -1;
     
-    pqueue = (struct common_queue *)queue;
-    if (pqueue->head == NULL) {
-        pqueue->head = ele;
+    queue = (struct common_queue *)q;
+    if (queue->head == NULL) {
+        queue->head = ele;
     } else {
-        pqueue->tail->next = ele;
+        queue->tail->next = ele;
     }
 
-    pqueue->tail = ele;
-    pqueue->tail->next = NULL;
+    queue->tail = ele;
+    queue->tail->next = NULL;
 
     return 0;
 }
 
 /**
- * @brief dequeue 
+ * @brief deq 
  *
- * @param queue [in] queue
+ * @param q [in] q
  *
- * @return element of queue, if succ; -1, if failed
+ * @return element of q, if succ; -1, if failed
  */
-void *dequeue(void *queue)
+void *dequeue(void *q)
 {
     void *ele = NULL;
-    struct common_queue *pqueue = NULL;
+    struct common_queue *queue = NULL;
     
-    if (queue == NULL) return NULL;
-    pqueue = (struct common_queue *)queue;
-    ele = pqueue->head;
-    if (pqueue->head == NULL) return NULL;
-    pqueue->head = pqueue->head->next;
+    if (q == NULL) return NULL;
+    queue = (struct common_queue *)q;
+    ele = queue->head;
+    if (queue->head == NULL) return NULL;
+    queue->head = queue->head->next;
 
     return ele;
 }
 
 /**
- * @brief queue_destroy 
+ * @brief q_destroy 
  *
- * @param queue [in] queue
+ * @param q [in] q
  */
-void queue_destroy(void *queue)
+void queue_destroy(void *q)
 {
     void *ele = NULL;
     
-    if (queue == NULL) return;
-    while ((ele = dequeue(queue)) != NULL)
+    if (q == NULL) return;
+    while ((ele = dequeue(q)) != NULL)
         free(ele);
 }
 
 /**
  * @brief jump_head 
  *
- * @param queue [in] queue
- * @param ele   [in] element of queue
+ * @param q [in] q
+ * @param ele   [in] element of q
  *
  * @return 
  */
-int jump_head(void *queue, void *ele)
+int jump_head(void *q, void *ele)
 {
-    struct common_queue *pqueue = NULL;
+    struct common_queue *queue = NULL;
     struct element *pele = NULL;
-    if (queue == NULL || ele == NULL) return -1;
+    if (q == NULL || ele == NULL) return -1;
     
-    pqueue = (struct common_queue *)queue;
+    queue = (struct common_queue *)q;
     pele = (struct element *)ele;
-    pele->next = pqueue->head;
-    pqueue->head = pele;
+    pele->next = queue->head;
+    queue->head = pele;
 
     return 0;
 }
 
 /**
- * @brief jump_queue 
+ * @brief jump_q 
  *
- * @param queue [in] queue
+ * @param q [in] q
  * @param ele1  [in] jump front of ele1
  * @param ele2  [in] element of inserting
  *
  * @return 0, if succ; -1, if failed
  */
-int jump_queue(void *queue, void *ele1, void *ele2)
+int jump_queue(void *q, void *ele1, void *ele2)
 {
-    struct common_queue *pqueue = NULL;
+    struct common_queue *queue = NULL;
     struct element *pele = NULL, *pele1 = NULL, *pele2 = NULL;
     struct element *pele_pre = NULL;
     
-    if (queue == NULL || ele2 == NULL) return -1;
-    if (ele1 == NULL) return jump_head(queue, ele2);
+    if (q == NULL || ele2 == NULL) return -1;
+    if (ele1 == NULL) return jump_head(q, ele2);
 
-    pqueue = (struct common_queue *)queue;
+    queue = (struct common_queue *)q;
     pele1 = (struct element *)ele1;
     pele2 = (struct element *)ele2;
 
-    pele = pqueue->head;
+    pele = queue->head;
     while (1) {
         if (pele == NULL) break;
         if (pele == pele1) break;
@@ -114,7 +114,7 @@ int jump_queue(void *queue, void *ele1, void *ele2)
     }
     
     if (pele == NULL) return -1;
-    if (pele_pre == NULL) return jump_head(queue, ele2);
+    if (pele_pre == NULL) return jump_head(q, ele2);
 
     pele_pre->next = pele2;
     pele2->next = pele;
@@ -123,24 +123,24 @@ int jump_queue(void *queue, void *ele1, void *ele2)
 }
 
 /**
- * @brief del_element -- delete element from queue
+ * @brief del_element -- delete element from q
  *
- * @param queue [in] queue 
+ * @param q [in] q 
  * @param ele   [in] element
  *
  * @return 0, if succ; -1, if failed
  */
-int del_element(void *queue, void *ele)
+int del_element(void *q, void *ele)
 {
-    struct common_queue *pqueue = NULL;
+    struct common_queue *queue = NULL;
     struct element *pele = NULL;
     struct element *pele_pre = NULL;
     
-    if (queue == NULL || ele == NULL) return -1;
+    if (q == NULL || ele == NULL) return -1;
 
-    pqueue = (struct common_queue *)queue;
+    queue = (struct common_queue *)q;
 
-    pele = pqueue->head;
+    pele = queue->head;
     while (1) {
         if (pele == NULL) break;
         if (pele == ele) break;
@@ -150,11 +150,107 @@ int del_element(void *queue, void *ele)
     
     if (pele == NULL) return -1;
     if (pele_pre == NULL) {
-        pqueue->head = pqueue->head->next;
+        queue->head = queue->head->next;
     } else {
         pele_pre->next = pele->next;
     }
     free(ele);
 
+    return 0;
+}
+
+/**
+ * @brief get_head 
+ *
+ * @param q
+ *
+ * @return head element, if succ; NULL, if failed
+ */
+void * get_head(void *q)
+{
+    if (q == NULL) return NULL;
+
+    return ((struct common_queue *)q)->head;
+}
+
+/**
+ * @brief get_queue_length 
+ *
+ * @param q [in] queue
+ *
+ * @return len of queue, if succ; -1, if q is null
+ */
+int get_queue_length(void *q)
+{
+    struct element *ele = NULL;
+    int len = 0;
+
+    if (q == NULL) return -1;
+    ele = ((struct common_queue *)q)->head;
+    while (ele != NULL) {
+        len++;
+        ele = ele->next;
+    }
+
+    return len;
+}
+
+/**
+ * @brief exchange 
+ *
+ * @param q     [in] queue
+ * @param ele1  [in] element1
+ * @param ele2  [in] element2
+ *
+ * @return 0, if succ; -1, if failed
+ */
+int exchange(void *q, void *ele1, void *ele2)
+{
+    struct element *pele = NULL, *ele = NULL;;
+    struct common_queue queue_before = {0}, queue_after = {0};
+
+    /**
+     * 1. if q, ele1, ele2 has one be null, then return
+     * 2. if ele1 == ele2, then return
+     */
+    if (q == NULL || ele1 == NULL || ele2 == NULL) return -1;
+    if (ele1 == ele2) return 0;
+
+    /**
+     * find the first ele, and save it
+     * if could not find , then return
+     */
+    while ((pele = dequeue(q)) != NULL) {
+        if (pele == ele1 || pele == ele2) {
+            ele = pele;
+            break;
+        } else enqueue(&queue_before, pele);
+    }
+    if (pele == NULL) goto over;
+
+    /**
+     * if found the second ele, then break and deal the queue
+     * if could not find , then return
+     */
+    while ((pele = dequeue(q)) != NULL) {
+        if (pele == ele1 || pele == ele2) {
+            enqueue(&queue_before, pele);
+            enqueue(&queue_after, ele);
+            break;
+        } else enqueue(&queue_after, pele);
+    }
+    if (pele == NULL)
+        enqueue(&queue_before, ele);
+
+    /**
+     * merge queue before, after and q
+     */
+    queue_before.tail->next = queue_after.head;
+    queue_before.tail = queue_after.tail;
+    queue_before.tail->next = ((struct common_queue *)q)->head;
+    queue_before.tail = ((struct common_queue *)q)->tail;
+over:
+    ((struct common_queue *)q)->head = queue_before.head;
+    
     return 0;
 }

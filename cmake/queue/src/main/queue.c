@@ -52,10 +52,18 @@ int main(int agrc, char *agrv[])
     del_element(&q, ele2);
     del_element(&q, q.head);
 
+    ele = get_head(&q);
+    printf("head id: %d\n", ele->id);
+    printf("queue size: %d\n", get_queue_length(&q));
+
+    struct element *ele3 = (struct element *)malloc(sizeof(struct element));
+    //exchange(&q, q.head, q.head->next);
+    exchange(&q, q.head, q.tail);
     while ((ele = dequeue(&q)) != NULL) {
         printf("id: %d\n", ele->id);
         free(ele);
     }
+    free(ele3);
 
     return rt;
 }

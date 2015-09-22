@@ -84,4 +84,33 @@ int jump_queue(void *queue, void *ele1, void *ele2);
  */
 int del_element(void *queue, void *ele);
 
+/**
+ * @brief get_head 
+ *
+ * @param q
+ *
+ * @return head element, if succ; NULL, if failed
+ */
+void * get_head(void *q);
+
+/**
+ * @brief get_queue_length 
+ *
+ * @param q [in] queue
+ *
+ * @return len of queue, if succ; -1, if q is null
+ */
+int get_queue_length(void *q);
+
+/**
+ * @brief exchange 
+ *
+ * @param q     [in] queue
+ * @param ele1  [in] element1
+ * @param ele2  [in] element2
+ *
+ * @return 0, if succ; -1, if failed
+ */
+int exchange(void *q, void *ele1, void *ele2);
+
 #endif
