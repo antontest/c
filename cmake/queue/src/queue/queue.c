@@ -294,7 +294,7 @@ int reverse_queue(void *q)
  */
 void bubble_queue(void *q, int (*cmp)(const void *, const void *))
 {
-    struct element *pre = NULL, *cur = NULL, *next= NULL;
+    struct element *pre = NULL, *cur = NULL, *next= NULL, *last = NULL;
     struct common_queue *queue = (struct common_queue *)q; 
     int exchange_flag = 0;
 
@@ -312,7 +312,7 @@ void bubble_queue(void *q, int (*cmp)(const void *, const void *))
         next = cur->next;
         exchange_flag = 0;
 
-        while (next != NULL) {
+        while (next != NULL && next != last) {
             /**
              * exchange two elements
              */
@@ -327,14 +327,17 @@ void bubble_queue(void *q, int (*cmp)(const void *, const void *))
                  * set exchange flag
                  */
                 exchange_flag = 1;
+                pre = next;
+                next = cur->next;
+                last = cur;
+            } else {
+                /**
+                 * next compare
+                 */
+                pre = cur;
+                cur = next;
+                next = next->next;
             }
-
-            /**
-             * next compare
-             */
-            pre = cur;
-            cur = next;
-            next = next->next;
         }
         if (!exchange_flag) break;
     }

@@ -40,11 +40,13 @@ int main(int agrc, char *agrv[])
 
     ele2 = (struct elem *)malloc(sizeof(struct elem));
     ele2->id = 2;
-    enqueue(&q, ele2); 
+    //enqueue(&q, ele2); 
+    jump_head(&q, ele2); 
 
     ele = (struct elem *)malloc(sizeof(struct elem));
     ele->id = 3;
-    enqueue(&q, ele); 
+    //enqueue(&q, ele); 
+    jump_head(&q, ele); 
 
     ele = (struct elem *)malloc(sizeof(struct elem));
     ele->id = 4;
