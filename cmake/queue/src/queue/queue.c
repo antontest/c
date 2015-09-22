@@ -381,12 +381,18 @@ static void merge(void *left_queue, void *right_queue, int (*cmp)(const void *, 
     struct common_queue q = {0};
     struct element *lele = NULL, *rele = NULL;
 
-    left = (struct common_queue *)(left_queue);
+    left = (struct common_queue *)left_queue;
     right = (struct common_queue *)right_queue;
     while (1) {
-        if ((lele = dequeue(left)) == NULL) break;
+        if ((lele = dequeue(left)) == NULL) {
+            q.tail->next = right->head;
+            q.tail = right->tail;
+            break;
+        }
         if ((rele = dequeue(right)) == NULL) {
-            jump_head(left, lele);
+            enqueue(&q, lele);
+            q.tail->next = left->head;
+            q.tail = left->tail;
             break;
         }
         if (cmp(lele, rele) <= 0) {
@@ -399,16 +405,7 @@ static void merge(void *left_queue, void *right_queue, int (*cmp)(const void *, 
         }
     }
 
-    if (lele == NULL && rele == NULL) goto over;
-    if (lele == NULL) {
-        q.tail->next = right->head;
-        q.tail = right->tail;
-    } else {
-        q.tail->next = left->head;
-        q.tail = left->tail;
-    }
 
-over:
     left->head = q.head;
     left->tail = q.tail;
 }
