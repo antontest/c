@@ -72,7 +72,6 @@ int main(int agrc, char *agrv[])
 {
     int rt = 0; /* return value of function main */
     
-    /*
     pthread_t pid;
     struct thread t = {0};
     t.run = 1;
@@ -101,9 +100,9 @@ int main(int agrc, char *agrv[])
     //pjoin(pid);
     //qthread->active = 0;
     //pexit(NULL);
+    sleep(1);
    
     return 0;
-    */
 
     //pthread_create(&pid, NULL, pthread, &t);
     /*

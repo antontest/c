@@ -350,23 +350,38 @@ static void abnormal_event_add()
  */
 static void exit_cleanup()
 {
+    struct thread *pthread = NULL;
     if (qthread != NULL) {
+
         /**
          * stop pool manager thread
          */
         while (1) {
             if (qthread->state == THREAD_OVER) break;
-            pthread_mutex_lock(&qthread->lock);
             qthread->active = 0;
-            pthread_mutex_unlock(&qthread->lock);
             usleep(10);
         }
+        
+        while (qthread->run_pool.head != NULL) {
+            plock(&qthread->lock);
+            pthread = dequeue_pool(&qthread->run_pool);
+            punlock(&qthread->lock);
 
+            if (pthread == NULL) break;
+            pthread->repeat = 0;
+            pthread->delete = 1;
+            usleep(10);
+
+            if (pthread->state != THREAD_OVER) 
+                pcancel(pthread->pid);
+            
+            if (pthread != NULL) free(pthread);
+            pthread = NULL;
+        }
 
         /**
          * free memory of thread pool
          */
-        printf("qthread clean run\n");
         destroy_pool(&qthread->run_pool);
         
         /**
@@ -379,10 +394,12 @@ static void exit_cleanup()
         /**
          * free memory of pool
          */
-        free(qthread);
+        if (qthread) free(qthread);
         qthread = NULL;
     }
+
     if (pool != NULL) {
+        printf("free pool\n");
         /**
          * stop pool manager thread
          */
@@ -411,7 +428,7 @@ static void exit_cleanup()
         /**
          * free memory of pool
          */
-        free(pool);
+        if (pool) free(pool);
         pool = NULL;
     }
 
@@ -426,6 +443,7 @@ static void * pstart_runtine(void *arg)
 {
     struct thread *pthread = NULL;
     
+    if (qthread == NULL) return NULL;
     while (qthread->active)
     {
         plock(&qthread->lock);
@@ -434,7 +452,7 @@ static void * pstart_runtine(void *arg)
 
         if (pthread == NULL) goto wait;
         if (pthread->delete) {
-            punlock(&qthread->lock);
+            plock(&qthread->lock);
             thread_destroy(pthread);
             punlock(&qthread->lock);
         }
@@ -448,6 +466,9 @@ wait:
         usleep(10);
     }
 
+    plock(&qthread->lock);
+    qthread->state = THREAD_OVER;
+    punlock(&qthread->lock);
     //0printf("pstart runtine over\n");
     return NULL;
 }
@@ -471,6 +492,25 @@ pthread_t pstart(thread_handler handler, void *arg)
         qthread = create_pool();
     if (qthread == NULL) return -1;
 
+    /**
+     * create thread of pool manager
+     */
+    if (qthread->state <=  THREAD_CREATING)
+    {
+        if (pthread_create(&qthread->pid, NULL, pstart_runtine, qthread) < 0)
+        {
+            free(qthread);
+            qthread = NULL;
+            return -1;
+        }
+
+        /**  
+         * pthread clean up
+         */
+        abnormal_event_add();
+        atexit(exit_cleanup);
+    }
+
     if (handler == NULL) return -1;
     if ((pthread = create_thread()) == NULL)
         return -1;
@@ -484,26 +524,6 @@ pthread_t pstart(thread_handler handler, void *arg)
         thread_destroy(pthread);
         return -1;
     }
-    
-    /**
-     * create thread of pool manager
-     */
-    if (qthread->pid <= 0)
-    {
-        qthread->active = 1;
-        if (pthread_create(&qthread->pid, NULL, pstart_runtine, qthread) < 0)
-        {
-            thread_destroy(pthread);
-            return -1;
-        }
-
-        /**  
-         * pthread clean up
-         */
-        atexit(exit_cleanup);
-        abnormal_event_add();
-    }
-
     plock(&qthread->lock);
     enqueue_pool(&qthread->run_pool, pthread);
     punlock(&qthread->lock);
@@ -557,6 +577,7 @@ void ptrylock(pthread_mutex_t *mtx)
 void punlock(pthread_mutex_t *mtx)
 {
     if (mtx == NULL) return;
+    pthread_mutex_unlock(mtx);
 }
 
 /**
@@ -613,10 +634,16 @@ void pexit(void *rval)
             pthread_mutex_unlock(&qthread->lock);
             usleep(10);
         }
+         
+        while (qthread->state != THREAD_OVER) {
+            qthread->active = 0;
+            usleep(10);
+        }
 
-        pthread_mutex_lock(&qthread->lock);
-        qthread->active = 0;
-        pthread_mutex_unlock(&qthread->lock);
+        pthread_mutex_destroy(&qthread->lock); 
+        pthread_cond_destroy(&qthread->ready); 
+        free(qthread);
+        qthread = NULL;
     }
 
     if (pool != NULL) {
@@ -668,10 +695,19 @@ void pexit(void *rval)
             thread_destroy(pthread);
         }
          
-        pthread_mutex_lock(&pool->lock);
-        pool->active = 0;
-        pthread_mutex_unlock(&pool->lock);
+        while (pool->state != THREAD_OVER) {
+            pool->active = 0;
+            usleep(10);
+        }
+
+        pthread_cond_destroy(&pool->ready); 
+        pthread_mutex_destroy(&pool->lock); 
+        free(pool);
+        pool = NULL;
+        usleep(100);
     }
+
+    pthread_exit(NULL);
 }
 
 /**
