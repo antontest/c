@@ -113,4 +113,13 @@ int get_queue_length(void *q);
  */
 int exchange(void *q, void *ele1, void *ele2);
 
+/**
+ * @brief reverse_queue 
+ *
+ * @param q [in] queue
+ *
+ * @return 0, if succ; -1, if failed
+ */
+int reverse_queue(void *q);
+
 #endif

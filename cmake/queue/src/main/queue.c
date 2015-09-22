@@ -56,14 +56,16 @@ int main(int agrc, char *agrv[])
     printf("head id: %d\n", ele->id);
     printf("queue size: %d\n", get_queue_length(&q));
 
-    struct element *ele3 = (struct element *)malloc(sizeof(struct element));
+    reverse_queue(&q);
+    printf("tail id: %d\n", q.tail->id);
+    //struct element *ele3 = (struct element *)malloc(sizeof(struct element));
     //exchange(&q, q.head, q.head->next);
-    exchange(&q, q.head, q.tail);
+    //exchange(&q, q.head, q.tail);
     while ((ele = dequeue(&q)) != NULL) {
         printf("id: %d\n", ele->id);
         free(ele);
     }
-    free(ele3);
+    //free(ele3);
 
     return rt;
 }

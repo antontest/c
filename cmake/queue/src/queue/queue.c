@@ -251,3 +251,37 @@ over:
     
     return 0;
 }
+
+/**
+ * @brief reverse_queue 
+ *
+ * @param q [in] queue
+ *
+ * @return 0, if succ; -1, if failed
+ */
+int reverse_queue(void *q)
+{
+    struct element *ele = NULL, *pre = NULL, *cur = NULL;
+
+    if (q == NULL) return -1;
+
+    /**
+     * deal tail node
+     */
+    ele = ((struct common_queue *)q)->head;
+    ((struct common_queue *)q)->tail = ele;
+    
+    /**
+     * reverse
+     */
+    while (ele != NULL) {
+        pre = cur;
+        cur = ele;
+        ele = ele->next;
+        cur->next = pre;
+    }
+    ((struct common_queue *)q)->head = cur;
+    ((struct common_queue *)q)->tail->next = NULL;
+
+    return 0;
+}
