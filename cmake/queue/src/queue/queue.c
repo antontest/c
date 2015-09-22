@@ -343,3 +343,120 @@ void bubble_queue(void *q, int (*cmp)(const void *, const void *))
     }
     queue->tail = cur;
 }
+
+/**
+ * @brief get_middle -- get middle element of queue
+ *
+ * @param q [in] queue
+ *
+ * @return middle element, if succ;
+ */
+void * get_middle(void *q)
+{
+    struct element *slow = NULL, *fast = NULL;
+
+    if (q == NULL) return NULL;
+    slow = ((struct common_queue *)q)->head;
+    fast = slow;
+
+    while (fast != NULL && fast->next != NULL) {
+        slow = slow->next;
+        fast = fast->next->next;
+    }
+
+    return slow;
+}
+
+/**
+ * @brief merge 
+ *
+ * @param left_queue  [in] left queue
+ * @param right_queue [in] right queue
+ * @param cmp         [in] callback
+ */
+static void merge(void *left_queue, void *right_queue, int (*cmp)(const void *, const void *))
+{
+    struct common_queue *left = NULL, *right = NULL;
+    struct common_queue q = {0};
+    struct element *lele = NULL, *rele = NULL;
+
+    left = (struct common_queue *)(left_queue);
+    right = (struct common_queue *)right_queue;
+    lele = dequeue(left);
+    rele = dequeue(right);
+    if (rele == NULL) return;
+    if (lele == NULL) {
+        left_queue = right_queue;
+        return;
+    }
+
+    /*
+    if (cmp(lele, rele) <= 0) {
+        enqueue(&q, lele);
+        q.head = lele;
+    } else {
+        enqueue(&q, rele);
+        q.head = rele;
+    }
+    */
+
+    while ((lele = dequeue(left)) != NULL && (rele = dequeue(right)) != NULL) {
+        if (cmp(lele, rele) <= 0)
+            enqueue(&q, lele);
+        else enqueue(&q, rele);
+    }
+
+    if (lele == NULL) {
+        if (rele != NULL) {
+            q.tail->next = right->head;
+            q.tail = right->tail;
+        }
+    } else {
+        if (lele != NULL) {
+            q.tail->next = left->head;
+            q.tail = left->tail;
+        }
+    }
+
+    q.tail->next = NULL;
+    left->head = q.head;
+    left->tail = q.tail;
+}
+
+/**
+ * @brief merge_queue 
+ *
+ * @param q   [in] queue
+ * @param cmp [in] callback
+ */ 
+void merge_queue(void *q, int (*cmp)(const void *, const void *))
+{
+    struct common_queue *queue = NULL;
+    struct common_queue left = {0}, right = {0};
+    struct element *mid = NULL;
+
+    printf("len: %d\n", get_queue_length(q));
+    if (cmp == NULL) return;
+    if (q == NULL) return;
+    queue = (struct common_queue *)q;
+    if (queue->head == NULL || queue->head->next == NULL) return;
+
+    mid = get_middle(q);
+    if (queue->tail == mid) return;
+    left.head = queue->head;
+    left.tail = mid;
+    right.head = mid->next;
+    left.tail->next = NULL;
+    printf("left len: %d\n", get_queue_length(&left));
+    right.tail = queue->tail;
+    right.tail->next = NULL;
+    printf("rigt len: %d\n", get_queue_length(&right));
+    
+    merge_queue(&left, cmp);
+    merge_queue(&right, cmp);
+    merge(&left, &right, cmp);
+    printf("merge\n");
+
+    queue->head = left.head;
+    queue->tail = left.tail;
+}

@@ -69,8 +69,12 @@ int main(int agrc, char *agrv[])
     //reverse_queue(&q);
     printf("tail id: %d\n", q.tail->id);
 
-    bubble_queue(&q, cmp);
+    //bubble_queue(&q, cmp);
+    merge_queue(&q, cmp);
+    printf("bubble tail id: %d\n", q.head->id);
     printf("bubble tail id: %d\n", q.tail->id);
+    ele = get_middle(&q);
+    printf("mid id: %d\n", ele->id);
     //struct element *ele3 = (struct element *)malloc(sizeof(struct element));
     //exchange(&q, q.head, q.head->next);
     //exchange(&q, q.head, q.tail);

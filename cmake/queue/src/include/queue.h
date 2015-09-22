@@ -130,4 +130,21 @@ int reverse_queue(void *q);
  */
 void bubble_queue(void *q, int (*cmp)(const void *, const void *));
 
+/**
+ * @brief get_middle -- get middle element of queue
+ *
+ * @param q [in] queue
+ *
+ * @return middle element, if succ;
+ */
+void * get_middle(void *q);
+
+/**
+ * @brief merge_queue 
+ *
+ * @param q   [in] queue
+ * @param cmp [in] callback
+ */ 
+void merge_queue(void *q, int (*cmp)(const void *, const void *));
+
 #endif
