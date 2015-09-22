@@ -122,4 +122,12 @@ int exchange(void *q, void *ele1, void *ele2);
  */
 int reverse_queue(void *q);
 
+/**
+ * @brief bubble_queue 
+ *
+ * @param q   [in] queue
+ * @param cmp [in] callback
+ */
+void bubble_queue(void *q, int (*cmp)(const void *, const void *));
+
 #endif

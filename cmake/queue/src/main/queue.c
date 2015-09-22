@@ -19,6 +19,11 @@ struct queue {
     struct elem *tail;
 };
 
+int cmp(const void *ele1, const void* ele2)
+{
+    return ((struct elem *)ele1)->id - ((struct elem *)ele2)->id;
+}
+
 /*********************************************************
  ******************    Main Function    ******************
  *********************************************************/
@@ -43,21 +48,27 @@ int main(int agrc, char *agrv[])
 
     ele = (struct elem *)malloc(sizeof(struct elem));
     ele->id = 4;
-    jump_head(&q, ele); 
+    enqueue(&q, ele); 
+    //jump_head(&q, ele); 
 
     ele1 = (struct elem *)malloc(sizeof(struct elem));
     ele1->id = 5;
-    jump_queue(&q, ele2, ele1); 
+    enqueue(&q, ele1); 
+    //jump_head(&q, ele1); 
+    //jump_queue(&q, ele2, ele1); 
 
-    del_element(&q, ele2);
-    del_element(&q, q.head);
+    //del_element(&q, ele2);
+    //del_element(&q, q.head);
 
     ele = get_head(&q);
     printf("head id: %d\n", ele->id);
     printf("queue size: %d\n", get_queue_length(&q));
 
-    reverse_queue(&q);
+    //reverse_queue(&q);
     printf("tail id: %d\n", q.tail->id);
+
+    bubble_queue(&q, cmp);
+    printf("bubble tail id: %d\n", q.tail->id);
     //struct element *ele3 = (struct element *)malloc(sizeof(struct element));
     //exchange(&q, q.head, q.head->next);
     //exchange(&q, q.head, q.tail);

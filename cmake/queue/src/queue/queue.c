@@ -285,3 +285,58 @@ int reverse_queue(void *q)
 
     return 0;
 }
+
+/**
+ * @brief bubble_queue 
+ *
+ * @param q   [in] queue
+ * @param cmp [in] callback
+ */
+void bubble_queue(void *q, int (*cmp)(const void *, const void *))
+{
+    struct element *pre = NULL, *cur = NULL, *next= NULL;
+    struct common_queue *queue = (struct common_queue *)q; 
+    int exchange_flag = 0;
+
+    if (q == NULL || cmp == NULL) return;
+    cur = ((struct common_queue *)q)->head;
+    if (cur == NULL) return;
+    next = cur->next;
+
+    while (1) {
+        /**
+         * reset pointer
+         */
+        pre = NULL;
+        cur = queue->head;
+        next = cur->next;
+        exchange_flag = 0;
+
+        while (next != NULL) {
+            /**
+             * exchange two elements
+             */
+            if (cmp(cur, next) > 0) {
+                if (pre != NULL)
+                    pre->next = next;
+                else queue->head = next;
+                cur->next = next->next;
+                next->next = cur;
+
+                /**
+                 * set exchange flag
+                 */
+                exchange_flag = 1;
+            }
+
+            /**
+             * next compare
+             */
+            pre = cur;
+            cur = next;
+            next = next->next;
+        }
+        if (!exchange_flag) break;
+    }
+    queue->tail = cur;
+}
