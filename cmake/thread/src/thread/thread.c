@@ -1242,11 +1242,16 @@ static void * pthread_pool_runtine(void *arg)
                  * execute task, and put this thread to run queue.
                  * before this, need to transform callback function, create_time and so on
                  */
-                pthread_mutex_lock(&pthread->lock);
-                memcpy(&pthread->worker, &task_thread->worker, sizeof(task_thread->worker));
+                //pthread_mutex_lock(&pthread->lock);
+                //memcpy(&pthread->worker, &task_thread->worker, sizeof(task_thread->worker));
+                //pthread->active = task_thread->active;
+                //pthread->pid = task_thread->pid;
+                //pthread->id = task_thread->id;
+                pthread->worker.handler = task_thread->worker.handler;
+                pthread->worker.arg = task_thread->worker.arg;
                 pthread->create_time = task_thread->create_time;
                 pthread->run = 1;
-                pthread_mutex_unlock(&pthread->lock);
+                //pthread_mutex_unlock(&pthread->lock);
                 thread_destroy(task_thread);
 
                 enqueue_pool(&pool->run_pool, pthread);
@@ -1376,7 +1381,8 @@ static void * free_idle_runtine(void *arg)
             pthread_mutex_lock(&pthread->lock);
             pthread->delete = 1;
             pthread_mutex_unlock(&pthread->lock);
-            usleep(10);
+            usleep(100);
+            if (pthread->state != THREAD_OVER) pcancel(pthread->pid);
             thread_destroy(pthread);
         }
         punlock(&pool->lock);
