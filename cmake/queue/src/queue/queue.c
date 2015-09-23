@@ -369,13 +369,13 @@ void * get_middle(void *q)
 }
 
 /**
- * @brief merge 
+ * @brief merge -- Merge two ordered queues
  *
  * @param left_queue  [in] left queue
  * @param right_queue [in] right queue
- * @param cmp         [in] callback
+ * @param cmp         [in] compare function callback
  */
-static void merge(void *left_queue, void *right_queue, int (*cmp)(const void *, const void *))
+void merge(void *left_queue, void *right_queue, int (*cmp)(const void *, const void *))
 {
     struct common_queue *left = NULL, *right = NULL;
     struct common_queue q = {0};

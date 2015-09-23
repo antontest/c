@@ -140,6 +140,15 @@ void bubble_queue(void *q, int (*cmp)(const void *, const void *));
 void * get_middle(void *q);
 
 /**
+ * @brief merge -- Merge two ordered queues
+ *
+ * @param left_queue  [in] left queue
+ * @param right_queue [in] right queue
+ * @param cmp         [in] compare function callback
+ */
+void merge(void *left_queue, void *right_queue, int (*cmp)(const void *, const void *));
+
+/**
  * @brief merge_queue 
  *
  * @param q   [in] queue

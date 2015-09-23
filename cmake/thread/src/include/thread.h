@@ -100,6 +100,8 @@ typedef struct task_pool {
  */
 typedef struct thread_pool {
     int active;                  /* active thread pool runtine */
+    int run;                     /* run thread pool runtine */
+    int exit;                    /* run thread pool runtine */
     int state;                   /* thread pool state */
 
     /**
