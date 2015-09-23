@@ -379,33 +379,36 @@ static void merge(void *left_queue, void *right_queue, int (*cmp)(const void *, 
 {
     struct common_queue *left = NULL, *right = NULL;
     struct common_queue q = {0};
-    struct element *lele = NULL, *rele = NULL;
+    struct element *ele = NULL;
 
+    /**
+     * two queues merge in order
+     */
     left = (struct common_queue *)left_queue;
     right = (struct common_queue *)right_queue;
-    while (1) {
-        if ((lele = dequeue(left)) == NULL) {
-            q.tail->next = right->head;
-            q.tail = right->tail;
-            break;
+    while (left->head != NULL && right->head != NULL) {
+        if (cmp(left->head, right->head) <= 0) {
+            ele = dequeue(left_queue);
+        } else {
+            ele = dequeue(right_queue);
         }
-        if ((rele = dequeue(right)) == NULL) {
-            enqueue(&q, lele);
-            q.tail->next = left->head;
-            q.tail = left->tail;
-            break;
-        }
-        if (cmp(lele, rele) <= 0) {
-            enqueue(&q, lele);
-            enqueue(&q, rele);
-        }
-        else {
-            enqueue(&q, rele);
-            enqueue(&q, lele);
-        }
+        enqueue(&q, ele);
     }
 
+    /**
+     * insert remaining queue into the queue tail
+     */
+    if (left->head == NULL) {
+        q.tail->next = right->head;
+        q.tail = right->tail;
+    } else {
+        q.tail->next = left->head;
+        q.tail = left->tail;
+    }
 
+    /**
+     * return result
+     */
     left->head = q.head;
     left->tail = q.tail;
 }
@@ -422,11 +425,18 @@ void merge_queue(void *q, int (*cmp)(const void *, const void *))
     struct common_queue left = {0}, right = {0};
     struct element *mid = NULL;
 
+    /**
+     * condition judge
+     */
     if (cmp == NULL) return;
     if (q == NULL) return;
     queue = (struct common_queue *)q;
     if (queue->head == NULL || queue->head->next == NULL) return;
 
+    /**
+     * 1. get middle element of queue
+     * 2. generate two queues
+     */
     mid = get_middle(q);
     left.head = queue->head;
     left.tail = mid;
@@ -435,10 +445,18 @@ void merge_queue(void *q, int (*cmp)(const void *, const void *))
     right.tail = queue->tail;
     right.tail->next = NULL;
     
+    /**
+     * merge sort
+     */
     merge_queue(&left, cmp);
     merge_queue(&right, cmp);
     merge(&left, &right, cmp);
 
+    /**
+     * return result
+     */
     queue->head = left.head;
     queue->tail = left.tail;
+
+    return;
 }
