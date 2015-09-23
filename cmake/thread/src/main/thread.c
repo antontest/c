@@ -26,14 +26,14 @@ void* sayhi(void *arg)
 
 void* waitsleep(void *arg)
 {
-    sleep(5);
-    printf("sleep 5\n");
+    sleep(2);
+    printf("sleep 2\n");
     return NULL;
 }
 
 void* waitsleep1(void *arg)
 {
-    sleep(2);
+    sleep(4);
     printf("sleep 2\n");
 
     return NULL;
@@ -154,9 +154,14 @@ int main(int agrc, char *agrv[])
     pthread_pool_add(waitsleep, NULL);
     //pthread_pool_add(waitsleep, NULL);
     while (rt++ < 5) pthread_pool_add(sayhello, NULL);
+    sleep(2);
+    pthread_pool_add(sayhi, NULL);
+    pthread_pool_add(sayhi, NULL);
+    pthread_pool_add(sayhi, NULL);
+    pthread_pool_add(sayhi, NULL);
 
-    //sleep(6);
-    pexit(NULL);
+    sleep(2);
+    //pexit(NULL);
             
     return rt;
 }

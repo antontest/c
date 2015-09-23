@@ -186,22 +186,19 @@ struct thread_pool * create_pool()
  *
  * @param pool
  */
-void destroy_pool(struct task_pool *task_pool)
+void destroy_pool(struct task_pool *tpool)
 {
     struct thread *pthread = NULL;
 
-    if (task_pool == NULL)
+    if (tpool == NULL)
         return;
 
-    while ((pthread = dequeue_pool(task_pool)) != NULL)
+    while ((pthread = dequeue_pool(tpool)) != NULL)
     {
-        if (pthread == NULL) continue;
         printf("  free thread : %d\n", pthread->id);
         thread_destroy(pthread);
-        usleep(10);
+        //free(pthread);
     }
-
-
 }
 
 /**
@@ -402,37 +399,32 @@ static void exit_cleanup()
         /**
          * stop pool manager thread
          */
-        /*
-        while (1) {
-            if (pool->state == THREAD_OVER) break;
+        while (pool->state != THREAD_OVER) {
             pool->active = 0;
             usleep(10);
         }
-        */
 
         /**
          * free memory of thread pool
          */
-        pthread_mutex_lock(&pool->lock);
-        printf("free task pool\n");
+        printf("free task pool: %d\n", get_pool_size(&pool->task_pool));
         destroy_pool(&pool->task_pool);
-        printf("free idle pool\n");
-        destroy_pool(&pool->idle_pool);
-        printf("free run pool\n");
+        printf("free run pool: %d\n", get_pool_size(&pool->run_pool));
         destroy_pool(&pool->run_pool);
-        pthread_mutex_unlock(&pool->lock);
+        printf("free idle pool: %d\n", get_pool_size(&pool->idle_pool));
+        destroy_pool(&pool->idle_pool);
 
         /**
          * free mutex, cond and sem
          */
-        pthread_mutex_destroy(&pool->lock);
-        pthread_cond_destroy(&pool->ready);
-        sem_destroy(&pool->sem);
+        //pthread_mutex_destroy(&pool->lock);
+        //pthread_cond_destroy(&pool->ready);
+        //sem_destroy(&pool->sem);
 
         /**
          * free memory of pool
          */
-        if (pool) free(pool);
+        if (pool != NULL) free(pool);
         pool = NULL;
     }
 
@@ -499,7 +491,7 @@ pthread_t pstart(thread_handler handler, void *arg)
     /**
      * create thread of pool manager
      */
-    if (qthread->state <=  THREAD_CREATING)
+    if (!qthread->run)
     {
         if (pthread_create(&qthread->pid, NULL, pstart_runtine, qthread) < 0)
         {
@@ -507,6 +499,7 @@ pthread_t pstart(thread_handler handler, void *arg)
             qthread = NULL;
             return -1;
         }
+        qthread->run = 1;
 
         /**  
          * pthread clean up
@@ -1181,8 +1174,8 @@ static void * pthread_pool_runtine(void *arg)
     struct thread *pthread = NULL;
     struct thread *task_thread = NULL;
     struct thread *head_thread = NULL;
-    int use_time = 0, free_time = pool->free_time;
-    int idle_cnt = 0;
+    //int use_time = 0, free_time = pool->free_time;
+    //int idle_cnt = 0;
 
     pool->state = THREAD_BUSY;
     while (pool->active) 
@@ -1193,15 +1186,14 @@ static void * pthread_pool_runtine(void *arg)
          *     thread count less than max thread count
          * (2) idle thread execute tasks if there is idle thread;
          */
+        pthread_mutex_lock(&pool->lock);
         while (pool->active)
         {
             /**
              * dequeue a task from task pthread pool. if no task, then no
              * need to excute
              */
-            pthread_mutex_lock(&pool->lock);
             task_thread = dequeue_pool(&pool->task_pool);
-            pthread_mutex_unlock(&pool->lock);
             if (task_thread == NULL) break;
 
             /**
@@ -1211,9 +1203,7 @@ static void * pthread_pool_runtine(void *arg)
              *     2) wait idle thread until there is idle thread;
              * (3) if there is some idle threads, then excute tasks
              */
-            pthread_mutex_lock(&pool->lock);
             pthread = dequeue_pool(&pool->idle_pool);
-            pthread_mutex_unlock(&pool->lock);
             if (pthread == NULL) {
                 if (pool->thread_total_cnt < pool->thread_max_cnt) {
                     /**
@@ -1222,26 +1212,20 @@ static void * pthread_pool_runtine(void *arg)
                     task_thread->run = 1; 
                     if (pthread_create(&task_thread->pid, NULL, thread_runtine, task_thread) < 0)
                     {
-                        pthread_mutex_lock(&pool->lock);
                         jumphead_pool(&pool->task_pool, task_thread);
-                        pthread_mutex_unlock(&pool->lock);
                         continue;
                     }
 
                     /**
                      * execute task, and put this thread to run queue
                      */
-                    pthread_mutex_lock(&pool->lock);
                     enqueue_pool(&pool->run_pool, task_thread);
                     pool->thread_total_cnt++;
-                    pthread_mutex_unlock(&pool->lock);
                 } else {
                     /**
                      * there is no any idle thread, enqueue this task to the end of task pool
                      */
-                    pthread_mutex_lock(&pool->lock);
                     jumphead_pool(&pool->task_pool, task_thread);
-                    pthread_mutex_unlock(&pool->lock);
                     break;
                 }
             } else {
@@ -1249,35 +1233,30 @@ static void * pthread_pool_runtine(void *arg)
                  * execute task, and put this thread to run queue.
                  * before this, need to transform callback function, create_time and so on
                  */
-                pthread_mutex_lock(&pool->lock);
                 memcpy(&pthread->worker, &task_thread->worker, sizeof(task_thread->worker));
                 pthread->create_time = task_thread->create_time;
                 pthread->run = 1;
                 thread_destroy(task_thread);
 
                 enqueue_pool(&pool->run_pool, pthread);
-                pthread_mutex_unlock(&pool->lock);
             }
         }
+        pthread_mutex_unlock(&pool->lock);
 
         /**
          * move idle thread to idle thread pool
          */
+        pthread_mutex_lock(&pool->lock);
         head_thread = NULL;
         while (pool->active) 
         {
-            pthread_mutex_lock(&pool->lock);
             pthread = dequeue_pool(&pool->run_pool);
-            pthread_mutex_unlock(&pool->lock);
 
             if (pthread == NULL) break;
             if (pthread != NULL && pthread == head_thread) {
-                pthread_mutex_lock(&pool->lock);
                 enqueue_pool(&pool->run_pool, pthread);
-                pthread_mutex_unlock(&pool->lock);
                 break;
             }
-            pthread_mutex_lock(&pool->lock);
             if (pthread->run == 0) {
                 pthread->create_time = get_localtime();
                 enqueue_pool(&pool->idle_pool, pthread);
@@ -1285,84 +1264,9 @@ static void * pthread_pool_runtine(void *arg)
                 enqueue_pool(&pool->run_pool, pthread);
                 if (head_thread == NULL) head_thread = pthread;
             }
-            pthread_mutex_unlock(&pool->lock);
             usleep(1);
         }
-       
-        usleep(10);
-        /**
-         * free thread when thread has no any task
-         */
-        head_thread = NULL;
-        while (pool->active && !pool->exit)
-        {
-            /**
-             * if idle thread count less than mini count,
-             * then no need to free.
-             */
-            pthread_mutex_lock(&pool->lock);
-            idle_cnt = get_pool_size(&pool->idle_pool);
-            pthread_mutex_unlock(&pool->lock);
-            if (idle_cnt <= pool->thread_mini_cnt) {
-                break;
-            }
-
-            /**
-             * dequeue idle thread:
-             * (1) if no idle thread, stop free;
-             * (2) if free thread a cycly, then break off while;
-             */
-            pthread_mutex_lock(&pool->lock);
-            pthread = dequeue_pool(&pool->idle_pool);
-            pthread_mutex_unlock(&pool->lock);
-            if (pthread == NULL) break;
-            if (pthread != NULL && pthread == head_thread) {
-                pthread_mutex_lock(&pool->lock);
-                enqueue_pool(&pool->idle_pool, pthread);
-                pthread_mutex_unlock(&pool->lock);
-                break;
-            }
-
-            /**
-             * if thread not hold, then free
-             */
-            pthread_mutex_unlock(&pool->lock);
-            if (!pthread->hold) {
-                pthread->delete = 1;
-                pthread->active = 0;
-                usleep(100);
-                thread_destroy(pthread);
-                pool->thread_total_cnt--;
-            }
-            pthread_mutex_unlock(&pool->lock);
-
-            /**
-             * if idle thread time out, free it; or add it to 
-             * the end of idle thread queue.
-             */
-            if (pool->free_time < 0) {
-                pthread_mutex_lock(&pool->lock);
-                enqueue_pool(&pool->idle_pool, pthread);
-                pthread_mutex_unlock(&pool->lock);
-                continue;
-            }
-            pthread_mutex_lock(&pool->lock);
-            use_time = get_localtime() - pthread->create_time;
-            if (use_time < free_time) {
-                enqueue_pool(&pool->idle_pool, pthread);
-                if (head_thread == NULL) {
-                    head_thread = pthread;
-                }
-            } else {
-                pthread->delete = 1;
-                pthread->active = 0;
-                usleep(100);
-                
-                thread_destroy(pthread);
-                pool->thread_total_cnt--;
-            }
-            pthread_mutex_unlock(&pool->lock);
-        }
+        pthread_mutex_unlock(&pool->lock);
 
         /**
          * pexit call
@@ -1374,7 +1278,6 @@ static void * pthread_pool_runtine(void *arg)
             pthread = pool->idle_pool.head;
             while (pthread != NULL) {
                 pthread->delete = 1;
-                usleep(10);
                 while (pthread->state != THREAD_OVER) usleep(10);
                 pthread = pthread->next;
             }
