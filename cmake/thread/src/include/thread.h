@@ -78,8 +78,8 @@ typedef struct thread
     pthread_t           pid;    /* pthread id, gived by pthread_create*/
     thread_worker_t     worker; /* pthread callback function, pthread main task */
     thread_worker_t     clean;  /* happened when thread be deleted or canceled*/
-    //pthread_mutex_t     lock; /* pthread mutex */
-    //pthread_cond_t      ready;/* pthread cond */
+    pthread_mutex_t     lock; /* pthread mutex */
+    pthread_cond_t      ready;/* pthread cond */
 
     /**
      * pointer to next thread

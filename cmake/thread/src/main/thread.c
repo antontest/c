@@ -143,7 +143,7 @@ int main(int agrc, char *agrv[])
     pthread_info();
     */
 
-    pthread_pool_init(5, 3, 2, 4);
+    pthread_pool_init(5, 3, 2, 2);
     
     pthread_pool_add(sayhi, NULL);
     pthread_pool_add(sayhi, NULL);
@@ -160,8 +160,8 @@ int main(int agrc, char *agrv[])
     pthread_pool_add(sayhi, NULL);
     pthread_pool_add(sayhi, NULL);
 
-    sleep(2);
-    //pexit(NULL);
+    //sleep(5);
+    pexit(NULL);
             
     return rt;
 }

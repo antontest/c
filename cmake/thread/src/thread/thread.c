@@ -1,6 +1,7 @@
 #include "thread.h"
 
 static int thread_id = 1;
+static int pool_thread_over_cnt = 0;
 static int cleanup_event_init = 0;
 
 /**
@@ -58,8 +59,12 @@ void *thread_runtine(void *arg)
      */
     while (pthread->active) 
     {
+        pthread_mutex_lock(&pthread->lock);
         if (pthread->delete) break;
-        if (!pthread->run) continue;
+        if (!pthread->run) {
+            pthread_mutex_unlock(&pthread->lock);
+            continue;
+        }
 
         /**
          * pthread task handle
@@ -86,9 +91,11 @@ void *thread_runtine(void *arg)
                 pthread->state = THREAD_IDLE;
             }
         }
+        pthread_mutex_unlock(&pthread->lock);
 
         if (!pthread->hold) break;
     }
+    pthread_mutex_unlock(&pthread->lock);
 
     //printf("thread %d over\n", pthread->id);
     if (pthread->clean.handler != NULL) 
@@ -133,12 +140,12 @@ struct thread * create_thread()
 
     memset(new_thread, 0, sizeof(struct thread));
     new_thread->active      = 1;
-    new_thread->state          = THREAD_CREATING;
+    new_thread->state       = THREAD_CREATING;
     new_thread->id          = thread_id++;
     new_thread->create_time = get_localtime();
 
-    //pthread_mutex_init(&new_thread->lock, NULL);
-    //pthread_cond_init(&new_thread->ready, NULL);
+    pthread_mutex_init(&new_thread->lock, NULL);
+    pthread_cond_init(&new_thread->ready, NULL);
 
     return new_thread;
 }
@@ -629,6 +636,8 @@ void pexit(void *rval)
         plock(&pool->lock);
         pool->exit = 1; 
         punlock(&pool->lock);
+        while (pool_thread_over_cnt < 2) usleep(10);
+        printf("all pool thread over\n");
     }
 
     pthread_exit(NULL);
@@ -1233,9 +1242,11 @@ static void * pthread_pool_runtine(void *arg)
                  * execute task, and put this thread to run queue.
                  * before this, need to transform callback function, create_time and so on
                  */
+                pthread_mutex_lock(&pthread->lock);
                 memcpy(&pthread->worker, &task_thread->worker, sizeof(task_thread->worker));
                 pthread->create_time = task_thread->create_time;
                 pthread->run = 1;
+                pthread_mutex_unlock(&pthread->lock);
                 thread_destroy(task_thread);
 
                 enqueue_pool(&pool->run_pool, pthread);
@@ -1244,7 +1255,7 @@ static void * pthread_pool_runtine(void *arg)
         pthread_mutex_unlock(&pool->lock);
 
         /**
-         * move idle thread to idle thread pool
+         * move idle thread of run thread to idle thread pool
          */
         pthread_mutex_lock(&pool->lock);
         head_thread = NULL;
@@ -1262,6 +1273,7 @@ static void * pthread_pool_runtine(void *arg)
                 enqueue_pool(&pool->idle_pool, pthread);
             } else {
                 enqueue_pool(&pool->run_pool, pthread);
+
                 if (head_thread == NULL) head_thread = pthread;
             }
             usleep(1);
@@ -1277,7 +1289,9 @@ static void * pthread_pool_runtine(void *arg)
             
             pthread = pool->idle_pool.head;
             while (pthread != NULL) {
+                pthread_mutex_lock(&pthread->lock);
                 pthread->delete = 1;
+                pthread_mutex_unlock(&pthread->lock);
                 while (pthread->state != THREAD_OVER) usleep(10);
                 pthread = pthread->next;
             }
@@ -1289,8 +1303,9 @@ static void * pthread_pool_runtine(void *arg)
 
     pthread_mutex_unlock(&pool->lock);
     pool->state = THREAD_OVER;
+    pool_thread_over_cnt++;
     pthread_mutex_unlock(&pool->lock);
-    //printf("thread pool runtine over\n");
+    printf("thread pool runtine over\n");
     return NULL;
 }
 
@@ -1325,14 +1340,53 @@ unlock:
         
     pthread_mutex_lock(&pool->lock);
     pool->state = THREAD_OVER;
-    pthread_mutex_unlock(&pool->lock);
+    pool_thread_over_cnt++;
+    punlock(&pool->lock);
     //printf("move to idle thread over\n");
+
     return NULL;
 }
 
-void atexit_handle()
+/**
+ * @brief free_idle_runtine 
+ *
+ * @param arg
+ *
+ * @return 
+ */
+static void * free_idle_runtine(void *arg)
 {
-    kill(getpid(), SIGTERM);
+    struct timeval tv = {0};
+    struct thread *pthread = NULL;
+    struct thread *pre = NULL;
+    int idle_cnt = 0;;
+
+    while (pool->active && !pool->exit) {
+        tv.tv_sec = pool->free_time;
+        tv.tv_usec = 0;
+
+        pre = NULL;
+        select(0, NULL, NULL, NULL, &tv);
+        idle_cnt = get_pool_size(&pool->idle_pool) - pool->thread_mini_cnt;
+        if (idle_cnt <= 0)
+            continue;
+        plock(&pool->lock);
+        while (idle_cnt-- > 0) {
+            pthread = dequeue_pool(&pool->idle_pool);
+            pthread_mutex_lock(&pthread->lock);
+            pthread->delete = 1;
+            pthread_mutex_unlock(&pthread->lock);
+            usleep(10);
+            thread_destroy(pthread);
+        }
+        punlock(&pool->lock);
+    }
+
+    plock(&pool->lock);
+    pool_thread_over_cnt++;
+    punlock(&pool->lock);
+    printf("free idle thread over\n");
+    return NULL;
 }
 
 /**
@@ -1373,6 +1427,7 @@ int pthread_pool_init(int max_cnt, int mini_cnt, int init_cnt, int tm)
      */
     pthread_create(&pool->pid, NULL, pthread_pool_runtine, pool);
     //pthread_create(&pool->pid, NULL, run_to_idle_runtine, pool);
+    pthread_create(&pool->pid, NULL, free_idle_runtine, pool);
     sem_init(&pool->sem, 0, 0);
     
     /**
@@ -1449,9 +1504,11 @@ int pthread_pool_add(thread_handler handler, void *arg)
      * exec task directly
      */
     else {
+        pthread_mutex_lock(&pthread->lock);
         pthread->worker.handler = handler;
         pthread->worker.arg = arg;
         pthread->run = 1;
+        pthread_mutex_unlock(&pthread->lock);
 
         pthread_mutex_lock(&pool->lock);
         enqueue_pool(&pool->run_pool, pthread);
