@@ -542,6 +542,7 @@ static void thread_hold()
  */
 static void * thread_do(void *arg)
 {
+    if (arg == NULL) fprintf(stderr, "arg null\n");
     struct thread *thread_p = (struct thread *)arg;
     struct thpool *thpool_p = thread_p->thpool_p;
 
@@ -557,9 +558,9 @@ static void * thread_do(void *arg)
     /**
      * Mark thread as alive (initialized)
      */
-    pthread_mutex_lock(&(thpool_p->thcount_lock));
+    pthread_mutex_lock(&thpool_p->thcount_lock);
     thpool_p->num_threads_alive += 1;
-    pthread_mutex_unlock(&(thpool_p->thcount_lock));
+    pthread_mutex_unlock(&thpool_p->thcount_lock);
 
     while (threads_keepalive) {
         bsem_wait(thpool_p->jobqueue_p->has_jobs);
@@ -592,6 +593,9 @@ static void * thread_do(void *arg)
         }
     }
 
+    pthread_mutex_lock(&thpool_p->thcount_lock);
+    thpool_p->num_threads_alive -= 1;
+    pthread_mutex_unlock(&thpool_p->thcount_lock);
     return NULL;
 }
 
@@ -614,7 +618,7 @@ void  thread_init(thpool *thpool_p, struct thread **thread_p)
     (*thread_p)->thpool_p = thpool_p;
     (*thread_p)->id = threads_id++;
 
-    pthread_create(&(*thread_p)->pid, NULL, (void *)thread_do, thread_p);
+    pthread_create(&(*thread_p)->pid, NULL, (void *)thread_do, *thread_p);
     pthread_detach((*thread_p)->pid);
 }
 

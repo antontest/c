@@ -69,6 +69,7 @@ typedef struct jobqueue {
 } jobqueue;
 
 typedef struct thpool thpool;
+typedef struct thpool *threadpool;
 
 /**
  * @brief thread info package

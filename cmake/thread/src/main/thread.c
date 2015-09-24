@@ -71,6 +71,14 @@ void *pthread(void *arg)
 int main(int agrc, char *agrv[])
 {
     int rt = 0; /* return value of function main */
-            
+    threadpool thpool = thpool_init(5);
+
+    int i;
+    for (i = 0; i < 10; i++) {
+        thpool_add_work(thpool, sayhi, NULL);
+    }
+    sleep(2);
+    thpool_destroy(thpool);
+
     return rt;
 }
