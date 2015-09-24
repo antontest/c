@@ -1,8 +1,17 @@
 #include "thread.h"
 
-static int thread_id = 1;
-static int pool_thread_over_cnt = 0;
-static int cleanup_event_init = 0;
+static volatile int threads_id = 1;
+static volatile int threads_keepalive;
+static volatile int threads_on_hold;
+
+#ifdef THPOOL_DEBUG
+#define THPOOL_DEBUG 1
+#else
+#define THPOOL_DEBUG 0
+#endif
+
+#define MAX_NANOSEC 999999999
+#define CEIL(X) ((X - (int)X) > 0 ? (int)(X + 1) : (int)(X))
 
 /**
  * @brief cleanup_runtine -- happened thread be canceled 
@@ -11,27 +20,27 @@ static int cleanup_event_init = 0;
  */
 void cleanup_runtine(void *arg)
 {
-    thread_t *pthread = NULL;
+    struct thread *thread_p = NULL;
     if (arg == NULL) return;
 
     /**
      * default thread cancel dealing
      */
-    pthread = (thread_t *)arg;
-    if (pthread->clean.handler != NULL)
-        pthread->clean.handler(pthread->clean.arg);
-    pthread->run = 0;
-    pthread->delete = 1;
-    pthread->state = THREAD_OVER;
-    //printf("thread %d be canceled, start to clean\n", pthread->id);
+    thread_p = (struct thread *)arg;
+    if (thread_p->clean.function != NULL)
+        thread_p->clean.function(thread_p->clean.arg);
+    thread_p->run = 0;
+    thread_p->delete = 1;
+    thread_p->state = THREAD_OVER;
+    //printf("thread %d be canceled, start to clean\n", thread_p->id);
 
     return;
 }
 
 /**
- * @brief pthread handler
+ * @brief thread_p handler
  *
- * @param arg [in] struct pthread pointer
+ * @param arg [in] struct thread_p pointer
  *
  * @return 
  */
@@ -40,11 +49,11 @@ void *thread_runtine(void *arg)
     /**
      * thread parameter init
      */
-    thread_t *pthread = NULL;
+    struct thread *thread_p = NULL;
     if (arg == NULL) return NULL;
-    pthread = (thread_t *)arg;
-    thread_worker_t *worker = &pthread->worker;
-    pthread->state = THREAD_RUNNING;
+    thread_p = (struct thread *)arg;
+    struct job *worker = &thread_p->worker;
+    thread_p->state = THREAD_RUNNING;
 
     /**
      * set thread can be canceled
@@ -57,52 +66,52 @@ void *thread_runtine(void *arg)
     /**
      * thread thread dealing function
      */
-    while (pthread->active) 
+    while (thread_p->active) 
     {
-        pthread_mutex_lock(&pthread->lock);
-        if (pthread->delete) break;
-        if (!pthread->run) {
-            pthread_mutex_unlock(&pthread->lock);
+        pthread_mutex_lock(&thread_p->lock);
+        if (thread_p->delete) break;
+        if (!thread_p->run) {
+            pthread_mutex_unlock(&thread_p->lock);
             continue;
         }
 
         /**
-         * pthread task handle
+         * thread_p task handle
          */
-        if (worker->handler != NULL) {
+        if (worker->function != NULL) {
             /**
              * start execute task, update thread state
              */
-            pthread->state = THREAD_BUSY;
-            worker->handler(worker->arg);
+            thread_p->state = THREAD_BUSY;
+            worker->function(worker->arg);
 
             /**
              * clear callback, if no repeat
              * update thread state
              */
-            if (!pthread->repeat) {
+            if (!thread_p->repeat) {
                 worker->arg = NULL;
-                worker->handler = NULL;
+                worker->function = NULL;
                 
                 /**
                  * update thread state
                  */
-                pthread->run = 0;
-                pthread->state = THREAD_IDLE;
+                thread_p->run = 0;
+                thread_p->state = THREAD_IDLE;
             }
         }
-        pthread_mutex_unlock(&pthread->lock);
+        pthread_mutex_unlock(&thread_p->lock);
 
-        if (!pthread->hold) break;
+        if (!thread_p->hold) break;
     }
-    pthread_mutex_unlock(&pthread->lock);
+    pthread_mutex_unlock(&thread_p->lock);
 
-    //printf("thread %d over\n", pthread->id);
-    if (pthread->clean.handler != NULL) 
-        pthread->clean.handler(pthread->clean.arg);
-    pthread->run = 0;
-    pthread->delete = 1;
-    pthread->state = THREAD_OVER;
+    //printf("thread %d over\n", thread_p->id);
+    if (thread_p->clean.function != NULL) 
+        thread_p->clean.function(thread_p->clean.arg);
+    thread_p->run = 0;
+    thread_p->delete = 1;
+    thread_p->state = THREAD_OVER;
     pthread_cleanup_pop(0);
 
     return NULL;
@@ -110,7 +119,7 @@ void *thread_runtine(void *arg)
 
 
 /******************************************************
- *************  Pthread Queue Function  ***************
+ *************  thread_p Queue Function  ***************
  ******************************************************/
 
 /**
@@ -118,6 +127,7 @@ void *thread_runtine(void *arg)
  *
  * @return 
  */
+/*
 static long get_localtime()
 {
     struct sysinfo sys_tm = {0};
@@ -125,416 +135,19 @@ static long get_localtime()
     sysinfo(&sys_tm);
     return sys_tm.uptime;
 }
+*/
 
-/**
- * @brief create_thread 
- *
- * @return pointer to new thread, if succ; NULL, if failed
- */
-struct thread * create_thread()
-{
-    struct thread *new_thread = NULL;
-
-    if ((new_thread = (struct thread *)malloc(sizeof(struct thread))) == NULL)
-        return NULL;
-
-    memset(new_thread, 0, sizeof(struct thread));
-    new_thread->active      = 1;
-    new_thread->state       = THREAD_CREATING;
-    new_thread->id          = thread_id++;
-    new_thread->create_time = get_localtime();
-
-    pthread_mutex_init(&new_thread->lock, NULL);
-    pthread_cond_init(&new_thread->ready, NULL);
-
-    return new_thread;
-}
-
-/**
- * @brief thread_destroy 
- *
- * @param pthread
- */
-void thread_destroy(struct thread *pthread)
-{
-    if (pthread == NULL) return;
-
-    //pthread_mutex_destroy(&pthread->lock);
-    //pthread_cond_destroy(&pthread->ready);
-
-    free(pthread);
-    pthread = NULL;
-}
-
-/**
- * @brief create_pool 
- *
- * @return new pool, if succ; NULL, if failed
- */
-struct thread_pool * create_pool()
-{
-    struct thread_pool *new_pool = NULL;
-
-    if ((new_pool = (struct thread_pool *)malloc(sizeof(struct thread_pool))) == NULL)
-        return NULL;
-
-    memset(new_pool, 0, sizeof(struct thread_pool));
-    new_pool->active = 1;
-    new_pool->state = THREAD_CREATING;
-
-    pthread_mutex_init(&new_pool->lock, NULL);
-    pthread_cond_init(&new_pool->ready, NULL);
-
-    return new_pool;
-}
-
-/**
- * @brief destroy_pool 
- *
- * @param pool
- */
-void destroy_pool(struct task_pool *tpool)
-{
-    struct thread *pthread = NULL;
-
-    if (tpool == NULL)
-        return;
-
-    while ((pthread = dequeue_pool(tpool)) != NULL)
-    {
-        printf("  free thread : %d\n", pthread->id);
-        thread_destroy(pthread);
-        //free(pthread);
-    }
-}
-
-/**
- * @brief enqueue_pool 
- *
- * @param pool    [in] pthread pool
- * @param pthread [in] pthread
- * 
- * @return 0, if succ; -1, if, failed
- */
-int enqueue_pool(struct task_pool *task_pool, struct thread *pthread)
-{
-    if (task_pool == NULL || pthread == NULL) return -1;
-
-    /**
-     * add thread
-     */
-    if (task_pool->head == NULL) {
-        task_pool->head = pthread;
-    }
-    else task_pool->tail->next = pthread;
-    task_pool->tail        = pthread;
-    task_pool->tail->next  = NULL;
-
-    return 0;
-}
-
-/**
- * @brief jumphead_pool 
- *
- * @param task_pool
- * @param pthread
- *
- * @return 
- */
-int jumphead_pool(struct task_pool *task_pool, struct thread *pthread)
-{
-    if (task_pool == NULL || pthread == NULL) return -1;
-
-    pthread->next = task_pool->head;
-    task_pool->head = pthread;
-
-    return 0;
-}
-
-/**
- * @brief dequeue_pool 
- *
- * @param pool
- *
- * @return 
- */
-struct thread * dequeue_pool(struct task_pool *task_pool)
-{
-    struct thread *pthread = NULL;
-    if (task_pool == NULL) return NULL;
-
-    pthread = task_pool->head;
-    if (pthread != NULL) {
-        task_pool->head = task_pool->head->next;
-        pthread->next = NULL;
-    }
-
-    return pthread;
-}
-
-/**
- * @brief get_pool_size 
- *
- * @param pool
- *
- * @return 
- */
-int get_pool_size(struct task_pool *pool)
-{
-    struct thread *pthread = NULL;
-    int size = 0;
-
-    if (pool == NULL) return -1;
-    pthread = pool->head;
-    while (pthread != NULL) {
-        pthread = pthread->next;
-        size++;
-    }
-
-    return size;
-}
 
 
 /******************************************************
-*************** Pthread Clear Function ****************
+*************** thread_p Clear Function ****************
 ******************************************************/
-static void exit_cleanup();
-/**
- * @brief sig_deal 
- *
- * @param signum [in] number of signal
- */
-static void sig_deal(int signum)
-{
-    switch (signum)
-    {
-        case SIGKILL:
-        case SIGTERM:
-        case SIGINT:
-        case SIGQUIT:
-        case SIGHUP:
-        //case SIGABRT:
-            exit_cleanup();
-            _exit(1);
-            break;
-        default:
-            break;
-    }
 
-    return;
-}
-
-/**
- * @brief abnormal_event_add 
- */
-static void abnormal_event_add()
-{
-    struct sigaction sa;
-
-    if (cleanup_event_init) return;
-
-    /**
-     * act signal to queue
-     */
-    sa.sa_flags = 0;
-    sa.sa_handler = sig_deal;
-    sigaction(SIGKILL, &sa, NULL);
-    sigaction(SIGTERM, &sa, NULL);
-    sigaction(SIGINT, &sa, NULL);
-    sigaction(SIGQUIT, &sa, NULL);
-    sigaction(SIGHUP, &sa, NULL);
-    //sigaction(SIGABRT, &sa, NULL);
-    cleanup_event_init = 1;
-
-    return;
-}
-
-/**
- * @brief clean up when program over 
- */
-static void exit_cleanup()
-{
-    struct thread *pthread = NULL;
-    if (qthread != NULL) {
-
-        /**
-         * stop pool manager thread
-         */
-        while (1) {
-            if (qthread->state == THREAD_OVER) break;
-            qthread->active = 0;
-            usleep(10);
-        }
-        
-        while (qthread->run_pool.head != NULL) {
-            plock(&qthread->lock);
-            pthread = dequeue_pool(&qthread->run_pool);
-            punlock(&qthread->lock);
-
-            if (pthread == NULL) break;
-            pthread->repeat = 0;
-            pthread->delete = 1;
-            usleep(10);
-
-            if (pthread->state != THREAD_OVER) 
-                pcancel(pthread->pid);
-            
-            if (pthread != NULL) free(pthread);
-            pthread = NULL;
-        }
-
-        /**
-         * free memory of thread pool
-         */
-        destroy_pool(&qthread->run_pool);
-        
-        /**
-         * free mutex, cond and sem
-         */
-        pthread_mutex_destroy(&qthread->lock);
-        pthread_cond_destroy(&qthread->ready);
-        sem_destroy(&qthread->sem);
-
-        /**
-         * free memory of pool
-         */
-        if (qthread) free(qthread);
-        qthread = NULL;
-    }
-
-    if (pool != NULL) {
-        /**
-         * stop pool manager thread
-         */
-        while (pool->state != THREAD_OVER) {
-            pool->active = 0;
-            usleep(10);
-        }
-
-        /**
-         * free memory of thread pool
-         */
-        printf("free task pool: %d\n", get_pool_size(&pool->task_pool));
-        destroy_pool(&pool->task_pool);
-        printf("free run pool: %d\n", get_pool_size(&pool->run_pool));
-        destroy_pool(&pool->run_pool);
-        printf("free idle pool: %d\n", get_pool_size(&pool->idle_pool));
-        destroy_pool(&pool->idle_pool);
-
-        /**
-         * free mutex, cond and sem
-         */
-        //pthread_mutex_destroy(&pool->lock);
-        //pthread_cond_destroy(&pool->ready);
-        //sem_destroy(&pool->sem);
-
-        /**
-         * free memory of pool
-         */
-        if (pool != NULL) free(pool);
-        pool = NULL;
-    }
-
-    _exit(0);
-}
 
 
 /******************************************************
-*************** Pthread Basic Function ****************
+*************** thread_p Basic Function ****************
 ******************************************************/
-static void * pstart_runtine(void *arg)
-{
-    struct thread *pthread = NULL;
-    
-    if (qthread == NULL) return NULL;
-    while (qthread->active)
-    {
-        plock(&qthread->lock);
-        pthread = dequeue_pool(&qthread->run_pool);
-        punlock(&qthread->lock);
-
-        if (pthread == NULL) goto wait;
-        if (pthread->delete) {
-            plock(&qthread->lock);
-            thread_destroy(pthread);
-            punlock(&qthread->lock);
-        }
-        else {
-            plock(&qthread->lock);
-            enqueue_pool(&qthread->run_pool, pthread);
-            punlock(&qthread->lock);
-        }
-
-wait:
-        usleep(10);
-    }
-
-    plock(&qthread->lock);
-    qthread->state = THREAD_OVER;
-    punlock(&qthread->lock);
-    //0printf("pstart runtine over\n");
-    return NULL;
-}
-
-/**
- * @brief pstart -- start a thread
- *
- * @param handler [in] callback
- * @param arg     [in] arg
- *
- * @return pid of thread, if succ; -1, if failed
- */
-pthread_t pstart(thread_handler handler, void *arg)
-{
-    struct thread *pthread = NULL;
-
-    /**
-     * init pthred pool
-     */
-    if (qthread == NULL)
-        qthread = create_pool();
-    if (qthread == NULL) return -1;
-
-    /**
-     * create thread of pool manager
-     */
-    if (!qthread->run)
-    {
-        if (pthread_create(&qthread->pid, NULL, pstart_runtine, qthread) < 0)
-        {
-            free(qthread);
-            qthread = NULL;
-            return -1;
-        }
-        qthread->run = 1;
-
-        /**  
-         * pthread clean up
-         */
-        abnormal_event_add();
-        atexit(exit_cleanup);
-    }
-
-    if (handler == NULL) return -1;
-    if ((pthread = create_thread()) == NULL)
-        return -1;
-
-    pthread->worker.handler = handler;
-    pthread->worker.arg = arg;
-    pthread->run    = 1;
-
-    if (pthread_create(&pthread->pid, NULL, thread_runtine, pthread) < 0)
-    {
-        thread_destroy(pthread);
-        return -1;
-    }
-    plock(&qthread->lock);
-    enqueue_pool(&qthread->run_pool, pthread);
-    punlock(&qthread->lock);
-
-    return pthread->pid;
-} 
-
 /**
  * @brief pcreate 
  *
@@ -554,7 +167,7 @@ pthread_t pcreate(thread_handler handler, void *arg)
 /**
  * @brief lock -- lock thread
  *
- * @param mtx [in] pthread mutex
+ * @param mtx [in] thread_p mutex
  */
 void plock(pthread_mutex_t *mtx)
 {
@@ -565,7 +178,7 @@ void plock(pthread_mutex_t *mtx)
 /**
  * @brief ptrylock -- lock thread
  *
- * @param mtx [in] pthread mutex
+ * @param mtx [in] thread_p mutex
  */
 void ptrylock(pthread_mutex_t *mtx)
 {
@@ -576,7 +189,7 @@ void ptrylock(pthread_mutex_t *mtx)
 /**
  * @brief unlock -- unlock thread
  *
- * @param mtx [in] pthread mutex
+ * @param mtx [in] thread_p mutex
  */
 void punlock(pthread_mutex_t *mtx)
 {
@@ -587,7 +200,7 @@ void punlock(pthread_mutex_t *mtx)
 /**
  * @brief wait -- wait another thread
  *
- * @param cond [in] pthread cond
+ * @param cond [in] thread_p cond
  * @param mtx  [in] pthred mutex
  */
 void pwait(pthread_cond_t *cond, pthread_mutex_t *mtx)
@@ -599,7 +212,7 @@ void pwait(pthread_cond_t *cond, pthread_mutex_t *mtx)
 /**
  * @brief pcontinue -- let another thread go on
  *
- * @param cond [in] pthread cond
+ * @param cond [in] thread_p cond
  */
 void pcontinue(pthread_cond_t *cond)
 {
@@ -608,9 +221,9 @@ void pcontinue(pthread_cond_t *cond)
 }
 
 /**
- * @brief wait pthread over 
+ * @brief wait thread_p over 
  *
- * @param pthread [in]
+ * @param thread_p [in]
  */
 void pjoin(pthread_t pid)
 {
@@ -626,21 +239,7 @@ void pjoin(pthread_t pid)
  */
 void pexit(void *rval)
 {
-    if (qthread != NULL) {
-        plock(&qthread->lock);
-        qthread->exit = 1; 
-        punlock(&qthread->lock);
-    }
-
-    if (pool != NULL) {
-        plock(&pool->lock);
-        pool->exit = 1; 
-        punlock(&pool->lock);
-        while (pool_thread_over_cnt < 2) usleep(10);
-        printf("all pool thread over\n");
-    }
-
-    pthread_exit(NULL);
+    pthread_exit(rval);
 }
 
 /**
@@ -670,7 +269,7 @@ int pcancel(pthread_t pid)
 
 
 /******************************************************
-*************** Pthread Attribute Function ************
+*************** thread_p Attribute Function ************
 ******************************************************/
 /**
  * @brief enable_cancel 
@@ -731,791 +330,537 @@ int set_detach()
 }
 
 /******************************************************
-*************** Pthread Manage Function ****************
-******************************************************/
+ *************** thread_p Manage Function **************
+ ******************************************************/
+
+
+/******************************************************
+ *************** Thread Pool Function *****************
+ ******************************************************/
+/* =================== SYNCHRONISATION =================== */
 /**
- * @brief start a pthread
+ * @brief init semaphore to 1 or 0
  *
- * @param pt  [out] pthread ID
- * @param cr  [in] pthread function
- * @param arg [in] parameter you want to transfer into pthread function
- *
- * @return 0, if succ; -1, if failed.
+ * @param pbsem [in] binary semaphore
+ * @param value [in] take only 1 or 0
  */
-int pthread_start(thread_handler handler, void *arg, int run, int repeat)
+void bsem_init(bsem *pbsem, int value)
 {
-    struct thread *pthread = NULL;
+    if (value < 0 || value > 1) {
+        fprintf(stderr, "bsem_init(): Binary semaphore can take only values 1 or 0");
+        exit(1);
+    }
+
+    pthread_mutex_init(&pbsem->mutex, NULL);
+    pthread_cond_init(&pbsem->cond, NULL);
+    pbsem->v = value;
+}
+
+/**
+ * @brief reset semaphore to 0
+ *
+ * @param pbsem [in] semaphore
+ */
+void bsem_reset(bsem *pbsem)
+{
+    bsem_init(pbsem, 0);
+}
+
+/**
+ * @brief post to at least one thread
+ *
+ * @param pbsem
+ */
+void bsem_post(bsem *pbsem)
+{
+    pthread_mutex_lock(&pbsem->mutex);
+    pbsem->v = 1;
+    pthread_cond_signal(&pbsem->cond);
+    pthread_mutex_unlock(&pbsem->mutex);
+}
+
+/**
+ * @brief post all threads
+ *
+ * @param pbsem
+ */
+void bsem_post_all(bsem *pbsem)
+{
+    pthread_mutex_lock(&pbsem->mutex);
+    pbsem->v = 1;
+    pthread_cond_broadcast(&pbsem->cond);
+    pthread_mutex_unlock(&pbsem->mutex);
+}
+
+/**
+ * @brief wait on semaphore until semaphore has value 0
+ *
+ * @param pbsem
+ */
+void bsem_wait(bsem *pbsem)
+{
+    pthread_mutex_lock(&pbsem->mutex);
+    while (pbsem->v != 1) {
+        pthread_cond_wait(&pbsem->cond, &pbsem->mutex);
+    }
+    pthread_mutex_unlock(&pbsem->mutex);
+}
+
+
+/* ====================== JOB QUEUE ====================== */
+/**
+ * @brief initialize queue
+ *
+ * @param thpool_p [in] pointer to thread pool
+ *
+ * @return 0, if succ; -1, if failed
+ */
+int jobqueue_init(thpool *thpool_p)
+{
+    thpool_p->jobqueue_p = (struct jobqueue *)malloc(sizeof(struct jobqueue));
+    if (thpool_p->jobqueue_p == NULL) return -1;
+    thpool_p->jobqueue_p->len = 0;
+    thpool_p->jobqueue_p->front = NULL;
+    thpool_p->jobqueue_p->rear = NULL;
+
+    thpool_p->jobqueue_p->has_jobs = (struct bsem *)malloc(sizeof(struct bsem));
+    if (thpool_p->jobqueue_p->has_jobs == NULL) return -1;
+
+    pthread_mutex_init(&thpool_p->jobqueue_p->rwlock, NULL);
+    bsem_init(thpool_p->jobqueue_p->has_jobs, 0);
+    
+    return 0;
+}
+
+/**
+ * @brief add (allocateed) job to queue
+ *
+ * @param thpool_p [in] pointer ot thread pool
+ * @param newjob   [in] new job
+ */
+void jobqueue_push(thpool *thpool_p, struct job *newjob)
+{
+    newjob->prev = NULL;
+    switch (thpool_p->jobqueue_p->len) {
+        case 0: /* if no jobs in queue */
+            thpool_p->jobqueue_p->front = newjob;
+            thpool_p->jobqueue_p->rear = newjob;
+            break;
+        default: /* if jobs in queue */
+            thpool_p->jobqueue_p->rear->prev = newjob;
+            thpool_p->jobqueue_p->rear = newjob;
+            break;
+
+    }
+    thpool_p->jobqueue_p->len++;
+
+    bsem_post(thpool_p->jobqueue_p->has_jobs);
+}
+
+/**
+ * @brief get first job from queue (remove it from queue)
+ *
+ * @param thpool_p [in] pointer to thread pool
+ *
+ * @return job
+ */
+struct job * jobqueue_pull(thpool *thpool_p)
+{
+    job *job_p;
+    job_p = thpool_p->jobqueue_p->front;
+    
+    switch (thpool_p->jobqueue_p->len) {
+        case 0:  /* if no jobs in queue */
+            break;
+        case 1:  /* if one job in queue */
+            thpool_p->jobqueue_p->front = NULL;
+            thpool_p->jobqueue_p->rear = NULL;
+            thpool_p->jobqueue_p->len = 0;
+            break;
+        default: /* if more than one job in queue */
+            thpool_p->jobqueue_p->front = job_p->prev;
+            thpool_p->jobqueue_p->len--;
+            /* more than one job in queue, post it */
+            bsem_post(thpool_p->jobqueue_p->has_jobs);
+            break;
+    }
+
+    return job_p;
+}
+
+/**
+ * @brief clear the queue
+ *
+ * @param thpool_p
+ */
+void jobqueue_clear(thpool *thpool_p)
+{
+    while (thpool_p->jobqueue_p->len) {
+        free(jobqueue_pull(thpool_p));
+    }
+
+    thpool_p->jobqueue_p->front = NULL;
+    thpool_p->jobqueue_p->rear = NULL;
+    bsem_reset(thpool_p->jobqueue_p->has_jobs);
+    thpool_p->jobqueue_p->len = 0;
+}
+
+/**
+ * @brief free all queue resources back to the system
+ *
+ * @param thpool_p [in] pointer to thread pool
+ */
+void jobqueue_destroy(thpool *thpool_p)
+{
+    jobqueue_clear(thpool_p);
+    free(thpool_p->jobqueue_p->has_jobs);
+}
+
+
+
+/* ======================== THREAD ======================= */
+/**
+ * @brief sets the calling thread on hold
+ */
+static void thread_hold()
+{
+    threads_on_hold = 1;
+    while (threads_on_hold) {
+        sleep(1);
+    }
+}
+
+/**
+ * @brief what each thread is doing
+ *
+ * In principle this is an endless loop. The only time loop get interupped
+ * is once thpool_destrpy() is invaked or the program exits.
+ *
+ * @param arg [in] thread that will run this function
+ *
+ * @return nothing 
+ */
+static void * thread_do(void *arg)
+{
+    struct thread *thread_p = (struct thread *)arg;
+    struct thpool *thpool_p = thread_p->thpool_p;
+
+    /** 
+     * register signal handler
+     */
+    struct sigaction act;
+    act.sa_handler = thread_hold;
+    if (sigaction(SIGUSR1, &act, NULL) == -1) {
+        fprintf(stderr, "thread_do(): cannot handle SIGUSR1");
+    }
 
     /**
-     * init thread and thread queue
+     * Mark thread as alive (initialized)
      */
-    if (qthread == NULL) qthread = create_pool();
-    if (qthread == NULL) return -1;
-    pthread = create_thread();
-    if (pthread == NULL) return -1;
+    pthread_mutex_lock(&(thpool_p->thcount_lock));
+    thpool_p->num_threads_alive += 1;
+    pthread_mutex_unlock(&(thpool_p->thcount_lock));
 
-    pthread->state = THREAD_CREATING;
-    pthread->worker.handler = handler;
-    pthread->worker.arg = arg;
+    while (threads_keepalive) {
+        bsem_wait(thpool_p->jobqueue_p->has_jobs);
 
-    pthread->run    = run;
-    pthread->repeat = repeat;
-    pthread->active = 1;
+        if (threads_keepalive) {
+            pthread_mutex_lock(&thpool_p->thcount_lock);
+            thpool_p->num_threads_working++;
+            pthread_mutex_unlock(&thpool_p->thcount_lock);
 
-    if (pthread_create(&pthread->pid, NULL, thread_runtine, pthread) < 0)
-    {
-        thread_destroy(pthread);
+            /**
+             * read job from queue and execute it
+             */
+            void* (*func_buff)(void *arg);
+            void *arg_buff;
+            job *job_p;
+            pthread_mutex_lock(&thpool_p->thcount_lock);
+            job_p = jobqueue_pull(thpool_p);
+            pthread_mutex_unlock(&thpool_p->thcount_lock);
+
+            if (job_p) {
+                func_buff = job_p->function;
+                arg_buff = job_p->arg;
+                func_buff(arg_buff);
+                free(job_p);
+            }
+
+            pthread_mutex_lock(&thpool_p->thcount_lock);
+            thpool_p->num_threads_working--;
+            pthread_mutex_unlock(&thpool_p->thcount_lock);
+        }
+    }
+
+    return NULL;
+}
+
+/**
+ * @brief initialize a thread in the thread pool
+ *
+ * @param thpool_p [in]  pointer tp thread pool
+ * @param thread_p [out] address to thre pointer of the thread to be created, if succ;
+ * @param id       [in]  id to be given to the thread
+ *
+ */
+void  thread_init(thpool *thpool_p, struct thread **thread_p)
+{
+    *thread_p = (struct thread *)malloc(sizeof(struct thread));
+    if (thread_p == NULL) {
+        fprintf(stderr, "Could not allocate memeory for thread\n");
+        exit(1);
+    }
+
+    (*thread_p)->thpool_p = thpool_p;
+    (*thread_p)->id = threads_id++;
+
+    pthread_create(&(*thread_p)->pid, NULL, (void *)thread_do, thread_p);
+    pthread_detach((*thread_p)->pid);
+}
+
+/**
+ * @brief frees a thread
+ *
+ * @param thread_p [in] pointer to thread
+ */
+void thread_destroy(thread *thread_p)
+{
+    free(thread_p);
+}
+
+
+
+/* ===================== THREAD POOL ===================== */
+/**
+ * @brief initialise thread pool
+ *
+ * @param num_threads
+ *
+ * @return 
+ */
+struct thpool * thpool_init(int num_threads)
+{
+    threads_on_hold = 0;
+    threads_keepalive = 1;
+
+    if (num_threads < 0) num_threads = 0;
+
+    /**
+     * make new thread pool
+     */
+    thpool *thpool_p;
+    thpool_p = (struct thpool *)malloc(sizeof(struct thpool));
+    if (thpool_p == NULL) {
+        fprintf(stderr, "thpool_init(): Could not allocate memory for thread pool\n");
+        return NULL;
+    }
+    thpool_p->num_threads_alive = 0;
+    thpool_p->num_threads_working = 0;
+
+    /**
+     * initialise the job queue
+     */
+    if (jobqueue_init(thpool_p) == -1) {
+        fprintf(stderr, "thpool_init(): Could not allocate memory for job queue\n");
+        free(thpool_p);
+        return NULL;
+    }
+
+    /**
+     * make threads in pool
+     */
+    thpool_p->threads = (struct thread **)malloc(num_threads * sizeof(struct thread));
+    if (thpool_p->threads == NULL) {
+        fprintf(stderr, "thpool_init(): Could not allocate memory for threads\n");
+        jobqueue_destroy(thpool_p);
+        free(thpool_p->jobqueue_p);
+        free(thpool_p);
+        return NULL;
+    }
+    pthread_mutex_init(&thpool_p->thcount_lock, NULL);
+
+    /**
+     * thread init
+     */
+    int n;
+    for (n = 0; n < num_threads; n++) {
+        thread_init(thpool_p, &thpool_p->threads[n]);
+        if (THPOOL_DEBUG)
+            printf("THPOOL_DEBUG: Created thread %d in pool\n", n);
+    }
+
+    /**
+     * wait for threads to initizlize
+     */
+    while (thpool_p->num_threads_alive != num_threads) usleep(10);
+
+    return thpool_p;
+}
+
+/**
+ * @brief add work to the thread pool
+ *
+ * @param thpool_p
+ * @param function
+ * @param arg
+ *
+ * @return 
+ */
+int thpool_add_work(thpool *thpool_p, void *(*function)(void*), void *arg)
+{
+    job *newjob;
+
+    newjob = (struct job*)malloc(sizeof(struct job));
+    if (newjob == NULL) {
+        fprintf(stderr, "thpool_add_work(): Could not alloacte memory for new job\n");
         return -1;
     }
-    enqueue_pool(&qthread->run_pool, pthread);
 
-    /**  
-     * pthread clean up
+    /**
+     * add function and argument
      */
-    abnormal_event_add();
-    atexit(exit_cleanup);
+    newjob->function = function;
+    newjob->arg = arg;
 
-    return pthread->id;
-}
-
-/**
- * @brief get_thread 
- *
- * @param thread_id  [in]  id
- *
- * @return struct thread, if succ; NULL, if failed
- */
-struct thread * get_thread(int thread_id)
-{
-    struct thread *pthread = NULL;
-    if (thread_id < 0 || pool == NULL) goto over;
-    
-    pthread = qthread->run_pool.head;
-    while (pthread != NULL)
-    {
-        if (pthread->id == thread_id) 
-            break;
-        pthread = pthread->next;
-    }
-
-over:
-    return pthread;
-}
-
-/**
- * @brief let pthread run
- *
- * @param thread id [in]  id
- */
-void pthread_run(thread_t *pthread)
-{
-    if (pthread == NULL || !pthread->active) return;
-
-    pthread->run = 1;
-    pthread->state = THREAD_RUNNING;
-
-    return;
-}
-
-/**
- * @brief thread_stop 
- *
- * @param pthread [in]
- */
-void pthread_stop(thread_t *pthread)
-{
-    if (pthread == NULL || !pthread->active || !pthread->run) return;
-    
-    pthread->run = 0;
-    pthread->state = THREAD_STOPPED;
-
-    return;
-}
-
-/**
- * @brief pthread exec another function
- *
- * @param pthread [in]
- * @param pr   [in] callback
- * @param arg  [in]
- */
-void pthread_exec(thread_t *pthread, thread_handler handler, void *arg)
-{
-    if (pthread == NULL || !pthread->active || !pthread->repeat) return;
-
-    while (pthread->run) usleep(10);
-    pthread->run = 0;
-    pthread->worker.handler = handler;
-    pthread->worker.arg = arg;
-
-    pthread->run = 1;
-
-    return;
-}
-
-/**
- * @brief exec function when pthread over
- *
- * @param pthread [in]
- * @param pr   [in] callback
- * @param arg  [in]
- */
-void pthread_on_exit(thread_t *pthread, thread_handler handler, void *arg)
-{
-    if (pthread == NULL || !pthread->active || !pthread->repeat) return;
-
-    pthread->clean.handler = handler;
-    pthread->clean.arg     = arg;
-
-    return;
-}
-
-
-/**
- * @brief lock a thread
- * 
- * @param mtx [in] mutex
- *
- * @return 0, if succ; -1, if falied.
- */
-/*
-int pthread_lock(thread_t *pthread)
-{
-    if (pthread == NULL || pthread->active) return -1;
-    pthread->state = THREAD_LOCK;
-
-    return pthread_mutex_lock(&pthread->lock);
-}
-*/
-
-/**
- * @brief lock a thread
- * 
- * @param mtx [in] mutex
- *
- * @return 0, if succ; -1, if falied.
- */
-/*
-int pthread_trylock(thread_t *pthread)
-{
-    if (pthread == NULL && !pthread->active) return -1;
-    pthread->state = THREAD_LOCK;
-
-    return pthread_mutex_trylock(&pthread->lock);
-}
-*/
-
-/**
- * @brief unlock a thread
- * 
- * @param mtx [in] mutex
- *
- * @return 0, if succ; -1, if falied.
- */
-/*
-int pthread_unlock(thread_t *pthread)
-{
-    if (pthread == NULL && !pthread->active) return -1;
-    pthread->state = THREAD_RUNNING;
-
-    return pthread_mutex_unlock(&pthread->lock);
-}
-*/
-
-/**
- * @brief destroy a lock of a thread
- * 
- * @param mtx [in] mutex
- *
- * @return 0, if succ; -1, if falied.
- */
-int pthread_delete(thread_t *pthread)
-{
-    int wait_tm = 10 * 100;
-    if (pthread == NULL || !pthread->active) return -1;
-
-    /* wait over for current process */
-    if (pthread->run)
-    {
-        while(wait_tm-- > 0)
-        {
-            if (!pthread->run) break;
-            else usleep(10);
-        }
-    }
-
-    /* delete thread */
-    pthread->delete = 1;
-
-    /* wait over for thread */
-    if (pthread->run)
-    {
-        while(wait_tm-- > 0)
-        {
-            if (!pthread->run) break;
-            else usleep(10);
-        }
-    }
-
-    /* if thread don't end, then call pthread_cancel to end it. */
-    if (pthread->run)
-    {
-        pthread_cancel(pthread->pid);
-        //pthread_mutex_destroy(&pthread->lock);
-        //pthread_cond_destroy(&pthread->ready);
-    }
-    pthread->state = THREAD_OVER;
+    /**
+     * add job to queue
+     */
+    pthread_mutex_lock(&thpool_p->jobqueue_p->rwlock);
+    jobqueue_push(thpool_p, newjob);
+    pthread_mutex_unlock(&thpool_p->jobqueue_p->rwlock);
 
     return 0;
 }
 
 /**
- * @brief wait pthread over 
+ * @brief wait until all jobs have finished
  *
- * @param pthread [in]
+ * @param thpool_p
  */
-void pthread_time_wait_over(thread_t *pthread, int tm_ms)
+void thpool_wait(thpool *thpool_p)
 {
-    struct timeval tv = {0};
-    long timer_accuracy = 100;
-    if (pthread == NULL || !pthread->active) return;
+    /**
+     * continuous polling
+     */
+    double timeout = 1.0;
+    double tpassed = 0.0;
+    time_t start, end;
 
-    while (1)
+    time(&start);
+    while (tpassed < timeout && 
+            (thpool_p->jobqueue_p->len || thpool_p->num_threads_working))
     {
-        tv.tv_sec = 0;
-        tv.tv_usec = 1000 * timer_accuracy;
-
-        select(0, NULL, NULL, NULL, &tv);
-        if (!pthread->run) 
-        {
-            break;
-        }
-
-        tm_ms -= timer_accuracy;
-        if (tm_ms <= 0) 
-        {
-            if (pthread->run) pthread_cancel(pthread->pid);
-            break;
-        }
+        time(&end);
+        tpassed = difftime(end, start);
     }
 
-    pthread->state = THREAD_OVER; 
-    return;
-}
+    /**
+     * exponential polling
+     */
+    long init_nano = 1;
+    long new_nano = 0;
+    double multiplier = 1.01;
+    int max_secs = 20;
 
+    struct timespec polling_interval;
+    polling_interval.tv_sec = 0;
+    polling_interval.tv_nsec = init_nano;
 
-
-/**
- * @brief pthread_run 
- *
- * @param thread_id [in] thread id
- */
-
-void thread_run(int thread_id)
-{
-    thread_t *pthread = get_thread(thread_id);
-
-    if (pthread != NULL) {
-        pthread->run = 1;
-        pthread->state  = THREAD_RUNNING;
-    }
-}
-
-/**
- * @brief pthread_stop 
- *
- * @param thread_id [in] thread id
- */
-void thread_stop(int thread_id)
-{
-    thread_t *pthread = get_thread(thread_id);
-    if (pthread != NULL) {
-        pthread->run = 0;
-        pthread->state  = THREAD_STOPPED;
-    }
-}
-
-/**
- * @brief pthread_delete
- *
- * @param thread_id [in] thread id
- */
-void thread_delete(int thread_id)
-{
-    thread_t *pthread = get_thread(thread_id);
-
-    if (pthread != NULL) {
-        pthread->delete = 1;
-        pthread->state = THREAD_OVER;
-    }
-}
-
-/**
- * @brief pthread_hold 
- *
- * @param thread_id [in] thread id
- */
-void thread_hold(int thread_id)
-{
-    thread_t *pthread = get_thread(thread_id);
-
-    if (pthread != NULL) {
-        pthread->hold = 1;
-    }
-}
-
-/**
- * @brief pthread_unhold 
- *
- * @param thread_id [in] thread id
- */
-void thread_unhold(int thread_id)
-{
-    thread_t *pthread = get_thread(thread_id);
-
-    if (pthread != NULL) {
-        pthread->hold = 0;
-    }
-}
-
-/**
- * @brief pthread_lock 
- *
- * @param thread_id [in] thread id
- */
-/*
-void thread_lock(int thread_id)
-{
-    thread_t *pthread = get_thread(thread_id);
-
-    if (pthread != NULL) {
-        pthread->state = THREAD_LOCK;
-        pthread_mutex_lock(&pthread->lock);
-    }
-}
-*/
-
-/**
- * @brief pthread_unlock 
- *
- * @param thread_id [in] thread id
- */
-/*
-void thread_unlock(int thread_id)
-{
-    thread_t *pthread = get_thread(thread_id);
-
-    if (pthread != NULL) {
-        pthread->state = THREAD_RUNNING;
-        pthread_mutex_unlock(&pthread->lock);
-    }
-}
-*/
-
-/**
- * @brief pthread_wait 
- *
- * @param thread_id [in] thread id
- */
-/*
-void thread_wait(int thread_id)
-{
-    thread_t *pthread = get_thread(thread_id);
-
-    if (pthread != NULL && pthread->state == THREAD_LOCK) {
-        pthread->state = THREAD_WAIT;
-        pthread_cond_wait(&pthread->ready, &pthread->lock);
-    }
-}
-*/
-
-/**
- * @brief pthread_unwait 
- *
- * @param thread_id [in] thread id
- */
-/*
-void thread_unwait(int thread_id)
-{
-    thread_t *pthread = get_thread(thread_id);
-
-    if (pthread != NULL) {
-        pthread->state = THREAD_RUNNING;
-        pthread_cond_signal(&pthread->ready);
-    }
-}
-*/
-
-/**
- * @brief pthread_info 
- */
-void pthread_info(struct task_pool *task_pool)
-{
-    thread_t *pthread = NULL;
-    const char *state[] = {   
-        "idle", 
-        "creating", 
-        "running", 
-        "busy", 
-        "stopped", 
-        "locked", 
-        "waiting", 
-        "over"
-    };
- 
-    for (pthread = task_pool->head; pthread != NULL; 
-            pthread = pthread->next)
+    while (thpool_p->jobqueue_p->len || thpool_p->num_threads_working)
     {
-        printf("pool id: %d ---> name: %s ---> status: %s\n", 
-                pthread->id, pthread->name, state[pthread->state]);
-    }
-}
-
-/**
- * @brief pthread_pool_runtine 
- *
- * @param arg
- *
- * @return 
- */
-static void * pthread_pool_runtine(void *arg)
-{
-    struct thread *pthread = NULL;
-    struct thread *task_thread = NULL;
-    struct thread *head_thread = NULL;
-    //int use_time = 0, free_time = pool->free_time;
-    //int idle_cnt = 0;
-
-    pool->state = THREAD_BUSY;
-    while (pool->active) 
-    {
-        /**
-         * execute thread tasks:
-         * (1) create new thread when prepared thread all busy, if total
-         *     thread count less than max thread count
-         * (2) idle thread execute tasks if there is idle thread;
-         */
-        pthread_mutex_lock(&pool->lock);
-        while (pool->active)
-        {
-            /**
-             * dequeue a task from task pthread pool. if no task, then no
-             * need to excute
-             */
-            task_thread = dequeue_pool(&pool->task_pool);
-            if (task_thread == NULL) break;
-
-            /**
-             * (1) dequque a thread from idle thread pool
-             * (2) if there is no idle thread any more:
-             *     1) create new thread if total thread count less than max count;
-             *     2) wait idle thread until there is idle thread;
-             * (3) if there is some idle threads, then excute tasks
-             */
-            pthread = dequeue_pool(&pool->idle_pool);
-            if (pthread == NULL) {
-                if (pool->thread_total_cnt < pool->thread_max_cnt) {
-                    /**
-                     * create new thread
-                     */
-                    task_thread->run = 1; 
-                    if (pthread_create(&task_thread->pid, NULL, thread_runtine, task_thread) < 0)
-                    {
-                        jumphead_pool(&pool->task_pool, task_thread);
-                        continue;
-                    }
-
-                    /**
-                     * execute task, and put this thread to run queue
-                     */
-                    enqueue_pool(&pool->run_pool, task_thread);
-                    pool->thread_total_cnt++;
-                } else {
-                    /**
-                     * there is no any idle thread, enqueue this task to the end of task pool
-                     */
-                    jumphead_pool(&pool->task_pool, task_thread);
-                    break;
-                }
-            } else {
-                /**
-                 * execute task, and put this thread to run queue.
-                 * before this, need to transform callback function, create_time and so on
-                 */
-                pthread_mutex_lock(&pthread->lock);
-                memcpy(&pthread->worker, &task_thread->worker, sizeof(task_thread->worker));
-                pthread->create_time = task_thread->create_time;
-                pthread->run = 1;
-                pthread_mutex_unlock(&pthread->lock);
-                thread_destroy(task_thread);
-
-                enqueue_pool(&pool->run_pool, pthread);
+        nanosleep(&polling_interval, NULL);
+        if (polling_interval.tv_sec < max_secs) {
+            polling_interval.tv_sec = new_nano % MAX_NANOSEC;
+            new_nano = CEIL(polling_interval.tv_sec * multiplier);
+            if (new_nano > MAX_NANOSEC) {
+                polling_interval.tv_sec++;
             }
-        }
-        pthread_mutex_unlock(&pool->lock);
-
-        /**
-         * move idle thread of run thread to idle thread pool
-         */
-        pthread_mutex_lock(&pool->lock);
-        head_thread = NULL;
-        while (pool->active) 
-        {
-            pthread = dequeue_pool(&pool->run_pool);
-
-            if (pthread == NULL) break;
-            if (pthread != NULL && pthread == head_thread) {
-                enqueue_pool(&pool->run_pool, pthread);
-                break;
-            }
-            if (pthread->run == 0) {
-                pthread->create_time = get_localtime();
-                enqueue_pool(&pool->idle_pool, pthread);
-            } else {
-                enqueue_pool(&pool->run_pool, pthread);
-
-                if (head_thread == NULL) head_thread = pthread;
-            }
-            usleep(1);
-        }
-        pthread_mutex_unlock(&pool->lock);
-
-        /**
-         * pexit call
-         */
-        if (pool->exit) {
-            if (pool->task_pool.head != NULL) continue;
-            if (pool->run_pool.head != NULL) continue;
-            
-            pthread = pool->idle_pool.head;
-            while (pthread != NULL) {
-                pthread_mutex_lock(&pthread->lock);
-                pthread->delete = 1;
-                pthread_mutex_unlock(&pthread->lock);
-                while (pthread->state != THREAD_OVER) usleep(10);
-                pthread = pthread->next;
-            }
-
-            break;
-        }
-
+        } else break;
     }
 
-    pthread_mutex_unlock(&pool->lock);
-    pool->state = THREAD_OVER;
-    pool_thread_over_cnt++;
-    pthread_mutex_unlock(&pool->lock);
-    printf("thread pool runtine over\n");
-    return NULL;
+    /**
+     * fall back to max polling
+     */
+    while (thpool_p->jobqueue_p->len || thpool_p->num_threads_working) {
+        sleep(max_secs);
+    }
 }
 
 /**
- * @brief run_to_idle_runtine 
+ * @brief destroy the thread pool
  *
- * @param arg
- *
- * @return 
+ * @param thpool_p
  */
-void * run_to_idle_runtine(void *arg)
+void thpool_destroy(thpool *thpool_p)
 {
-    struct thread *pthread = NULL;
+    volatile int threads_total = thpool_p->num_threads_alive;
 
-    while (pool->active) 
+    /**
+     * end each thread's infinite loop
+     */
+    threads_keepalive = 0;
+
+    /**
+     * give one second to kill idle threads
+     */
+    double timeout = 1.0;
+    double tpassed = 0.0;
+    time_t start, end;
+    time(&start);
+    while (tpassed < timeout && 
+            (thpool_p->num_threads_alive))
     {
-        pthread_mutex_lock(&pool->lock);
-        pool->state = THREAD_RUNNING;
-        pthread = dequeue_pool(&pool->run_pool);
-
-        if (pthread == NULL) goto unlock;
-        if (pthread->run == 0) {
-            pthread->create_time = get_localtime();
-            enqueue_pool(&pool->idle_pool, pthread);
-        } else {
-            enqueue_pool(&pool->run_pool, pthread);
-        }
-unlock:
-        pthread_mutex_unlock(&pool->lock);
-        usleep(10);
-    }
-        
-    pthread_mutex_lock(&pool->lock);
-    pool->state = THREAD_OVER;
-    pool_thread_over_cnt++;
-    punlock(&pool->lock);
-    //printf("move to idle thread over\n");
-
-    return NULL;
-}
-
-/**
- * @brief free_idle_runtine 
- *
- * @param arg
- *
- * @return 
- */
-static void * free_idle_runtine(void *arg)
-{
-    struct timeval tv = {0};
-    struct thread *pthread = NULL;
-    struct thread *pre = NULL;
-    int idle_cnt = 0;;
-
-    while (pool->active && !pool->exit) {
-        tv.tv_sec = pool->free_time;
-        tv.tv_usec = 0;
-
-        pre = NULL;
-        select(0, NULL, NULL, NULL, &tv);
-        idle_cnt = get_pool_size(&pool->idle_pool) - pool->thread_mini_cnt;
-        if (idle_cnt <= 0)
-            continue;
-        plock(&pool->lock);
-        while (idle_cnt-- > 0) {
-            pthread = dequeue_pool(&pool->idle_pool);
-            pthread_mutex_lock(&pthread->lock);
-            pthread->delete = 1;
-            pthread_mutex_unlock(&pthread->lock);
-            usleep(10);
-            thread_destroy(pthread);
-        }
-        punlock(&pool->lock);
+        bsem_post_all(thpool_p->jobqueue_p->has_jobs);
+        time(&end);
+        tpassed = difftime(end, start);
     }
 
-    plock(&pool->lock);
-    pool_thread_over_cnt++;
-    punlock(&pool->lock);
-    printf("free idle thread over\n");
-    return NULL;
-}
-
-/**
- * @brief pthread_pool_init 
- *
- * @param max_cnt  [in] mac count of thread in pthread pool
- * @param mini_cnt [in] mini count of thread in pthread pool
- * @param init_cnt [in] init count of thread in pthread pool
- * @param tm       [in] timeout of thread in pthread pool
- *
- * @return 0, if succ; -1, if failed
- */
-int pthread_pool_init(int max_cnt, int mini_cnt, int init_cnt, int tm)
-{
-    struct thread *pthread = NULL;
-
     /**
-     * init pthred pool
+     * poll remaining threads
      */
-    if (pool != NULL || max_cnt <= 0) return 0;
-    pool = create_pool();
-    if (pool == NULL) return -1;
 
-    /**
-     * init pool info
-     */
-    if (mini_cnt < 0) mini_cnt = 0;
-    if (init_cnt < 0) init_cnt = 0;
-    if (init_cnt > max_cnt) init_cnt = max_cnt;
-    if (mini_cnt > max_cnt) mini_cnt = max_cnt;
-    pool->thread_max_cnt = max_cnt;
-    pool->thread_mini_cnt = mini_cnt;
-    if (tm == 0) tm = DFT_THREAD_TIMEOUT;
-    pool->free_time = tm;
-
-    /**
-     * create thread of pool manager
-     */
-    pthread_create(&pool->pid, NULL, pthread_pool_runtine, pool);
-    //pthread_create(&pool->pid, NULL, run_to_idle_runtine, pool);
-    pthread_create(&pool->pid, NULL, free_idle_runtine, pool);
-    sem_init(&pool->sem, 0, 0);
-    
-    /**
-     * create thread for pthread pool
-     */
-    while (init_cnt-- > 0)
+    while (thpool_p->num_threads_alive)
     {
-        pthread = create_thread();
-        if (pthread == NULL) continue;
-        pthread->hold = 1;
-
-        if (pthread_create(&pthread->pid, NULL, thread_runtine, pthread) < 0)
-        {
-            free(pthread);
-            pthread = NULL;
-            continue;
-        }
-
-        pthread_mutex_lock(&pool->lock);
-        enqueue_pool(&pool->idle_pool, pthread);
-        pool->thread_total_cnt++;
-        pthread_mutex_unlock(&pool->lock);
+        bsem_post_all(thpool_p->jobqueue_p->has_jobs);
+        sleep(1);
     }
 
-    /**  
-     * pthread clean up
+    /**
+     * job queue cleanup
      */
-    abnormal_event_add();
-    atexit(exit_cleanup);
-    //atexit(atexit_handle);
+    jobqueue_destroy(thpool_p);
+    free(thpool_p->jobqueue_p);
 
-    return 0;
+    /**
+     * deallocs
+     */
+    int n;
+    for (n = 0; n < threads_total; n++) {
+        thread_destroy(thpool_p->threads[n]);
+    }
+    free(thpool_p->threads);
+    free(thpool_p);
 }
 
 /**
- * @brief pthread_pool_add 
+ * @brief pause all threads in thread pool
  *
- * @param handler [in] pthread callback
- * @param arg     [in]
- *
- * @return 0, if succ; -1, if failed
+ * @param thpool_p
  */
-int pthread_pool_add(thread_handler handler, void *arg)
+void thpool_pause(thpool *thpool_p)
 {
-    struct thread *pthread = NULL;
-
-    /**
-     * dequeue a idle thread:
-     * (1) if has, then exec directly;
-     * (2) if not, create a new task;
-     */
-    pthread_mutex_lock(&pool->lock);
-    pthread = dequeue_pool(&pool->idle_pool);
-    pthread_mutex_unlock(&pool->lock);
-
-    /**
-     * create a new task
-     */
-    if (pthread == NULL) 
-    {
-        pthread = create_thread();
-        if (pthread == NULL) {
-            return -1;
-        } 
-        pthread->hold = 1;
-        pthread->worker.handler = handler;
-        pthread->worker.arg = arg;
-
-        pthread_mutex_lock(&pool->lock);
-        enqueue_pool(&pool->task_pool, pthread);
-        pthread_mutex_unlock(&pool->lock);
+    int n;
+    for (n = 0; n < thpool_p->num_threads_alive; n++) {
+        pthread_kill(thpool_p->threads[n]->pid, SIGUSR1);
     }
-    /**
-     * exec task directly
-     */
-    else {
-        pthread_mutex_lock(&pthread->lock);
-        pthread->worker.handler = handler;
-        pthread->worker.arg = arg;
-        pthread->run = 1;
-        pthread_mutex_unlock(&pthread->lock);
+}
 
-        pthread_mutex_lock(&pool->lock);
-        enqueue_pool(&pool->run_pool, pthread);
-        pthread_mutex_unlock(&pool->lock);
-
-    }
-    pthread_mutex_unlock(&pool->lock);
-
-    return 0;
+/**
+ * @brief resume all threads in thread poo;
+ *
+ * @param thpool_p
+ */
+void thpool_resume(thpool *thpool_p)
+{
+    threads_on_hold = 0;
 }
