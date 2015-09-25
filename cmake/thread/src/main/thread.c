@@ -5,7 +5,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <thread.h>
+#include "thread.h"
+#include "bsem.h"
+#include "thpool.h"
 
 /*********************************************************
  **************    Function Declaration    ***************
@@ -71,97 +73,14 @@ void *pthread(void *arg)
 int main(int agrc, char *agrv[])
 {
     int rt = 0; /* return value of function main */
-    
-    /*
-    pthread_t pid;
-    struct thread t = {0};
-    t.run = 1;
+    threadpool thpool = thpool_init(5);
 
-    //pid = pstart(waitsleep, NULL);
-    //pid = pstart(pthread, &t);
-    //sleep(2);
-    //pthread_cancel(pid);
-    //pid = pstart(pthread, NULL);
-    pid = pstart(sayhi, NULL);
-    pid = pstart(sayhi, NULL);
-    pid = pstart(sayhi, NULL);
-    pid = pstart(sayhi, NULL);
-    pid = pstart(sayhello, NULL);
-    pid = pstart(sayhello, NULL);
-    pid = pstart(sayhello, NULL);
-    pid = pstart(sayhello, NULL);
-    pid = pstart(sayhello, NULL);
-    pid = pstart(sayhello, NULL);
-
-    //printf("size: %d\n", get_pool_size(&qthread->run_pool));
-    //sleep(2);
-    //pthread_cancel(pid);
-    //sleep(5);
-    //pid = pcreate(pthread, NULL);
-    //pjoin(pid);
-    //qthread->active = 0;
-    //pexit(NULL);
-    sleep(1);
-   
-    return 0;
-    */
-
-    //pthread_create(&pid, NULL, pthread, &t);
-    /*
-    pid = pstart(sayhi, &t);
-    pid = pstart(sayhi, &t);
-    pid = pstart(sayhi, &t);
-    pid = pstart(sayhi, &t);
-    sleep(3);
-
-    return 0;
-    */
-
-    /*
-    struct thread_cfg cfg = {0};
-
-    thread_create("sayhello", sayhello, NULL, 1, 0);
-    thread_create("waitsleep", waitsleep, NULL, 1, 0);
-    thread_create("waitsleep1", waitsleep1, NULL, 1, 0);
-    thread_create("sayhi", sayhi, NULL, 1, 0);
-
-    cfg.run = 1;
-    cfg.name = "pthread";
-    cfg.worker.handler = pthread;
-    cfg.worker.arg = NULL;
-    rt = pthread_start(&cfg);
-    pthread_hold(rt);
-    pthread_info();
-
-    sleep(1);
-    thread_create("sayhi", sayhi, NULL, 1, 0);
-    cfg.name = "sayhello";
-    cfg.worker.handler = sayhello;
-    cfg.worker.arg = NULL;
-
-    rt = pthread_start(&cfg);
-    pthread_info();
-    */
-
-    pthread_pool_init(5, 3, 2, 2);
-    
-    pthread_pool_add(sayhi, NULL);
-    pthread_pool_add(sayhi, NULL);
-    pthread_pool_add(sayhi, NULL);
-    pthread_pool_add(sayhi, NULL);
-    pthread_pool_add(sayhi, NULL);
-    pthread_pool_add(sayhi, NULL);
-    pthread_pool_add(waitsleep, NULL);
-    //pthread_pool_add(waitsleep, NULL);
-    while (rt++ < 5) pthread_pool_add(sayhello, NULL);
+    int i;
+    for (i = 0; i < 10; i++) {
+        thpool_add_work(thpool, sayhi, NULL);
+    }
     sleep(2);
-    pthread_pool_add(sayhi, NULL);
-    pthread_pool_add(sayhi, NULL);
-    pthread_pool_add(sayhi, NULL);
-    pthread_pool_add(sayhi, NULL);
+    thpool_destroy(thpool);
 
-    //sleep(5);
-    pexit(NULL);
-            
     return rt;
 }
