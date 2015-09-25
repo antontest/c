@@ -5,7 +5,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <thread.h>
+#include "thread.h"
+#include "bsem.h"
+#include "thpool.h"
 
 /*********************************************************
  **************    Function Declaration    ***************

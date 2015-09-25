@@ -13,11 +13,15 @@ AUX_SOURCE_DIRECTORY(main SRC_PATH)
 
 # set source files and lib source files
 SET(CSRC ${SRC_PATH})
-SET(LIB_SRC thread/thread.c)
+SET(THREAD_SRC thread/thread.c)
+SET(BSEM_SRC bsem/bsem.c)
+SET(THPOOL_SRC thpool/thpool.c bsem/bsem.c)
 
 # lib generation
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/src/lib)
-ADD_LIBRARY(thread_static STATIC ${LIB_SRC})
+ADD_LIBRARY(thread_static STATIC ${THREAD_SRC})
+ADD_LIBRARY(bsem STATIC ${BSEM_SRC})
+ADD_LIBRARY(thpool STATIC ${THPOOL_SRC})
 
 # generat exec
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR})
@@ -27,7 +31,7 @@ ADD_EXECUTABLE(thread ${CSRC})
 TARGET_LINK_LIBRARIES(thread_static pthread)
 SET_TARGET_PROPERTIES(thread_static PROPERTIES OUTPUT_NAME "thread")
 #ADD_DEPENDENCIES(thread pthread thread_static)
-TARGET_LINK_LIBRARIES(thread thread_static)
+TARGET_LINK_LIBRARIES(thread thread_static bsem thpool)
 
 # -------------- INSTALL -------------- #
 # install path setting
