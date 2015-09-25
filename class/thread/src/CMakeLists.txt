@@ -18,13 +18,15 @@ SET(LIB_SRC thread/thread.c)
 SET(MUTEX_SRC mutex/mutex.c)
 SET(COND_SRC cond/cond.c)
 SET(BSEM_SRC bsem/bsem.c)
+SET(VALUE_SRC thread_value/thread_value.c)
 
 # lib generation
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/src/lib)
-ADD_LIBRARY(thread_static STATIC ${LIB_SRC})
+ADD_LIBRARY(thread_static SHARED ${LIB_SRC})
 ADD_LIBRARY(mutex STATIC ${MUTEX_SRC})
 ADD_LIBRARY(cond STATIC ${COND_SRC})
 ADD_LIBRARY(bsem SHARED ${BSEM_SRC})
+ADD_LIBRARY(thread_value STATIC ${VALUE_SRC})
 
 # generat exec
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR})
@@ -32,6 +34,7 @@ ADD_EXECUTABLE(thread ${CSRC})
 
 # link library
 SET_TARGET_PROPERTIES(thread_static PROPERTIES OUTPUT_NAME "thread")
+TARGET_LINK_LIBRARIES(thread_static mutex pthread thread_value)
 TARGET_LINK_LIBRARIES(bsem mutex cond)
 TARGET_LINK_LIBRARIES(thread thread_static)
 
