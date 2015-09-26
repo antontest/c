@@ -109,7 +109,7 @@ static mutex_t *id_mutex;
 static thread_value_t *current_thread;
 
 
-//#define HAVE_PTHREAD_CANCEL
+#define HAVE_PTHREAD_CANCEL
 #ifndef HAVE_PTHREAD_CANCEL
 /* if pthread_cancel is not available, we emulate it using a signal */
 #ifdef ANDROID
@@ -257,7 +257,6 @@ static private_thread_t *thread_create_internal()
 static void thread_cleanup(private_thread_t *this)
 {
 	cleanup_handler_t *handler;
-	printf("cancel\n");
 	this->mutex->lock(this->mutex);
 	while (this->cleanup_handlers->remove_last(this->cleanup_handlers,
 											   (void**)&handler) == SUCCESS)
