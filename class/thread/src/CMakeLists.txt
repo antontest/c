@@ -34,7 +34,7 @@ ADD_EXECUTABLE(thread ${CSRC})
 
 # link library
 SET_TARGET_PROPERTIES(thread_static PROPERTIES OUTPUT_NAME "thread")
-TARGET_LINK_LIBRARIES(thread_static mutex pthread thread_value)
+TARGET_LINK_LIBRARIES(thread_static mutex pthread thread_value linked_list)
 TARGET_LINK_LIBRARIES(bsem mutex cond)
 TARGET_LINK_LIBRARIES(thread thread_static)
 
@@ -49,7 +49,7 @@ endif()
 # INSTALL(FILES include/main.h DESTINATION include)
 find_files(h include HLIST)
 foreach(hfile ${HLIST})
-    INSTALL(FILES ${hfile} DESTINATION include)
+    INSTALL(FILES ${hfile} DESTINATION include/thread)
 endforeach()
 
 # install library
@@ -59,9 +59,9 @@ if (LIBLIST)
     foreach(libfile ${LIBLIST})
         INSTALL(FILES ${libfile} DESTINATION lib)
     endforeach()
-else()
-    INSTALL(TARGETS thread_static LIBRARY DESTINATION lib)
 endif()
+INSTALL(TARGETS thread_static LIBRARY DESTINATION lib)
+INSTALL(TARGETS bsem LIBRARY DESTINATION lib)
 
 # install target
-INSTALL(TARGETS thread RUNTIME DESTINATION exec)
+# INSTALL(TARGETS thread RUNTIME DESTINATION exec)

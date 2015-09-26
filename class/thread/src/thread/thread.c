@@ -16,7 +16,8 @@ static inline pid_t gettid()
 }
 #endif
 
-#include "utils.h"
+#include "utils/utils.h"
+#include "utils/linked_list.h"
 #include "mutex.h"
 #include "thread_value.h"
 #include "thread.h"
@@ -48,6 +49,11 @@ struct private_thread_t {
 	 * Argument for the main function.
 	 */
 	void *arg;
+
+	/**
+	 * Stack of cleanup handlers.
+	 */
+	linked_list_t *cleanup_handlers;
 
 	/**
 	 * Mutex to make modifying thread properties safe.
@@ -103,6 +109,7 @@ static mutex_t *id_mutex;
 static thread_value_t *current_thread;
 
 
+//#define HAVE_PTHREAD_CANCEL
 #ifndef HAVE_PTHREAD_CANCEL
 /* if pthread_cancel is not available, we emulate it using a signal */
 #ifdef ANDROID
@@ -113,7 +120,7 @@ static thread_value_t *current_thread;
 
 /* the signal handler for SIG_CANCEL uses pthread_exit to terminate the
  * "cancelled" thread */
-static void cancel_signal_handler(int sig)
+void cancel_signal_handler(int sig)
 {
 	pthread_exit(NULL);
 }
@@ -133,7 +140,7 @@ static void thread_destroy(private_thread_t *this)
 		this->mutex->unlock(this->mutex);
 		return;
 	}
-	//this->cleanup_handlers->destroy(this->cleanup_handlers);
+	this->cleanup_handlers->destroy(this->cleanup_handlers);
 	this->mutex->unlock(this->mutex);
 	this->mutex->destroy(this->mutex);
 	sem_destroy(&this->created);
@@ -236,7 +243,7 @@ static private_thread_t *thread_create_internal()
 			.detach = _detach,
 			.join = _join,
 		},
-		//.cleanup_handlers = linked_list_create(),
+		.cleanup_handlers = linked_list_create(),
 		.mutex = mutex_create(),
 	);
 	sem_init(&this->created, FALSE, 0);
@@ -249,14 +256,15 @@ static private_thread_t *thread_create_internal()
  */
 static void thread_cleanup(private_thread_t *this)
 {
-	//cleanup_handler_t *handler;
+	cleanup_handler_t *handler;
+	printf("cancel\n");
 	this->mutex->lock(this->mutex);
-	/*while (this->cleanup_handlers->remove_last(this->cleanup_handlers,
+	while (this->cleanup_handlers->remove_last(this->cleanup_handlers,
 											   (void**)&handler) == SUCCESS)
 	{
 		handler->cleanup(handler->arg);
 		free(handler);
-	}*/
+	}
 	this->terminated = TRUE;
 	thread_destroy(this);
 }
@@ -348,7 +356,7 @@ u_int thread_current_id()
  */
 void thread_cleanup_push(thread_cleanup_t cleanup, void *arg)
 {
-	//private_thread_t *this = (private_thread_t*)thread_current();
+	private_thread_t *this = (private_thread_t*)thread_current();
 	cleanup_handler_t *handler;
 
 	INIT(handler,
@@ -356,9 +364,9 @@ void thread_cleanup_push(thread_cleanup_t cleanup, void *arg)
 		.arg = arg,
 	);
 
-	//this->mutex->lock(this->mutex);
-	//this->cleanup_handlers->insert_last(this->cleanup_handlers, handler);
-	//this->mutex->unlock(this->mutex);
+	this->mutex->lock(this->mutex);
+	this->cleanup_handlers->insert_last(this->cleanup_handlers, handler);
+	this->mutex->unlock(this->mutex);
 }
 
 /**
@@ -366,7 +374,6 @@ void thread_cleanup_push(thread_cleanup_t cleanup, void *arg)
  */
 void thread_cleanup_pop(bool execute)
 {
-    /*
 	private_thread_t *this = (private_thread_t*)thread_current();
 	cleanup_handler_t *handler;
 
@@ -385,7 +392,6 @@ void thread_cleanup_pop(bool execute)
 		handler->cleanup(handler->arg);
 	}
 	free(handler);
-	*/
 }
 
 /**

@@ -12,6 +12,7 @@
  *********************************************************/
 void* sayhi(void *arg)
 {
+    sleep(5);
     printf("hi\n");
 
     return NULL;
@@ -24,15 +25,15 @@ int main(int agrc, char *agrv[])
 {
     int rt = 0; /* return value of function main */
 
-    thread_t *thread = NULL, *t = NULL;
+    thread_t *thread = NULL;
     threads_init();
+    thread_cancelability(true);
     thread = thread_create(sayhi, NULL);
-    t = thread_create(sayhi, NULL);
 
     sleep(1);
+    thread->cancel(thread);
     threads_deinit();
     free(thread);
-    free(t);
 
     return rt;
 }

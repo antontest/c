@@ -5,6 +5,7 @@
 #include <string.h>
 #include <sys/time.h>
 #include <time.h>
+#include <arpa/inet.h>
 
 /**
  * General purpose boolean type.
@@ -26,6 +27,73 @@
 #ifndef TRUE
 # define TRUE  true
 #endif /* TRUE */
+
+typedef enum status_t status_t;
+
+/**
+ * Return values of function calls.
+ */
+enum status_t {
+	/**
+	 * Call succeeded.
+	 */
+	SUCCESS,
+
+	/**
+	 * Call failed.
+	 */
+	FAILED,
+
+	/**
+	 * Out of resources.
+	 */
+	OUT_OF_RES,
+
+	/**
+	 * The suggested operation is already done
+	 */
+	ALREADY_DONE,
+
+	/**
+	 * Not supported.
+	 */
+	NOT_SUPPORTED,
+
+	/**
+	 * One of the arguments is invalid.
+	 */
+	INVALID_ARG,
+
+	/**
+	 * Something could not be found.
+	 */
+	NOT_FOUND,
+
+	/**
+	 * Error while parsing.
+	 */
+	PARSE_ERROR,
+
+	/**
+	 * Error while verifying.
+	 */
+	VERIFY_ERROR,
+
+	/**
+	 * Object in invalid state.
+	 */
+	INVALID_STATE,
+
+	/**
+	 * Destroy object which called method belongs to.
+	 */
+	DESTROY_ME,
+
+	/**
+	 * Another call to the method is required.
+	 */
+	NEED_MORE,
+};
 
 /**
  * Helper function that compares two strings for equality
@@ -144,6 +212,20 @@ static inline time_t time_monotonic(struct timeval *tv)
 	return tv->tv_sec;
 }
 
+/**
+ * Call destructor of an object, if object != NULL
+ */
+#define DESTROY_IF(obj) if (obj) (obj)->destroy(obj)
+
+/**
+ * Call offset destructor of an object, if object != NULL
+ */
+#define DESTROY_OFFSET_IF(obj, offset) if (obj) obj->destroy_offset(obj, offset);
+
+/**
+ * Call function destructor of an object, if object != NULL
+ */
+#define DESTROY_FUNCTION_IF(obj, fn) if (obj) obj->destroy_function(obj, fn);
 
 
 /**
@@ -199,6 +281,165 @@ static inline time_t time_monotonic(struct timeval *tv)
 	__attribute__((transparent_union)), ##__VA_ARGS__); \
 	static typeof(name) *_##name = (typeof(name)*)name; \
 	static ret name(this, ##__VA_ARGS__)
+
+
+/**
+ * Macro to allocate a sized type.
+ */
+#define malloc_thing(thing) ((thing*)malloc(sizeof(thing)))
+
+/**
+ * Get the number of elements in an array
+ */
+#define countof(array) (sizeof(array)/sizeof(array[0]))
+
+/**
+ * Ignore result of functions tagged with warn_unused_result attributes
+ */
+#define ignore_result(call) { if(call){}; }
+
+/**
+ * Assign a function as a class method
+ */
+#define ASSIGN(method, function) (method = (typeof(method))function)
+
+
+/**
+ * Write a 16-bit host order value in network order to an unaligned address.
+ *
+ * @param host		host order 16-bit value
+ * @param network	unaligned address to write network order value to
+ */
+static inline void htoun16(void *network, u_int16_t host)
+{
+	char *unaligned = (char*)network;
+
+	host = htons(host);
+	memcpy(unaligned, &host, sizeof(host));
+}
+
+/**
+ * Write a 32-bit host order value in network order to an unaligned address.
+ *
+ * @param host		host order 32-bit value
+ * @param network	unaligned address to write network order value to
+ */
+static inline void htoun32(void *network, u_int32_t host)
+{
+	char *unaligned = (char*)network;
+
+	host = htonl(host);
+	memcpy((char*)unaligned, &host, sizeof(host));
+}
+
+/**
+ * Write a 64-bit host order value in network order to an unaligned address.
+ *
+ * @param host		host order 64-bit value
+ * @param network	unaligned address to write network order value to
+ */
+static inline void htoun64(void *network, u_int64_t host)
+{
+	char *unaligned = (char*)network;
+
+#ifdef be64toh
+	host = htobe64(host);
+	memcpy((char*)unaligned, &host, sizeof(host));
+#else
+	u_int32_t high_part, low_part;
+
+	high_part = host >> 32;
+	high_part = htonl(high_part);
+	low_part  = host & 0xFFFFFFFFLL;
+	low_part  = htonl(low_part);
+
+	memcpy(unaligned, &high_part, sizeof(high_part));
+	unaligned += sizeof(high_part);
+	memcpy(unaligned, &low_part, sizeof(low_part));
+#endif
+}
+
+/**
+ * Read a 16-bit value in network order from an unaligned address to host order.
+ *
+ * @param network	unaligned address to read network order value from
+ * @return			host order value
+ */
+static inline u_int16_t untoh16(void *network)
+{
+	char *unaligned = (char*)network;
+	u_int16_t tmp;
+
+	memcpy(&tmp, unaligned, sizeof(tmp));
+	return ntohs(tmp);
+}
+
+/**
+ * Read a 32-bit value in network order from an unaligned address to host order.
+ *
+ * @param network	unaligned address to read network order value from
+ * @return			host order value
+ */
+static inline u_int32_t untoh32(void *network)
+{
+	char *unaligned = (char*)network;
+	u_int32_t tmp;
+
+	memcpy(&tmp, unaligned, sizeof(tmp));
+	return ntohl(tmp);
+}
+
+/**
+ * Read a 64-bit value in network order from an unaligned address to host order.
+ *
+ * @param network	unaligned address to read network order value from
+ * @return			host order value
+ */
+static inline u_int64_t untoh64(void *network)
+{
+	char *unaligned = (char*)network;
+
+#ifdef be64toh
+	u_int64_t tmp;
+
+	memcpy(&tmp, unaligned, sizeof(tmp));
+	return be64toh(tmp);
+#else
+	u_int32_t high_part, low_part;
+
+	memcpy(&high_part, unaligned, sizeof(high_part));
+	unaligned += sizeof(high_part);
+	memcpy(&low_part, unaligned, sizeof(low_part));
+
+	high_part = ntohl(high_part);
+	low_part  = ntohl(low_part);
+
+	return (((u_int64_t)high_part) << 32) + low_part;
+#endif
+}
+
+/**
+ * Round up size to be multiple of alignement
+ */
+static inline size_t round_up(size_t size, int alignement)
+{
+	int remainder;
+
+	remainder = size % alignement;
+	if (remainder)
+	{
+		size += alignement - remainder;
+	}
+	return size;
+}
+
+/**
+ * Round down size to be a multiple of alignement
+ */
+static inline size_t round_down(size_t size, int alignement)
+{
+	return size - (size % alignement);
+}
 
 #endif
 

@@ -1,6 +1,6 @@
 #ifndef __MUTEX_H__
 #define __MUTEX_H__
-#include "utils.h"
+#include "utils/utils.h"
 
 typedef struct mutex_t mutex_t;
 
