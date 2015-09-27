@@ -5,38 +5,16 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "thread.h"
-#include "thread_value.h"
+#include <pthread.h>
+#include <thread/thread.h>
+#include <timer.h>
 
 /*********************************************************
  **************    Function Declaration    ***************
  *********************************************************/
-void* sayhi(void *arg)
+void hi(void *arg)
 {
-    sleep(1);
-    printf("hi, id: %d\n", thread_current_id());
-
-    return NULL;
-}
-
-void* sayhi1(void *arg)
-{
-    sleep(2);
-    printf("hi1\n");
-
-    return NULL;
-}
-
-void* sayhi2(void *arg)
-{
-    printf("hi2\n");
-
-    return NULL;
-}
-
-void cleanup(void *arg)
-{
-    printf("clean up\n");
+    printf("hi\n");
 }
 
 /*********************************************************
@@ -45,14 +23,18 @@ void cleanup(void *arg)
 int main(int agrc, char *agrv[])
 {
     int rt = 0; /* return value of function main */
-
-    thread_t *thread = NULL; //*t = NULL, *t1 = NULL;
-    threads_init();
-    thread_cancelability(true);
-    thread = thread_create(sayhi, NULL);
-
-    thread->join(thread);
-    threads_deinit();
+    timer *t;
+    t = timer_start(hi, NULL, 100);
+    printf("timer state1: %s\n", t->get_state_str(t));
+    sleep(1);
+    t->pause(t);
+    t->set_interval(t, 1000);
+    printf("timer run times: %d\n", t->get_runtimes(t));
+    printf("timer state: %s\n", t->get_state_str(t));
+    sleep(1);
+    t->resume(t);
+    sleep(2);
+    t->destroy(t);
 
     return rt;
 }

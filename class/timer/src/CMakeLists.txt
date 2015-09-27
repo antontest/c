@@ -14,19 +14,21 @@ AUX_SOURCE_DIRECTORY(main SRC_PATH)
 
 # set source files and lib source files
 SET(CSRC ${SRC_PATH})
-SET(LIB_SRC linked_list/linked_list.c enum/enum.c)
+SET(LIB_SRC timer/timer.c)
 
 # lib generation
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/src/lib)
-ADD_LIBRARY(utils_share SHARED ${LIB_SRC})
+ADD_LIBRARY(timer_share SHARED ${LIB_SRC})
 
 # generat exec
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR})
-ADD_EXECUTABLE(utils ${CSRC})
+ADD_EXECUTABLE(timer ${CSRC})
 
 # link library
-SET_TARGET_PROPERTIES(utils_share PROPERTIES OUTPUT_NAME "utils")
-TARGET_LINK_LIBRARIES(utils utils_share)
+SET_TARGET_PROPERTIES(timer_share PROPERTIES OUTPUT_NAME "timer")
+ADD_DEPENDENCIES(timer_share pthread mutex utils)
+TARGET_LINK_LIBRARIES(timer_share pthread mutex utils)
+TARGET_LINK_LIBRARIES(timer timer_share pthread)
 
 # -------------- INSTALL -------------- #
 # install path setting
@@ -36,12 +38,14 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 endif()
 
 # install header files
-INSTALL(FILES include/linked_list.h DESTINATION include/utils)
-INSTALL(FILES include/utils.h DESTINATION include/utils)
-INSTALL(FILES include/enum.h DESTINATION include/utils)
+# INSTALL(FILES include/main.h DESTINATION include)
+find_files(h include HLIST)
+foreach(hfile ${HLIST})
+    INSTALL(FILES ${hfile} DESTINATION include)
+endforeach()
 
 # install library
-INSTALL(TARGETS utils_share LIBRARY DESTINATION lib)
+INSTALL(TARGETS timer_share LIBRARY DESTINATION lib)
 
 # install target
-#INSTALL(TARGETS linked_list RUNTIME DESTINATION exec)
+# INSTALL(TARGETS timer RUNTIME DESTINATION exec)
