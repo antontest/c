@@ -27,8 +27,8 @@ ADD_LIBRARY(thread_share SHARED ${LIB_SRC})
 ADD_LIBRARY(mutex STATIC ${MUTEX_SRC})
 ADD_LIBRARY(cond STATIC ${COND_SRC})
 ADD_LIBRARY(bsem SHARED ${BSEM_SRC})
-ADD_LIBRARY(thread_value STATIC ${VALUE_SRC})
-ADD_LIBRARY(rwlock SHARED ${RWLOCK_SRC})
+ADD_LIBRARY(thread_value SHARED ${VALUE_SRC})
+ADD_LIBRARY(thread_rwlock SHARED ${RWLOCK_SRC})
 
 # generat exec
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR})
@@ -38,7 +38,7 @@ ADD_EXECUTABLE(thread ${CSRC})
 SET_TARGET_PROPERTIES(thread_share PROPERTIES OUTPUT_NAME "thread")
 TARGET_LINK_LIBRARIES(thread_share mutex pthread linked_list utils thread_value)
 TARGET_LINK_LIBRARIES(bsem mutex cond utils)
-TARGET_LINK_LIBRARIES(rwlock mutex cond thread_share)
+TARGET_LINK_LIBRARIES(thread_rwlock mutex cond thread_share)
 TARGET_LINK_LIBRARIES(thread thread_share)
 
 # -------------- INSTALL -------------- #
@@ -64,7 +64,11 @@ if (LIBLIST)
     endforeach()
 endif()
 INSTALL(TARGETS thread_share LIBRARY DESTINATION lib)
+INSTALL(TARGETS thread_value LIBRARY DESTINATION lib)
+INSTALL(TARGETS thread_rwlock LIBRARY DESTINATION lib)
 INSTALL(TARGETS bsem LIBRARY DESTINATION lib)
+INSTALL(TARGETS cond ARCHIVE DESTINATION lib)
+INSTALL(TARGETS mutex ARCHIVE DESTINATION lib)
 
 # install target
 # INSTALL(TARGETS thread RUNTIME DESTINATION exec)
