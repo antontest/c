@@ -217,9 +217,9 @@ static void initialize_is_reader()
 METHOD(rwlock_t, read_lock, void,
 	private_rwlock_t *this)
 {
-	uintptr_t reading;
+	unsigned int reading;
 
-	reading = (uintptr_t)pthread_getspecific(is_reader);
+	reading = (unsigned int)pthread_getspecific(is_reader);
 	this->mutex->lock(this->mutex);
 	if (!this->writer && reading > 0)
 	{
@@ -275,10 +275,10 @@ METHOD(rwlock_t, unlock, void,
 	}
 	else
 	{
-		uintptr_t reading;
+		unsigned int reading;
 
 		this->reader_count--;
-		reading = (uintptr_t)pthread_getspecific(is_reader);
+		reading = (unsigned int)pthread_getspecific(is_reader);
 		pthread_setspecific(is_reader, (void*)(reading - 1));
 	}
 	if (!this->reader_count)

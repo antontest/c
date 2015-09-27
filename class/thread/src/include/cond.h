@@ -1,7 +1,7 @@
 #ifndef __COND_H__
 #define __COND_H__
 #include "mutex.h"
-#include <time.h>
+#include <sys/time.h>
 
 typedef struct cond_t cond_t;
 

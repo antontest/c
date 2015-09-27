@@ -2,6 +2,10 @@
 #include "mutex.h"
 #include "cond.h"
 #include "bsem.h"
+#include <string.h>
+#include <stdlib.h>
+#include <time.h>
+#include <sys/time.h>
 
 typedef struct private_bsem_t private_bsem_t;
 

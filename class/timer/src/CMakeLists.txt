@@ -26,8 +26,8 @@ ADD_EXECUTABLE(timer ${CSRC})
 
 # link library
 SET_TARGET_PROPERTIES(timer_share PROPERTIES OUTPUT_NAME "timer")
-ADD_DEPENDENCIES(timer_share pthread mutex utils)
-TARGET_LINK_LIBRARIES(timer_share pthread mutex utils)
+ADD_DEPENDENCIES(timer_share pthread mutex utils enum)
+TARGET_LINK_LIBRARIES(timer_share pthread mutex utils enum)
 TARGET_LINK_LIBRARIES(timer timer_share pthread)
 
 # -------------- INSTALL -------------- #

@@ -3,6 +3,8 @@
 #include <sys/select.h>
 #include <pthread.h>
 #include <stdbool.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include <semaphore.h>
 #include <utils/utils.h>
 #include <utils/enum.h>

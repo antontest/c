@@ -36,8 +36,8 @@ ADD_EXECUTABLE(thread ${CSRC})
 
 # link library
 SET_TARGET_PROPERTIES(thread_share PROPERTIES OUTPUT_NAME "thread")
-TARGET_LINK_LIBRARIES(thread_share mutex pthread thread_value linked_list)
-TARGET_LINK_LIBRARIES(bsem mutex cond)
+TARGET_LINK_LIBRARIES(thread_share mutex pthread linked_list utils thread_value)
+TARGET_LINK_LIBRARIES(bsem mutex cond utils)
 TARGET_LINK_LIBRARIES(rwlock mutex cond thread_share)
 TARGET_LINK_LIBRARIES(thread thread_share)
 

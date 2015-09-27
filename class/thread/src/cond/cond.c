@@ -1,5 +1,5 @@
 #include <pthread.h>
-#include <stdint.h>
+#include <stdlib.h>
 #include <time.h>
 #include <errno.h>
 #include "utils/utils.h"
@@ -68,7 +68,7 @@ METHOD(cond_t, timed_wait_abs, bool, private_cond_t *this, private_mutex_t *mute
 METHOD(cond_t, timed_wait, bool, private_cond_t *this, private_mutex_t *mutex, unsigned int timeout)
 {
 	struct timeval tv;
-	u_int s, ms;
+	unsigned int s, ms;
 
 	time_monotonic(&tv);
 
