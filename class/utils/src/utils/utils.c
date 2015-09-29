@@ -1,4 +1,5 @@
 #include <string.h>
+#include <stdlib.h>
 #include <sys/time.h>
 #include <time.h>
 #include <arpa/inet.h>
@@ -259,3 +260,17 @@ inline size_t round_down(size_t size, int alignement)
 	return size - (size % alignement);
 }
 
+/**
+ * @brief rand in array
+ *
+ * @param min [in] mini number after rand 
+ * @param max [in] max number after rand 
+ *
+ * @return 
+ */
+inline int rand_num(int min, int max)
+{
+    if (min <0 || min >= max) return -1;
+    srandom ((unsigned int)time(NULL));
+    return random () % (max - min) + min;
+}

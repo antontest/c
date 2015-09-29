@@ -294,5 +294,15 @@ inline unsigned int round_up(unsigned int size, int alignement);
  */
 inline unsigned int round_down(unsigned int size, int alignement);
 
+/**
+ * @brief rand in array
+ *
+ * @param min [in] mini number after rand 
+ * @param max [in] max number after rand 
+ *
+ * @return a number in min ~ max
+ */
+inline int rand_num(int min, int max);
+
 #endif
 
