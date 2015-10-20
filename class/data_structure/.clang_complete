@@ -1,0 +1,10 @@
+-I /usr/include/ 
+-I ~/tools/include/
+-I .
+-I ./src
+-I ./src/extra_lib
+-I ./src/lib
+-I ./src/main
+-I ./src/list
+-I ./src/data_structure
+-I ./src/include

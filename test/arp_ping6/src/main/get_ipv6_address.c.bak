@@ -1,0 +1,410 @@
+/**
+ * usual head files
+ */
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
+#include <netdb.h>
+#include <ifaddrs.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netinet/ip.h>
+#include <netinet/ip6.h>
+#include <netinet/icmp6.h>
+#include <arpa/inet.h>
+#include <sys/ioctl.h>
+#include <bits/ioctls.h>
+#include <net/if.h>
+#include <linux/if_ether.h>
+#include <linux/if_packet.h>
+#include <errno.h>
+
+#define ETH_HEADER_LEN  14
+#define IPV6_HEADER_LEN 40
+#define ICMP_HEADER_LEN 8
+
+/*********************************************************
+ **************    Function Declaration    ***************
+ *********************************************************/
+int get_ipv6_address(char ipv6[])
+{
+    struct ifaddrs *ifaddr, *ifa;
+    int family, s;
+
+    if ( ipv6 == NULL ) {
+        return -1;
+    }
+
+    if ( getifaddrs(&ifaddr) == -1 ) {
+        perror("getifaddrs");
+        return -1;
+    }
+
+    for ( ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next ) {
+        if ( ifa->ifa_addr == NULL ) {
+            continue;
+        }
+
+        family = ifa->ifa_addr->sa_family;
+        if ( family != AF_INET6 || !strcasecmp(ifa->ifa_name, "lo") ) {
+            continue;
+        }
+
+        s = getnameinfo(ifa->ifa_addr, sizeof(struct sockaddr_in6), ipv6,
+                NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
+        if ( s != 0 ) {
+            return -1;
+        }
+
+        printf( "ipv6 address: %s\n", ipv6 );
+        break;
+    }
+
+    freeifaddrs(ifaddr);
+    return 0;
+}
+
+
+// Computing the internet checksum (RFC 1071).
+// Note that the internet checksum does not preclude collisions.
+unsigned int checksum (unsigned int *addr, int len)
+{
+    int count = len;
+    register uint32_t sum = 0;
+    unsigned int answer = 0;
+
+    // Sum up 2-byte values until none or only one byte left.
+    while (count > 1) {
+        sum += *(addr++);
+        count -= 2;
+    }
+
+    // Add left-over byte, if any.
+    if (count > 0) {
+        sum += *(unsigned char *) addr;
+    }
+
+    // Fold 32-bit sum into 16 bits; we lose information by doing this,
+    // increasing the chances of a collision.
+    // sum = (lower 16 bits) + (upper 16 bits shifted right 16 bits)
+    while (sum >> 16) {
+        sum = (sum & 0xffff) + (sum >> 16);
+    }
+
+    // Checksum is one's compliment of sum.
+    answer = ~sum;
+
+    return (answer);
+}
+
+// Build IPv6 ICMP pseudo-header and call checksum function (Section 8.1 of RFC 2460).
+unsigned int icmp6_checksum (struct ip6_hdr iphdr, struct icmp6_hdr icmp6hdr, unsigned char *payload, int payloadlen)
+{
+    char buf[IP_MAXPACKET];
+    char *ptr;
+    int chksumlen = 0;
+    int i;
+
+    ptr = &buf[0];  // ptr points to beginning of buffer buf
+
+    // Copy source IP address into buf (128 bits)
+    memcpy (ptr, &iphdr.ip6_src.s6_addr, sizeof (iphdr.ip6_src.s6_addr));
+    ptr += sizeof (iphdr.ip6_src);
+    chksumlen += sizeof (iphdr.ip6_src);
+
+    // Copy destination IP address into buf (128 bits)
+    memcpy (ptr, &iphdr.ip6_dst.s6_addr, sizeof (iphdr.ip6_dst.s6_addr));
+    ptr += sizeof (iphdr.ip6_dst.s6_addr);
+    chksumlen += sizeof (iphdr.ip6_dst.s6_addr);
+
+    // Copy Upper Layer Packet length into buf (32 bits).
+    // Should not be greater than 65535 (i.e., 2 bytes).
+    *ptr = 0; ptr++;
+    *ptr = 0; ptr++;
+    *ptr = (ICMP_HEADER_LEN + payloadlen) / 256;
+    ptr++;
+    *ptr = (ICMP_HEADER_LEN + payloadlen) % 256;
+    ptr++;
+    chksumlen += 4;
+
+    // Copy zero field to buf (24 bits)
+    *ptr = 0; ptr++;
+    *ptr = 0; ptr++;
+    *ptr = 0; ptr++;
+    chksumlen += 3;
+
+    // Copy next header field to buf (8 bits)
+    memcpy (ptr, &iphdr.ip6_nxt, sizeof (iphdr.ip6_nxt));
+    ptr += sizeof (iphdr.ip6_nxt);
+    chksumlen += sizeof (iphdr.ip6_nxt);
+
+    // Copy ICMPv6 type to buf (8 bits)
+    memcpy (ptr, &icmp6hdr.icmp6_type, sizeof (icmp6hdr.icmp6_type));
+    ptr += sizeof (icmp6hdr.icmp6_type);
+    chksumlen += sizeof (icmp6hdr.icmp6_type);
+
+    // Copy ICMPv6 code to buf (8 bits)
+    memcpy (ptr, &icmp6hdr.icmp6_code, sizeof (icmp6hdr.icmp6_code));
+    ptr += sizeof (icmp6hdr.icmp6_code);
+    chksumlen += sizeof (icmp6hdr.icmp6_code);
+
+    // Copy ICMPv6 ID to buf (16 bits)
+    memcpy (ptr, &icmp6hdr.icmp6_id, sizeof (icmp6hdr.icmp6_id));
+    ptr += sizeof (icmp6hdr.icmp6_id);
+    chksumlen += sizeof (icmp6hdr.icmp6_id);
+
+    // Copy ICMPv6 sequence number to buff (16 bits)
+    memcpy (ptr, &icmp6hdr.icmp6_seq, sizeof (icmp6hdr.icmp6_seq));
+    ptr += sizeof (icmp6hdr.icmp6_seq);
+    chksumlen += sizeof (icmp6hdr.icmp6_seq);
+
+    // Copy ICMPv6 checksum to buf (16 bits)
+    // Zero, since we don't know it yet.
+    *ptr = 0; ptr++;
+    *ptr = 0; ptr++;
+    chksumlen += 2;
+
+    // Copy ICMPv6 payload to buf
+    memcpy (ptr, payload, payloadlen * sizeof (unsigned char));
+    ptr += payloadlen;
+    chksumlen += payloadlen;
+
+    // Pad to the next 16-bit boundary
+    for (i = 0; i < payloadlen % 2; i++, ptr++) {
+        *ptr = 0;
+        ptr += 1;
+        chksumlen += 1;
+    }
+
+    return checksum ((unsigned int *) buf, chksumlen);
+}
+
+int arp_ping6(const char *target, int tries, const char *ifname)
+{
+    struct ip6_hdr      send_iphdr  , *recv_iphdr;
+    struct icmp6_hdr    send_icmphdr, *recv_icmphdr;
+    struct ifreq        ifr;
+    struct timeval      wait;
+    struct addrinfo     hints;
+    struct addrinfo     *res;
+    struct sockaddr_in6 *ipv6;
+    struct sockaddr_ll  device;
+    struct sockaddr     from;
+    unsigned char       src_mac[6];
+    unsigned char       dst_mac[6];
+    unsigned char       send_ether_frame[IP_MAXPACKET];
+    unsigned char       recv_ether_frame[IP_MAXPACKET];
+    unsigned char       data[5]   = "echo";
+    socklen_t           from_len;
+    void                *tmp;
+    int                 send_fd, recv_fd;
+    int                 status;
+    int                 frame_length;
+    int                 done = 0;
+    int  try_count      = 0;
+    char src_ip6[64]    = {0};
+    char dst_ip6[64]    = {0};
+
+    if ( (send_fd = socket (PF_PACKET, SOCK_RAW, htons (ETH_P_ALL)) ) < 0 ) {
+            perror ("socket()");
+            return -1;
+    }
+
+    /**
+     * usr ioctl to look up interface name and get its MAC address
+     */
+    memset( &ifr, 0, sizeof( ifr ) );
+    snprintf( ifr.ifr_name, sizeof (ifr.ifr_name), "%s", ifname );
+    if ( ioctl (send_fd, SIOCGIFHWADDR, &ifr) < 0 ) {
+        perror ("ioctl() failed to get source MAC address");
+        return -1;
+    }
+    memcpy( src_mac, ifr.ifr_hwaddr.sa_data, sizeof(char) * 6 );
+    close (send_fd);
+
+    /**
+     * find interface index from interface name
+     */
+    memset( &device, 0, sizeof( device ) );
+    if ( (device.sll_ifindex = if_nametoindex (ifname)) == 0 ) {
+        perror ("if_nametoindex() failed");
+        return -1;
+    }
+
+    /**
+     * set destination MAC address and destination IP address
+     **/
+    memset ( dst_mac, 1, sizeof( char ) * 6 );
+    strcpy ( dst_ip6, target );
+
+    /**
+     * get source IPv6 address
+     */
+    get_ipv6_address(src_ip6);
+
+    /**
+     * fill out hints for getaddrinfo
+     */
+    memset( &hints, 0, sizeof( hints ) );
+    hints.ai_family   = AF_INET6;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_flags    = hints.ai_flags | AI_CANONNAME;
+
+    /**
+     * resolve target
+     */
+    if ( getaddrinfo (dst_ip6, NULL, &hints, &res) != 0 ) {
+        return -1;
+    }
+    ipv6 = (struct sockaddr_in6 *) res->ai_addr;
+    tmp = &(ipv6->sin6_addr);
+    if ( inet_ntop (AF_INET6, tmp, dst_ip6, INET6_ADDRSTRLEN) == NULL ) {
+        return -1;
+    }
+    freeaddrinfo (res);
+
+    /**
+     * fill out sockaddr_ll
+     */
+    device.sll_family = AF_PACKET;
+    device.sll_halen  = 6;
+    memcpy( device.sll_addr, src_mac, sizeof(char) * 6 );
+
+    /**
+     * IPv6 header
+     */
+    send_iphdr.ip6_flow = htonl ((6 << 28) | (0 << 20) | 0);
+    send_iphdr.ip6_plen = htons (ICMP_HEADER_LEN + sizeof(data));
+    send_iphdr.ip6_nxt  = IPPROTO_ICMPV6;
+    send_iphdr.ip6_hops = 255;
+    if ( inet_pton (AF_INET6, src_ip6, &(send_iphdr.ip6_src)) != 1 ) {
+        return -1;
+    }
+    if ( inet_pton (AF_INET6, dst_ip6, &(send_iphdr.ip6_dst)) != 1 ) {
+        return -1;
+    }
+
+    /**
+     * ICMP header  
+     */
+    send_icmphdr.icmp6_type  = ICMP6_ECHO_REQUEST;
+    send_icmphdr.icmp6_code  = 0;
+    send_icmphdr.icmp6_id    = htons (1000);
+    send_icmphdr.icmp6_seq   = htons (0);
+    send_icmphdr.icmp6_cksum = 0;
+    send_icmphdr.icmp6_cksum = icmp6_checksum (send_iphdr, send_icmphdr, data, sizeof (data));
+
+    /**
+     * fill out ethernet frame header
+     */
+    /**
+     * Ethernet frame length = ethernet header (MAC + MAC + ethernet type) +
+     * ethernet data (IP header + ICMP header + ICMP data)
+     */
+     frame_length = 6 + 6 + 2 + IPV6_HEADER_LEN + ICMP_HEADER_LEN + sizeof (data);
+     memcpy( send_ether_frame,     dst_mac, sizeof(char) * 6 );
+     memcpy( send_ether_frame + 6, src_mac, sizeof(char) * 6 );
+     send_ether_frame[12] = ETH_P_IPV6 / 256;
+     send_ether_frame[13] = ETH_P_IPV6 % 256;
+     memcpy( send_ether_frame + ETH_HEADER_LEN, &send_iphdr, IPV6_HEADER_LEN );
+     memcpy( send_ether_frame + ETH_HEADER_LEN + IPV6_HEADER_LEN, &send_icmphdr, sizeof(char) * ICMP_HEADER_LEN );
+     memcpy( send_ether_frame + ETH_HEADER_LEN + IPV6_HEADER_LEN + ICMP_HEADER_LEN, data, sizeof(data));
+
+    if ( (recv_fd = socket (PF_PACKET, SOCK_RAW, htons (ETH_P_ALL)) ) < 0 ) {
+            perror ("socket()");
+            return -1;
+    }
+
+    /**
+     * cast recv_iphdr and recv_icmphdr as pointer to header
+     */
+    recv_iphdr   = (struct ip6_hdr *) (recv_ether_frame + ETH_HEADER_LEN);
+    recv_icmphdr = (struct icmp6_hdr *) (recv_ether_frame + ETH_HEADER_LEN + IPV6_HEADER_LEN);
+
+    for (;;) {
+        /**
+         * send ethernet frame to socket
+         */
+        if (sendto(send_fd, send_ether_frame, frame_length, 0, (struct sockaddr *) &device, sizeof(device)) <= 0) {
+            return -1;
+        }
+
+        printf("send succ\n");
+        /**
+         * set time for the socket to timeout and give ip waiting for a reply
+         */
+        wait.tv_sec  = 2;
+        wait.tv_usec = 0;
+        setsockopt(recv_fd, SOL_SOCKET, SO_RCVTIMEO, &wait, sizeof(struct timeval));
+
+        while (1) {
+            memset(recv_ether_frame, 0, IP_MAXPACKET);
+            memset(&from, 0, sizeof(struct sockaddr));
+            from_len = sizeof(from);
+
+            if (recvfrom(recv_fd, recv_ether_frame, IP_MAXPACKET, 0, (struct sockaddr *) &from, &from_len) < 0) {
+                printf("recv timeout\n");
+                status = errno;
+                switch (status) {
+                    case EAGAIN:
+                        try_count++;
+                        break;
+                    case EINTR:
+                        continue;
+                        break;
+                    default:
+                        return -1;
+                }
+            }
+            printf("recv succ\n");
+
+            printf("protocol: %d, ETH_P_IPV6: %d\n", ((recv_ether_frame[12] << 8) + recv_ether_frame[13]), ETH_P_IPV6);
+            if (((recv_ether_frame[12] << 8) + recv_ether_frame[13]) == ETH_P_IPV6 && (recv_iphdr->ip6_nxt == IPPROTO_ICMPV6) && (recv_icmphdr->icmp6_type == ICMP6_ECHO_REPLY) && (recv_icmphdr->icmp6_code == 0)) {
+                char rec_ip[INET6_ADDRSTRLEN];
+
+                if (inet_ntop(AF_INET6, &(recv_iphdr->ip6_src), rec_ip, INET6_ADDRSTRLEN) == NULL) {
+                    return -1;
+                }
+
+                printf("%s received\n", rec_ip);
+                if (!strcasecmp(dst_ip6, rec_ip)) {
+                    done = 1;
+                    break;
+                }
+            }
+
+            printf("no match\n");
+        }
+        
+        if (done == 1) {
+            break;
+        }
+
+        if (try_count >= tries) {
+            break;
+        }
+    }
+
+    /**
+     * close socket
+     */
+    close(send_fd);
+    close(recv_fd);
+
+    return 0;
+}
+
+/*********************************************************
+ ******************    Main Function    ******************
+ *********************************************************/
+int main(int agrc, char *agrv[])
+{
+    int rt = 0; /* return value of function main */
+
+    arp_ping6("2001:888:db8:1::b", 3, "eth0");
+    
+    return rt;
+}

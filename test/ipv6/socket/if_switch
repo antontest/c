@@ -1,0 +1,17 @@
+#! /bin/bash
+# Name : ip_switch
+# Func : 
+# Time : 2015-09-06 16:23:23
+
+test $# -lt 1 && echo -e "\033[0;31mUsage ip_switch [0|1|on|off]\033[0m" && exit 1
+
+value=-1
+test "$1" = "on" -o "$1" = "1" && value=1
+test "$1" = "off" -o "$1" == "0" && value=0
+test $value -ne 0 -a $value -ne 1 && echo -e "\033[0;31mUsage ip_switch [0|1|on|off]\033[0m" && exit 1
+
+echo -n "ip_forward: before("`cat /proc/sys/net/ipv4/ip_forward`"), after("
+echo "$1" > /proc/sys/net/ipv4/ip_forward 
+echo `cat /proc/sys/net/ipv4/ip_forward`")"
+#sysctl -w net.ipv4.ip_forward=$1
+#sysctl -p /etc/sysctl.conf

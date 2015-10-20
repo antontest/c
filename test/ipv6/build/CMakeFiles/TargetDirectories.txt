@@ -1,0 +1,1 @@
+/home/anton/program/c/test/ipv6/build/src_bin/CMakeFiles/ipv6.dir
