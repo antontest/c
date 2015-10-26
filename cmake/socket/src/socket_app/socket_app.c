@@ -359,7 +359,7 @@ static void* tcp_client_backup_service(void *sock)
     int fd = sck->fd;
     int maxfd = sck->fd;
     int can_recv_bytes = 0;
-    int nready = 0;
+    //int nready = 0;
 
     /* avoid sock equal to NULL */
     if (sock == NULL) return NULL;
@@ -379,7 +379,8 @@ static void* tcp_client_backup_service(void *sock)
         set = allset;
         
         /* time waiting */
-        nready = select(maxfd + 1, &set, NULL, NULL, &tv);
+        //nready = select(maxfd + 1, &set, NULL, NULL, &tv);
+        select(maxfd + 1, &set, NULL, NULL, &tv);
 
         if (FD_ISSET(sck->fd, &set))
         {

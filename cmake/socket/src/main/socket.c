@@ -80,13 +80,12 @@ int main(int agrc, char *agrv[])
     if (netmac_flag) {
         unsigned char buf[6];
         struct timeval start = {0}, end = {0};
-        int tuse = 0;
         int ret = 0;
 
         gettimeofday(&start, NULL);
         if ((ret = get_net_mac(ip, buf, 0)) > 0) {
             gettimeofday(&end, NULL);
-            tuse = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_usec - start.tv_usec);
+            //tuse = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_usec - start.tv_usec);
             printf("\033[0;m%s MAC Address: \033[0;35m%02x:%02x:%02x:%02x:%02x:%02x\033[0m, used %d.%03ds.\n", ip, 
                     buf[0], buf[1], buf[2], buf[3], buf[4], buf[5], (int)ret/ 1000000, (int)(ret % 1000000));
         } else {
@@ -324,7 +323,7 @@ int net_tcp_ser(const char *ip, const unsigned short port)
         while (1)
         {
             printf("Please input: \n");
-            if (gets(buf) == NULL) break;
+            //if (gets(buf) == NULL) break;
             if (!strcasecmp("end", buf)) break;
             if (strlen(buf) && sck.curr_cli_fd > 0) 
                 ret = socket_send(sck.curr_cli_fd, buf, strlen(buf));
@@ -378,7 +377,7 @@ int net_tcp_cli(const char *ip, const unsigned short port)
         while (1)
         {
             printf("Please input: \n");
-            if (gets(buf) == NULL) break;
+            //if (gets(buf) == NULL) break;
             if (!strcasecmp("end", buf)) break;
             if (strlen(buf)) 
                 ret = socket_send(sck.fd, buf, strlen(buf));

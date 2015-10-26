@@ -128,6 +128,14 @@ void *timer_main(void *arg)
     return NULL;
 }
 
+METHOD(timer, start, void, private_timer_t *this)
+{
+    this->mutex->lock(this->mutex);
+    this->run_or_pause = 1;
+    this->state = TIMER_RUNNING;
+    this->mutex->unlock(this->mutex);
+}
+
 METHOD(timer, pause_, void, private_timer_t *this)
 {
     this->mutex->lock(this->mutex);
@@ -180,6 +188,7 @@ static private_timer_t *timer_create_internal()
 
     INIT(this,
         .public = {
+            .start = _start,
             .pause = _pause_,
             .resume = _resume_,
             .destroy = _destroy,
@@ -222,6 +231,8 @@ timer *timer_start(timer_main_t main, void *arg, unsigned int timer_interval)
     }
     this->timer_interval = timer_interval;
     this->id = next_id++;
+    this->run_or_pause = 0;
+    this->state = TIMER_STARTING;
     sem_post(&this->created);
 
     return &this->public;

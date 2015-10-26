@@ -1,32 +1,31 @@
 # cmake version
 cmake_minimum_required(VERSION 2.8)
-include($ENV{CMAKE_PATH}/func/func.cmake)
 
 # set include and lib path
 INCLUDE_DIRECTORIES($ENV{INCLUDE_PATH} ${PROJECT_SOURCE_DIR}/src/include)
 LINK_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/lib)
 
 # set c compile parameters
-ADD_DEFINITIONS(-Wall -O2 -Werror)
+ADD_DEFINITIONS(-Wall -O2 -Werror -g -Wno-error=unused-result)
 
 # add source path
 AUX_SOURCE_DIRECTORY(main SRC_PATH)
 
 # set source files and lib source files
 SET(CSRC ${SRC_PATH})
-SET(LIB_SRC data_structure/data_structure.c)
+SET(LIB_SRC proc/proc.c)
 
 # lib generation
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/src/lib)
-ADD_LIBRARY(data_structure_static STATIC ${LIB_SRC})
+ADD_LIBRARY(proc_shared SHARED ${LIB_SRC})
 
 # generat exec
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR})
-ADD_EXECUTABLE(data_structure ${CSRC})
+ADD_EXECUTABLE(proc ${CSRC})
 
 # link library
-SET_TARGET_PROPERTIES(data_structure_static PROPERTIES OUTPUT_NAME "data_structure")
-TARGET_LINK_LIBRARIES(data_structure data_structure_static)
+SET_TARGET_PROPERTIES(proc_shared PROPERTIES OUTPUT_NAME "proc")
+TARGET_LINK_LIBRARIES(proc proc_shared)
 
 # -------------- INSTALL -------------- #
 # install path setting
@@ -35,9 +34,12 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     SET(CMAKE_INSTALL_PREFIX "$ENV{USR_TOOLS_PATH}" CACHE PATH "default install path" FORCE)
 endif()
 
-# install header and library files
-install_hfiles(include include)
-install_lib(lib lib)
+# install header files
+INSTALL(FILES include/proc.h DESTINATION include)
+INSTALL(FILES include/macro.h DESTINATION include)
+    
+# install library
+INSTALL(TARGETS proc_shared LIBRARY DESTINATION lib)
 
 # install target
-# INSTALL(TARGETS data_structure RUNTIME DESTINATION exec)
+INSTALL(TARGETS proc RUNTIME DESTINATION bin)

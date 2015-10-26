@@ -45,7 +45,7 @@ TARGET_LINK_LIBRARIES(thread thread_share)
 # install path setting
 SET(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT 1)
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-    SET(CMAKE_INSTALL_PREFIX "$ENV{TOOLS_PATH}" CACHE PATH "default install path" FORCE)
+    SET(CMAKE_INSTALL_PREFIX "$ENV{USR_TOOLS_PATH}" CACHE PATH "default install path" FORCE)
 endif()
 
 # install header files

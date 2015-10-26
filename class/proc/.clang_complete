@@ -1,0 +1,7 @@
+-I /usr/include/ 
+-I ~/usr/include/
+-I .
+-I ./src
+-I ./src/proc
+-I ./src/main
+-I ./src/include

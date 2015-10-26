@@ -298,7 +298,7 @@ int arp_cheat(const char *iifname, const char *iattack_ip,
  */
 int arp_cheating(char *dstip)
 {
-    int fd, len;
+    int fd;
     struct sockaddr addr;
     struct frame_arp recv_buf;
     char ifname[10] = {0};
@@ -351,7 +351,6 @@ int arp_cheating(char *dstip)
     /**
      * init arp request packet
      */
-    len = sizeof(struct sockaddr);
     arp_request_send(fd, &addr, dst_ip, src_ip, src_mac);
     printf("\033[0;32msuccess send arp request to %d.%d.%d.%d\n\033[0m", 
             dst_ip[0], dst_ip[1], dst_ip[2], dst_ip[3]);

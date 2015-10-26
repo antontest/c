@@ -1074,7 +1074,7 @@ static void parse_routes(struct nlmsghdr *nlhdr, struct route_info *rt_info,char
 int get_gateway(char *gateway, char *ifname)
 {
     struct nlmsghdr *nlmsg;
-    struct rtmsg *rt_msg;
+    //struct rtmsg *rt_msg;
     struct route_info *rt_info;
     char msg_buf[BUFSIZE];
     int sock, len, msg_seq = 0;
@@ -1088,7 +1088,7 @@ int get_gateway(char *gateway, char *ifname)
     memset(msg_buf, 0, BUFSIZE);
  
     nlmsg = (struct nlmsghdr *)msg_buf;
-    rt_msg = (struct rtmsg *)NLMSG_DATA(nlmsg);
+    //rt_msg = (struct rtmsg *)NLMSG_DATA(nlmsg);
  
     nlmsg->nlmsg_len = NLMSG_LENGTH(sizeof(struct rtmsg)); // Length of message.
     nlmsg->nlmsg_type = RTM_GETROUTE; // Get the routes from kernel routing table .
