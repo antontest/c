@@ -1,0 +1,7 @@
+/home/anton/usr/include/utils/library.h
+/home/anton/usr/include/utils/linked_list.h
+/home/anton/usr/include/utils/utils.h
+/home/anton/usr/include/utils/enum.h
+/home/anton/usr/lib/liblinked_list.so
+/home/anton/usr/lib/libutils.so
+/home/anton/usr/lib/libenum.so

@@ -304,5 +304,29 @@ inline unsigned int round_down(unsigned int size, int alignement);
  */
 inline int rand_num(int min, int max);
 
+/**
+ * Same as memcpy, but XORs src into dst instead of copy
+ */
+void memxor(unsigned char dest[], unsigned char src[], unsigned int n);
+
+/**
+ * Safely overwrite n bytes of memory at ptr with zero, inlining variant.
+ */
+inline void memwipe_inline(void *ptr, unsigned int n);
+
+/**
+ * Safely overwrite n bytes of memory at ptr with zero, auto-inlining variant.
+ */
+inline void memwipe(void *ptr, unsigned int n);
+
+/**
+ * Described in header.
+ */
+void memwipe_noinline(void *ptr, unsigned int n)
+{
+	memwipe_inline(ptr, n);
+}
+
+
 #endif
 

@@ -16,7 +16,7 @@ inline bool streq(const char *x, const char *y)
 /**
  * Helper function that compares two strings for equality, length limited
  */
-inline bool strneq(const char *x, const char *y, size_t len)
+inline bool strneq(const char *x, const char *y, unsigned int len)
 {
 	return strncmp(x, y, len) == 0;
 }
@@ -40,7 +40,7 @@ inline bool strcaseeq(const char *x, const char *y)
 /**
  * Helper function that compares two strings for equality ignoring case, length limited
  */
-inline bool strncaseeq(const char *x, const char *y, size_t len)
+inline bool strncaseeq(const char *x, const char *y, unsigned int len)
 {
 	return strncasecmp(x, y, len) == 0;
 }
@@ -56,7 +56,7 @@ inline char *strdupnull(const char *s)
 /**
  * Helper function that compares two binary blobs for equality
  */
-inline bool memeq(const void *x, const void *y, size_t len)
+inline bool memeq(const void *x, const void *y, unsigned int len)
 {
 	return memcmp(x, y, len) == 0;
 }
@@ -240,7 +240,7 @@ inline unsigned long int untoh64(void *network)
 /**
  * Round up size to be multiple of alignement
  */
-inline size_t round_up(size_t size, int alignement)
+inline unsigned int round_up(size_t size, int alignement)
 {
 	int remainder;
 
@@ -255,7 +255,7 @@ inline size_t round_up(size_t size, int alignement)
 /**
  * Round down size to be a multiple of alignement
  */
-inline size_t round_down(size_t size, int alignement)
+inline unsigned int round_down(size_t size, int alignement)
 {
 	return size - (size % alignement);
 }
@@ -273,4 +273,94 @@ inline int rand_num(int min, int max)
     if (min <0 || min >= max) return -1;
     srandom ((unsigned int)time(NULL));
     return random () % (max - min) + min;
+}
+
+/**
+ * Safely overwrite n bytes of memory at ptr with zero, auto-inlining variant.
+ */
+inline void memwipe(void *ptr, unsigned int n)
+{
+	if (!ptr)
+	{
+		return;
+	}
+	if (__builtin_constant_p(n))
+	{
+		memwipe_inline(ptr, n);
+	}
+	else
+	{
+		memwipe_noinline(ptr, n);
+	}
+}
+
+/**
+ * Safely overwrite n bytes of memory at ptr with zero, inlining variant.
+ */
+inline void memwipe_inline(void *ptr, unsigned int n)
+{
+	volatile char *c = (volatile char*)ptr;
+	unsigned int m, i;
+
+	/* byte wise until long aligned */
+	for (i = 0; (uintptr_t)&c[i] % sizeof(long) && i < n; i++)
+	{
+		c[i] = 0;
+	}
+	/* word wise */
+	if (n >= sizeof(long))
+	{
+		for (m = n - sizeof(long); i <= m; i += sizeof(long))
+		{
+			*(volatile long*)&c[i] = 0;
+		}
+	}
+	/* byte wise of the rest */
+	for (; i < n; i++)
+	{
+		c[i] = 0;
+	}
+}
+
+/**
+ * Described in header.
+ */
+void memxor(unsigned char dst[], unsigned char  src[], unsigned int n)
+{
+	int m, i;
+
+	/* byte wise XOR until dst aligned */
+	for (i = 0; (uintptr_t)&dst[i] % sizeof(long) && i < n; i++)
+	{
+		dst[i] ^= src[i];
+	}
+	/* try to use words if src shares an aligment with dst */
+	switch (((uintptr_t)&src[i] % sizeof(long)))
+	{
+		case 0:
+			for (m = n - sizeof(long); i <= m; i += sizeof(long))
+			{
+				*(long*)&dst[i] ^= *(long*)&src[i];
+			}
+			break;
+		case sizeof(int):
+			for (m = n - sizeof(int); i <= m; i += sizeof(int))
+			{
+				*(int*)&dst[i] ^= *(int*)&src[i];
+			}
+			break;
+		case sizeof(short):
+			for (m = n - sizeof(short); i <= m; i += sizeof(short))
+			{
+				*(short*)&dst[i] ^= *(short*)&src[i];
+			}
+			break;
+		default:
+			break;
+	}
+	/* byte wise XOR of the rest */
+	for (; i < n; i++)
+	{
+		dst[i] ^= src[i];
+	}
 }

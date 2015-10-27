@@ -1,0 +1,10 @@
+-I /usr/include/ 
+-I ~/usr/include/
+-I .
+-I ./src
+-I ./src/lib
+-I ./src/main
+-I ./src/socket
+-I ./src/include
+-I ./src/socket_manager
+-I ./src/socket_host

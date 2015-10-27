@@ -1,0 +1,1 @@
+/usr/bin/cc     CMakeFiles/utils.dir/main/utils.c.o  -o ../../utils  -L/home/anton/program/c/class/utils/src/lib -rdynamic ../../src/lib/liblinked_list.so ../../src/lib/libenum.so ../../src/lib/libutils.so -Wl,-rpath,/home/anton/program/c/class/utils/src/lib 

@@ -80,6 +80,20 @@ struct host_t {
 	void (*set_port) (host_t *this, unsigned short port);
 
 	/**
+	 * Get the port of this host
+	 *
+	 * @return		port number
+	 */
+	char* (*get_ip) (host_t *this, char **ip, int size);
+
+	/**
+	 * Set the port of this host
+	 *
+	 * @param port	port number
+	 */
+	void (*set_ip) (host_t *this, const char *ip);
+
+	/**
 	 * Compare the ips of two hosts hosts.
 	 *
 	 * @param other	the other to compare

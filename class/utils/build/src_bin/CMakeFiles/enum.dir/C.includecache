@@ -1,0 +1,18 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../src/include/enum.h
+
+/home/anton/program/c/class/utils/src/enum/enum.c
+stddef.h
+-
+string.h
+-
+enum.h
+/home/anton/program/c/class/utils/src/enum/enum.h
+

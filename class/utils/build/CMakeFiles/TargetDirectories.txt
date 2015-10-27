@@ -1,0 +1,4 @@
+/home/anton/program/c/class/utils/build/src_bin/CMakeFiles/utils.dir
+/home/anton/program/c/class/utils/build/src_bin/CMakeFiles/enum.dir
+/home/anton/program/c/class/utils/build/src_bin/CMakeFiles/linked_list.dir
+/home/anton/program/c/class/utils/build/src_bin/CMakeFiles/utils_share.dir

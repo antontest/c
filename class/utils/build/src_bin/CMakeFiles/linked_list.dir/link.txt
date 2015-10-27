@@ -1,0 +1,1 @@
+/usr/bin/cc  -fPIC   -shared -Wl,-soname,liblinked_list.so -o ../../src/lib/liblinked_list.so CMakeFiles/linked_list.dir/linked_list/linked_list.c.o  -L/home/anton/program/c/class/utils/src/lib 

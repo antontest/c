@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "socket_host.h"
+#include "host.h"
 #include <utils/utils.h>
 
 #define IPV4_LEN	 4
@@ -84,6 +84,25 @@ METHOD(host_t, get_family, int,
 	private_host_t *this)
 {
 	return this->address.sa_family;
+}
+
+METHOD(host_t, get_ip, char *, private_host_t *this, char **ip, int size)
+{
+    int family;
+
+    family = this->address.sa_family;
+    switch (family) {
+        case AF_INET:
+            inet_ntop(family, (void *)&this->address4.sin_addr.s_addr, *ip, size);
+            break;
+        case AF_INET6:
+            inet_ntop(family, (void *)&this->address6.sin6_addr, *ip, size);
+            break;
+        default:
+            break;
+    }
+
+    return *ip;
 }
 
 METHOD(host_t, get_port, unsigned short,
@@ -211,6 +230,7 @@ static private_host_t *host_create_empty(void)
 			.get_sockaddr_len = _get_sockaddr_len,
 			.clone = _clone_,
 			.get_family = _get_family,
+			.get_ip = _get_ip,
 			.get_port = _get_port,
 			.set_port = _set_port,
 			.ip_equals = (int (*)(host_t *,host_t *))ip_equals,
@@ -294,7 +314,7 @@ host_t *host_create_from_string_and_family(char *string, int family,
 			}
 			addr.v4.sin_port = htons(port);
 			addr.v4.sin_family = AF_INET;
-			return host_create_from_sockaddr((struct sockaddr*)&addr);
+            return host_create_from_sockaddr((struct sockaddr*)&addr);
 		default:
 			return NULL;
 	}
