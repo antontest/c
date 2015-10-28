@@ -281,6 +281,7 @@ static void *thread_main(private_thread_t *this)
 
 	/* TODO: this is not 100% portable as pthread_t is an opaque type (i.e.
 	 * could be of any size, or even a struct) */
+	/*
 #ifdef HAVE_GETTID
 	fprintf(stdout, "created thread %.2d [%u]",
 		 this->id, gettid());
@@ -288,6 +289,7 @@ static void *thread_main(private_thread_t *this)
 	fprintf(stdout, "created thread %.2d [%lx]",
 		 this->id, (u_long)this->thread_id);
 #endif
+    */
 
 	res = this->main(this->arg);
 	pthread_cleanup_pop(TRUE);

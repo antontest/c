@@ -5,13 +5,11 @@
 #include <string.h>
 #include <time.h>
 #include <errno.h>
-#include "cond.h"
+#include <utils/utils.h>
 #include "mutex.h"
-
 
 typedef struct private_mutex_t private_mutex_t;
 typedef struct private_r_mutex_t private_r_mutex_t;
-typedef struct private_condvar_t private_condvar_t;
 
 /**
  * private data of mutex

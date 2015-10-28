@@ -24,9 +24,12 @@
 #include <netinet/udp.h>
 #include <net/if.h>
 
+#include <sys/epoll.h>
 #include <signal.h>
 #include <thread/thread.h>
+#include <thread/mutex.h>
 #include <host.h>
+#include <utils/enum.h>
 
 /* Maximum size of a packet */
 #define MAX_PACKET 10000
@@ -54,18 +57,32 @@
 
 typedef enum socket_state_t socket_state_t;
 enum socket_state_t {
-    SOCKET_CLOSED = 0,
+    SOCKET_CONNECT_ERROR = 0,
+    SOCKET_SEND_ERROR,
+    SOCKET_RECEIVE_ERROR, 
+    SOCKET_CLOSED,
     SOCKET_STARTING,
     SOCKET_CONNECTING,
     SOCKET_CONNECTED,
-    SOCKET_CONNECT_ERROR,
     SOCKET_SENDING,
     SOCKET_SENDED,
-    SOCKET_SEND_ERROR,
     SOCKET_RECEIVING,
     SOCKET_RECEIVED,
-    SOCKET_RECEIVE_ERROR, 
 };
+
+ENUM(socket_state_name, SOCKET_CONNECT_ERROR, SOCKET_RECEIVED,
+    "connect error",
+    "send error",
+    "recv error",
+    "closed",
+    "starting",
+    "connecting",
+    "connected",
+    "sending",
+    "sended",
+    "receiving",
+    "received",
+    );
 
 typedef struct private_socket_t private_socket_t;
 
@@ -88,6 +105,11 @@ struct private_socket_t {
      * socket fd
      */
     int accept_fd;
+
+    /**
+     * epoll socket fd
+     */
+    int epoll_fd;
 
     /**
      * Configured addr
@@ -113,89 +135,56 @@ struct private_socket_t {
      * TRUE if the source address should be set on outbound packets
      */
     bool set_source;
+
+    /**
+     * socket state check thread
+     */
+    thread_t *state_check;
+
+    /**
+     * socket property modify lock
+     */
+    mutex_t *lock;
 };
 
-METHOD(socket_t, receiver, int,
-        private_socket_t *this, void *buf, int size, int timeout)
+static int thread_onoff = 1;
+void *check_socket_state_thread(private_socket_t *this)
 {
-    int max_fd = 0;
-    int select_fd = 0;
+    fd_set fds;
     int can_read_bytes = 0;
     struct timeval tv = {0};
-    void *timeout_ptr = NULL;
-    fd_set fds;
+    
+    while (thread_onoff) {
+        if (this->state < SOCKET_CONNECTED) continue;
 
-    FD_ZERO(&fds);
-    if (this->fd != -1) {
-        FD_SET(this->fd, &fds);
-        max_fd = max(max_fd, this->fd);
-    }
-    if (this->accept_fd != -1) {
+        FD_ZERO(&fds);
         FD_SET(this->accept_fd, &fds);
-        max_fd = max(max_fd, this->accept_fd);
-    }
-    if (max_fd < 1) {
-        return -1;
-    }
-    max_fd++;
-    this->state = SOCKET_RECEIVING;
 
-    if (timeout > 0) {
-        tv.tv_sec = timeout / 1000;
-        tv.tv_usec = timeout % 1000;
-        timeout_ptr = &tv;
-    }
-    if (select(max_fd, &fds, NULL, NULL, timeout_ptr) < 0) {
-        this->state = SOCKET_RECEIVE_ERROR;
-        printf("select failed\n");
-        return -1;
-    }
+        tv.tv_sec = 1;
+        tv.tv_usec = 0;
+        select(this->accept_fd + 1, &fds, NULL, NULL, &tv);
+        if (FD_ISSET(this->accept_fd, &fds)) {
+            ioctl(this->accept_fd, FIONREAD, &can_read_bytes);
+            if (can_read_bytes <= 0) {
+                FD_CLR(this->accept_fd, &fds);
 
-    if (FD_ISSET(this->fd, &fds)) {
-        select_fd = this->fd;
-    }
-    if (!select_fd && FD_ISSET(this->accept_fd, &fds)) {
-        select_fd = this->accept_fd;
-    }
-    if (select_fd <= 0) {
-        return -1;
+                this->lock->lock(this->lock);
+                this->state = SOCKET_CLOSED;
+                close(this->accept_fd);
+                this->accept_fd = -1;
+                this->lock->unlock(this->lock);
+            }
+        }
     }
 
-    ioctl(select_fd, FIONREAD, &can_read_bytes);
-    if (can_read_bytes > 0) {
-        size = can_read_bytes < size ? can_read_bytes : size;
-    }
-    switch (this->type) {
-        case SOCK_DGRAM:
-            this->state = SOCKET_RECEIVED;
-            return recvfrom(this->fd, buf, size, 0, NULL, NULL);
-        default:
-            this->state = SOCKET_RECEIVED;
-            return recv(this->accept_fd, buf, size, 0);
-    }
-}
-
-METHOD(socket_t, sender, int,
-        private_socket_t *this, void *buf, int size)
-{
-    int send_cnt = 0;
-
-    this->state = SOCKET_SENDING;
-    switch (this->type) {
-        case SOCK_DGRAM:
-            send_cnt = sendto(this->fd, buf, size, 0, (struct sockaddr *)this->host->get_sockaddr(this->host), (socklen_t)sizeof(struct sockaddr));
-        default:
-            send_cnt = send(this->accept_fd, buf, size, 0);
-    }
-    this->state = SOCKET_SENDED;
-
-    return send_cnt;
+    return NULL;
 }
 
 METHOD(socket_t, listener, int, private_socket_t *this, int family, int type, int prototype, char *ip, unsigned short port)
 {
     int on = 1;
 
+    if (this->fd > 0) return this->fd;
     this->state = SOCKET_CLOSED;
     this->host = host_create_from_string_and_family(ip, family, port);
     
@@ -233,7 +222,9 @@ METHOD(socket_t, listener, int, private_socket_t *this, int family, int type, in
         close(this->fd);
         return -1;
     }
+
     this->state = SOCKET_STARTING;
+    this->state_check = thread_create((void *)check_socket_state_thread, this);
 
     return this->fd;
 }
@@ -242,6 +233,7 @@ METHOD(socket_t, connecter, int, private_socket_t *this, int family, int type, i
 {
     int on = 1;
 
+    if (this->fd > 0) return this->fd;
     this->state = SOCKET_STARTING;
     this->host = host_create_from_string_and_family(ip, family, port);
     
@@ -264,6 +256,7 @@ METHOD(socket_t, connecter, int, private_socket_t *this, int family, int type, i
     this->type = type;
 
     if (type == SOCK_DGRAM) {
+        this->accept_fd = this->fd;
         return this->fd;
     }
 
@@ -274,7 +267,10 @@ METHOD(socket_t, connecter, int, private_socket_t *this, int family, int type, i
         close(this->fd);
         return -1;
     }
+
+    this->accept_fd = this->fd;
     this->state = SOCKET_CONNECTED;
+    this->state_check = thread_create((void *)check_socket_state_thread, this);
 
     return this->fd;
 }
@@ -286,9 +282,105 @@ METHOD(socket_t, accepter, int, private_socket_t *this)
         close(this->fd);
         return -1;
     }
+
+    this->lock->lock(this->lock);
     this->state = SOCKET_CONNECTED;
+    this->lock->unlock(this->lock);
 
     return this->accept_fd;
+}
+
+METHOD(socket_t, receiver, int,
+        private_socket_t *this, void *buf, int size, int timeout)
+{
+    int max_fd = 0;
+    int select_fd = 0;
+    int can_read_bytes = 0;
+    struct timeval tv = {0};
+    void *timeout_ptr = NULL;
+    fd_set fds;
+
+    if (this->accept_fd <= 0) {
+        return -1;
+    }
+
+    FD_ZERO(&fds);
+    FD_SET(this->accept_fd, &fds);
+    max_fd = this->accept_fd + 1;
+    this->lock->lock(this->lock);
+    this->state = SOCKET_RECEIVING;
+    this->lock->unlock(this->lock);
+
+    if (timeout > 0) {
+        tv.tv_sec = timeout / 1000;
+        tv.tv_usec = timeout % 1000;
+        timeout_ptr = &tv;
+    }
+    if (select(max_fd, &fds, NULL, NULL, timeout_ptr) < 0) {
+        this->lock->lock(this->lock);
+        this->state = SOCKET_RECEIVE_ERROR;
+        this->lock->unlock(this->lock);
+        printf("select failed\n");
+        return -1;
+    }
+
+    if (FD_ISSET(this->fd, &fds)) {
+        select_fd = this->fd;
+    }
+    if (!select_fd && FD_ISSET(this->accept_fd, &fds)) {
+        select_fd = this->accept_fd;
+    }
+    if (select_fd <= 0) {
+        return -1;
+    }
+
+    ioctl(select_fd, FIONREAD, &can_read_bytes);
+    if (can_read_bytes > 0) {
+        size = can_read_bytes < size ? can_read_bytes : size;
+    } else {
+        this->lock->lock(this->lock);
+        this->state = SOCKET_CLOSED;
+        close(this->accept_fd);
+        this->accept_fd = -1;
+        this->lock->unlock(this->lock);
+        return -1;
+    }
+
+    switch (this->type) {
+        case SOCK_DGRAM:
+            this->lock->lock(this->lock);
+            this->state = SOCKET_RECEIVED;
+            this->lock->unlock(this->lock);
+            return recvfrom(this->fd, buf, size, 0, NULL, NULL);
+        default:
+            this->lock->lock(this->lock);
+            this->state = SOCKET_RECEIVED;
+            this->lock->unlock(this->lock);
+            return recv(this->accept_fd, buf, size, 0);
+    }
+}
+
+METHOD(socket_t, sender, int,
+        private_socket_t *this, void *buf, int size)
+{
+    int send_cnt = 0;
+
+    if(this->accept_fd <= 0) return -1;
+
+    this->lock->lock(this->lock);
+    this->state = SOCKET_SENDING;
+    this->lock->unlock(this->lock);
+    switch (this->type) {
+        case SOCK_DGRAM:
+            send_cnt = sendto(this->fd, buf, size, 0, (struct sockaddr *)this->host->get_sockaddr(this->host), (socklen_t)sizeof(struct sockaddr));
+        default:
+            send_cnt = send(this->accept_fd, buf, size, 0);
+    }
+    this->lock->lock(this->lock);
+    this->state = SOCKET_SENDED;
+    this->lock->unlock(this->lock);
+
+    return send_cnt;
 }
 
 
@@ -325,22 +417,12 @@ METHOD(socket_t, get_sockfd, int, private_socket_t *this)
 
 METHOD(socket_t, get_state, int, private_socket_t *this)
 {
-    int can_read_bytes = 0;
-
-    if (this->state <= SOCKET_STARTING) {
-        return this->state;
-    }
-
-    if (this->type == SOCK_DGRAM) {
-        ioctl(this->fd, FIONREAD, &can_read_bytes);
-    } else {
-        ioctl(this->accept_fd, FIONREAD, &can_read_bytes);
-    }
-
-    if (can_read_bytes <= 0) {
-        this->state = SOCKET_CLOSED;
-    }
     return this->state;
+}
+
+METHOD(socket_t, print_state, void, private_socket_t *this)
+{
+    fprintf(stdout, "[socket state] %s\n", enum_to_name(socket_state_name, this->state));
 }
 
 METHOD(socket_t, destroy, void, private_socket_t *this)
@@ -355,10 +437,15 @@ METHOD(socket_t, destroy, void, private_socket_t *this)
         close(this->fd);
     }
 
+    thread_onoff = 0;
+    sleep(1);
+    this->state_check->cancel(this->state_check);
+    threads_deinit();
+    this->lock->destroy(this->lock);
+
     free(this->host);
     free(this);
 }
-
 
 /*
  * See header for description
@@ -380,6 +467,7 @@ socket_t *socket_create()
             .get_type     = _get_type,
             .get_sockfd   = _get_sockfd,
             .get_state    = _get_state,
+            .print_state  = _print_state,
             .destroy      = _destroy,
             },
             .host      = NULL,
@@ -387,6 +475,10 @@ socket_t *socket_create()
             .fd        = -1,
             .accept_fd = -1,
     );
+
+    threads_init();
+    thread_cancelability(1);
+    this->lock = mutex_create();
 
     return &this->public;
 }

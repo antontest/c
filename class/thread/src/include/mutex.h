@@ -1,9 +1,7 @@
 #ifndef __MUTEX_H__
 #define __MUTEX_H__
-#include "utils/utils.h"
 
 typedef struct mutex_t mutex_t;
-
 
 /**
  * Mutex wrapper implements simple, portable and advanced mutex functions.

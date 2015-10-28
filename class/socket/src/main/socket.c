@@ -60,13 +60,17 @@ int main(int agrc, char *agrv[])
     socket_t *tcp = socket_create();
     char buff[64] = {0};
     tcp->listen(tcp, AF_INET, SOCK_STREAM, IPPROTO_TCP, "172.21.34.28", 5001);
+    tcp->print_state(tcp);
     tcp->accept(tcp);
-    tcp->receive(tcp, buff, sizeof(buff), 0);
+    tcp->receive(tcp, buff, sizeof(buff), 1000);
     printf("recv: %s\n", buff);
     sleep(3);
-    printf("state: %d\n", tcp->get_state(tcp));
+    tcp->print_state(tcp);
+    memset(buff, 0, sizeof(buff));
     tcp->receive(tcp, buff, sizeof(buff), 0);
+    tcp->print_state(tcp);
     printf("recv: %s\n", buff);
+    tcp->destroy(tcp);
 
     /*
     socket_t *udp = socket_create();

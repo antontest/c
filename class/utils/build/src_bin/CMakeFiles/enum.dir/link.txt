@@ -1,1 +1,0 @@
-/usr/bin/cc  -fPIC   -shared -Wl,-soname,libenum.so -o ../../src/lib/libenum.so CMakeFiles/enum.dir/enum/enum.c.o  -L/home/anton/program/c/class/utils/src/lib 

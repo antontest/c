@@ -322,11 +322,7 @@ inline void memwipe(void *ptr, unsigned int n);
 /**
  * Described in header.
  */
-void memwipe_noinline(void *ptr, unsigned int n)
-{
-	memwipe_inline(ptr, n);
-}
-
+void memwipe_noinline(void *ptr, unsigned int n);
 
 #endif
 

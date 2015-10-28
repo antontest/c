@@ -157,6 +157,13 @@ struct socket_t {
     int (*get_state)(socket_t *this);
 
     /**
+     * Print the socket status this socket is listening on.
+     *
+     * @return				Print the status
+     */
+    void (*print_state)(socket_t *this);
+
+    /**
      * Destroy a socket implementation.
      */
     void (*destroy)(socket_t *this);

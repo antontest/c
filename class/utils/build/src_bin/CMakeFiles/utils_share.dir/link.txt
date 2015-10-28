@@ -1,1 +1,0 @@
-/usr/bin/cc  -fPIC   -shared -Wl,-soname,libutils.so -o ../../src/lib/libutils.so CMakeFiles/utils_share.dir/utils/utils.c.o  -L/home/anton/program/c/class/utils/src/lib 

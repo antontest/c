@@ -37,7 +37,7 @@ SET_TARGET_PROPERTIES(socket_shared PROPERTIES OUTPUT_NAME "socket")
 TARGET_LINK_LIBRARIES(host utils)
 TARGET_LINK_LIBRARIES(chunk utils)
 TARGET_LINK_LIBRARIES(packet utils chunk)
-TARGET_LINK_LIBRARIES(socket_shared utils packet chunk host thread)
+TARGET_LINK_LIBRARIES(socket_shared utils packet chunk host thread enum mutex)
 TARGET_LINK_LIBRARIES(socket_manager utils)
 TARGET_LINK_LIBRARIES(socket socket_shared)
 
