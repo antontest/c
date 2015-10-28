@@ -9,79 +9,156 @@
 #include <socket.h>
 
 /*********************************************************
+ ***************    Macros Declaration    ****************
+ *********************************************************/
+enum proto_type_t {
+    PROTOCOL_TCP = 1,
+    PROTOCOL_UCP = (1 << 1)
+};
+
+enum ser_flag_t {
+    SOCKET_SERVER = 1,
+    SOCKET_CLIENT = (1 << 1)
+};
+
+/*********************************************************
+ **************    Variable Declaration    ***************
+ *********************************************************/
+static int ser_or_cli_flag = -1;
+static int socket_protocol= -1;
+static int socket_type = -1;
+static int send_times = 1;
+static char *send_message = NULL;
+static char *ip = NULL;
+static char *port = NULL;
+
+/*********************************************************
  **************    Function Declaration    ***************
  *********************************************************/
+/**
+ * parser_args
+ */
+void parser_args(int agrc, char *agrv[]);
+
 
 /*********************************************************
  ******************    Main Function    ******************
  *********************************************************/
 int main(int agrc, char *agrv[])
 {
-    int rt = 0; /* return value of function main */
+    int rt = 0;
+    int status = 0;
+    socket_t *sck = NULL;
+    char buf[512] = {0};
 
-    /*
-    socket_t *tcp = socket_create();
-    tcp->listen(tcp, AF_INET, SOCK_STREAM, IPPROTO_TCP, "172.21.34.28", 5001);
-    int tcp_fd = tcp->accept(tcp);
-    if (tcp_fd > 0) {
-        char buff[128] = {0};
-        recv(tcp_fd, buff, sizeof(buff), 0);
-        printf("recv: %s\n", buff);
+    parser_args(agrc, agrv);
+
+    if (ser_or_cli_flag > 0) {
+        if (socket_type <= 0 || socket_protocol <= 0) {
+            fprintf(stderr, "[socket]: please give protocol type when create a server or client socket\n");
+            exit(1);
+        }
+        if (ip == NULL) {
+            fprintf(stderr, "[socket]: please give ip address when create a server or client socket\n");
+            exit(1);
+        }
+        if (port == NULL) {
+            fprintf(stderr, "[socket]: please give port number when create a server or client socket\n");
+            exit(1);
+        }
+
+        sck = socket_create();
+        if (sck == NULL) {
+            fprintf(stderr, "[socket]: socket_create failed\n");
+        }
+        switch (ser_or_cli_flag) {
+            case SOCKET_SERVER:
+                status = sck->listen(sck, AF_INET, socket_type, socket_protocol, ip, atoi(port));
+                if (status <= 0) break;
+                status = sck->accept(sck);
+                if (status <= 0) break;
+
+                fprintf(stdout, "-->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
+                while (sck->receive(sck, buf, sizeof(buf), 0) > 0 ) {
+                    if (!strncasecmp("==end==", buf, sizeof("==end=="))) {
+                        break;
+                    }
+                    fprintf(stdout, "[socket receive]: %s\n", buf);
+                }
+                fprintf(stdout, "-->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
+                break;
+            case SOCKET_CLIENT:
+                status = sck->connect(sck, AF_INET, socket_type, socket_protocol, ip, atoi(port));
+                if (status <= 0) break;
+                if (send_message == NULL) break;
+                
+                fprintf(stdout, "-->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
+                while (send_times-- > 0) {
+                    rt = sck->send(sck, send_message, strlen(send_message));
+                    if (rt > 0)fprintf(stdout, "[socket send to %s]: %s\n", ip, send_message);
+                    if (send_times > 0)sleep(1);
+                }
+                fprintf(stdout, "-->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
+                break;
+        }
+
+        if (sck != NULL) sck->destroy(sck);
     }
-    tcp->destroy(tcp);
-
-    socket_t *udp = socket_create();
-    int udp_fd = udp->listen(udp, AF_INET, SOCK_DGRAM, IPPROTO_UDP, "172.21.34.28", 5001);
-    if (udp_fd > 0) {
-        printf("udp\n");
-        char buff[64] = {0};
-        recvfrom(udp_fd, buff, sizeof(buff), 0, NULL, 0);
-        printf("recv: %s\n", buff);
-    }
-    udp->destroy(udp);
-    */
-
-    /*
-    socket_t *tcp = socket_create();
-    int fd = tcp->connect(tcp, AF_INET, SOCK_STREAM, IPPROTO_TCP, "172.21.34.28", 5001);
-    if (fd > 0) {
-        send(fd, "hello", 6, 0);
-    }
-    tcp->destroy(tcp);
-    */
-
-    /*
-    socket_t *udp = socket_create();
-    udp->connect(udp, AF_INET, SOCK_DGRAM, IPPROTO_UDP, "172.21.34.28", 5001);
-    udp->send(udp, "hello", 6);
-    udp->destroy(udp);
-    */
-
-    socket_t *tcp = socket_create();
-    char buff[64] = {0};
-    tcp->listen(tcp, AF_INET, SOCK_STREAM, IPPROTO_TCP, "172.21.34.28", 5001);
-    tcp->print_state(tcp);
-    tcp->accept(tcp);
-    tcp->receive(tcp, buff, sizeof(buff), 1000);
-    printf("recv: %s\n", buff);
-    sleep(3);
-    tcp->print_state(tcp);
-    memset(buff, 0, sizeof(buff));
-    tcp->receive(tcp, buff, sizeof(buff), 0);
-    tcp->print_state(tcp);
-    printf("recv: %s\n", buff);
-    tcp->destroy(tcp);
-
-    /*
-    socket_t *udp = socket_create();
-    char buff[64] = {0};
-    udp->listen(udp, AF_INET, SOCK_DGRAM, IPPROTO_UDP, "172.21.34.28", 5001);
-    udp->receive(udp, buff, sizeof(buff), 0);
-    printf("recv: %s\n", buff);
-    sleep(5);
-    udp->receive(udp, buff, sizeof(buff), 0);
-    printf("recv: %s\n", buff);
-    */
 
     return rt;
 }
+
+static void check_args_num(int agrc, char *agrv[], int curr_num)
+{
+    if (curr_num >= agrc) {
+        fprintf(stderr, "socket: %s option must has a parameter!\n", agrv[curr_num - 1]);
+        exit(1);
+    }
+}
+
+/**
+ * parser_args
+ */
+void parser_args(int agrc, char *agrv[]){
+    int i = 0;
+    
+    if (agrc < 1) {
+        return;
+    }
+
+    for (i = 0; i < agrc; i++) {
+        if (!strncmp("-h", agrv[i], sizeof("-h")) || !strncmp("--help", agrv[i], sizeof("--help"))) {
+            printf("help\n");
+        } else if (!strncmp("-s", agrv[i], sizeof("-s")) || !strncmp("--server", agrv[i], sizeof("--server"))) {
+            ser_or_cli_flag = SOCKET_SERVER;
+        } else if (!strncmp("-c", agrv[i], sizeof("-c")) || !strncmp("--client", agrv[i], sizeof("--client"))) {
+            ser_or_cli_flag = SOCKET_CLIENT;
+        } else if (!strncmp("-a", agrv[i], sizeof("-a")) || !strncmp("--agreement", agrv[i], sizeof("--agreement"))) {
+            check_args_num(agrc, agrv, ++i);
+            if (!strncmp("u", agrv[i], sizeof("u")) || !strncmp("udp", agrv[i], sizeof("udp"))) {
+                socket_protocol = IPPROTO_UDP;
+                socket_type = SOCK_DGRAM;
+            } else if (!strncmp("t", agrv[i], sizeof("t")) || !strncmp("tcp", agrv[i], sizeof("tcp"))) {
+                socket_protocol = IPPROTO_TCP;
+                socket_type = SOCK_STREAM;
+            } else {
+                fprintf(stderr, "Invalid arguemnt\n");
+                exit(1);
+            }
+        } else if (!strncmp("-i", agrv[i], sizeof("-i")) || !strncmp("--ip", agrv[i], sizeof("--ip"))) {
+            check_args_num(agrc, agrv, ++i);
+            ip = agrv[i];
+        } else if (!strncmp("-p", agrv[i], sizeof("-p")) || !strncmp("--port", agrv[i], sizeof("--port"))) {
+            check_args_num(agrc, agrv, ++i);
+            port = agrv[i];
+        } else if (!strncmp("-t", agrv[i], sizeof("-t")) || !strncmp("--send_times", agrv[i], sizeof("--send_times"))) {
+            check_args_num(agrc, agrv, ++i);
+            send_times = atoi(agrv[i]) > 0 ? atoi(agrv[i]) : send_times;
+        } else if (!strncmp("-m", agrv[i], sizeof("-m")) || !strncmp("--message", agrv[i], sizeof("--message"))) {
+            check_args_num(agrc, agrv, ++i);
+            send_message = agrv[i];
+        }
+    }
+
+}
+

@@ -55,21 +55,6 @@
 #define IN6ADDR_ANY_INIT {{{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}}}
 #endif
 
-typedef enum socket_state_t socket_state_t;
-enum socket_state_t {
-    SOCKET_CONNECT_ERROR = 0,
-    SOCKET_SEND_ERROR,
-    SOCKET_RECEIVE_ERROR, 
-    SOCKET_CLOSED,
-    SOCKET_STARTING,
-    SOCKET_CONNECTING,
-    SOCKET_CONNECTED,
-    SOCKET_SENDING,
-    SOCKET_SENDED,
-    SOCKET_RECEIVING,
-    SOCKET_RECEIVED,
-};
-
 ENUM(socket_state_name, SOCKET_CONNECT_ERROR, SOCKET_RECEIVED,
     "connect error",
     "send error",
@@ -170,8 +155,8 @@ void *check_socket_state_thread(private_socket_t *this)
 
                 this->lock->lock(this->lock);
                 this->state = SOCKET_CLOSED;
-                close(this->accept_fd);
-                this->accept_fd = -1;
+//                close(this->accept_fd);
+//                this->accept_fd = -1;
                 this->lock->unlock(this->lock);
             }
         }
@@ -194,13 +179,13 @@ METHOD(socket_t, listener, int, private_socket_t *this, int family, int type, in
     }
 
     if ((this->fd = socket(family, type, prototype)) < 0) {
-        fprintf(stderr, "could not open socket: %s", strerror(errno));
+        fprintf(stderr, "could not open socket: %s\n", strerror(errno));
         return -1;
     }
 
     if (setsockopt(this->fd, SOL_SOCKET, SO_REUSEADDR, (void*)&on, sizeof(on)) < 0)
     {        
-        fprintf(stderr, "unable to set SO_REUSEADDR on socket: %s", strerror(errno));
+        fprintf(stderr, "unable to set SO_REUSEADDR on socket: %s\n", strerror(errno));
         close(this->fd);
         return -1;
     }
@@ -438,12 +423,11 @@ METHOD(socket_t, destroy, void, private_socket_t *this)
     }
 
     thread_onoff = 0;
-    sleep(1);
-    this->state_check->cancel(this->state_check);
+    usleep(1000);
+    if (this->state_check) this->state_check->cancel(this->state_check);
+    if (this->lock) this->lock->destroy(this->lock);
+    if (this->host != NULL) free(this->host);
     threads_deinit();
-    this->lock->destroy(this->lock);
-
-    free(this->host);
     free(this);
 }
 

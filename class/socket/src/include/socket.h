@@ -4,6 +4,20 @@
 #include <packet.h>
 #include <utils/utils.h>
 
+typedef enum socket_state_t socket_state_t;
+enum socket_state_t {
+    SOCKET_CONNECT_ERROR = 0,
+    SOCKET_SEND_ERROR,
+    SOCKET_RECEIVE_ERROR, 
+    SOCKET_CLOSED,
+    SOCKET_STARTING,
+    SOCKET_CONNECTING,
+    SOCKET_CONNECTED,
+    SOCKET_SENDING,
+    SOCKET_SENDED,
+    SOCKET_RECEIVING,
+    SOCKET_RECEIVED,
+};
 
 typedef struct socket_t socket_t;
 typedef enum socket_family_t socket_family_t;
