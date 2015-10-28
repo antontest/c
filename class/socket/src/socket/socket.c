@@ -1,6 +1,3 @@
-#include <socket.h>
-#include <chunk.h>
-
 /* for struct in6_pktinfo */
 #define _GNU_SOURCE
 #ifdef __sun
@@ -24,6 +21,8 @@
 #include <netinet/udp.h>
 #include <net/if.h>
 
+#include <socket.h>
+#include <chunk.h>
 #include <sys/epoll.h>
 #include <signal.h>
 #include <thread/thread.h>
@@ -99,7 +98,12 @@ struct private_socket_t {
     /**
      * Configured addr
      */
-    host_t *host;
+    host_t *host_ser;
+
+    /**
+     * socket addr of udp receive
+     */
+    host_t *host_cli;
 
     /**
      * socket type;
@@ -110,16 +114,6 @@ struct private_socket_t {
      * socket state;
      */
     int state;
-
-    /**
-     * Maximum packet size to receive
-     */
-    int max_packet;
-
-    /**
-     * TRUE if the source address should be set on outbound packets
-     */
-    bool set_source;
 
     /**
      * socket state check thread
@@ -171,10 +165,16 @@ METHOD(socket_t, listener, int, private_socket_t *this, int family, int type, in
 
     if (this->fd > 0) return this->fd;
     this->state = SOCKET_CLOSED;
-    this->host = host_create_from_string_and_family(ip, family, port);
+    this->host_ser = host_create_from_string_and_family(ip, family, port);
+    this->host_cli = host_create_any(family);
     
-    if (this->host == NULL) {
-        fprintf(stderr, "host create failed\n");
+    if (this->host_ser == NULL) {
+        fprintf(stderr, "server host create failed\n");
+        return -1;
+    }
+
+    if (this->host_cli == NULL) {
+        fprintf(stderr, "client host create failed\n");
         return -1;
     }
 
@@ -190,7 +190,7 @@ METHOD(socket_t, listener, int, private_socket_t *this, int family, int type, in
         return -1;
     }
 
-    if (bind(this->fd, (struct sockaddr *)this->host->get_sockaddr(this->host), (socklen_t)sizeof(struct sockaddr)) < 0) {
+    if (bind(this->fd, (struct sockaddr *)this->host_ser->get_sockaddr(this->host_ser), (socklen_t)sizeof(struct sockaddr)) < 0) {
         fprintf(stderr, "unable to bind socket: %s\n", strerror(errno));
         close(this->fd);
         return -1;
@@ -221,10 +221,16 @@ METHOD(socket_t, connecter, int, private_socket_t *this, int family, int type, i
 
     if (this->fd > 0) return this->fd;
     this->state = SOCKET_STARTING;
-    this->host = host_create_from_string_and_family(ip, family, port);
+    this->host_ser = host_create_from_string_and_family(ip, family, port);
+    this->host_cli = host_create_any(family);
     
-    if (this->host == NULL) {
-        fprintf(stderr, "host create failed\n");
+    if (this->host_ser == NULL) {
+        fprintf(stderr, "server host create failed\n");
+        return -1;
+    }
+
+    if (this->host_cli == NULL) {
+        fprintf(stderr, "client host create failed\n");
         return -1;
     }
 
@@ -247,7 +253,7 @@ METHOD(socket_t, connecter, int, private_socket_t *this, int family, int type, i
     }
 
     this->state = SOCKET_CONNECTING;
-    if (connect(this->fd, (struct sockaddr *)this->host->get_sockaddr(this->host), (socklen_t)sizeof(struct sockaddr)) < 0) {
+    if (connect(this->fd, (struct sockaddr *)this->host_ser->get_sockaddr(this->host_ser), (socklen_t)sizeof(struct sockaddr)) < 0) {
         fprintf(stderr, "unable to connect to server: %s", strerror(errno));
         this->state = SOCKET_CONNECT_ERROR;
         close(this->fd);
@@ -263,7 +269,7 @@ METHOD(socket_t, connecter, int, private_socket_t *this, int family, int type, i
 
 METHOD(socket_t, accepter, int, private_socket_t *this)
 {
-    if ((this->accept_fd = accept(this->fd, NULL, 0)) < 0) {
+    if ((this->accept_fd = accept(this->fd, this->host_cli->get_sockaddr(this->host_cli), this->host_cli->get_sockaddr_len(this->host_cli))) < 0) {
         fprintf(stderr, "accept failed: %s\n", strerror(errno));
         close(this->fd);
         return -1;
@@ -338,7 +344,7 @@ METHOD(socket_t, receiver, int,
             this->lock->lock(this->lock);
             this->state = SOCKET_RECEIVED;
             this->lock->unlock(this->lock);
-            return recvfrom(this->fd, buf, size, 0, NULL, NULL);
+            return recvfrom(this->fd, buf, size, 0, this->host_cli->get_sockaddr(this->host_cli), this->host_cli->get_sockaddr_len(this->host_cli));
         default:
             this->lock->lock(this->lock);
             this->state = SOCKET_RECEIVED;
@@ -359,7 +365,7 @@ METHOD(socket_t, sender, int,
     this->lock->unlock(this->lock);
     switch (this->type) {
         case SOCK_DGRAM:
-            send_cnt = sendto(this->fd, buf, size, 0, (struct sockaddr *)this->host->get_sockaddr(this->host), (socklen_t)sizeof(struct sockaddr));
+            send_cnt = sendto(this->fd, buf, size, 0, (struct sockaddr *)this->host_ser->get_sockaddr(this->host_ser), (socklen_t)sizeof(struct sockaddr));
             break;
         default:
             send_cnt = send(this->accept_fd, buf, size, 0);
@@ -372,21 +378,43 @@ METHOD(socket_t, sender, int,
     return send_cnt;
 }
 
+METHOD(socket_t, get_ip, char *,
+        private_socket_t *this)
+{
+    return this->host_ser->get_ip(this->host_ser, NULL, 0);
+}
+
+METHOD(socket_t, get_cli_ip, char *,
+        private_socket_t *this)
+{
+    return this->host_cli->get_ip(this->host_cli, NULL, 0);
+}
 
 METHOD(socket_t, get_port, unsigned short,
         private_socket_t *this)
 {
-    return this->host->get_port(this->host);
+    return this->host_ser->get_port(this->host_ser);
+}
+
+METHOD(socket_t, get_cli_port, unsigned short,
+        private_socket_t *this)
+{
+    return this->host_cli->get_port(this->host_cli);
 }
 
 METHOD(socket_t, get_family, unsigned short, private_socket_t *this)
 {
-    return this->host->get_family(this->host);
+    return this->host_ser->get_family(this->host_ser);
 }
 
 METHOD(socket_t, get_sockaddr, struct sockaddr *, private_socket_t *this)
 {
-    return this->host->get_sockaddr(this->host);
+    return this->host_ser->get_sockaddr(this->host_ser);
+}
+
+METHOD(socket_t, get_cli_sockaddr, struct sockaddr *, private_socket_t *this)
+{
+    return this->host_cli->get_sockaddr(this->host_ser);
 }
 
 METHOD(socket_t, get_type, int, private_socket_t *this)
@@ -428,9 +456,12 @@ METHOD(socket_t, destroy, void, private_socket_t *this)
 
     thread_onoff = 0;
     usleep(1000);
+
     if (this->state_check) this->state_check->cancel(this->state_check);
     if (this->lock) this->lock->destroy(this->lock);
-    if (this->host != NULL) free(this->host);
+    if (this->host_ser != NULL) this->host_ser->destroy(this->host_ser);
+    if (this->host_cli != NULL) this->host_cli->destroy(this->host_cli);
+    
     threads_deinit();
     free(this);
 }
@@ -449,16 +480,21 @@ socket_t *socket_create()
             .connect      = _connecter,
             .send         = _sender,
             .receive      = _receiver,
+            .get_ip       = _get_ip,
+            .get_cli_ip   = _get_cli_ip,
             .get_port     = _get_port,
+            .get_cli_port = _get_cli_port,
             .get_family   = _get_family,
             .get_sockaddr = _get_sockaddr,
+            .get_cli_sockaddr = _get_cli_sockaddr,
             .get_type     = _get_type,
             .get_sockfd   = _get_sockfd,
             .get_state    = _get_state,
             .print_state  = _print_state,
             .destroy      = _destroy,
             },
-            .host      = NULL,
+            .host_ser  = NULL,
+            .host_cli  = NULL,
             .state     = SOCKET_CLOSED,
             .fd        = -1,
             .accept_fd = -1,

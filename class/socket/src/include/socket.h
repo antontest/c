@@ -150,6 +150,34 @@ struct socket_t {
     struct sockaddr *(*get_sockaddr)(socket_t *this);
 
     /**
+     * Get the family this socket is listening on.
+     *
+     * @return				the family
+     */
+    struct sockaddr *(*get_cli_sockaddr)(socket_t *this);
+
+    /**
+     * Get the client ip address this socket is listening on.
+     *
+     * @return				the client ip address
+     */
+    char *(*get_ip)(socket_t *this);
+
+    /**
+     * Get the client ip address this socket is listening on.
+     *
+     * @return				the client ip address
+     */
+    char *(*get_cli_ip)(socket_t *this);
+
+    /**
+     * Get the client port this socket is listening on.
+     *
+     * @return				the client port
+     */
+    unsigned short (*get_cli_port)(socket_t *this);
+
+    /**
      * Get the socket type this socket is listening on.
      *
      * @return				the type

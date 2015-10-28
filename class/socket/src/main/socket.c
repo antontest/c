@@ -78,21 +78,21 @@ int main(int agrc, char *agrv[])
                 if (socket_type == SOCK_STREAM) status = sck->accept(sck);
                 if (status <= 0) break;
 
-                fprintf(stdout, "-->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
+                fprintf(stdout, "----->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
                 while (sck->receive(sck, buf, sizeof(buf), 0) > 0 ) {
                     if (!strncasecmp("==end==", buf, sizeof("==end=="))) {
                         break;
                     }
-                    fprintf(stdout, "[socket receive]: %s\n", buf);
+                    fprintf(stdout, "[socket receive from %s]: %s\n", sck->get_cli_ip(sck), buf);
                 }
-                fprintf(stdout, "-->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
+                fprintf(stdout, "----->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
                 break;
             case SOCKET_CLIENT:
                 status = sck->connect(sck, AF_INET, socket_type, socket_protocol, ip, atoi(port));
                 if (status <= 0) break;
                 if (send_message == NULL) break;
                 
-                fprintf(stdout, "-->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
+                fprintf(stdout, "----->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
                 while (send_times-- > 0) {
                     status = sck->send(sck, send_message, strlen(send_message));
                     if (status > 0)fprintf(stdout, "[socket send to %s]: %s\n", ip, send_message);
@@ -101,7 +101,7 @@ int main(int agrc, char *agrv[])
                 if (socket_type == SOCK_DGRAM) {
                     sck->send(sck, "==end==", strlen("==end=="));
                 }
-                fprintf(stdout, "-->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
+                fprintf(stdout, "----->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
                 break;
         }
 
