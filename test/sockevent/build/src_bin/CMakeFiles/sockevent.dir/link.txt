@@ -1,1 +1,0 @@
-/home/anton/bin/clang/bin/clang     CMakeFiles/sockevent.dir/main/sockevent.c.o  -o ../../sockevent  -L/home/anton/program/c/test/sockevent/src/lib -rdynamic -lpthread -Wl,-rpath,/home/anton/program/c/test/sockevent/src/lib: 
