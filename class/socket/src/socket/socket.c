@@ -132,7 +132,7 @@ struct private_socket_t {
     mutex_t *lock;
 };
 
-static int thread_onoff = 1;
+static volatile int thread_onoff = 1;
 void *check_socket_state_thread(private_socket_t *this)
 {
     fd_set fds;
@@ -199,6 +199,7 @@ METHOD(socket_t, listener, int, private_socket_t *this, int family, int type, in
 
     if (type == SOCK_DGRAM) {
         this->state = SOCKET_STARTING;
+        this->accept_fd = this->fd;
         return this->fd;
     }
 
@@ -286,6 +287,7 @@ METHOD(socket_t, receiver, int,
     fd_set fds;
 
     if (this->accept_fd <= 0) {
+        printf("111\n");
         return -1;
     }
 
@@ -358,8 +360,10 @@ METHOD(socket_t, sender, int,
     switch (this->type) {
         case SOCK_DGRAM:
             send_cnt = sendto(this->fd, buf, size, 0, (struct sockaddr *)this->host->get_sockaddr(this->host), (socklen_t)sizeof(struct sockaddr));
+            break;
         default:
             send_cnt = send(this->accept_fd, buf, size, 0);
+            break;
     }
     this->lock->lock(this->lock);
     this->state = SOCKET_SENDED;

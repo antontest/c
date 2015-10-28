@@ -75,7 +75,7 @@ int main(int agrc, char *agrv[])
             case SOCKET_SERVER:
                 status = sck->listen(sck, AF_INET, socket_type, socket_protocol, ip, atoi(port));
                 if (status <= 0) break;
-                status = sck->accept(sck);
+                if (socket_type == SOCK_STREAM) status = sck->accept(sck);
                 if (status <= 0) break;
 
                 fprintf(stdout, "-->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
@@ -94,9 +94,12 @@ int main(int agrc, char *agrv[])
                 
                 fprintf(stdout, "-->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
                 while (send_times-- > 0) {
-                    rt = sck->send(sck, send_message, strlen(send_message));
-                    if (rt > 0)fprintf(stdout, "[socket send to %s]: %s\n", ip, send_message);
+                    status = sck->send(sck, send_message, strlen(send_message));
+                    if (status > 0)fprintf(stdout, "[socket send to %s]: %s\n", ip, send_message);
                     if (send_times > 0)sleep(1);
+                }
+                if (socket_type == SOCK_DGRAM) {
+                    sck->send(sck, "==end==", strlen("==end=="));
                 }
                 fprintf(stdout, "-->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
                 break;
