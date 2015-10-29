@@ -14,7 +14,7 @@ if (DEFINED CC)
         SET(CMAKE_LINKER "${COMPILER_PATH}/bin/llvm-link")
         SET(CMAKE_NM "${COMPILER_PATH}/bin/llvm-nm")
         SET(CMAKE_OBJDUMP "${COMPILER_PATH}/bin/llvm-objdump")
-        SET(CMAKE_RANLIB "${COMPILER_PATH}/bin/llvm-ranlib")
+        #SET(CMAKE_RANLIB "${COMPILER_PATH}/bin/llvm-ranlib")
     endif(${CC} STREQUAL "clang")
 endif(DEFINED CC)
 

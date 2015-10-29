@@ -39,8 +39,16 @@ void get_args(int agrc, char *agrv[], struct options *opt)
                 fount_flag = 1;
                 if (opts->value == NULL) continue;
                 if (opts->has_args == 0) {
-                    ret_int = 1;
-                    memcpy(opts->value, &ret_int, sizeof(ret_int));
+                    if (opts->value_type == RET_STRING) {
+                        fprintf(stderr, "option [%s] return value type wrong\n", agrv[i]);
+                        exit(1);
+                    }
+
+                    if (opts->value_type == RET_INT) {
+                        *(opts->value) = (void *)1;
+                    } else {
+                        *(opts->value) = (void *)'1';
+                    }
                 } else {
                     if (++i >= agrc) {
                         fprintf(stderr, "agruement [%s] need a parameter\n", agrv[i - 1]);
@@ -50,10 +58,9 @@ void get_args(int agrc, char *agrv[], struct options *opt)
                     switch (opts->value_type) {
                         case RET_CHAR:
                             memcpy(opts->value, agrv[i], 1);
+                            break;
                         case RET_INT:
-                            if (i < agrc) {
-                                ret_int = atoi(agrv[i]);
-                            }
+                            if (i < agrc) ret_int = atoi(agrv[i]);
                             memcpy(opts->value, &ret_int, sizeof(int));
                             break;
                         default:
