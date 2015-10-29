@@ -40,6 +40,10 @@ static char *port = NULL;
  */
 void parser_args(int agrc, char *agrv[]);
 
+/**
+ * @brief print_usage 
+ */
+static void print_usage();
 
 /*********************************************************
  ******************    Main Function    ******************
@@ -111,6 +115,22 @@ int main(int agrc, char *agrv[])
     return rt;
 }
 
+/**
+ * @brief print_usage 
+ */
+static void print_usage()
+{
+    printf("Usage: socket [options] [parameter]\n");
+    printf("The Options arg:\n");
+    printf("  -s, --server     Create a socket server\n");
+    printf("  -c, --client     Create a socket client\n");
+    printf("  -a, --agreement  Agreement of networking. Agreement can be \"[u udp t tcp]\"\n");
+    printf("  -i, --ip         IP address\n");
+    printf("  -p, --port       Port\n");
+    printf("  -t, --send_times times of sending message\n");
+    printf("  -m, --message    Message of sending\n");
+}
+
 static void check_args_num(int agrc, char *agrv[], int curr_num)
 {
     if (curr_num >= agrc) {
@@ -131,7 +151,7 @@ void parser_args(int agrc, char *agrv[]){
 
     for (i = 0; i < agrc; i++) {
         if (!strncmp("-h", agrv[i], sizeof("-h")) || !strncmp("--help", agrv[i], sizeof("--help"))) {
-            printf("help\n");
+            print_usage();
         } else if (!strncmp("-s", agrv[i], sizeof("-s")) || !strncmp("--server", agrv[i], sizeof("--server"))) {
             ser_or_cli_flag = SOCKET_SERVER;
         } else if (!strncmp("-c", agrv[i], sizeof("-c")) || !strncmp("--client", agrv[i], sizeof("--client"))) {

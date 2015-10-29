@@ -40,15 +40,10 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 endif()
 
 # install header files
-INSTALL(FILES include/library.h DESTINATION include/utils)
-INSTALL(FILES include/linked_list.h DESTINATION include/utils)
-INSTALL(FILES include/utils.h DESTINATION include/utils)
-INSTALL(FILES include/enum.h DESTINATION include/utils)
+install_hfiles(include include/utils)
 
 # install library
-INSTALL(TARGETS linked_list LIBRARY DESTINATION lib)
-INSTALL(TARGETS utils_share LIBRARY DESTINATION lib)
-INSTALL(TARGETS enum LIBRARY DESTINATION lib)
+install_lib(lib lib)
 
 # install target
-#INSTALL(TARGETS linked_list RUNTIME DESTINATION exec)
+#INSTALL(TARGETS linked_list RUNTIME DESTINATION bin)

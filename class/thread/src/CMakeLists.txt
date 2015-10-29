@@ -49,26 +49,10 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 endif()
 
 # install header files
-# INSTALL(FILES include/main.h DESTINATION include)
-find_files(h include HLIST)
-foreach(hfile ${HLIST})
-    INSTALL(FILES ${hfile} DESTINATION include/thread)
-endforeach()
+install_hfiles(include include/thread)
 
 # install library
-# INSTALL(TARGETS thread_share ARCHIVE DESTINATION lib)
-find_files(aa lib LIBLIST)
-if (LIBLIST)
-    foreach(libfile ${LIBLIST})
-        INSTALL(FILES ${libfile} DESTINATION lib)
-    endforeach()
-endif()
-INSTALL(TARGETS thread_share LIBRARY DESTINATION lib)
-INSTALL(TARGETS thread_value LIBRARY DESTINATION lib)
-INSTALL(TARGETS thread_rwlock LIBRARY DESTINATION lib)
-INSTALL(TARGETS bsem LIBRARY DESTINATION lib)
-INSTALL(TARGETS cond ARCHIVE DESTINATION lib)
-INSTALL(TARGETS mutex ARCHIVE DESTINATION lib)
+install_lib(lib lib)
 
 # install target
-# INSTALL(TARGETS thread RUNTIME DESTINATION exec)
+# INSTALL(TARGETS thread RUNTIME DESTINATION bin)

@@ -1,5 +1,6 @@
 # cmake version
 cmake_minimum_required(VERSION 2.8)
+include($ENV{CMAKE_PATH}/func/func.cmake)
 
 # set include and lib path
 INCLUDE_DIRECTORIES($ENV{INCLUDE_PATH} ${PROJECT_SOURCE_DIR}/src/include)
@@ -35,11 +36,10 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 endif()
 
 # install header files
-INSTALL(FILES include/proc.h DESTINATION include)
-INSTALL(FILES include/macro.h DESTINATION include)
+install_hfiles(include include)
     
 # install library
-INSTALL(TARGETS proc_shared LIBRARY DESTINATION lib)
+install_lib(lib lib)
 
 # install target
 INSTALL(TARGETS proc RUNTIME DESTINATION bin)

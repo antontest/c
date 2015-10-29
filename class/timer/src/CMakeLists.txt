@@ -38,14 +38,10 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 endif()
 
 # install header files
-# INSTALL(FILES include/main.h DESTINATION include)
-find_files(h include HLIST)
-foreach(hfile ${HLIST})
-    INSTALL(FILES ${hfile} DESTINATION include)
-endforeach()
+install_hfiles(include include)
 
 # install library
-INSTALL(TARGETS timer_share LIBRARY DESTINATION lib)
+install_lib(lib lib)
 
 # install target
-# INSTALL(TARGETS timer RUNTIME DESTINATION exec)
+# INSTALL(TARGETS timer RUNTIME DESTINATION bin)
