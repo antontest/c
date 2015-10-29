@@ -1,3 +1,5 @@
+#ifndef __GET_ARGS_H__
+#define __GET_ARGS_H__
 
 /*********************************************************
  **************    Function Declaration    ***************
@@ -44,3 +46,4 @@ struct options {
  */
 void get_args(int agrc, char *agrv[], struct options *opt);
 
+#endif /* __GET_ARGS_H__ */
