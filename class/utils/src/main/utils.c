@@ -6,6 +6,7 @@
 //#include <utils.h>
 //#include <enum.h>
 //#include <linked_list.h>
+#include <debug.h>
 
 /*********************************************************
  **************    Function Declaration    ***************
@@ -46,6 +47,7 @@ int main(int agrc, char *agrv[])
     free(list);
 
     printf("name: %s\n", enum_to_name(st, ST_2));
+    dbg(DBG_NET, 1, "This is a test");
 
     return rt;
 }

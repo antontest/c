@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8)
 include($ENV{CMAKE_PATH}/func/func.cmake)
 
 # set include and lib path
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/include)
+INCLUDE_DIRECTORIES($ENV{INCLUDE_PATH} ${PROJECT_SOURCE_DIR}/src/include)
 LINK_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/lib)
 
 # set c compile parameters
@@ -14,27 +14,19 @@ AUX_SOURCE_DIRECTORY(main SRC_PATH)
 
 # set source files and lib source files
 SET(CSRC ${SRC_PATH})
-SET(LIST_SRC linked_list/linked_list.c)
-SET(UTILS_SRC utils/utils.c)
-SET(ENUM_SRC enum/enum.c)
-SET(DEBUG_SRC debug/debug.c)
-SET(ARGS_SRC debug/debug.c)
+SET(LIB_SRC get_args/get_args.c)
 
 # lib generation
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/src/lib)
-ADD_LIBRARY(linked_list SHARED ${LIST_SRC})
-ADD_LIBRARY(utils_share SHARED ${UTILS_SRC})
-ADD_LIBRARY(enum SHARED ${ENUM_SRC})
-ADD_LIBRARY(utils_debug STATIC ${DEBUG_SRC})
-ADD_LIBRARY(get_args STATIC ${ARGS_SRC})
+ADD_LIBRARY(get_args_static STATIC ${LIB_SRC})
 
 # generat exec
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR})
-ADD_EXECUTABLE(utils ${CSRC})
+ADD_EXECUTABLE(get_args ${CSRC})
 
 # link library
-SET_TARGET_PROPERTIES(utils_share PROPERTIES OUTPUT_NAME "utils")
-TARGET_LINK_LIBRARIES(utils linked_list enum utils_share utils_debug)
+SET_TARGET_PROPERTIES(get_args_static PROPERTIES OUTPUT_NAME "get_args")
+TARGET_LINK_LIBRARIES(get_args get_args_static)
 
 # -------------- INSTALL -------------- #
 # install path setting
@@ -43,11 +35,9 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     SET(CMAKE_INSTALL_PREFIX "$ENV{USR_TOOLS_PATH}" CACHE PATH "default install path" FORCE)
 endif()
 
-# install header files
-install_hfiles(include include/utils)
-
-# install library
+# install header and library files
+install_hfiles(include include)
 install_lib(lib lib)
 
 # install target
-#INSTALL(TARGETS linked_list RUNTIME DESTINATION bin)
+# INSTALL(TARGETS get_args RUNTIME DESTINATION bin)
