@@ -17,12 +17,14 @@ SET(CSRC ${SRC_PATH})
 SET(LIST_SRC linked_list/linked_list.c)
 SET(UTILS_SRC utils/utils.c)
 SET(ENUM_SRC enum/enum.c)
+SET(DEBUG_SRC debug/debug.c)
 
 # lib generation
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/src/lib)
 ADD_LIBRARY(linked_list SHARED ${LIST_SRC})
 ADD_LIBRARY(utils_share SHARED ${UTILS_SRC})
 ADD_LIBRARY(enum SHARED ${ENUM_SRC})
+ADD_LIBRARY(debug STATIC ${DEBUG_SRC})
 
 # generat exec
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR})
