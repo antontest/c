@@ -129,6 +129,16 @@ enum status_t {
 #define POS printf("%s, line %d\n", __FILE__, __LINE__)
 
 /**
+ * get variable address
+ */
+#define VARIABLE_ADDR(var) ((void *)&var)
+
+/**
+ * get address's address
+ */
+#define ADDR_ADDR(var) ((void **)&var)
+
+/**
  * Object allocation/initialization macro, using designated initializer.
  */
 #define INIT(this, ...) \
