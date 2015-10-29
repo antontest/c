@@ -45,9 +45,10 @@ void get_args(int agrc, char *agrv[], struct options *opt)
                     }
 
                     if (opts->value_type == RET_INT) {
-                        *(opts->value) = (void *)1;
+                        ret_int = 1;
+                        memcpy(opts->value, &ret_int, sizeof(int));
                     } else {
-                        *(opts->value) = (void *)'1';
+                        memcpy(opts->value, "1", 1);
                     }
                 } else {
                     if (++i >= agrc) {
