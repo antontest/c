@@ -51,6 +51,7 @@ int main(int agrc, char *agrv[])
     dbg("%d aaa bbb %s", 1, "ccc");
     dbg_pos("%d aaa bbb %s", 2, "ccc");
     dbg_err(DBG_LOG, "%d aaa bbb %s", 3, "ccc");
+    dbg2("%d aaa bbb %s", 3, "ccc");
 
     /*
     log_t *log;

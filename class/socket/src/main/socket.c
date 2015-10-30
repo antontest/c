@@ -7,6 +7,8 @@
 #include <unistd.h>
 #include <host.h>
 #include <socket.h>
+#include <utils/get_args.h>
+#include <utils/utils.h>
 
 /*********************************************************
  ***************    Macros Declaration    ****************
@@ -24,13 +26,6 @@ enum ser_flag_t {
 /*********************************************************
  **************    Variable Declaration    ***************
  *********************************************************/
-static int ser_or_cli_flag = -1;
-static int socket_protocol= -1;
-static int socket_type = -1;
-static int send_times = 1;
-static char *send_message = NULL;
-static char *ip = NULL;
-static char *port = NULL;
 
 /*********************************************************
  **************    Function Declaration    ***************
@@ -43,20 +38,50 @@ void parser_args(int agrc, char *agrv[]);
 /**
  * @brief print_usage 
  */
-static void print_usage();
+//static void print_usage();
 
 /*********************************************************
  ******************    Main Function    ******************
  *********************************************************/
 int main(int agrc, char *agrv[])
 {
+    int help_flag = 0;
+    int ser_flag = 0;
+    int cli_flag = 0;
+    int ser_or_cli_flag = -1;
+    int socket_protocol= -1;
+    int socket_type = -1;
+    int send_times = 1;
+    char *protocol = NULL;
+    char *message = NULL;
+    char *ip = NULL;
+    int port = NULL;
     int rt = 0;
     int status = 0;
     socket_t *sck = NULL;
     char buf[512] = {0};
+    struct options opts[] = {
+        {"-h", "--help", 0, RET_INT, ADDR_ADDR(help_flag)},
+        {"-s", "--server", 0, RET_INT, ADDR_ADDR(ser_flag)},
+        {"-c", "--client", 0, RET_INT, ADDR_ADDR(cli_flag)},
+        {"-a", "--agreement", 1, RET_STR, ADDR_ADDR(protocol)},
+        {"-i", "--ip", 1, RET_STR, ADDR_ADDR(ip)},
+        {"-p", "--port", 1, RET_INT, ADDR_ADDR(port)},
+        {"-m", "--message", 1, RET_STR, ADDR_ADDR(message)},
+    };
+    
+    get_args(agrc, agrv, opts);
+    printf("help_flag: %d\n", help_flag);
+    printf("ip: %s\n", ip);
+    printf("port: %d\n", port);
+    printf("message: %s\n", message);
+    printf("ser_flag: %d\n", ser_flag);
+    printf("cli_flag: %d\n", cli_flag);
+    printf("protocol: %s\n", protocol);
 
-    parser_args(agrc, agrv);
-
+    return 0;
+    if (ser_flag > 0) ser_or_cli_flag = SOCKET_SERVER;
+    else if (cli_flag > 0) ser_or_cli_flag = SOCKET_CLIENT;
     if (ser_or_cli_flag > 0) {
         if (socket_type <= 0 || socket_protocol <= 0) {
             fprintf(stderr, "[socket]: please give protocol type when create a server or client socket\n");
@@ -66,7 +91,7 @@ int main(int agrc, char *agrv[])
             fprintf(stderr, "[socket]: please give ip address when create a server or client socket\n");
             exit(1);
         }
-        if (port == NULL) {
+        if (port < 1) {
             fprintf(stderr, "[socket]: please give port number when create a server or client socket\n");
             exit(1);
         }
@@ -77,7 +102,7 @@ int main(int agrc, char *agrv[])
         }
         switch (ser_or_cli_flag) {
             case SOCKET_SERVER:
-                status = sck->listen(sck, AF_INET, socket_type, socket_protocol, ip, atoi(port));
+                status = sck->listen(sck, AF_INET, socket_type, socket_protocol, ip, port);
                 if (status <= 0) break;
                 if (socket_type == SOCK_STREAM) status = sck->accept(sck);
                 if (status <= 0) break;
@@ -92,14 +117,14 @@ int main(int agrc, char *agrv[])
                 fprintf(stdout, "----->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
                 break;
             case SOCKET_CLIENT:
-                status = sck->connect(sck, AF_INET, socket_type, socket_protocol, ip, atoi(port));
+                status = sck->connect(sck, AF_INET, socket_type, socket_protocol, ip, port);
                 if (status <= 0) break;
-                if (send_message == NULL) break;
+                if (message == NULL) break;
                 
                 fprintf(stdout, "----->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
                 while (send_times-- > 0) {
-                    status = sck->send(sck, send_message, strlen(send_message));
-                    if (status > 0)fprintf(stdout, "[socket send to %s]: %s\n", ip, send_message);
+                    status = sck->send(sck, message, strlen(message));
+                    if (status > 0)fprintf(stdout, "[socket send to %s]: %s\n", ip, message);
                     if (send_times > 0)sleep(1);
                 }
                 if (socket_type == SOCK_DGRAM) {
@@ -118,6 +143,7 @@ int main(int agrc, char *agrv[])
 /**
  * @brief print_usage 
  */
+/*
 static void print_usage()
 {
     printf("Usage: socket [options] [parameter]\n");
@@ -138,10 +164,12 @@ static void check_args_num(int agrc, char *agrv[], int curr_num)
         exit(1);
     }
 }
+*/
 
 /**
  * parser_args
  */
+/*
 void parser_args(int agrc, char *agrv[]){
     int i = 0;
     
@@ -184,4 +212,4 @@ void parser_args(int agrc, char *agrv[]){
     }
 
 }
-
+*/

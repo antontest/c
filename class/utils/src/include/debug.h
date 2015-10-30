@@ -34,6 +34,8 @@ enum debug_t {
 	DBG_PRO,
 	/** directory */
 	DBG_DIR,
+	/** debugger */
+	DBG_DBG,
 	/** logger */
 	DBG_LOG,
 	/** applications other than daemons */
@@ -95,6 +97,23 @@ enum level_t {
         file_name + 1, __LINE__, __func__, ##__VA_ARGS__); \
     } while (0)
 #endif /* DEBUG_LEVEL */
+
+#define dbg0(fmt, ...) \
+    do { \
+        _dbg(stdout, -1, -1, fmt, ##__VA_ARGS__); \
+    } while (0)
+#define dbg1(fmt, ...) \
+    do { \
+        char *file_name = strrchr(__FILE__, '/'); \
+        _dbg(stdout, -1, -1, "[%s:%d][%s] " fmt , \
+        file_name + 1, __LINE__, __func__, ##__VA_ARGS__); \
+    } while (0)
+#define dbg2(fmt, ...) \
+    do { \
+        char *file_name = strrchr(__FILE__, '/'); \
+        _dbg(stdout, DBG_DBG, -1, "[%s:%d][%s] " fmt , \
+        file_name + 1, __LINE__, __func__, ##__VA_ARGS__); \
+    } while (0)
 
 #ifndef dbg_debug
 # define dbg_debug(...) {}
