@@ -131,7 +131,7 @@ enum status_t {
 /**
  * get variable address
  */
-#define VARIABLE_ADDR(var) ((void *)&var)
+#define ADDR(var) ((void *)&var)
 
 /**
  * get address's address

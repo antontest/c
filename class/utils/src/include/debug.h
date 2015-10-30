@@ -16,40 +16,28 @@ typedef enum level_t level_t;
  * Debug message group.
  */
 enum debug_t {
+        /** no dedug module info */
+        DBG_NULL = -1,
 	/** daemon specific */
-	DBG_DMN,
-	/** IKE_SA_MANAGER */
-	DBG_MGR,
-	/** IKE_SA */
-	DBG_IKE,
-	/** CHILD_SA */
-	DBG_CHD,
-	/** job processing */
-	DBG_JOB,
+	DBG_DMN = 1,
+	/** utils */
+	DBG_UTL,
+	/** timer */
+	DBG_TMR,
+	/** thread */
+	DBG_THR,
+	/** socket */
+	DBG_NET,
 	/** configuration backends */
 	DBG_CFG,
-	/** kernel interface */
-	DBG_KNL,
-	/** networking/sockets */
-	DBG_NET,
-	/** low-level encoding/decoding (ASN.1, X.509 etc.) */
-	DBG_ASN,
-	/** message encoding/decoding */
-	DBG_ENC,
-	/** trusted network connect */
-	DBG_TNC,
-	/** integrity measurement client */
-	DBG_IMC,
-	/** integrity measurement verifier */
-	DBG_IMV,
-	/** platform trust service */
-	DBG_PTS,
-	/** libtls */
-	DBG_TLS,
+	/** process */
+	DBG_PRO,
+	/** directory */
+	DBG_DIR,
+	/** logger */
+	DBG_LOG,
 	/** applications other than daemons */
 	DBG_APP,
-	/** libipsec */
-	DBG_ESP,
 	/** libstrongswan */
 	DBG_LIB,
 	/** number of groups */
@@ -64,16 +52,18 @@ enum debug_t {
 enum level_t {
 	/** absolutely silent */
 	LEVEL_SILENT = -1,
+	/** log postion in file */
+	LEVEL_POS = -1,
 	/** most important auditing logs */
-	LEVEL_AUDIT =   0,
+	LEVEL_AUDIT ,
 	/** control flow */
-	LEVEL_CTRL =    1,
+	LEVEL_CTRL,
 	/** diagnose problems */
-	LEVEL_DIAG =    2,
+	LEVEL_DIAG,
 	/** raw binary blobs */
-	LEVEL_RAW =     3,
+	LEVEL_RAW,
 	/** including sensitive data (private keys) */
-	LEVEL_PRIVATE = 4,
+	LEVEL_PRIVATE,
 };
 
 #ifndef DEBUG_LEVEL

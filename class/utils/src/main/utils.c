@@ -47,7 +47,7 @@ int main(int agrc, char *agrv[])
     free(list);
 
     printf("name: %s\n", enum_to_name(st, ST_2));
-    dbg(DBG_NET, 1, "This is a test");
+    dbg(DBG_UTL, LEVEL_POS, "This is a test");
 
     return rt;
 }
