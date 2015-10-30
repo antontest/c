@@ -7,6 +7,7 @@
 //#include <enum.h>
 //#include <linked_list.h>
 #include <debug.h>
+#include <log.h>
 
 /*********************************************************
  **************    Function Declaration    ***************
@@ -47,7 +48,21 @@ int main(int agrc, char *agrv[])
     free(list);
 
     printf("name: %s\n", enum_to_name(st, ST_2));
-    dbg(DBG_UTL, LEVEL_POS, "This is a test");
+    dbg("%d aaa bbb %s", 1, "ccc");
+    dbg_pos("%d aaa bbb %s", 2, "ccc");
+    dbg_err(DBG_LOG, "%d aaa bbb %s", 3, "ccc");
+
+    /*
+    log_t *log;
+    log = log_create("log.log");
+    log->log(log, DBG_NET, LEVEL_DEBUG, "This is a test");
+    log->destroy(log);
+    */
+
+    log_init(NULL);
+    log_error(DBG_NET, "%d This is a test %s", 1, "1");
+    log_warn(DBG_NET, "%s This is a test", "aaaaa");
+    log_deinit();
 
     return rt;
 }

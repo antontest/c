@@ -53,61 +53,64 @@ enum level_t {
 	/** absolutely silent */
 	LEVEL_SILENT = -1,
 	/** log postion in file */
-	LEVEL_POS = -1,
+	LEVEL_DEBUG = 1,
 	/** most important auditing logs */
-	LEVEL_AUDIT ,
+	LEVEL_TRACE,
 	/** control flow */
-	LEVEL_CTRL,
+	LEVEL_NOTICE,
 	/** diagnose problems */
-	LEVEL_DIAG,
+	LEVEL_WARNING,
 	/** raw binary blobs */
-	LEVEL_RAW,
+	LEVEL_ERROR,
 	/** including sensitive data (private keys) */
 	LEVEL_PRIVATE,
 };
 
+
 #ifndef DEBUG_LEVEL
-# define DEBUG_LEVEL 4
+# define DEBUG_LEVEL 5
 #endif /* DEBUG_LEVEL */
 
 /** debug macros, they call the dbg function hook */
-#if DEBUG_LEVEL >= 0
-# define DBG0(group, fmt, ...) dbg(group, 0, fmt, ##__VA_ARGS__)
-#endif /* DEBUG_LEVEL */
 #if DEBUG_LEVEL >= 1
-# define DBG1(group, fmt, ...) dbg(group, 1, fmt, ##__VA_ARGS__)
+#define dbg(fmt, ...) \
+    do { \
+        _dbg(stdout, -1, -1, fmt, ##__VA_ARGS__); \
+    } while (0)
 #endif /* DEBUG_LEVEL */
-#if DEBUG_LEVEL >= 2
-# define DBG2(group, fmt, ...) dbg(group, 2, fmt, ##__VA_ARGS__)
+//dbg(stdout, group, 1, "[%s:%d][%s] "fmt, __FILE__, __LINE__,  __func__, ##__VA_ARGS__); 
+#if DEBUG_LEVEL >= 1
+#define dbg_pos(fmt, ...) \
+    do { \
+        char *file_name = strrchr(__FILE__, '/'); \
+        _dbg(stdout, -1, -1, "[%s:%d][%s] " fmt , \
+        file_name + 1, __LINE__, __func__, ##__VA_ARGS__); \
+    } while (0)
 #endif /* DEBUG_LEVEL */
-#if DEBUG_LEVEL >= 3
-# define DBG3(group, fmt, ...) dbg(group, 3, fmt, ##__VA_ARGS__)
-#endif /* DEBUG_LEVEL */
-#if DEBUG_LEVEL >= 4
-# define DBG4(group, fmt, ...) dbg(group, 4, fmt, ##__VA_ARGS__)
+#if DEBUG_LEVEL >= 5
+#define dbg_err(group, fmt, ...) \
+    do { \
+        char *file_name = strrchr(__FILE__, '/'); \
+        _dbg(stderr, group, LEVEL_ERROR, "[%s:%d][%s] " fmt , \
+        file_name + 1, __LINE__, __func__, ##__VA_ARGS__); \
+    } while (0)
 #endif /* DEBUG_LEVEL */
 
-#ifndef DBG0
-# define DBG0(...) {}
+#ifndef dbg_debug
+# define dbg_debug(...) {}
 #endif
-#ifndef DBG1
-# define DBG1(...) {}
+#ifndef dbg_pos
+# define dbg_pos(...) {}
 #endif
-#ifndef DBG2
-# define DBG2(...) {}
-#endif
-#ifndef DBG3
-# define DBG3(...) {}
-#endif
-#ifndef DBG4
-# define DBG4(...) {}
+#ifndef dbg_err
+# define dbg_err(...) {}
 #endif
 
 /** dbg function hook, uses dbg_default() by default */
-extern void (*dbg) (debug_t group, level_t level, char *fmt, ...);
+extern void (*_dbg) (FILE *stream, debug_t group, level_t level, char *fmt, ...);
 
 /** default logging function */
-void dbg_default(debug_t group, level_t level, char *fmt, ...);
+void dbg_default(FILE *stream, debug_t group, level_t level, char *fmt, ...);
 
 /** set the level logged by dbg_default() */
 void dbg_default_set_level(level_t level);

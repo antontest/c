@@ -18,7 +18,8 @@ SET(LIST_SRC linked_list/linked_list.c)
 SET(UTILS_SRC utils/utils.c)
 SET(ENUM_SRC enum/enum.c)
 SET(DEBUG_SRC debug/debug.c)
-SET(ARGS_SRC debug/debug.c)
+SET(ARGS_SRC get_args/get_args.c)
+SET(LOG_SRC log/log.c)
 
 # lib generation
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/src/lib)
@@ -27,6 +28,7 @@ ADD_LIBRARY(utils_share SHARED ${UTILS_SRC})
 ADD_LIBRARY(enum SHARED ${ENUM_SRC})
 ADD_LIBRARY(utils_debug STATIC ${DEBUG_SRC})
 ADD_LIBRARY(get_args STATIC ${ARGS_SRC})
+ADD_LIBRARY(log STATIC ${LOG_SRC})
 
 # generat exec
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR})
@@ -34,7 +36,7 @@ ADD_EXECUTABLE(utils ${CSRC})
 
 # link library
 SET_TARGET_PROPERTIES(utils_share PROPERTIES OUTPUT_NAME "utils")
-TARGET_LINK_LIBRARIES(utils linked_list enum utils_share utils_debug)
+TARGET_LINK_LIBRARIES(utils linked_list enum utils_share utils_debug log)
 
 # -------------- INSTALL -------------- #
 # install path setting
