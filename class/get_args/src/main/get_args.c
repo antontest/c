@@ -25,10 +25,10 @@ int main(int agrc, char *agrv[])
     char s = '0';
     struct options opts[] = {
         {"-h", "--help", 0, RET_INT   , ADDR_ADDR(help_flag)},
-        {"-s", "--stat", 0, RET_CHAR  , ADDR_ADDR(s)},
-        {"-i", "--ip"  , 1, RET_STRING, ADDR_ADDR(ip)},
+        {"-s", "--stat", 0, RET_CHR  , ADDR_ADDR(s)},
+        {"-i", "--ip"  , 1, RET_STR, ADDR_ADDR(ip)},
         {"-p", "--port", 1, RET_INT   , ADDR_ADDR(port)},
-        {"-c", "--char", 1, RET_CHAR  , ADDR_ADDR(c)},
+        {"-c", "--char", 1, RET_CHR  , ADDR_ADDR(c)},
         {NULL, NULL    , 0, 0         , NULL},
     };
 

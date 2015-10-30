@@ -10,7 +10,7 @@ typedef enum debug_t debug_t;
 typedef enum level_t level_t;
 
 #include <stdio.h>
-#include "utils/enum.h"
+#include "enum.h"
 
 /**
  * Debug message group.

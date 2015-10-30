@@ -1,5 +1,5 @@
 #include <log.h>
-#include <utils/utils.h>
+#include <utils.h>
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
@@ -10,8 +10,6 @@
 #define LOG_PATH_LEN     (250)
 #define LOG_BUFF_LEN     (1024 * 1024 * 4)
 #define SYS_LOG_BUFF_LEN (1024 * 1024 * 8)
-
-
 
 ENUM(debug_name, DBG_DMN, DBG_LIB,
         "DMN",
@@ -144,7 +142,7 @@ METHOD(log_t, get_level, int, private_log_t *this)
     return this->default_level;
 }
 
-METHOD(log_t, log, void, private_log_t *this, debug_t group, level_t level, char *fmt, ...)
+METHOD(log_t, log_, void, private_log_t *this, debug_t group, level_t level, char *fmt, ...)
 {
     va_list args;
     int buff_use_len = 0;
@@ -197,7 +195,7 @@ log_t *log_create(const char *log_file)
 
     INIT(this,
         .public = {
-        .log = _log,
+        .log = _log_,
         .get_level = _get_level,
         .destroy = _destroy_,
         },

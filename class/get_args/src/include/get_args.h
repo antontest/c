@@ -5,9 +5,9 @@
  **************    Function Declaration    ***************
  *********************************************************/
 typedef enum ret_value_type{
-    RET_CHAR   = 0,     /* return char    */
-    RET_INT    = 1,     /* return int    */
-    RET_STRING = 2      /* return string */
+    RET_CHR = 0,     /* return char    */
+    RET_INT = 1,     /* return int    */
+    RET_STR = 2      /* return string */
 } ret_value_type;
 
 struct options {

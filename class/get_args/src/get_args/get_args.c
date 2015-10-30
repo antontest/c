@@ -39,7 +39,7 @@ void get_args(int agrc, char *agrv[], struct options *opt)
                 fount_flag = 1;
                 if (opts->value == NULL) continue;
                 if (opts->has_args == 0) {
-                    if (opts->value_type == RET_STRING) {
+                    if (opts->value_type == RET_STR) {
                         fprintf(stderr, "option [%s] return value type wrong\n", agrv[i]);
                         exit(1);
                     }
@@ -57,7 +57,7 @@ void get_args(int agrc, char *agrv[], struct options *opt)
                     }
 
                     switch (opts->value_type) {
-                        case RET_CHAR:
+                        case RET_CHR:
                             memcpy(opts->value, agrv[i], 1);
                             break;
                         case RET_INT:

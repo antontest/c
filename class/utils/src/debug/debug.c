@@ -4,7 +4,7 @@
 #include <string.h>
 #include <sys/utsname.h>
 #include "debug.h"
-#include <utils/utils.h>
+#include <utils.h>
 
 ENUM(debug_names, DBG_DMN, DBG_LIB,
         "DMN",
