@@ -221,8 +221,9 @@ METHOD(socket_t, connecter, int, private_socket_t *this, int family, int type, i
 
     if (this->fd > 0) return this->fd;
     this->state = SOCKET_STARTING;
-    this->host_ser = host_create_from_string_and_family(ip, family, port);
-    this->host_cli = host_create_any(family);
+    //this->host_ser = host_create_from_string_and_family(ip, family, port);
+    this->host_ser = host_create_any(family);
+    this->host_cli = host_create_from_string_and_family(ip, family, port);
     
     if (this->host_ser == NULL) {
         fprintf(stderr, "server host create failed\n");
@@ -253,7 +254,7 @@ METHOD(socket_t, connecter, int, private_socket_t *this, int family, int type, i
     }
 
     this->state = SOCKET_CONNECTING;
-    if (connect(this->fd, (struct sockaddr *)this->host_ser->get_sockaddr(this->host_ser), (socklen_t)sizeof(struct sockaddr)) < 0) {
+    if (connect(this->fd, (struct sockaddr *)this->host_cli->get_sockaddr(this->host_cli), *(socklen_t *)this->host_cli->get_sockaddr_len(this->host_cli))< 0) {
         fprintf(stderr, "unable to connect to server: %s\n", strerror(errno));
         this->state = SOCKET_CONNECT_ERROR;
         close(this->fd);
