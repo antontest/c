@@ -190,7 +190,7 @@ METHOD(socket_t, listener, int, private_socket_t *this, int family, int type, in
         return -1;
     }
 
-    if (bind(this->fd, (struct sockaddr *)this->host_ser->get_sockaddr(this->host_ser), (socklen_t)sizeof(struct sockaddr)) < 0) {
+    if (bind(this->fd, (struct sockaddr *)this->host_ser->get_sockaddr(this->host_ser), *(socklen_t *)this->host_ser->get_sockaddr_len(this->host_ser)) < 0) {
         fprintf(stderr, "unable to bind socket: %s\n", strerror(errno));
         close(this->fd);
         return -1;
@@ -241,7 +241,7 @@ METHOD(socket_t, connecter, int, private_socket_t *this, int family, int type, i
 
     if (setsockopt(this->fd, SOL_SOCKET, SO_REUSEADDR, (void*)&on, sizeof(on)) < 0)
     {        
-        fprintf(stderr, "unable to set SO_REUSEADDR on socket: %s", strerror(errno));
+        fprintf(stderr, "unable to set SO_REUSEADDR on socket: %s\n", strerror(errno));
         close(this->fd);
         return -1;
     }
@@ -254,7 +254,7 @@ METHOD(socket_t, connecter, int, private_socket_t *this, int family, int type, i
 
     this->state = SOCKET_CONNECTING;
     if (connect(this->fd, (struct sockaddr *)this->host_ser->get_sockaddr(this->host_ser), (socklen_t)sizeof(struct sockaddr)) < 0) {
-        fprintf(stderr, "unable to connect to server: %s", strerror(errno));
+        fprintf(stderr, "unable to connect to server: %s\n", strerror(errno));
         this->state = SOCKET_CONNECT_ERROR;
         close(this->fd);
         return -1;

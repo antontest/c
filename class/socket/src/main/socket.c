@@ -40,7 +40,7 @@ void parser_args(int agrc, char *agrv[]);
  */
 static void print_usage();
 
-void start_network(int ser_or_cli_flag, int socket_type, int socket_protocol, char *ip, int port, int times, char *message);
+void start_network(int ser_or_cli_flag, int net_type, int socket_type, int socket_protocol, char *ip, int port, int times, char *message);
 
 /*********************************************************
  ******************    Main Function    ******************
@@ -50,21 +50,24 @@ int main(int agrc, char *agrv[])
     /**
      * cmd parameter
      */ 
-    int help_flag = 0;
-    int ser_flag = 0;
-    int cli_flag = 0;
-    int ser_or_cli_flag = -1;
-    int socket_protocol= -1;
-    int socket_type = -1;
-    int times = 1;
-    char *protocol = NULL;
-    char *message = NULL;
-    char *ip = NULL;
-    int port = 0;
-    int rt = 0;
+    int  help_flag       = 0;
+    int  ipv6_flag       = 0;
+    int  ser_flag        = 0;
+    int  cli_flag        = 0;
+    int  ser_or_cli_flag = -1;
+    int  socket_protocol = -1;
+    int  socket_type     = -1;
+    int  net_type        = AF_INET;
+    int  times           = 1;
+    char *protocol       = NULL;
+    char *message        = NULL;
+    char *ip             = NULL;
+    int  port            = 0;
+    int  rt              = 0;
 
     struct options opts[] = {
         {"-h", "--help",      0, RET_INT, ADDR_ADDR(help_flag) },
+        {"-6", NULL,          0, RET_INT, ADDR_ADDR(ipv6_flag) },
         {"-s", "--server",    0, RET_INT, ADDR_ADDR(ser_flag)  },
         {"-c", "--client",    0, RET_INT, ADDR_ADDR(cli_flag)  },
         {"-a", "--agreement", 1, RET_STR, ADDR_ADDR(protocol)  },
@@ -80,6 +83,7 @@ int main(int agrc, char *agrv[])
         exit(1);
     }
 
+    if (ipv6_flag > 0) net_type = AF_INET6;
     if (ser_flag > 0) ser_or_cli_flag = SOCKET_SERVER;
     else if (cli_flag > 0) ser_or_cli_flag = SOCKET_CLIENT;
     if (protocol != NULL) {
@@ -96,7 +100,7 @@ int main(int agrc, char *agrv[])
         
     }
 
-    start_network(ser_or_cli_flag, socket_type, socket_protocol, ip, port, times, message);
+    start_network(ser_or_cli_flag, net_type, socket_type, socket_protocol, ip, port, times, message);
 
     return rt;
 }
@@ -117,64 +121,66 @@ static void print_usage()
     printf("  -m, --message    Message of sending\n");
 }
 
-void start_network(int ser_or_cli_flag, int socket_type, int socket_protocol, char *ip, int port, int times, char *message)
+void start_network(int ser_or_cli_flag, int net_type, int socket_type, int socket_protocol, char *ip, int port, int times, char *message)
 {
     int status = 0;
     socket_t *sck = NULL;
     char buf[512] = {0};
-    if (ser_or_cli_flag > 0) {
-        if (socket_type <= 0 || socket_protocol <= 0) {
-            fprintf(stderr, "[socket]: please give protocol type when create a server or client socket\n");
-            exit(1);
-        }
-        if (ip == NULL) {
+
+    if (ser_or_cli_flag <= 0) return;
+    
+    if (socket_type <= 0 || socket_protocol <= 0) {
+        fprintf(stderr, "[socket]: please give protocol type when create a server or client socket\n");
+        exit(1);
+    }
+    if (ip == NULL) {
+        if (ser_or_cli_flag == SOCKET_CLIENT) {
             fprintf(stderr, "[socket]: please give ip address when create a server or client socket\n");
             exit(1);
         }
-        if (port < 1) {
-            fprintf(stderr, "[socket]: please give port number when create a server or client socket\n");
-            exit(1);
-        }
-
-        sck = socket_create();
-        if (sck == NULL) {
-            fprintf(stderr, "[socket]: socket_create failed\n");
-        }
-        switch (ser_or_cli_flag) {
-            case SOCKET_SERVER:
-                status = sck->listen(sck, AF_INET, socket_type, socket_protocol, ip, port);
-                if (status <= 0) break;
-                if (socket_type == SOCK_STREAM) status = sck->accept(sck);
-                if (status <= 0) break;
-
-                fprintf(stdout, "----->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
-                while (sck->receive(sck, buf, sizeof(buf), 0) > 0 ) {
-                    if (!strncasecmp("==end==", buf, sizeof("==end=="))) {
-                        break;
-                    }
-                    fprintf(stdout, "[socket receive from %s]: %s\n", sck->get_cli_ip(sck), buf);
-                }
-                fprintf(stdout, "----->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
-                break;
-            case SOCKET_CLIENT:
-                status = sck->connect(sck, AF_INET, socket_type, socket_protocol, ip, port);
-                if (status <= 0) break;
-                if (message == NULL) break;
-                
-                fprintf(stdout, "----->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
-                while (times-- > 0) {
-                    status = sck->send(sck, message, strlen(message));
-                    if (status > 0)fprintf(stdout, "[socket send to %s]: %s\n", ip, message);
-                    if (times > 0)sleep(1);
-                }
-                if (socket_type == SOCK_DGRAM) {
-                    sck->send(sck, "==end==", strlen("==end=="));
-                }
-                fprintf(stdout, "----->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
-                break;
-        }
-
-        if (sck != NULL) sck->destroy(sck);
+    }
+    if (port < 1) {
+        fprintf(stderr, "[socket]: please give port number when create a server or client socket\n");
+        exit(1);
     }
 
+    sck = socket_create();
+    if (sck == NULL) {
+        fprintf(stderr, "[socket]: socket_create failed\n");
+    }
+    switch (ser_or_cli_flag) {
+        case SOCKET_SERVER:
+            status = sck->listen(sck, net_type, socket_type, socket_protocol, ip, port);
+            if (status <= 0) break;
+            if (socket_type == SOCK_STREAM) status = sck->accept(sck);
+            if (status <= 0) break;
+
+            fprintf(stdout, "----->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
+            while (sck->receive(sck, buf, sizeof(buf), 0) > 0 ) {
+                if (!strncasecmp("==end==", buf, sizeof("==end=="))) {
+                    break;
+                }
+                fprintf(stdout, "[socket receive from %s]: %s\n", sck->get_cli_ip(sck), buf);
+            }
+            fprintf(stdout, "----->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
+            break;
+        case SOCKET_CLIENT:
+            status = sck->connect(sck, net_type, socket_type, socket_protocol, ip, port);
+            if (status <= 0) break;
+            if (message == NULL) break;
+
+            fprintf(stdout, "----->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
+            while (times-- > 0) {
+                status = sck->send(sck, message, strlen(message));
+                if (status > 0)fprintf(stdout, "[socket send to %s]: %s\n", ip, message);
+                if (times > 0)sleep(1);
+            }
+            if (socket_type == SOCK_DGRAM) {
+                sck->send(sck, "==end==", strlen("==end=="));
+            }
+            fprintf(stdout, "----->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
+            break;
+    }
+
+    if (sck != NULL) sck->destroy(sck);
 }
