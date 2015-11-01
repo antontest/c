@@ -134,10 +134,13 @@ void start_network(int ser_or_cli_flag, int net_type, int socket_type, int socke
         exit(1);
     }
     if (ip == NULL) {
+        ip = "%any";
+        /*
         if (ser_or_cli_flag == SOCKET_CLIENT) {
             fprintf(stderr, "[socket]: please give ip address when create a server or client socket\n");
             exit(1);
         }
+        */
     }
     if (port < 1) {
         fprintf(stderr, "[socket]: please give port number when create a server or client socket\n");
