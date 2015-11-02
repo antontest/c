@@ -1,0 +1,15 @@
+-I /usr/include/ 
+-I ~/usr/include/
+-I .
+-I ./src
+-I ./src/lib
+-I ./src/main
+-I ./src/socket_router
+-I ./src/socket_property
+-I ./src/socket_icmp
+-I ./src/socket_msg
+-I ./src/socket_msg/backup
+-I ./src/socket_base
+-I ./src/socket_arp
+-I ./src/socket_app
+-I ./src/include

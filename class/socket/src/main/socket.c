@@ -9,6 +9,7 @@
 #include <socket.h>
 #include <utils/get_args.h>
 #include <utils/utils.h>
+#include <property.h>
 
 /*********************************************************
  ***************    Macros Declaration    ****************
@@ -76,7 +77,15 @@ int main(int agrc, char *agrv[])
         {"-t", "--times",     1, RET_INT, ADDR_ADDR(times)     },
         {"-m", "--message",   1, RET_STR, ADDR_ADDR(message)   },
     };
-    
+ 
+    printf("ifname: %s\n", get_ifname(0));
+    printf("ip: %s\n", get_local_ip(AF_INET6, NULL, 1));
+    print_mac(get_mac_addr(NULL), "mac");
+    printf("subnet: %s\n", get_subnet_addr("172.21.34.34", "255.255.0.0"));
+    printf("mask: %d\n", mask_to_bits("255.255.255.0"));
+    printf("speed: %d\n", get_eth_speed("eth0"));
+    printf("gateway: %s\n", get_gateway());
+    return 0;
     get_args(agrc, agrv, opts);
     if(help_flag > 0) {
         print_usage();
@@ -143,8 +152,11 @@ void start_network(int ser_or_cli_flag, int net_type, int socket_type, int socke
         */
     }
     if (port < 1) {
+        port = 5001;
+        /*
         fprintf(stderr, "[socket]: please give port number when create a server or client socket\n");
         exit(1);
+        */
     }
 
     sck = socket_create();

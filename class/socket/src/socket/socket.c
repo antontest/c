@@ -221,7 +221,6 @@ METHOD(socket_t, connecter, int, private_socket_t *this, int family, int type, i
 
     if (this->fd > 0) return this->fd;
     this->state = SOCKET_STARTING;
-    //this->host_ser = host_create_from_string_and_family(ip, family, port);
     this->host_ser = host_create_any(family);
     this->host_cli = host_create_from_string_and_family(ip, family, port);
     
@@ -294,7 +293,6 @@ METHOD(socket_t, receiver, int,
     fd_set fds;
 
     if (this->accept_fd <= 0) {
-        printf("111\n");
         return -1;
     }
 
