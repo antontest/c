@@ -85,6 +85,7 @@ int main(int agrc, char *agrv[])
     printf("mask: %d\n", mask_to_bits("255.255.255.0"));
     printf("speed: %d\n", get_eth_speed("eth0"));
     printf("gateway: %s\n", get_gateway());
+    print_mac(get_net_mac("172.21.34.89", 4), "mac");
     return 0;
     get_args(agrc, agrv, opts);
     if(help_flag > 0) {

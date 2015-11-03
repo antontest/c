@@ -368,7 +368,7 @@ int get_interface_state(int fd, const char *ifname);
  *
  * @return 0, if uscc; -1, if failed
  */
-int get_net_mac(char *dstip, unsigned char mac[6], int timeout);
+unsigned char *get_net_mac(char *dstip, int timeout);
 
 
 /*************************************************************

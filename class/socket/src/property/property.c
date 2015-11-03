@@ -823,11 +823,10 @@ int get_eth_speed(const char *ifname)
     struct ethtool_cmd ep = {0};
 
     if (ifname == NULL) return -1;
-
     memset(&ifr, 0, sizeof(ifr));
     strcpy(ifr.ifr_name, ifname);
 
-    if ((fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
+    if ((fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP)) < 0)
         return -1;
 
     ep.cmd = ETHTOOL_GSET;
@@ -1075,13 +1074,15 @@ int get_interface_state(int fd, const char *ifname)
  *
  * @return 0, if uscc; -1, if failed
  */
-int get_net_mac(char *dstip, unsigned char mac[6], int timeout)
+static unsigned char net_mac[6] = {0};
+unsigned char *get_net_mac(char *dstip, int timeout)
 {
     int fd, len;
     struct sockaddr addr;
     struct frame_arp snd_buf, recv_buf;
     char *ifname = NULL;
     char *if_save = NULL;
+    char *ip_save = NULL;
     unsigned char *src_mac = NULL;
     unsigned char src_ip[6];
     unsigned char dst_ip[6];
@@ -1090,27 +1091,26 @@ int get_net_mac(char *dstip, unsigned char mac[6], int timeout)
     fd_set set;
     struct timeval start = {0}, end = {0};
     int time_use = 0;
-    int found_flag = 0;
 
-    if (dstip == NULL || mac == NULL) return -1;
+    memset(net_mac, 0, sizeof(net_mac));
+    if (dstip == NULL) return net_mac;
 
     /**
      * check ifname
      */
     ifname = get_ifname(0);
     if_save = strtok(ifname, " ");
-    if (if_save == NULL) return -1;
+    if (if_save == NULL) return net_mac;
     
     /**
      * local info
      */
-    if_save = get_local_ip(AF_INET, ifname, 1);
+    ip_save = get_local_ip(AF_INET, ifname, 1);
     ip2arr(src_ip_buf, src_ip);
     ip2arr(dstip, dst_ip);
-    src_mac = get_mac_addr(if_save);
+    src_mac = get_mac_addr(ip_save);
     if (!memcmp(dst_ip, src_ip, 4)) {
-        memcpy(mac, src_mac, 6);
-        return 1;
+        return net_mac;
     }
 
     /**
@@ -1170,8 +1170,7 @@ int get_net_mac(char *dstip, unsigned char mac[6], int timeout)
             recvfrom(fd, &recv_buf, sizeof(recv_buf), 0, NULL, NULL);
             if (!memcmp(recv_buf.ah.src_ip, dst_ip, 4)) 
             {
-                memcpy(mac, recv_buf.ah.src_mac, 6);
-                found_flag = 1;
+                memcpy(net_mac, recv_buf.ah.src_mac, 6);
                 break;
             }
         }
@@ -1186,8 +1185,7 @@ int get_net_mac(char *dstip, unsigned char mac[6], int timeout)
     gettimeofday(&end, NULL);
     time_use = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_usec - start.tv_usec);
     
-    if (!found_flag) return found_flag;
-    return time_use;
+    return net_mac;
 }
 
 /**
