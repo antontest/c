@@ -1,4 +1,4 @@
-#include "socket_arp.h"
+#include "arp.h"
 #include <timer.h>
 
 /*************************************************************
@@ -12,8 +12,7 @@
  * @param src_mac[6]
  * @param dst_ip[4]
  */
-void arp_request_package(struct frame_arp *frame, unsigned char src_ip[4], 
-                    unsigned char src_mac[6], unsigned char dst_ip[4])
+void arp_request_package(struct frame_arp *frame, unsigned char src_ip[4], unsigned char src_mac[6], unsigned char dst_ip[4])
 {
     unsigned char broad_mac[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
     
@@ -40,8 +39,7 @@ void arp_request_package(struct frame_arp *frame, unsigned char src_ip[4],
  * @param dst_ip[4]
  * @param dst_mac[6]
  */
-void arp_reply_package(struct frame_arp *frame, unsigned char src_ip[4], 
-                    unsigned char src_mac[6], unsigned char dst_ip[4], unsigned char dst_mac[6])
+void arp_reply_package(struct frame_arp *frame, unsigned char src_ip[4], unsigned char src_mac[6], unsigned char dst_ip[4], unsigned char dst_mac[6])
 {  
     memcpy(frame->fh.dst_mac, dst_mac, 6);
     memcpy(frame->fh.src_mac, src_mac, 6);
@@ -68,8 +66,7 @@ void arp_reply_package(struct frame_arp *frame, unsigned char src_ip[4],
  *
  * @return send count, if succ; -1, if failed 
  */
-int arp_request_send(int fd, struct sockaddr *addr, unsigned char dst_ip[4], 
-             unsigned char src_ip[4], unsigned char src_mac[6])
+int arp_request_send(int fd, struct sockaddr *addr, unsigned char dst_ip[4], unsigned char src_ip[4], unsigned char src_mac[6])
 {
     struct frame_arp frame;
     
@@ -92,8 +89,7 @@ int arp_request_send(int fd, struct sockaddr *addr, unsigned char dst_ip[4],
  *
  * @return send count, if succ; -1, if failed 
  */
-int arp_reply_send(int fd, struct sockaddr *addr, unsigned char dst_ip[4], unsigned char dst_mac[6], 
-             unsigned char src_ip[4], unsigned char src_mac[6])
+int arp_reply_send(int fd, struct sockaddr *addr, unsigned char dst_ip[4], unsigned char dst_mac[6], unsigned char src_ip[4], unsigned char src_mac[6])
 {
     struct frame_arp frame;
     int rt = 0;
@@ -105,8 +101,7 @@ int arp_reply_send(int fd, struct sockaddr *addr, unsigned char dst_ip[4], unsig
     return rt;
 }
 
-static void callback(unsigned char *arg, const struct pcap_pkthdr *head, 
-        const unsigned char *packet)
+static void callback(unsigned char *arg, const struct pcap_pkthdr *head, const unsigned char *packet)
 {
     struct frame_arp *old_frame = (struct frame_arp *)packet;
     struct frame_arp frame;
