@@ -21,32 +21,6 @@
 #endif
 */
 
-#ifndef ETHER_HDR
-#define ETHER_HDR
-struct ether_hdr {
-    unsigned char   dst_mac[6];
-    unsigned char   src_mac[6];
-    unsigned short  proto_type;
-} __attribute__ ((__packed__));
-#endif
-
-#ifndef ICMP_HDR
-#define ICMP_HDR
-struct icmp_hdr {
-    unsigned char   i_type;
-    unsigned char   i_code;
-    unsigned short  i_cksum;
-} __attribute__ ((__packed__));
-#endif
-
-#ifndef PING_HDR
-#define PING_HDR
-struct ping_hdr {
-    unsigned char   i_id;
-    unsigned char   i_seq;
-} __attribute__ ((__packed__));
-#endif
-
 #ifndef FRAME_HDR
 #define FRAME_HDR
 // 14 bytes
@@ -238,3 +212,4 @@ struct frame_ip {
 #endif
 
 #endif
+
