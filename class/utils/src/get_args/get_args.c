@@ -14,7 +14,7 @@ void get_args(int agrc, char *agrv[], struct options *opt)
 {
     int i = 0;
     int ret_int = 1;
-    int fount_flag = 0;
+    int found_flag = 0;
     struct options *opts = opt;
 
     if (agrc < 1 || agrv == NULL) {
@@ -27,16 +27,16 @@ void get_args(int agrc, char *agrv[], struct options *opt)
     }
 
     for (i = 1; i < agrc; i++) {
-        fount_flag = 0;
+        found_flag = 0;
         for (opts = opt; (opts->short_name != NULL || opts->long_name != NULL); opts++) {
             if (opts->been_get == 1) {
-                fount_flag = 1;
+                found_flag = 1;
                 continue;
             }
              
             if ((opts->short_name != NULL && strlen(agrv[i]) == strlen(opts->short_name) && !strncasecmp(opts->short_name, agrv[i], strlen(opts->short_name))) || (opts->long_name != NULL && strlen(agrv[i]) == strlen(opts->long_name) && !strncasecmp(opts->long_name, agrv[i], strlen(opts->long_name)))) {
     
-                fount_flag = 1;
+                found_flag = 1;
                 if (opts->value == NULL) continue;
                 if (opts->has_args == 0) {
                     if (opts->value_type == RET_STR) {
@@ -75,7 +75,7 @@ void get_args(int agrc, char *agrv[], struct options *opt)
             } 
         }
 
-        if (!fount_flag) {
+        if (!found_flag) {
             fprintf(stderr, "Invalid arguement\n");
             exit(1);
         }

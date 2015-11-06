@@ -21,10 +21,10 @@
 #endif
 */
 
-#ifndef FRAME_HDR
-#define FRAME_HDR
+#ifndef ether_hdr
+#define ether_hdr
 // 14 bytes
-struct frame_hdr {
+struct ether_hdr {
     unsigned char   dst_mac[6];
     unsigned char   src_mac[6];
     unsigned short  protocol;
@@ -145,7 +145,7 @@ struct icmp_hdr {
 #define FRAME_ARP
 //all frame 14+8+20 bytes
 struct frame_arp {
-    struct frame_hdr fh;
+    struct ether_hdr fh;
     struct arp_hdr   ah;
 };
 #endif
@@ -154,7 +154,7 @@ struct frame_arp {
 #define FRAME_UDP
 //all frame 14+20+8 bytes
 struct frame_udp {
-    struct frame_hdr fh;
+    struct ether_hdr fh;
     struct ip_hdr    ih;
     struct udp_hdr   uh;
 };
@@ -164,7 +164,7 @@ struct frame_udp {
 #define FRAME_TCP
 //all frame 14+20+20 bytes
 struct frame_tcp {
-    struct frame_hdr fh;
+    struct ether_hdr fh;
     struct ip_hdr    ih;
     struct tcp_hdr   th;
 };
@@ -173,7 +173,7 @@ struct frame_tcp {
 #ifndef FRAME_IP
 #define FRAME_IP
 struct frame_ip {
-    struct frame_hdr fh;
+    struct ether_hdr fh;
     struct ip_hdr    ih;
     union {
         struct udp_hdr uh;

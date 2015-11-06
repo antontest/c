@@ -77,25 +77,25 @@ int main(int agrc, char *agrv[])
     }
 
     if (name_by_pid_flag) {
-        if (!get_name_by_pid(pid, buf, sizeof(buf)))
+        if (!get_proc_name(pid, buf, sizeof(buf)))
             printf("\033[0;35m%s\n\033[0m", buf);
     }
 
     if (par_flag) {
         ppid = get_ppid(pid);
         if (ppid > 0) {
-            if (!get_name_by_pid(ppid, buf, sizeof(buf)))
+            if (!get_proc_name(ppid, buf, sizeof(buf)))
                 printf("\033[0;35m%s\n\033[0m", buf);
         }
     }
 
     if (unique_flag) {
-        rt = is_proc_unique(name);
+        rt = check_proc_unique(name);
         printf("\033[0;35m%d\n\033[0m", rt);
     }
 
     if (exec_path_flag) {
-        if (!get_exe_path_by_pid(pid, buf, sizeof(buf)))
+        if (!get_exec_path(pid, buf, sizeof(buf)))
             printf("\033[0;36mpath of pid %d is: \033[0;35m%s\n\033[0m", pid, buf);
         else 
             printf("\033[0;31mget path of pid %d failed \n\033[0m", pid);

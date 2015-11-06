@@ -65,7 +65,7 @@ int get_ppid(pid_t pid);
  *
  * @return pid , if succ; -1, if failed.
  */
-int get_pid_by_name(const char *proc_name, int pid[], int size);
+int get_pid(const char *proc_name, int pid[], int size);
 
 /**
  * @brief get process name with pid
@@ -76,7 +76,7 @@ int get_pid_by_name(const char *proc_name, int pid[], int size);
  *
  * @return 0, if succ; -1, if failed
  */
-int get_name_by_pid(pid_t pid, char *name, int size);
+int get_proc_name(pid_t pid, char *name, int size);
 
 /**
  * @brief check process is unique 
@@ -85,7 +85,7 @@ int get_name_by_pid(pid_t pid, char *name, int size);
  *
  * @return 1, if process unique; otherwise return 0
  */
-int is_proc_unique(const char *proc_name);
+int check_proc_unique(const char *proc_name);
 
 /**
  * @brief get proc exe path by pid
@@ -96,7 +96,7 @@ int is_proc_unique(const char *proc_name);
  *
  * @return 0, if succ; -1, if failed
  */
-int get_exe_path_by_pid(pid_t pid, char *path, int size);
+int get_exec_path(pid_t pid, char *path, int size);
 
 /**
  * @brief get file path by fd and pid

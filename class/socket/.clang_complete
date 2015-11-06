@@ -3,8 +3,13 @@
 -I .
 -I ./src
 -I ./src/lib
+-I ./src/property
 -I ./src/main
+-I ./src/chunk
+-I ./src/arp
 -I ./src/socket
+-I ./src/packet
+-I ./src/header
+-I ./src/manager
+-I ./src/host
 -I ./src/include
--I ./src/socket_manager
--I ./src/socket_host

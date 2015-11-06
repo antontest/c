@@ -78,15 +78,6 @@ int main(int agrc, char *agrv[])
         {"-m", "--message",   1, RET_STR, ADDR_ADDR(message)   },
     };
  
-    printf("ifname: %s\n", get_ifname(0));
-    printf("ip: %s\n", get_local_ip(AF_INET6, NULL, 1));
-    print_mac(get_mac_addr(NULL), "mac");
-    printf("subnet: %s\n", get_subnet_addr("172.21.34.34", "255.255.0.0"));
-    printf("mask: %d\n", mask_to_bits("255.255.255.0"));
-    printf("speed: %d\n", get_eth_speed("eth0"));
-    printf("gateway: %s\n", get_gateway());
-    print_mac(get_net_mac("172.21.34.89", 4), "mac");
-    return 0;
     get_args(agrc, agrv, opts);
     if(help_flag > 0) {
         print_usage();

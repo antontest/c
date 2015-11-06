@@ -174,7 +174,7 @@ int get_ppid(pid_t pid)
  *
  * @return pid , if succ; -1, if failed.
  */
-int get_pid_by_name(const char *proc_name, int pid[], int size)
+int get_pid(const char *proc_name, int pid[], int size)
 {
     struct dirent *dir = NULL;
     DIR *dirp = NULL;
@@ -217,7 +217,7 @@ int get_pid_by_name(const char *proc_name, int pid[], int size)
  *
  * @return 0, if succ; -1, if failed
  */
-int get_name_by_pid(pid_t pid, char *name, int size)
+int get_proc_name(pid_t pid, char *name, int size)
 {
     char path[64] = {0};
     char buf[64] = {0};
@@ -243,10 +243,10 @@ free:
  *
  * @param name [in] process name
  *
- * @return pid of already running, if process unique; \ 
+ * @return pid of already running, if process unique;  
  *          otherwise return 0
  */
-int is_proc_unique(const char *proc_name)
+int check_proc_unique(const char *proc_name)
 {
     struct dirent *dir = NULL;
     DIR *dirp = NULL;
@@ -290,7 +290,7 @@ int is_proc_unique(const char *proc_name)
  *
  * @return 0, if succ; -1, if failed
  */
-int get_exe_path_by_pid(pid_t pid, char *path, int size)
+int get_exec_path(pid_t pid, char *path, int size)
 {
     char exe_path[64] = {0};
     char buf[256] = {0};
@@ -401,7 +401,7 @@ int read_uptime(void) {
     int uptime = 0;
 
     fp = fopen("/proc/uptime", "r");
-    fscanf(fp, "%u.", &uptime);
+    if (fscanf(fp, "%u.", &uptime)) {}
     fclose(fp);
 
     return uptime;
@@ -500,7 +500,7 @@ int check_app_start_conflict(const char *app_name, const char *state_file, int (
     if ((fp = fopen(state_file, "r")) == NULL) {
         return errno;
     }
-    fgets(app_state, sizeof(app_state), fp);
+    if (fgets(app_state, sizeof(app_state), fp)) {}
     sscanf(app_state, "%*[^:]:%[^-]-%*[^:]:%*[^:]:%[0-9]", pid, state);
     fclose(fp);
 
@@ -550,14 +550,14 @@ int app_state_check(const char *app_name, int pid_num, int uptime, const char *s
 
     now = read_uptime();
     fp = fopen(state_file, "r+");
-    fgets(app_state, sizeof(app_state), fp);
+    if (fgets(app_state, sizeof(app_state), fp)) {}
     idx = rindex(app_state, ':');
     status = atoi(++idx);
     fseek(fp, -strlen(idx), SEEK_CUR);
     sscanf(app_state, "%*[^:]:%*[^:]:%[^-]", app_uptime);
 
     if (pid_num) {
-        if (!is_proc_unique(app_name)) {
+        if (!check_proc_unique(app_name)) {
             ret = APP_RUNNING;
         } else {
             ret = APP_STOPPED;
