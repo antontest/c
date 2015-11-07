@@ -2,13 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <fcntl.h>
-#include <sys/types.h>
 #include <sys/stat.h>
-#include <pthread.h>
-#include <stdbool.h>
-#include <sys/sysinfo.h>
-#include <sys/errno.h>
+#include <stdarg.h>
 #include <utils/utils.h>
 #include "fileio.h"
 
@@ -87,7 +82,7 @@ METHOD(fileio_t, readn_, char *, private_fileio_t *this, int size)
     if (!this->read_buffer) this->read_buffer = malloc(this->read_buf_size);
     if (!this->read_buffer) return NULL;
 
-    fread(this->read_buffer, size < this->read_buf_size ? size : this->read_buf_size, 1, this->fp);
+    ignore_result(fread(this->read_buffer, size < this->read_buf_size ? size : this->read_buf_size, 1, this->fp));
     return this->read_buffer;
 }
 
@@ -137,7 +132,7 @@ METHOD(fileio_t, seek_, int, private_fileio_t *this, int offset, int whence)
 
 METHOD(fileio_t, truncate_, void, private_fileio_t *this, unsigned int length)
 {
-    ftruncate(fileno(this->fp), length);
+    if (ftruncate(fileno(this->fp), length) < 0) return;
     rewind(this->fp);
 }
 
