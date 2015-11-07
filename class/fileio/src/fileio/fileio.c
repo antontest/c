@@ -5,26 +5,26 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <signal.h>
 #include <pthread.h>
-#include <semaphore.h>
 #include <stdbool.h>
 #include <sys/sysinfo.h>
 #include <sys/errno.h>
-#include <sys/wait.h>
-#include <sys/select.h>
-#include <getopt.h>
-#include <time.h>
 #include <utils/utils.h>
 #include "fileio.h"
 
-#define DEFAULT_FILE_BUFFER_SIZE (1024)
+#define DEFAULT_FILE_READ_BUFFER_SIZE (1024)
+#define DEFAULT_FILE_WRITE_BUFFER_SIZE (1024)
 typedef struct private_fileio_t private_fileio_t;
 struct private_fileio_t {
     /**
      * @brief public interface
      */
     fileio_t public;
+
+    /**
+     * @brief save file name
+     */
+    char *filename;
 
     /**
      * @brief file handle
@@ -35,40 +35,237 @@ struct private_fileio_t {
      * @brief buffer of file dealing
      */
     char *read_buffer;
+
+    /**
+     * @brief read buffer size
+     */
+    unsigned int read_buf_size;
+
+    /**
+     * @brief buffer of writing
+     */
+    char *write_buffer;
+
+    /**
+     * @brief write buffer size
+     */
+    unsigned int write_buf_size;
 };
 
 METHOD(fileio_t, open_, FILE *, private_fileio_t *this, const char *filename, const char *mode)
 {
+    if (this->fp != NULL) return this->fp;
     if (!filename || !mode) return NULL;
+
     this->fp = fopen(filename, mode);
+    if (this->fp != NULL) {
+        if (this->filename != NULL) free(this->filename);
+        this->filename = strdup(filename);
+    }
+
+    return this->fp;
+}
+
+METHOD(fileio_t, ropen, FILE *, private_fileio_t *this, const char *mode)
+{
+    this->fp = freopen(this->filename, mode, this->fp);
     return this->fp;
 }
 
 METHOD(fileio_t, read_, char *, private_fileio_t *this)
 {
     if (!this->fp) return NULL;
-    if (!this->read_buffer) this->read_buffer = malloc(DEFAULT_FILE_BUFFER_SIZE);
+    if (!this->read_buffer) this->read_buffer = malloc(this->read_buf_size);
     if (!this->read_buffer) return NULL;
 
-    return fgets(this->read_buffer, DEFAULT_FILE_BUFFER_SIZE, this->fp);
+    return fgets(this->read_buffer, this->read_buf_size, this->fp);
+}
+
+METHOD(fileio_t, readn_, char *, private_fileio_t *this, int size)
+{
+    if (!this->fp) return NULL;
+    if (!this->read_buffer) this->read_buffer = malloc(this->read_buf_size);
+    if (!this->read_buffer) return NULL;
+
+    fread(this->read_buffer, size < this->read_buf_size ? size : this->read_buf_size, 1, this->fp);
+    return this->read_buffer;
+}
+
+METHOD(fileio_t, readrl_, char *, private_fileio_t *this, char *buffer, int size)
+{
+    if (!this->fp) return NULL;
+    if (!buffer || size < 1) return NULL;
+    return fgets(buffer, size, this->fp);
+}
+
+METHOD(fileio_t, readrn_, int, private_fileio_t *this, char *buffer, int size)
+{
+    if (!this->fp || !buffer || size < 1) return -1;
+    return fread(buffer, size, 1, this->fp);
 }
 
 METHOD(fileio_t, write_, int, private_fileio_t *this, const char *buf)
 {
-    if (!buf || !this->fp) return -1;
+    int write_size = 0;
     
-    return fputs(buf, this->fp);
+    if (!buf || !this->fp) return -1;    
+    write_size = fputs(buf, this->fp);
+    fflush(this->fp);
+
+    return write_size;
+}
+
+METHOD(fileio_t, vwrite_, int, private_fileio_t *this, const char *fmt, ...)
+{
+    va_list arg;
+    int write_cnt = 0;
+
+    if (!fmt || !this->fp) return -1;
+    va_start(arg, fmt);
+    write_cnt = vfprintf(this->fp, fmt, arg);
+    fflush(this->fp);
+    va_end(arg);
+
+    return write_cnt;
+}
+
+METHOD(fileio_t, seek_, int, private_fileio_t *this, int offset, int whence)
+{
+    fseek(this->fp, offset, whence);
+    return ftell(this->fp);
+}
+
+METHOD(fileio_t, truncate_, void, private_fileio_t *this, unsigned int length)
+{
+    ftruncate(fileno(this->fp), length);
+    rewind(this->fp);
 }
 
 METHOD(fileio_t, close_, void, private_fileio_t *this)
 {
-    if (this->read_buffer != NULL) free(this->read_buffer);
-    this->read_buffer = NULL;
-
     if (this->fp != NULL) fclose(this->fp);
-    this->fp = NULL;
+    if (this->read_buffer != NULL) memset(this->read_buffer, 0, this->read_buf_size);
+    if (this->write_buffer != NULL) memset(this->write_buffer, 0, this->write_buf_size);
+}
+
+METHOD(fileio_t, destroy_, void, private_fileio_t *this)
+{
+    if (this->fp           != NULL) fclose(this->fp);
+    if (this->read_buffer  != NULL) free(this->read_buffer);
+    if (this->write_buffer != NULL) free(this->write_buffer);
+    if (!this->filename) free(this->filename);
+    this->fp           = NULL;
+    this->read_buffer  = NULL;
+    this->write_buffer = NULL;
+    this->filename     = NULL;
 
     free(this);
+}
+
+METHOD(fileio_t, get_read_buffer, char *, private_fileio_t *this)
+{
+    return this->read_buffer;
+}
+
+METHOD(fileio_t, get_write_buffer, char *, private_fileio_t *this)
+{
+    return this->write_buffer;
+}
+
+METHOD(fileio_t, get_file_handle, FILE *, private_fileio_t *this)
+{
+    return this->fp;
+}
+
+METHOD(fileio_t, get_file_no, int, private_fileio_t *this)
+{
+    return fileno(this->fp);
+}
+
+METHOD(fileio_t, get_filename, char *, private_fileio_t *this)
+{
+    return this->filename;
+}
+
+METHOD(fileio_t, get_file_size, int, private_fileio_t *this)
+{
+    int total_size = 0;
+    int before_size = 0;
+
+    before_size = ftell(this->fp);
+    fseek(this->fp, 0, SEEK_END);
+    total_size = ftell(this->fp);
+    fseek(this->fp, before_size, SEEK_SET);
+
+    return total_size;
+}
+
+METHOD(fileio_t, get_before_size, int, private_fileio_t *this)
+{
+    return ftell(this->fp);
+}
+
+METHOD(fileio_t, get_rest_size, int, private_fileio_t *this)
+{
+    int total_size = 0;
+    int before_size = 0;
+
+    before_size = ftell(this->fp);
+    fseek(this->fp, 0, SEEK_END);
+    total_size = ftell(this->fp);
+    fseek(this->fp, before_size, SEEK_SET);
+
+    return (total_size - before_size);
+}
+
+METHOD(fileio_t, get_read_buf_size, int, private_fileio_t *this)
+{
+    return this->read_buf_size;
+}
+
+METHOD(fileio_t, get_write_buf_size, int, private_fileio_t *this)
+{
+    return this->write_buf_size;
+}
+
+METHOD(fileio_t, set_read_buf_size, char *, private_fileio_t *this, unsigned int size)
+{
+    char *ptr = NULL;
+
+    if (!this->read_buffer) {
+        this->read_buffer = malloc(size);
+        return this->read_buffer;
+    }
+
+    if (this->read_buf_size != size) {
+        ptr = realloc(this->read_buffer, size);
+        if (ptr != NULL) {
+            this->read_buffer = ptr;
+            this->read_buf_size = size;
+        }
+    }
+
+    return this->read_buffer;
+}
+
+METHOD(fileio_t, set_write_buf_size, char *, private_fileio_t *this, unsigned int size)
+{
+    char *ptr = NULL;
+
+    if (!this->write_buffer) {
+        this->write_buffer = malloc(size);
+        return this->write_buffer;
+    }
+
+    if (this->write_buf_size != size) {
+        ptr = realloc(this->write_buffer, size);
+        if (ptr != NULL) {
+            this->write_buffer = ptr;
+            this->write_buf_size = size;
+        }
+    }
+
+    return this->write_buffer;
 }
 
 /**
@@ -82,17 +279,46 @@ fileio_t *create_fileio(const char *filename, const char *mode)
 
     INIT(this,
         .public = {
-            .open  = _open_,
-            .read  = _read_,
-            .write = _write_,
-            .close = _close_,
+            .open     = _open_,
+            .ropen    = _ropen,
+            .read     = _read_,
+            .readn    = _readn_,
+            .readrl   = _readrl_,
+            .readrn   = _readrn_,
+            .write    = _write_,
+            .vwrite   = _vwrite_,
+            .seek     = _seek_,
+            .truncate = _truncate_,
+            .close    = _close_,
+            .destroy  = _destroy_,
+
+            .get_file_handle    = _get_file_handle,
+            .get_file_no        = _get_file_no,
+            .get_filename       = _get_filename,
+            .get_file_size      = _get_file_size,
+            .get_rest_size      = _get_rest_size,
+            .get_before_size    = _get_before_size,
+            .get_read_buf_size  = _get_read_buf_size,
+            .get_write_buf_size = _get_write_buf_size,
+            .get_read_buffer    = _get_read_buffer,
+            .get_write_buffer   = _get_write_buffer,
+
+            .set_read_buf_size  = _set_read_buf_size,
+            .set_write_buf_size = _set_write_buf_size,
         },
         .fp = NULL,
-        .read_buffer = NULL,
+        .filename     = NULL,
+        .read_buffer  = NULL,
+        .write_buffer = NULL,
+        .read_buf_size  = DEFAULT_FILE_READ_BUFFER_SIZE,
+        .write_buf_size = DEFAULT_FILE_WRITE_BUFFER_SIZE,
     );
 
-    if (filename != NULL && mode != NULL)
+    if (filename != NULL && mode != NULL) {
         this->fp = fopen(filename, mode);
+        this->filename = strdup(filename);
+    }
+
     return &this->public;
 }
 
@@ -176,6 +402,119 @@ void a_trim(char *s)
     }
     *b = '\0';
 }
+
+typedef struct private_cfg_t private_cfg_t;
+struct private_cfg_t {
+    /**
+     * @brief public interface
+     */
+    cfg_t public;
+
+    /**
+     * deal with file, like open, read and wirte
+     */
+    fileio_t *file;
+};
+
+METHOD(cfg_t, get_value, char *, private_cfg_t *this, const char *keyname, const char *split)
+{
+    char *read_ptr = NULL;
+    char *ret_ptr  = NULL;
+    char *save_ptr = NULL;
+
+    if (!keyname || !split) return NULL;
+    while ((read_ptr = this->file->read(this->file)) != NULL) {
+        ret_ptr = strtok_r(read_ptr, split, &save_ptr);
+        if (!ret_ptr) continue;
+        if (!strcmp(ret_ptr, keyname)) break;
+    }
+
+    ret_ptr = strtok_r(NULL, split, &save_ptr);
+    if (!ret_ptr) return NULL;
+    ret_ptr = strtok_r(ret_ptr, "\n", &save_ptr);
+    
+    return ret_ptr;
+}
+
+METHOD(cfg_t, set_value, void, private_cfg_t *this, const char *keyname, const char *split, const char *value)
+{
+    char *read_ptr  = NULL;
+    char *ret_ptr   = NULL;
+    char *save_ptr  = NULL;
+    char *write_ptr = NULL;
+    char *value_ptr = NULL;
+    int  write_pos  = 0;
+
+    if (!keyname || !split) return;
+    if (!this->file->ropen(this->file, "r+")) return;
+
+    this->file->set_write_buf_size(this->file, this->file->get_file_size(this->file) + (value != NULL ? strlen(value) : 0));
+    write_ptr = this->file->get_write_buffer(this->file);
+    if (!write_ptr) return;
+    
+    this->file->seek(this->file, 0, SEEK_SET);
+    while ((read_ptr = this->file->read(this->file)) != NULL) {
+        sprintf(write_ptr, "%s%c", read_ptr, '\0');
+        ret_ptr = strtok_r(read_ptr, split, &save_ptr);
+        if (!ret_ptr) continue;
+        if (!strcmp(ret_ptr, keyname)) break;
+    }
+    
+    ret_ptr = strtok_r(NULL, split, &save_ptr);
+    if (!ret_ptr) return;
+    ret_ptr = strtok_r(ret_ptr, "\n", &save_ptr);
+    if (value != NULL && strlen(ret_ptr) == strlen(value) && !strcmp(ret_ptr, value)) return;
+
+    write_pos = this->file->get_before_size(this->file) - strlen(write_ptr);
+    value_ptr = strstr(write_ptr, ret_ptr);
+    if (value != NULL) {
+        strcpy(value_ptr, value);
+        strcat(write_ptr, "\n");
+    } else {
+        memset(write_ptr, 0, this->file->get_write_buf_size(this->file));
+    }
+
+    this->file->readrn(this->file, write_ptr + strlen(write_ptr), this->file->get_rest_size(this->file));
+    strcat(write_ptr, "\0");
+    
+    this->file->truncate(this->file, write_pos);
+    this->file->seek(this->file, write_pos, SEEK_SET);
+    this->file->write(this->file, write_ptr);
+}
+
+METHOD(cfg_t, cfg_destroy, void, private_cfg_t *this)
+{
+    if (this->file != NULL) this->file->close(this->file);
+    free(this);
+    this = NULL;
+}
+
+/**
+ * @brief create config file dealing instance 
+ *
+ * @param filename   config file name
+ */
+cfg_t *create_cfg(const char *filename)
+{
+    private_cfg_t *this;
+
+    if (filename == NULL && access(filename, F_OK) != 0) return NULL;
+    INIT(this,
+        .public = {
+            .get_value = _get_value,
+            .set_value = _set_value,
+            .destroy = _cfg_destroy,
+        },
+        .file = create_fileio(filename, "r"),
+    );
+    if (!this->file) {
+        free(this);
+        return NULL;
+    }
+
+    return &this->public;
+}
+
 
 /**
  * @brief get config info from line buffer
@@ -650,4 +989,21 @@ free:
     sum_buf = NULL;
 
     return rt;
+}
+
+/**
+ * @brief recover filename by file handle
+ *
+ * @param fp   file handle
+ * @return     file name
+ */
+static char local_file_name[255];
+char *recover_filename(FILE *fp)
+{
+    char fd_path[255] = {0};
+    
+    if (!fp) return NULL;
+    sprintf(fd_path, "/proc/self/fd/%d", fileno(fp));
+    if (readlink(fd_path, local_file_name, sizeof(local_file_name)) < 0) return NULL;
+    return local_file_name;
 }
