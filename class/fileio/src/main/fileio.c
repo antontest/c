@@ -28,10 +28,15 @@ int main(int agrc, char *agrv[])
 /*     fp->close(fp); */
 
     struct cfg_t *cfg = create_cfg("t.txt");
-    printf("value: %s\n", cfg->get_value(cfg, "name", ",:="));
+    printf("value: %s\n", cfg->get_value(cfg, "name"));
     //cfg->set_value(cfg, "name", ",:=", "antonio");
-    cfg->set_value(cfg, "name", ",:=", NULL);
+    //cfg->set_value(cfg, "name", ",:=", NULL);
     cfg->destroy(cfg);
+
+    struct ini_t *ini = create_ini("t.txt");
+    printf("value: %s\n", ini->get_value(ini, "info", "name1"));
+    ini->set_value(ini, "info2", "name", "antonio");
+    ini->destroy(ini);
 
     return rt;
 }

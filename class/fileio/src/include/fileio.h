@@ -147,6 +147,12 @@ struct fileio_t {
     int (*get_write_buf_size) (fileio_t *this);
 
     /**
+     * @brief  tests the end-of-file indicator for the stream pointed to by stream
+     * @return non zero, if end of file; 0, if not; -1, if failed
+     */
+    int (*is_endof) (fileio_t *this);
+
+    /**
      * @brief set file read buffer size
      *        default value: 1024
      *
@@ -181,7 +187,7 @@ struct cfg_t {
      *
      * @return          key value
      */
-    char *(*get_value) (cfg_t *this, const char *keyname, const char *split);
+    char *(*get_value) (cfg_t *this, const char *keyname);
 
     /**
      * @brief Get value by name from configure file  
@@ -190,7 +196,12 @@ struct cfg_t {
      * @param split     file config with split
      * @param value     value
      */
-    void (*set_value) (cfg_t *this, const char *keyname, const char *split, const char *value);
+    void (*set_value) (cfg_t *this, const char *keyname, const char *value);
+
+    /**
+     * @brief  config split
+     */
+    void (*set_split) (cfg_t *this, const char *split);
 
     /**
      * @brief free instance and memory
@@ -206,93 +217,51 @@ struct cfg_t {
 cfg_t *create_cfg(const char *filename);
 
 
-/**
- * @brief trim blank char at left side
- *
- * @param s [in] string
- */
-void l_trim(char *s);
+typedef struct ini_t ini_t;
+struct ini_t {
+    /**
+     * @brief Get value by name from configure file  
+     *
+     * @param key_name  config key name
+     * @param split     file config with split
+     *
+     * @return          key value
+     */
+    char *(*get_value) (ini_t *this, const char *appname, const char *keyname);
+
+    /**
+     * @brief Get value by name from configure file  
+     *
+     * @param key_name  config key name
+     * @param split     file config with split
+     * @param value     value
+     */
+    void (*set_value) (ini_t *this, const char *appname, const char *keyname, const char *value);
+
+    /**
+     * @brief  ini config split
+     */
+    void (*set_split) (ini_t *this, const char *split);
+
+    /**
+     * @brief free instance and memory
+     */
+    void (*destroy) (ini_t *this);
+};
 
 /**
- * @brief trim blank char at right side
+ * @brief create config file dealing instance 
  *
- * @param s [in] string
+ * @param filename   config file name
  */
-void r_trim(char *s);
+ini_t *create_ini(const char *filename);
+
 
 /**
- * @brief trim blank char at middle string 
- *          if blank is more than two
+ * @brief recover filename by file handle
  *
- * @param s [in] string
+ * @param fp   file handle
+ * @return     file name
  */
-void mid_trim(char *s);
-
-/**
- * @brief remove all blank from string
- *
- * @param s [in] string
- */
-void a_trim(char *s);
-
-/**
- * @brief get config info from line buffer
- *
- * @param line  [in] config line info
- * @param split [in] search by split char 
- * @param name  [out] left value splited by char
- * @param value [out] right value splited by char
- * 
- * @return  num of split char's position; -1, if not found or error
- */
-int cfg_line_split(char *line, const char *split, char **name, char **value);
-
-/**
- * @brief get the value from config
- *
- * @param key_name [in] key name
- * @param split    [in] split char
- * @param value[]  [out] key value
- * @param path     [in] path of config file
- *
- * @return 0, if succ; -1, if fail
- */
-int cfg_value_gain(const char *key_name, const char *split, char value[], const char *path) ;
-
-/**
- * @brief set the value from config
- *
- * @param key_name [in] key name
- * @param split    [in] split char
- * @param value    [in] key value
- * @param path     [in] path of config file
- *
- * @return 0, if succ; -1, if fail
- */
-int cfg_value_set(const char *key_name, const char *split, const char *value, const char *path);
-
-/**
- * @brief get the value from file_name.ini
- *
- * @param app_name [in] app name
- * @param key_name [in] key name
- * @param value[]  [out] key value
- * @param path     [in] path of config file
- *
- * @return 0, if succ; -1, if fail
- */
-int ini_value_gain(const char *app_name, const char *key_name, char value[], const char *path);
-
-/**
- * @brief set the value from file_name.ini
- *
- * @param app_name [in] app name
- * @param key_name [in] key name
- * @param value    [in] key value
- * @param path     [in] path of config file
- *
- * @return 0, if succ; -1, if fail
- */
-int ini_value_set(const char *app_name, const char *key_name, const char *value, const char *path);
-
+char *recover_filename(FILE *fp);
 #endif
