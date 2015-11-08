@@ -3,9 +3,208 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <fcntl.h>
+#include <signal.h>
 #include <stdarg.h>
 #include <utils/utils.h>
 #include "fileio.h"
+
+typedef struct private_filelock_t private_filelock_t;
+struct private_filelock_t {
+    /**
+     * @brief public interface
+     */
+    filelock_t public;
+
+    /**
+     * @brief file handle
+     */
+    FILE *fp;
+
+    /**
+     * @brief file handle
+     */
+    int fd;
+};
+
+static int file_lock_register(int fd, int cmd, int type, off_t offset, int whence, int len)
+{
+    struct flock lock;
+
+    lock.l_type   = type;
+    lock.l_start  = offset;
+    lock.l_whence = whence;
+    lock.l_len    = len;
+    lock.l_pid    = getpid();
+    
+    return fcntl(fd, cmd, &lock);
+}
+
+static pid_t file_lock_test(int fd, int type, off_t offset, int whence, int len)
+{
+    struct flock lock;
+
+    lock.l_type   = type;
+    lock.l_start  = offset;
+    lock.l_whence = whence;
+    lock.l_len    = len;
+
+    if (fcntl(fd, F_GETLK, &lock) < 0) {
+        return -1;
+    }
+
+    if (lock.l_type == F_UNLCK) {
+        return 0;
+    }
+
+    return (int)lock.l_pid;
+}
+
+METHOD(filelock_t, lock_register, int, private_filelock_t *this, int cmd, int type, off_t offset, int whence, off_t len)
+{
+    return file_lock_register(this->fd, cmd, type, offset, whence, len);
+}
+
+METHOD(filelock_t, read_lock, int, private_filelock_t *this, off_t offset, int whence, off_t len)
+{
+    return file_lock_register(this->fd, F_SETLKW, F_RDLCK, offset, whence, len);
+}
+
+METHOD(filelock_t, read_lock_all, int, private_filelock_t *this)
+{
+    int len = 0;
+    int curr_pos = 0;
+
+    curr_pos = ftell(this->fp);
+    fseek(this->fp, 0, SEEK_END);
+    len = ftell(this->fp);
+    fseek(this->fp, curr_pos, SEEK_SET);
+
+    return file_lock_register(this->fd, F_SETLKW, F_RDLCK, 0, SEEK_SET, len);
+}
+
+METHOD(filelock_t, read_lock_rest, int, private_filelock_t *this)
+{
+    int len = 0;
+    int curr_pos = 0;
+
+    curr_pos = ftell(this->fp);
+    fseek(this->fp, 0, SEEK_END);
+    len = ftell(this->fp);
+    fseek(this->fp, curr_pos, SEEK_SET);
+
+    return file_lock_register(this->fd, F_SETLKW, F_RDLCK, curr_pos, SEEK_SET, len - curr_pos);
+}
+
+METHOD(filelock_t, write_lock_all, int, private_filelock_t *this)
+{
+    int len = 0;
+    int curr_pos = 0;
+
+    curr_pos = ftell(this->fp);
+    fseek(this->fp, 0, SEEK_END);
+    len = ftell(this->fp);
+    fseek(this->fp, curr_pos, SEEK_SET);
+
+    return file_lock_register(this->fd, F_SETLKW, F_WRLCK, 0, SEEK_SET, len);
+}
+
+METHOD(filelock_t, write_lock_rest, int, private_filelock_t *this)
+{
+    int len = 0;
+    int curr_pos = 0;
+
+    curr_pos = ftell(this->fp);
+    fseek(this->fp, 0, SEEK_END);
+    len = ftell(this->fp);
+    fseek(this->fp, curr_pos, SEEK_SET);
+
+    return file_lock_register(this->fd, F_SETLKW, F_WRLCK, curr_pos, SEEK_SET, len - curr_pos);
+}
+
+METHOD(filelock_t, read_lock_try, int, private_filelock_t *this, off_t offset, int whence, off_t len)
+{
+    return file_lock_register(this->fd, F_SETLK, F_RDLCK, offset, whence, len);
+}
+
+METHOD(filelock_t, write_lock, int, private_filelock_t *this, off_t offset, int whence, off_t len)
+{
+    return file_lock_register(this->fd, F_SETLKW, F_WRLCK, offset, whence, len);
+}
+
+METHOD(filelock_t, write_lock_try, int, private_filelock_t *this, off_t offset, int whence, off_t len)
+{
+    return file_lock_register(this->fd, F_SETLK, F_WRLCK, offset, whence, len);
+}
+
+METHOD(filelock_t, unlock, int, private_filelock_t *this, off_t offset, int whence, off_t len)
+{
+    return file_lock_register(this->fd, F_SETLK, F_UNLCK, offset, whence, len);
+}
+
+METHOD(filelock_t, is_read_lockable, int, private_filelock_t *this, off_t offset, int whence, off_t len)
+{
+    return !file_lock_test(this->fd, F_RDLCK, offset, whence, len);
+}
+
+METHOD(filelock_t, is_write_lockable, int, private_filelock_t *this, off_t offset, int whence, off_t len)
+{
+    return !file_lock_test(this->fd, F_WRLCK, offset, whence, len);
+}
+
+METHOD(filelock_t, file_lock_destroy, void, private_filelock_t *this)
+{
+    int curr_pos = 0;
+    int len = 0;
+
+    curr_pos = ftell(this->fp);
+    fseek(this->fp, 0, SEEK_END);
+    len = ftell(this->fp);
+    fseek(this->fp, curr_pos, SEEK_SET);
+    file_lock_register(this->fd, F_SETLK, F_UNLCK, 0, SEEK_SET, len);
+    free(this);
+}
+
+METHOD(filelock_t, set_file_handle, void, private_filelock_t *this, FILE *fp)
+{
+    this->fp = fp;
+    this->fd = fileno(this->fp);
+}
+
+filelock_t *create_filelock(FILE *fp)
+{
+    private_filelock_t *this;
+    
+    INIT(this,
+        .public = {
+            .lock_register   = _lock_register,
+            .read_lock       = _read_lock,
+            .read_lock_all   = _read_lock_all,
+            .read_lock_rest  = _read_lock_rest,
+            .read_lock_try   = _read_lock_try,
+            .write_lock      = _write_lock,
+            .write_lock_all  = _write_lock_all,
+            .write_lock_rest = _write_lock_rest,
+            .write_lock_try  = _write_lock_try,
+            .unlock          = _unlock,
+            .destroy         = _file_lock_destroy,
+            
+            .set_file_handle = _set_file_handle,
+
+            .is_read_lockable  = _is_read_lockable,
+            .is_write_lockable = _is_write_lockable,
+        },
+        .fp = NULL,
+        .fd = -1,
+    );
+    if (fp != NULL) {
+        this->fp = fp;
+        this->fd = fileno(fp);
+    }
+    
+    return &this->public;
+}
 
 #define DEFAULT_FILE_READ_BUFFER_SIZE (1024)
 #define DEFAULT_FILE_WRITE_BUFFER_SIZE (1024)

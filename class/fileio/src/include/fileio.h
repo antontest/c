@@ -1,6 +1,119 @@
 #ifndef __CFG_H__
 #define __CFG_H__
 
+typedef struct filelock_t filelock_t;
+struct filelock_t {
+    /**
+     * @brief used to describe the locking register action taking place 
+     *
+     * @param offset  offset from l_whence
+     * @param whence  SEEK_SET, SEEK_CUR, SEEK_END 
+     * @param len     length, 0 = to EOF  
+     */
+    int (*lock_register) (filelock_t *this, int cmd, int type, off_t offset, int whence, off_t len);
+
+    /**
+     * @brief used to describe the read locking action taking place 
+     *
+     * @param offset  offset from l_whence
+     * @param whence  SEEK_SET, SEEK_CUR, SEEK_END 
+     * @param len     length, 0 = to EOF  
+     */
+    int (*read_lock) (filelock_t *this, off_t offset,int whence,off_t len);
+
+    /**
+     * @brief used to describe the read locking action taking place 
+     */
+    int (*read_lock_all) (filelock_t *this);
+
+    /**
+     * @brief used to describe the read locking action taking place 
+     */
+    int (*read_lock_rest) (filelock_t *this);
+
+    /**
+     * @brief used to describe the locking read action taking place 
+     *
+     * @param offset  offset from l_whence
+     * @param whence  SEEK_SET, SEEK_CUR, SEEK_END 
+     * @param len     length, 0 = to EOF  
+     */
+    int (*read_lock_try) (filelock_t *this, off_t offset,int whence,off_t len);
+
+    /**
+     * @brief used to describe the locking write action taking place 
+     *
+     * @param offset  offset from l_whence
+     * @param whence  SEEK_SET, SEEK_CUR, SEEK_END 
+     * @param len     length, 0 = to EOF  
+     */
+    int (*write_lock) (filelock_t *this, off_t offset,int whence,off_t len);
+
+    /**
+     * @brief used to describe the write locking action taking place 
+     */
+    int (*write_lock_all) (filelock_t *this);
+
+    /**
+     * @brief used to describe the locking write action taking place 
+     */
+    int (*write_lock_rest) (filelock_t *this);
+
+    /**
+     * @brief used to describe the locking write action taking place 
+     *
+     * @param offset  offset from l_whence
+     * @param whence  SEEK_SET, SEEK_CUR, SEEK_END 
+     * @param len     length, 0 = to EOF  
+     */
+    int (*write_lock_try) (filelock_t *this, off_t offset,int whence,off_t len);
+
+    /**
+     * @brief used to unlock the locking write action taking place 
+     *
+     * @param offset  offset from l_whence
+     * @param whence  SEEK_SET, SEEK_CUR, SEEK_END 
+     * @param len     length, 0 = to EOF  
+     */
+    int (*unlock) (filelock_t *this, off_t offset, int whence,off_t len);
+
+    /**
+     * @brief set file handle
+     *
+     * @param fd  file handler
+     */
+    void (*set_file_handle) (filelock_t *this, FILE *fp);
+
+    /**
+     * @brief free file lock instance 
+     */
+    void (*destroy) (filelock_t *this);
+
+    /**
+     * @brief checked whether has readable permission 
+     *
+     * @param offset  offset from l_whence
+     * @param whence  SEEK_SET, SEEK_CUR, SEEK_END 
+     * @param len     length, 0 = to EOF  
+     */
+    int (*is_read_lockable) (filelock_t *this, off_t offset, int whence, off_t len);
+
+    /**
+     * @brief checked whether has writeable permission 
+     *
+     * @param offset  offset from l_whence
+     * @param whence  SEEK_SET, SEEK_CUR, SEEK_END 
+     * @param len     length, 0 = to EOF  
+     */
+    int (*is_write_lockable) (filelock_t *this, off_t offset, int whence, off_t len);
+};
+
+/**
+ * @brief create_filelock instance
+ */
+filelock_t *create_filelock(FILE *fp);
+
+
 typedef struct fileio_t fileio_t;
 struct fileio_t {
     /**
