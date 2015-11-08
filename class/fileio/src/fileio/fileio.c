@@ -417,7 +417,7 @@ METHOD(cfg_t, set_cfg_split, void, private_cfg_t *this, const char *split)
 
 METHOD(cfg_t, cfg_destroy, void, private_cfg_t *this)
 {
-    if (this->file != NULL) this->file->close(this->file);
+    if (this->file != NULL) this->file->destroy(this->file);
     free(this);
     this = NULL;
 }
@@ -614,7 +614,7 @@ METHOD(ini_t, set_ini_split, void, private_ini_t *this, const char *split)
 
 METHOD(ini_t, ini_destroy, void, private_ini_t *this)
 {
-    if (this->file != NULL) this->file->close(this->file);
+    if (this->file != NULL) this->file->destroy(this->file);
     free(this);
     this = NULL;
 }
