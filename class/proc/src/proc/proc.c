@@ -161,14 +161,18 @@ METHOD(ipc_t, mkshm, int, private_ipc_t *this, key_t key, size_t size)
 
 METHOD(ipc_t, read_, int, private_ipc_t *this, void *buf, int size)
 {
+    int readed_size = 0;
+
     switch (this->type) {
         case IPC_FIFO:
             return read(this->fifo_fd, buf, size);
         case IPC_SHM:
-            if (this->shm_state != SHM_WRITED) return 0;
-            memcpy(buf, this->shm_data, this->shm_data_size);
+            if (this->shm_state == SHM_CREATING || this->shm_state == SHM_EMPTY) return -1;
+            while (this->shm_state != SHM_WRITED) usleep(10);
+            readed_size = size < this->shm_data_size ? size : this->shm_data_size;
+            memcpy(buf, this->shm_data, readed_size);
             this->shm_state = SHM_READED;
-            return this->shm_data_size;
+            return readed_size;
         default:
             return -1;
     }
@@ -176,16 +180,21 @@ METHOD(ipc_t, read_, int, private_ipc_t *this, void *buf, int size)
 
 METHOD(ipc_t, write_, int, private_ipc_t *this, void *buf, int size)
 {
+    int writed_size = 0;
+
     switch (this->type) {
         case IPC_FIFO:
             return write(this->fifo_fd, buf, size);
         case IPC_SHM:
-            if (this->shm_state != SHM_READED && this->shm_state == SHM_WRITED) return 0;
+            if (this->shm_state == SHM_CREATING || this->shm_state == SHM_EMPTY) return -1;
+            while (this->shm_state == SHM_WRITED && this->shm_state != SHM_READED) usleep(10);
+            
             this->shm_state     = SHM_WRITING;
-            strncpy(this->shm_data, buf, size);
+            writed_size = size < this->shm_size ? size : this->shm_size;
+            memcpy(this->shm_data, buf, writed_size);
             this->shm_state     = SHM_WRITED;
-            this->shm_data_size = size;
-            return size;   
+            this->shm_data_size = writed_size;
+            return writed_size;   
         default:
             return -1;
     }

@@ -44,36 +44,6 @@ int main(int agrc, char *agrv[])
     char buf[512] = {0};
     pid_t ppid = -1;
 
-    /*
-    struct ipc_t *ipc = create_ipc();
-    if (atoi(agrv[1]) == 0) {
-        //if (ipc->mkfifo(ipc, "./ipc", O_RDONLY | O_NONBLOCK) < 0) printf("mkfifo failed\n");
-        if (ipc->mkfifo(ipc, "./ipc", O_RDONLY | O_NONBLOCK) < 0) printf("mkfifo failed\n");
-        while (ipc->read(ipc, buf, sizeof(buf)) == 0);
-        //ipc->read(ipc, buf, sizeof(buf));
-        printf("buf: %s\n", buf);
-        ipc->close(ipc);
-    }
-    else {
-        if (ipc->mkfifo(ipc, "./ipc", O_WRONLY) < 0) printf("mkfifo failed\n");
-        ipc->write(ipc, "fifo succ", strlen("fifo succ\n") + 1);
-    }
-    ipc->destroy(ipc);
-    */
-
-    struct ipc_t *ipc = create_ipc();
-    ipc->mkshm(ipc, 1234, 100);
-    if (atoi(agrv[1]) == 0) {
-        int num;
-        while (ipc->read(ipc, &num, sizeof(num)) == 0) ;
-        printf("buf: %d\n", num);
-        ipc->close(ipc);
-    } else {
-        int num = 100;
-        ipc->write(ipc, &num, sizeof(num));
-    }
-    ipc->destroy(ipc);
-    return 0;
     /**
      * Get paramters from the command line
      */
