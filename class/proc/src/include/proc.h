@@ -1,16 +1,97 @@
 #ifndef __PROC_H__
 #define __PROC_H__
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/wait.h>
-#include <sys/types.h>
-#include <dirent.h>
-#include <errno.h>
-#include <stdarg.h>
-#include <fcntl.h>
+typedef enum shm_state_t shm_state_t;
+enum shm_state_t {
+    SHM_EMPTY    = 0,
+    SHM_CREATING = 1,
+    SHM_CREATED,
+    SHM_READING,
+    SHM_READED,
+    SHM_WRITING,
+    SHM_WRITED,
+    SHM_DESTROYED
+};
+
+struct shm_comm_t {
+    /**
+     * @brief whethen has written data in shared memory
+     */
+    shm_state_t state;
+
+    /**
+     * @brief permission of shared memory
+     */
+    int permission;
+
+    /**
+     * @brief length of data
+     */
+    int data_size;
+
+    /**
+     * @brief data in shared memory
+     */
+    char data[0];
+};
+
+typedef struct ipc_t ipc_t;
+struct ipc_t {
+    /**
+     * @brief Start up a ipc with pipe
+     */
+    int (*mkpipe) (ipc_t *this);
+
+    /**
+     * @brief Start up a ipc with pipe
+     *
+     * @param pathname  path name of fifo file
+     * @param mode      O_RDONLY, O_WRONLY, O_RDONLY | O_NONBLOCK and O_WRONLY | O_NONBLOCK
+     * 
+     * @return          fifo handl(fd), if succ
+     */
+    int (*mkfifo) (ipc_t *this, const char *pathname, const int mode);
+
+    /**
+     * @brief shared memory segment associate
+     *
+     * @param key  the argument key 
+     * @param size shmflg specifies both IPC_CREAT and IPC_EXCL and a shared memory  segment
+     */
+    int (*mkshm) (ipc_t *this, key_t key, size_t size);
+
+    /**
+     * @brief attempts to read up to count bytes from file descriptor fd into the buffer starting at buf
+     *
+     * @param buf   buffer
+     * @param size  size of buffer
+     * @return      On success, the number of bytes read is returned
+     */
+    int (*read) (ipc_t *this, char *buf, int size);
+
+    /**
+     * @brief writes  up  to count bytes from the buffer pointed buf to the file referred to by the file descriptor fd
+     *
+     * @param buf  buffer
+     * @return     On success, the number of bytes write is returned
+     */
+    int (*write) (ipc_t *this, char *buf, int size);
+
+    /**
+     * @brief close ipc 
+     */
+    void (*close) (ipc_t *this);
+
+    /**
+     * @brief Free ipc_t instance 
+     */
+    void (*destroy) (ipc_t *this);
+};
+
+/**
+ * @brief create ipc_t instance
+ */
+ipc_t *create_ipc();
 
 /*********************************************************
  **************    Function Declaration    ***************

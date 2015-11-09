@@ -6,6 +6,10 @@
 #include <string.h>
 #include <unistd.h>
 #include <getopt.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <dirent.h>
 #include <proc.h>
 
 /*********************************************************
@@ -40,6 +44,35 @@ int main(int agrc, char *agrv[])
     char buf[512] = {0};
     pid_t ppid = -1;
 
+    /*
+    struct ipc_t *ipc = create_ipc();
+    if (atoi(agrv[1]) == 0) {
+        //if (ipc->mkfifo(ipc, "./ipc", O_RDONLY | O_NONBLOCK) < 0) printf("mkfifo failed\n");
+        if (ipc->mkfifo(ipc, "./ipc", O_RDONLY | O_NONBLOCK) < 0) printf("mkfifo failed\n");
+        while (ipc->read(ipc, buf, sizeof(buf)) == 0);
+        //ipc->read(ipc, buf, sizeof(buf));
+        printf("buf: %s\n", buf);
+        ipc->close(ipc);
+    }
+    else {
+        if (ipc->mkfifo(ipc, "./ipc", O_WRONLY) < 0) printf("mkfifo failed\n");
+        ipc->write(ipc, "fifo succ", strlen("fifo succ\n") + 1);
+    }
+    ipc->destroy(ipc);
+    */
+
+    struct ipc_t *ipc = create_ipc();
+    ipc->mkshm(ipc, 1234, 100);
+    if (atoi(agrv[1]) == 0) {
+        printf("start read\n");
+        while (ipc->read(ipc, buf, sizeof(buf)) == 0) ;
+        printf("buf: %s\n", buf);
+    } else {
+        ipc->write(ipc, "hi", 3);
+        sleep(3);
+    }
+    ipc->destroy(ipc);
+    return 0;
     /**
      * Get paramters from the command line
      */

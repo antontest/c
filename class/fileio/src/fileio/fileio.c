@@ -381,7 +381,7 @@ METHOD(fileio_t, get_filename, char *, private_fileio_t *this)
     return this->filename;
 }
 
-METHOD(fileio_t, get_file_size, int, private_fileio_t *this)
+METHOD(fileio_t, get_file_total_size, int, private_fileio_t *this)
 {
     int total_size = 0;
     int before_size = 0;
@@ -494,7 +494,7 @@ fileio_t *create_fileio(const char *filename, const char *mode)
             .get_file_handle    = _get_file_handle,
             .get_file_no        = _get_file_no,
             .get_filename       = _get_filename,
-            .get_file_size      = _get_file_size,
+            .get_file_size      = _get_file_total_size,
             .get_rest_size      = _get_rest_size,
             .get_before_size    = _get_before_size,
             .get_read_buf_size  = _get_read_buf_size,

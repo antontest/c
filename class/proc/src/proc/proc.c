@@ -1,4 +1,263 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <dirent.h>
+#include <errno.h>
+#include <stdarg.h>
+#include <fcntl.h>
+#include <utils/utils.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
 #include "proc.h"
+
+typedef enum ipc_type_t ipc_type_t;
+enum ipc_type_t {
+    IPC_PIPE = 1,
+    IPC_FIFO,
+    IPC_SHM
+};
+
+typedef struct private_ipc_t private_ipc_t;
+struct private_ipc_t {
+    /**
+     * @brief public interface
+     */
+    ipc_t public;
+    
+    /**
+     * @brief type of IPC
+     */
+    ipc_type_t type;
+
+    /**
+     * @brief handles
+     */
+    union {
+        int pipe_fds[2];
+#define pipe_fd   ipc.pipe_fds
+#define pread_fd  ipc.pipe_fds[0]
+#define pwrite_fd ipc.pipe_fds[1]
+        
+        /**
+         * fifo
+         */
+        struct {
+            /**
+             * handle
+             */
+            int fd;
+
+            /**
+             * @brief fifo path
+             */
+            char *fifo_path;
+        } fifo;
+#define fifo_fd   ipc.fifo.fd
+#define fifo_path ipc.fifo.fifo_path
+
+        /**
+         * shared memory
+         */
+        struct {
+            /**
+             * handle
+             */
+            int id;
+
+           /**
+            * shared data
+            */
+            void *data;
+
+            /**
+             * address of shared memory
+             */
+            struct shm_comm_t *addr;
+        } shm;
+#define shm_id    ipc.shm.id 
+#define shm_addr  ipc.shm.addr
+#define shm_state ipc.shm.addr->state
+#define shm_perm  ipc.shm.addr->permission
+#define shm_size  ipc.shm.addr->data_size
+#define shm_data  ipc.shm.addr->data 
+    } ipc;
+
+    /**
+     * @brief read buffer
+     */
+    char *read_buffer;
+
+    /**
+     * @brief write buffer
+     */
+    char *write_buffer;
+};
+#define DEFAULT_READ_BUFFER_SIZE  (1024)
+#define DEFAULT_WRITE_BUFFER_SIZE (1024)
+
+METHOD(ipc_t, mkpipe_, int, private_ipc_t *this)
+{
+    if (pipe(this->pipe_fd)) return -1;
+
+    return 0;
+}
+
+METHOD(ipc_t, mkfifo_, int, private_ipc_t *this, const char *pathname, int mode)
+{
+    char *p = NULL;
+
+    this->type = IPC_FIFO;
+    if (!pathname || this->fifo_path != NULL || mode < 0) return -1;
+
+    this->fifo_path = strdup(pathname);
+    if (!this->fifo_path) return -1;
+
+    if (strstr(this->fifo_path, "/") != NULL) {
+        p = this->fifo_path + strlen(this->fifo_path) - 1;
+        while (p >= this->fifo_path) {
+            if (*p == '/') break;
+            p--;
+        }
+        *p = '\0';
+        if (access(this->fifo_path, F_OK)) return -1;
+    }
+
+    if (!(mode & 0x01) && access(pathname, F_OK)) {
+        if (mkfifo(pathname, 0777)) return -1;
+    } 
+
+    this->fifo_fd = open(pathname, mode);
+    if (this->fifo_fd < 0) unlink(pathname);
+    *p = '/';
+    return this->fifo_fd;
+}
+
+METHOD(ipc_t, mkshm, int, private_ipc_t *this, key_t key, size_t size)
+{
+    void *shmaddr = NULL;
+
+    this->type = IPC_SHM;
+    this->shm_id = shmget(key, size + sizeof(struct shm_comm_t), IPC_CREAT|0666);
+    if (this->shm_id < 0) return -1;
+
+    shmaddr = shmat(this->shm_id, (void *)0, 0);
+    if (shmaddr == (void *)-1) return -1;
+    this->shm_addr = (struct shm_comm_t *)shmaddr;
+    this->shm_state = SHM_CREATED;
+
+    return 0;
+}
+
+METHOD(ipc_t, read_, int, private_ipc_t *this, char *buf, int size)
+{
+    switch (this->type) {
+        case IPC_FIFO:
+            return read(this->fifo_fd, buf, size);
+        case IPC_SHM:
+            sleep(1);
+            printf("shm_state: %d\n", this->shm_state);
+            //this->shm_state = SHM_READING;
+            if (this->shm_state != SHM_WRITED) return 0;
+            strncpy(buf, this->shm_data, size);
+            printf("readed\n");
+            printf("buf: %s\n", this->shm_addr->data);
+            this->shm_state = SHM_READED;
+            return strlen(buf);
+        default:
+            return -1;
+    }
+}
+
+METHOD(ipc_t, write_, int, private_ipc_t *this, char *buf, int size)
+{
+    int write_len = 0;
+
+    switch (this->type) {
+        case IPC_FIFO:
+            return write(this->fifo_fd, buf, size);
+        case IPC_SHM:
+            if (this->shm_state != SHM_READED && this->shm_state == SHM_WRITED) return 0;
+            this->shm_state = SHM_WRITING;
+            write_len = this->shm_size < size ? this->shm_size : size;
+            strncpy(this->shm_data, buf, write_len);
+            this->shm_state = SHM_WRITED;
+            return write_len;   
+        default:
+            return -1;
+    }
+}
+
+METHOD(ipc_t, close_, void, private_ipc_t *this)
+{
+    switch (this->type) {
+        case IPC_FIFO:
+            if (this->fifo_fd > 0) close(this->fifo_fd);
+            
+            if (this->fifo_path) {
+                unlink(this->fifo_path);
+                free(this->fifo_path);
+            }
+
+            this->fifo_fd   = -1;
+            this->fifo_path = NULL;
+            break;
+        case IPC_SHM:
+            shmdt(this->shm_addr);
+            shmctl(this->shm_id, IPC_RMID, 0);
+            break;
+        default:
+            break;
+    }
+
+}
+
+METHOD(ipc_t, destroy_, void, private_ipc_t *this)
+{
+    if (this->read_buffer != NULL) free(this->read_buffer);
+
+    switch (this->type) {
+        case IPC_FIFO:
+            if (this->fifo_fd > 0) close(this->fifo_fd);
+            if (this->fifo_path) free(this->fifo_path);
+            
+            this->fifo_fd   = -1;
+            this->fifo_path = NULL;
+            break;
+        case IPC_SHM:
+            //shmdt(this->shm_addr);
+            //shmctl(this->shm_id, IPC_RMID, 0);
+            break;
+        default:
+            break;
+    }
+    free(this);
+}
+
+ipc_t *create_ipc()
+{
+    private_ipc_t *this;
+
+    INIT(this,
+        .public = {
+            .mkpipe  = _mkpipe_,
+            .mkfifo  = _mkfifo_,
+            .mkshm   = _mkshm,
+
+            .read    = _read_,
+            .write   = _write_,
+            .close   = _close_,
+            .destroy = _destroy_,
+        },
+        .fifo_path = NULL,
+    );
+    memset(&this->ipc, 0, sizeof(this->ipc));
+
+    return &this->public;
+}
 
 #define APP_STATE_FILE_PATH "/var/run/app_state"
 

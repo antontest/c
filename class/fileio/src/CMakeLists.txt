@@ -14,7 +14,7 @@ AUX_SOURCE_DIRECTORY(main SRC_PATH)
 
 # set source files and lib source files
 SET(CSRC ${SRC_PATH})
-SET(LIB_SRC fileio/fileio.c)
+SET(LIB_SRC fileio/fileio.c dir/dir.c)
 
 # lib generation
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/src/lib)
@@ -40,4 +40,4 @@ install_hfiles(include include)
 install_lib(lib lib)
 
 # install target
-INSTALL(TARGETS fileio RUNTIME DESTINATION bin)
+# INSTALL(TARGETS fileio RUNTIME DESTINATION bin)
