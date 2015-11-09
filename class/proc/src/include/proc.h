@@ -25,6 +25,11 @@ struct shm_comm_t {
     int permission;
 
     /**
+     * @brief size of shared memory
+     */
+    int shm_size;
+
+    /**
      * @brief length of data
      */
     int data_size;
@@ -67,7 +72,7 @@ struct ipc_t {
      * @param size  size of buffer
      * @return      On success, the number of bytes read is returned
      */
-    int (*read) (ipc_t *this, char *buf, int size);
+    int (*read) (ipc_t *this, void *buf, int size);
 
     /**
      * @brief writes  up  to count bytes from the buffer pointed buf to the file referred to by the file descriptor fd
@@ -75,7 +80,7 @@ struct ipc_t {
      * @param buf  buffer
      * @return     On success, the number of bytes write is returned
      */
-    int (*write) (ipc_t *this, char *buf, int size);
+    int (*write) (ipc_t *this, void *buf, int size);
 
     /**
      * @brief close ipc 

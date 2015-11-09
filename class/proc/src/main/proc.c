@@ -64,12 +64,13 @@ int main(int agrc, char *agrv[])
     struct ipc_t *ipc = create_ipc();
     ipc->mkshm(ipc, 1234, 100);
     if (atoi(agrv[1]) == 0) {
-        printf("start read\n");
-        while (ipc->read(ipc, buf, sizeof(buf)) == 0) ;
-        printf("buf: %s\n", buf);
+        int num;
+        while (ipc->read(ipc, &num, sizeof(num)) == 0) ;
+        printf("buf: %d\n", num);
+        ipc->close(ipc);
     } else {
-        ipc->write(ipc, "hi", 3);
-        sleep(3);
+        int num = 100;
+        ipc->write(ipc, &num, sizeof(num));
     }
     ipc->destroy(ipc);
     return 0;

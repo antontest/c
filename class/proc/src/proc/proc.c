@@ -71,19 +71,21 @@ struct private_ipc_t {
            /**
             * shared data
             */
-            void *data;
+            int created;
 
             /**
              * address of shared memory
              */
             struct shm_comm_t *addr;
         } shm;
-#define shm_id    ipc.shm.id 
-#define shm_addr  ipc.shm.addr
-#define shm_state ipc.shm.addr->state
-#define shm_perm  ipc.shm.addr->permission
-#define shm_size  ipc.shm.addr->data_size
-#define shm_data  ipc.shm.addr->data 
+#define shm_created    ipc.shm.created
+#define shm_id         ipc.shm.id 
+#define shm_addr       ipc.shm.addr
+#define shm_state      ipc.shm.addr->state
+#define shm_perm       ipc.shm.addr->permission
+#define shm_size       ipc.shm.addr->shm_size
+#define shm_data_size  ipc.shm.addr->data_size
+#define shm_data       ipc.shm.addr->data 
     } ipc;
 
     /**
@@ -141,51 +143,49 @@ METHOD(ipc_t, mkshm, int, private_ipc_t *this, key_t key, size_t size)
     void *shmaddr = NULL;
 
     this->type = IPC_SHM;
+    if (this->shm_created) return 0;
+
     this->shm_id = shmget(key, size + sizeof(struct shm_comm_t), IPC_CREAT|0666);
     if (this->shm_id < 0) return -1;
 
     shmaddr = shmat(this->shm_id, (void *)0, 0);
     if (shmaddr == (void *)-1) return -1;
-    this->shm_addr = (struct shm_comm_t *)shmaddr;
-    this->shm_state = SHM_CREATED;
+
+    this->shm_addr    = (struct shm_comm_t *)shmaddr;
+    this->shm_state   = SHM_CREATED;
+    this->shm_size    = size;
+    this->shm_created = 1;
 
     return 0;
 }
 
-METHOD(ipc_t, read_, int, private_ipc_t *this, char *buf, int size)
+METHOD(ipc_t, read_, int, private_ipc_t *this, void *buf, int size)
 {
     switch (this->type) {
         case IPC_FIFO:
             return read(this->fifo_fd, buf, size);
         case IPC_SHM:
-            sleep(1);
-            printf("shm_state: %d\n", this->shm_state);
-            //this->shm_state = SHM_READING;
             if (this->shm_state != SHM_WRITED) return 0;
-            strncpy(buf, this->shm_data, size);
-            printf("readed\n");
-            printf("buf: %s\n", this->shm_addr->data);
+            memcpy(buf, this->shm_data, this->shm_data_size);
             this->shm_state = SHM_READED;
-            return strlen(buf);
+            return this->shm_data_size;
         default:
             return -1;
     }
 }
 
-METHOD(ipc_t, write_, int, private_ipc_t *this, char *buf, int size)
+METHOD(ipc_t, write_, int, private_ipc_t *this, void *buf, int size)
 {
-    int write_len = 0;
-
     switch (this->type) {
         case IPC_FIFO:
             return write(this->fifo_fd, buf, size);
         case IPC_SHM:
             if (this->shm_state != SHM_READED && this->shm_state == SHM_WRITED) return 0;
-            this->shm_state = SHM_WRITING;
-            write_len = this->shm_size < size ? this->shm_size : size;
-            strncpy(this->shm_data, buf, write_len);
-            this->shm_state = SHM_WRITED;
-            return write_len;   
+            this->shm_state     = SHM_WRITING;
+            strncpy(this->shm_data, buf, size);
+            this->shm_state     = SHM_WRITED;
+            this->shm_data_size = size;
+            return size;   
         default:
             return -1;
     }
@@ -228,7 +228,7 @@ METHOD(ipc_t, destroy_, void, private_ipc_t *this)
             this->fifo_path = NULL;
             break;
         case IPC_SHM:
-            //shmdt(this->shm_addr);
+            shmdt(this->shm_addr);
             //shmctl(this->shm_id, IPC_RMID, 0);
             break;
         default:
@@ -255,6 +255,7 @@ ipc_t *create_ipc()
         .fifo_path = NULL,
     );
     memset(&this->ipc, 0, sizeof(this->ipc));
+    this->shm_addr = NULL;
 
     return &this->public;
 }
