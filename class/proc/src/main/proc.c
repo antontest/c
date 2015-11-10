@@ -44,22 +44,6 @@ int main(int agrc, char *agrv[])
     char buf[512] = {0};
     pid_t ppid = -1;
 
-    struct ipc_t *ipc = create_ipc();
-    ipc->mkshm(ipc, 1234, 100);
-    if (atoi(agrv[1]) == 0) {
-        ipc->read(ipc, buf, sizeof(buf));
-        printf("buf: %s\n", buf);
-        memset(buf, 0, sizeof(buf));
-        ipc->read(ipc, buf, sizeof(buf));
-        printf("buf: %s\n", buf);
-        ipc->close(ipc);
-    } else {
-        ipc->write(ipc, "hello", 5);
-        ipc->write(ipc, "hi", 2);
-    }
-
-    ipc->destroy(ipc);
-    return 0;
     /**
      * Get paramters from the command line
      */
