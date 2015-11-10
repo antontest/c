@@ -91,6 +91,31 @@ struct ipc_t {
      * @brief Free ipc_t instance 
      */
     void (*destroy) (ipc_t *this);
+
+    /**
+     * get name pipe handle
+     */
+    int (*get_fifo_fd) (ipc_t *this);
+
+    /**
+     * get shared memory address
+     */
+    void *(*get_shm_addr) (ipc_t *this);
+
+    /**
+     * get shared memory size
+     */
+    int (*get_shm_size) (ipc_t *this);
+
+    /**
+     * @brief get shared memory state 
+     */
+    shm_state_t (*get_shm_state) (ipc_t *this);
+
+    /**
+     * @brief get shared memory data 
+     */
+    void *(*get_shm_data) (ipc_t *this);
 };
 
 /**

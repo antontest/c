@@ -21,15 +21,12 @@
 #endif
 */
 
-#ifndef ether_hdr
-#define ether_hdr
 // 14 bytes
 struct ether_hdr {
     unsigned char   dst_mac[6];
     unsigned char   src_mac[6];
     unsigned short  protocol;
 };
-#endif
 
 #ifndef ARP_HDR
 #define ARP_HDR

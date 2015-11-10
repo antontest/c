@@ -168,7 +168,7 @@ METHOD(ipc_t, read_, int, private_ipc_t *this, void *buf, int size)
             return read(this->fifo_fd, buf, size);
         case IPC_SHM:
             if (this->shm_state == SHM_CREATING || this->shm_state == SHM_EMPTY) return -1;
-            while (this->shm_state != SHM_WRITED) usleep(10);
+            while (this->shm_state != SHM_WRITED) usleep(100);
             readed_size = size < this->shm_data_size ? size : this->shm_data_size;
             memcpy(buf, this->shm_data, readed_size);
             this->shm_state = SHM_READED;
@@ -187,7 +187,7 @@ METHOD(ipc_t, write_, int, private_ipc_t *this, void *buf, int size)
             return write(this->fifo_fd, buf, size);
         case IPC_SHM:
             if (this->shm_state == SHM_CREATING || this->shm_state == SHM_EMPTY) return -1;
-            while (this->shm_state == SHM_WRITED && this->shm_state != SHM_READED) usleep(10);
+            while (this->shm_state == SHM_WRITED && this->shm_state != SHM_READED) usleep(100);
             
             this->shm_state     = SHM_WRITING;
             writed_size = size < this->shm_size ? size : this->shm_size;
@@ -222,6 +222,31 @@ METHOD(ipc_t, close_, void, private_ipc_t *this)
             break;
     }
 
+}
+
+METHOD(ipc_t, get_fifo_fd, int, private_ipc_t *this)
+{
+    return this->fifo_fd;
+}
+
+METHOD(ipc_t, get_shm_addr, void *, private_ipc_t *this)
+{
+    return this->shm_addr;
+}
+
+METHOD(ipc_t, get_shm_size, int, private_ipc_t *this)
+{
+    return this->shm_size;
+}
+
+METHOD(ipc_t, get_shm_state, shm_state_t, private_ipc_t *this)
+{
+    return this->shm_state;
+}
+
+METHOD(ipc_t, get_shm_data, void *, private_ipc_t *this)
+{
+    return this->shm_data;
 }
 
 METHOD(ipc_t, destroy_, void, private_ipc_t *this)
@@ -260,6 +285,12 @@ ipc_t *create_ipc()
             .write   = _write_,
             .close   = _close_,
             .destroy = _destroy_,
+
+            .get_fifo_fd   = _get_fifo_fd,
+            .get_shm_addr  = _get_shm_addr,
+            .get_shm_size  = _get_shm_size,
+            .get_shm_state = _get_shm_state,
+            .get_shm_data  = _get_shm_data,
         },
         .fifo_path = NULL,
     );
