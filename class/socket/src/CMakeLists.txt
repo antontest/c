@@ -20,6 +20,7 @@ SET(MANAGER_SRC  manager/manager.c)
 SET(CHUNK_SRC    chunk/chunk.c)
 SET(PACKET_SRC   packet/packet.c)
 SET(PROPERTY_SRC property/property.c)
+SET(FTP_SRC      ftp/ftp.c)
 
 # lib generation
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/src/lib)
@@ -29,6 +30,7 @@ ADD_LIBRARY(socket_shared SHARED ${LIB_SRC})
 ADD_LIBRARY(host          SHARED ${HOST_SRC})
 ADD_LIBRARY(manager       SHARED ${MANAGER_SRC})
 ADD_LIBRARY(property      SHARED ${PROPERTY_SRC})
+ADD_LIBRARY(ftp           SHARED ${FTP_SRC})
 
 # generat exec
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR})
@@ -41,7 +43,8 @@ TARGET_LINK_LIBRARIES(chunk         utils)
 TARGET_LINK_LIBRARIES(packet        utils chunk)
 TARGET_LINK_LIBRARIES(socket_shared utils packet chunk host thread enum mutex)
 TARGET_LINK_LIBRARIES(manager       utils)
-TARGET_LINK_LIBRARIES(socket        socket_shared get_args property)
+TARGET_LINK_LIBRARIES(ftp           fileio socket_shared)
+TARGET_LINK_LIBRARIES(socket        socket_shared get_args property ftp)
 
 # -------------- INSTALL -------------- #
 # install path setting

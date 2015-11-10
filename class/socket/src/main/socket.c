@@ -10,6 +10,7 @@
 #include <utils/get_args.h>
 #include <utils/utils.h>
 #include <property.h>
+#include <ftp.h>
 
 /*********************************************************
  ***************    Macros Declaration    ****************
@@ -78,6 +79,14 @@ int main(int agrc, char *agrv[])
         {"-m", "--message",   1, RET_STR, ADDR_ADDR(message)   },
     };
  
+
+    ftp_t *ftp = create_ftp();
+    ftp->login(ftp, "172.21.34.18", 21, "antonio", "12345");
+    //ftp->get_data_port(ftp);
+    ftp->pwd(ftp, NULL, -1);
+    ftp->list(ftp, "/", NULL, -1);
+    ftp->destroy(ftp);
+    return 0;
     get_args(agrc, agrv, opts);
     if(help_flag > 0) {
         print_usage();
@@ -151,7 +160,7 @@ void start_network(int ser_or_cli_flag, int net_type, int socket_type, int socke
         */
     }
 
-    sck = socket_create();
+    sck = create_socket();
     if (sck == NULL) {
         fprintf(stderr, "[socket]: socket_create failed\n");
     }

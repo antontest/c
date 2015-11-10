@@ -214,7 +214,7 @@ struct socket_t {
 /**
  * Create a socket_default_socket instance.
  */
-socket_t *socket_create();
+socket_t *create_socket();
 
 /**
  * Helper function to (un-)register socket interfaces from plugin features.

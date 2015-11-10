@@ -468,7 +468,7 @@ METHOD(socket_t, destroy, void, private_socket_t *this)
 /*
  * See header for description
  */
-socket_t *socket_create()
+socket_t *create_socket()
 {
     private_socket_t *this;
 
