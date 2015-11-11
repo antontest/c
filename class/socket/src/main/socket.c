@@ -83,8 +83,8 @@ int main(int agrc, char *agrv[])
     ftp_t *ftp = create_ftp();
     ftp->login(ftp, "172.21.34.18", 21, "antonio", "12345");
     //ftp->get_data_port(ftp);
-    ftp->pwd(ftp, NULL, -1);
-    ftp->list(ftp, "/", NULL, -1);
+    ftp->pwd(ftp);
+    ftp->list(ftp, "/");
     ftp->destroy(ftp);
     return 0;
     get_args(agrc, agrv, opts);
@@ -172,11 +172,11 @@ void start_network(int ser_or_cli_flag, int net_type, int socket_type, int socke
             if (status <= 0) break;
 
             fprintf(stdout, "----->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
-            while (sck->receive(sck, buf, sizeof(buf), 0) > 0 ) {
+            while (sck->recv(sck, buf, sizeof(buf), 0) > 0 ) {
                 if (!strncasecmp("==end==", buf, sizeof("==end=="))) {
                     break;
                 }
-                fprintf(stdout, "[socket receive from %s]: %s\n", sck->get_cli_ip(sck), buf);
+                fprintf(stdout, "[socket recv from %s]: %s\n", sck->get_cli_ip(sck), buf);
             }
             fprintf(stdout, "----->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
             break;

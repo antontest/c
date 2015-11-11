@@ -116,6 +116,11 @@ struct private_socket_t {
     int state;
 
     /**
+     * @brief can read bytes
+     */
+    unsigned int can_read_bytes;
+
+    /**
      * socket state check thread
      */
     thread_t *state_check;
@@ -377,6 +382,14 @@ METHOD(socket_t, sender, int,
     return send_cnt;
 }
 
+METHOD(socket_t, get_can_read_bytes, unsigned int, private_socket_t *this)
+{
+    while (ioctl(this->accept_fd, FIONREAD, &this->can_read_bytes) == 0 && this->can_read_bytes < 1) usleep(100);
+    if (this->can_read_bytes < 1)
+        while (ioctl(this->fd, FIONREAD, &this->can_read_bytes) == 0 && this->can_read_bytes < 1) usleep(100);
+    return this->can_read_bytes;
+}
+
 METHOD(socket_t, get_ip, char *,
         private_socket_t *this)
 {
@@ -441,18 +454,15 @@ METHOD(socket_t, print_state, void, private_socket_t *this)
     fprintf(stdout, "[socket state] %s\n", enum_to_name(socket_state_name, this->state));
 }
 
+METHOD(socket_t, close_, void, private_socket_t *this)
+{
+    if (this->fd > 0) close(this->fd);
+    if (this->accept_fd > 0) close(this->accept_fd);
+}
+
 METHOD(socket_t, destroy, void, private_socket_t *this)
 {
-    if (this->accept_fd != -1)
-    {
-        close(this->accept_fd);
-    }
-
-    if (this->fd != -1)
-    {
-        close(this->fd);
-    }
-
+    _close_(this);
     thread_onoff = 0;
     usleep(1000);
 
@@ -478,7 +488,7 @@ socket_t *create_socket()
             .accept       = _accepter,
             .connect      = _connecter,
             .send         = _sender,
-            .receive      = _receiver,
+            .recv         = _receiver,
             .get_ip       = _get_ip,
             .get_cli_ip   = _get_cli_ip,
             .get_port     = _get_port,
@@ -486,6 +496,7 @@ socket_t *create_socket()
             .get_family   = _get_family,
             .get_sockaddr = _get_sockaddr,
             .get_cli_sockaddr = _get_cli_sockaddr,
+            .get_can_read_bytes = _get_can_read_bytes,
             .get_type     = _get_type,
             .get_sockfd   = _get_sockfd,
             .get_state    = _get_state,

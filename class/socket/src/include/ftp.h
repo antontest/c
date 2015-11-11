@@ -24,7 +24,7 @@ struct ftp_t  {
      *
      * @return      pointer to buffer
      */
-    char *(*list) (ftp_t *this, const char *path, char *buf, int size);
+    void (*list) (ftp_t *this, const char *path);
 
     /**
      * @brief  ftp server file listing 
@@ -34,7 +34,7 @@ struct ftp_t  {
      *
      * @return      pointer to buffer
      */
-    char *(*pwd) (ftp_t *this, char *buf, int size);
+    char *(*pwd) (ftp_t *this);
 
     /**
      * @brief close ftp instance

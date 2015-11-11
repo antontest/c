@@ -113,7 +113,7 @@ struct socket_t {
      *						- SUCCESS when packet successfully received
      *						- FAILED when unable to receive
      */
-    int (*receive)(socket_t *this, void *buf, int size, int timeout);
+    int (*recv)(socket_t *this, void *buf, int size, int timeout);
 
     /**
      * Send a packet.
@@ -127,6 +127,11 @@ struct socket_t {
      *						- FAILED when unable to send
      */
     int (*send)(socket_t *this, void *buf, int size);
+
+    /**
+     * @brief close socket 
+     */
+    void (*close) (socket_t *this);
 
     /**
      * Get the port this socket is listening on.
@@ -190,6 +195,11 @@ struct socket_t {
      * @return				the socket instance
      */
     int (*get_sockfd)(socket_t *this);
+
+    /**
+     * @brief can read bytes
+     */
+    unsigned int (*get_can_read_bytes) (socket_t *this);
 
     /**
      * Get the socket status this socket is listening on.

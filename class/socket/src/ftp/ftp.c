@@ -10,6 +10,7 @@
 #define FTP_PORT "21"
 #define FTP_SERV "localhost"
 #define FTP_MSG_BUFF_SIZE (1024)
+#define FTP_CODE_BUFF_SIZE (128)
 typedef struct private_ftp_t private_ftp_t;
 struct private_ftp_t {
     /**
@@ -74,39 +75,67 @@ struct private_ftp_t {
     socket_t *data_sck;
 
     /**
+     * @brief code buffer
+     */
+    char *code_buffer;
+
+    /**
      * @brief ftp message buffer 
      */
     char *msg_buffer;
 };
 
+static int ftp_cmd_send(private_ftp_t *this, const char *code, const char *fmt, ...)
+{
+    va_list arg;
+    char extern_opt[48] = {0};
+
+    va_start(arg, fmt);
+    vsnprintf(extern_opt, sizeof(extern_opt), fmt, arg);
+    va_end(arg);
+
+    memset(this->code_buffer, 0, FTP_CODE_BUFF_SIZE);
+    if (strlen(extern_opt))
+        snprintf(this->code_buffer, FTP_CODE_BUFF_SIZE, "%s %s\r\n", code, extern_opt);
+    else
+        snprintf(this->code_buffer, FTP_CODE_BUFF_SIZE, "%s\r\n", code);
+
+    return this->sck->send(this->sck, this->code_buffer, FTP_CODE_BUFF_SIZE);
+}
+
+static int ftp_msg_recv(private_ftp_t *this, socket_t *sock)
+{
+    if (!this->msg_buffer) this->msg_buffer= (char *)malloc(FTP_MSG_BUFF_SIZE);
+    if (!this->msg_buffer) return -1;
+    sock->recv(sock, this->msg_buffer, FTP_MSG_BUFF_SIZE, 0);
+    sscanf(this->msg_buffer, "%d", &this->code);
+    
+    return this->code;
+}
+
 METHOD(ftp_t, login, int, private_ftp_t *this, char *server, unsigned int port, const char *user, const char *passwd)
 {
     if (!user || !passwd || !server) return -1;
+    if (this->sck != NULL) return 0;
+    this->server = strdup(server);
+    this->user   = strdup(user);
+    this->passwd = strdup(passwd);
+    this->port   = port;
     
     this->sck = create_socket();
-    if (this->sck->connect(this->sck, AF_INET, SOCK_STREAM, IPPROTO_TCP, server, port) <= 0) return -1;
-
-    this->msg_buffer= (char *)malloc(FTP_MSG_BUFF_SIZE);
-    if (!this->msg_buffer) return -1;
-    this->sck->receive(this->sck, this->msg_buffer, FTP_MSG_BUFF_SIZE, 0);
-    sscanf(this->msg_buffer, "%d", &this->code);
+    if (this->sck->connect(this->sck, AF_INET, SOCK_STREAM, IPPROTO_TCP, this->server, this->port) <= 0) return -1;
+    ftp_msg_recv(this, this->sck);
     if (this->code != 220) return -1;
     
-    sprintf(this->msg_buffer, "USER %s\r\n", user); 
-    this->sck->send(this->sck, this->msg_buffer, strlen(this->msg_buffer));
-
-    this->sck->receive(this->sck, this->msg_buffer, FTP_MSG_BUFF_SIZE, 0);
-    sscanf(this->msg_buffer, "%d", &this->code);
+    ftp_cmd_send(this, "USER", this->user);
+    ftp_msg_recv(this, this->sck);
     if (this->code != 331) return -1;
 
-    sprintf(this->msg_buffer, "PASS %s\r\n", passwd); 
-    this->sck->send(this->sck, this->msg_buffer, strlen(this->msg_buffer));
-
-    this->sck->receive(this->sck, this->msg_buffer, FTP_MSG_BUFF_SIZE, 0);
-    sscanf(this->msg_buffer, "%d", &this->code);
+    ftp_cmd_send(this, "PASS", this->passwd);
+    ftp_msg_recv(this, this->sck);
     if (this->code != 230) return -1;
+
     this->logged = 1;
-    this->server = strdup(server);
 
     return 0;
 }
@@ -118,10 +147,8 @@ METHOD(ftp_t, get_data_port, int, private_ftp_t *this)
 
     if (this->logged != 1) return -1;
 
-    sprintf(this->msg_buffer, "PASV\r\n");
-    this->sck->send(this->sck, this->msg_buffer, strlen(this->msg_buffer));
-    this->sck->receive(this->sck, this->msg_buffer, FTP_MSG_BUFF_SIZE, 0);
-    sscanf(this->msg_buffer, "%d", &this->code);
+    ftp_cmd_send(this, "PASV", NULL);
+    ftp_msg_recv(this, this->sck);
     if (this->code != 227) return -1;
 
     strtok(this->msg_buffer, "(");
@@ -129,61 +156,51 @@ METHOD(ftp_t, get_data_port, int, private_ftp_t *this)
     if (!p) return -1;
     sscanf(p, "%*d,%*d,%*d,%d,%d,%d)", &p3_secute, &p1, &p2);
     this->data_port = p1 * 256 + p2;
-    printf("p1: %d, p2: %d, data_port: %d\n", p1, p2, this->data_port);
     
     return 0;
 }
 
-METHOD(ftp_t, list, char *, private_ftp_t *this, const char *path, char *buf, int size)
+METHOD(ftp_t, list, void, private_ftp_t *this, const char *path)
 {
+    char *list_buffer = NULL;
+    int list_bytes = 0;
+
     _get_data_port(this);
-    printf("data_port: %d\n", this->data_port);
 
-    //this->data_sck = create_socket();
-    //this->data_sck->connect(this->data_sck, AF_INET, SOCK_STREAM, IPPROTO_TCP, this->server, this->data_port);
+    this->data_sck = create_socket();
+    this->data_sck->connect(this->data_sck, AF_INET, SOCK_STREAM, IPPROTO_TCP, this->server, this->data_port);
+    if (this->data_sck->get_state(this->data_sck) != SOCKET_CONNECTED) return;
 
-    sprintf(this->msg_buffer, "LIST %s\r\n",path);
-    this->sck->send(this->sck, this->msg_buffer, strlen(this->msg_buffer));
-    this->sck->receive(this->sck, this->msg_buffer, FTP_MSG_BUFF_SIZE, 0);
-    printf("list: %s", this->msg_buffer);
-    sscanf(this->msg_buffer, "%d", &this->code);
-    printf("code: %d\n", this->code);
-    
-    sprintf(this->msg_buffer, "LIST %s\r\n", path);
-    this->sck->send(this->sck, this->msg_buffer, strlen(this->msg_buffer));
-    this->sck->receive(this->sck, this->msg_buffer, FTP_MSG_BUFF_SIZE, 0);
-    printf("list: %s", this->msg_buffer);
-    //if (this->code != 150) return NULL;
-
-
-    return buf;
+    ftp_cmd_send(this, "LIST", path);
+    list_bytes = this->data_sck->get_can_read_bytes(this->data_sck);
+    list_buffer = (char *)malloc(list_bytes);
+    if (!list_buffer) return;
+    this->data_sck->recv(this->data_sck, list_buffer, list_bytes, 0);
+    printf("%s", list_buffer);
+    free(list_buffer);
 }
 
-METHOD(ftp_t, pwd, char *, private_ftp_t *this, char *buf, int size)
+METHOD(ftp_t, pwd, char *, private_ftp_t *this)
 {
     char *path = NULL;
 
-    sprintf(this->msg_buffer, "PWD\r\n");
-    this->sck->send(this->sck, this->msg_buffer, strlen(this->msg_buffer));
-    this->sck->receive(this->sck, this->msg_buffer, FTP_MSG_BUFF_SIZE, 0);
-    sscanf(this->msg_buffer, "%d", &this->code);
+    ftp_cmd_send(this, "PWD", NULL);
+    ftp_msg_recv(this, this->sck);
     if (this->code != 257) return NULL;
 
     path = strstr(this->msg_buffer, "\"");
     sscanf(path, "\"%s\" %[^\n]s", path, this->msg_buffer);
     strtok(path, "\"");
-    printf("path: %s\n", path);
     
-    return buf;
+    return path;
 }
 
 METHOD(ftp_t, close_, void, private_ftp_t *this)
 {
     if (this->logged != 1) return;
-    sprintf(this->msg_buffer, "QUIT\r\n");
-    this->sck->send(this->sck, this->msg_buffer, strlen(this->msg_buffer));
-    this->sck->receive(this->sck, this->msg_buffer, FTP_MSG_BUFF_SIZE, 0);
-    sscanf(this->msg_buffer, "%d", &this->code);
+
+    ftp_cmd_send(this, "QUIT", NULL);
+    ftp_msg_recv(this, this->sck);
     if (this->code != 221) this->logged = -1;
     
     this->logged = 0;
@@ -192,8 +209,12 @@ METHOD(ftp_t, close_, void, private_ftp_t *this)
 
 METHOD(ftp_t, destroy_, void, private_ftp_t *this)
 {
-    if (this->sck != NULL) close_(this);
-    if (this->msg_buffer != NULL) free(this->msg_buffer);
+    if (this->sck         != NULL) _close_(this);
+    if (this->msg_buffer  != NULL) free(this->msg_buffer);
+    if (this->code_buffer != NULL) free(this->code_buffer);
+    if (this->user        != NULL) free(this->user);
+    if (this->passwd      != NULL) free(this->passwd);
+    if (this->server      != NULL) free(this->server);
 
     free(this);
 }
@@ -216,6 +237,11 @@ ftp_t *create_ftp()
         .logged     = 0,
         .data_port  = -1,
     );
+    this->code_buffer = (char *)malloc(FTP_CODE_BUFF_SIZE);
+    if (!this->code_buffer) {
+        free(this);
+        return NULL;
+    }
 
     return &this->public;
 }
