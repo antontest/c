@@ -19,6 +19,11 @@ struct options {
     int        been_get;     
 };
 
+struct usage {
+    const char *opt_name;  /* Like -h, --help */
+    const char *opt_usage; /* Like help information */
+};
+
 /**
  * @brief parser agruement from  command line
  * 
@@ -45,5 +50,19 @@ struct options {
  * @param opt    [out] options struct
  */
 void get_args(int agrc, char *agrv[], struct options *opt);
+
+/**
+ * @brief print program usage
+ * @usage
+    struct usage use[] = {
+        {"-h, --help",   "help"},
+        {"-p, --passwd", "pass word"},
+        {NULL, NULL}
+    };
+    print_usage(use);
+ *
+ * @param help_usage  [in] program usage struct
+ */
+void print_usage(struct usage *help_usage);
 
 #endif /* __GET_ARGS_H__ */

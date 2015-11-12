@@ -8,6 +8,7 @@
 //#include <linked_list.h>
 #include <debug.h>
 #include <log.h>
+#include <get_args.h>
 
 /*********************************************************
  **************    Function Declaration    ***************
@@ -35,6 +36,14 @@ int main(int agrc, char *agrv[])
     int rt = 0; /* return value of function main */
     struct ele el= {2, NULL};
     void *p = NULL;
+    struct usage use[] = {
+        {"-h, --help", "help"},
+        {"-p, --passwd", "pass word"},
+        {NULL, NULL}
+    };
+
+    print_usage(use);
+    return 0;
 
     linked_list_t *list = linked_list_create();
     rt = 1;

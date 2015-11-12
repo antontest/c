@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <socket.h>
-#include <get_args.h>
+#include <utils/get_args.h>
 #include <ftp.h>
 #include <utils/utils.h>
 
@@ -18,15 +18,28 @@ int main(int argc, char **argv)
     struct options opts[] = {
         {"-h", "--help",   0, RET_INT, ADDR_ADDR(help_flag)},
         {"-s", "--server", 1, RET_STR, ADDR_ADDR(server)},
+        {"-p", "--port",   1, RET_INT, ADDR_ADDR(port)},
         {"-u", "--user",   1, RET_STR, ADDR_ADDR(user)},
-        {"-p", "--port",   1, RET_INT, ADDR_ADDR(port)},
-        {"-p", "--port",   1, RET_INT, ADDR_ADDR(port)},
         {"-w", "--passwd", 1, RET_STR, ADDR_ADDR(passwd)},
         {"-l", "--list",   1, RET_STR, ADDR_ADDR(list_path)},
         {NULL, NULL,       0, 0,       NULL},
     };
+    struct usage help_usage[] = {
+        {"-h, --help",   "program usage"},
+        {"-s, --server", "ftp server IP"},
+        {"-p, --port",   "ftp server port listening on"},
+        {"-u, --user",   "user login"},
+        {"-w, --passwd", "password login"},
+        {"-l, --list",   "list current directory content in ftp server. Must append path"},
+        {NULL, NULL}
+    };
 
     get_args(argc, argv, opts);
+    if (help_flag) {
+        print_usage(help_usage);
+        exit(0);
+    }
+
     if (!server || !user || !passwd || port < 1) return -1;
     ftp = create_ftp();
     if (!ftp) return -1;

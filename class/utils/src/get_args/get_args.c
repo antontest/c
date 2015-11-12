@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 /**
  * @brief parser agruement from  command line
@@ -83,4 +84,37 @@ void get_args(int agrc, char *agrv[], struct options *opt)
 
     return;
 
+}
+
+static char *get_proc_name()
+{
+    char proc_path[] = "/proc/self/exe";
+    static char proc_name[256];
+    char *proc = NULL;
+    int name_len = 0;
+
+    if ((name_len = readlink(proc_path, proc_name, sizeof(proc_name))) < 0) return NULL;
+    if ((proc = strrchr(proc_name, '/')) == NULL) return NULL;
+    return proc + 1;
+}
+
+void print_usage(struct usage *help_usage)
+{
+    struct usage *use = help_usage;
+    int opt_len = 0;
+    int opt_max_len = 0;
+
+    if (!use) return;
+    
+    printf("Usage: %s [Options] [Parameters]\n", get_proc_name());
+    printf("The Options arg:\n");
+
+    for (use = help_usage; use->opt_name != NULL; use++) {
+        opt_len = strlen(use->opt_name);
+        if (opt_len > opt_max_len) opt_max_len = opt_len;
+    }
+
+    for (use = help_usage; use->opt_name != NULL; use++) {
+        printf("  %s%*c%s\n", use->opt_name, opt_max_len + 2 - strlen(use->opt_name), ' ', use->opt_usage);
+    }
 }

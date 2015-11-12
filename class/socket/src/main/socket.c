@@ -37,11 +37,6 @@ enum ser_flag_t {
  */
 void parser_args(int agrc, char *agrv[]);
 
-/**
- * @brief print_usage 
- */
-static void print_usage();
-
 void start_network(int ser_or_cli_flag, int net_type, int socket_type, int socket_protocol, char *ip, int port, int times, char *message);
 
 /*********************************************************
@@ -68,28 +63,31 @@ int main(int agrc, char *agrv[])
     int  rt              = 0;
 
     struct options opts[] = {
-        {"-h", "--help",      0, RET_INT, ADDR_ADDR(help_flag) },
-        {"-6", NULL,          0, RET_INT, ADDR_ADDR(ipv6_flag) },
-        {"-s", "--server",    0, RET_INT, ADDR_ADDR(ser_flag)  },
-        {"-c", "--client",    0, RET_INT, ADDR_ADDR(cli_flag)  },
-        {"-a", "--agreement", 1, RET_STR, ADDR_ADDR(protocol)  },
-        {"-i", "--ip",        1, RET_STR, ADDR_ADDR(ip)        },
-        {"-p", "--port",      1, RET_INT, ADDR_ADDR(port)      },
-        {"-t", "--times",     1, RET_INT, ADDR_ADDR(times)     },
-        {"-m", "--message",   1, RET_STR, ADDR_ADDR(message)   },
+        {"-h", "--help"      , 0, RET_INT, ADDR_ADDR(help_flag) },
+        {"-6", NULL          , 0, RET_INT, ADDR_ADDR(ipv6_flag) },
+        {"-s", "--server"    , 0, RET_INT, ADDR_ADDR(ser_flag)  },
+        {"-c", "--client"    , 0, RET_INT, ADDR_ADDR(cli_flag)  },
+        {"-a", "--agreement" , 1, RET_STR, ADDR_ADDR(protocol)  },
+        {"-i", "--ip"        , 1, RET_STR, ADDR_ADDR(ip)        },
+        {"-p", "--port"      , 1, RET_INT, ADDR_ADDR(port)      },
+        {"-t", "--times"     , 1, RET_INT, ADDR_ADDR(times)     },
+        {"-m", "--message"   , 1, RET_STR, ADDR_ADDR(message)   },
+    };
+    struct usage help_usage[] = {
+        {"-s, --server"    , "Create a socket server"},
+        {"-c, --client"    , "Create a socket client"},
+        {"-a, --agreement" , "Agreement of networking. Agreement can be \"[u udp t tcp]\""},
+        {"-i, --ip"        , "IP address"},
+        {"-p, --port"      , "Port"},
+        {"-t, --times"     , "Times of sending message"},
+        {"-m, --message"   , "Message of sending"},
+        {"-h, --help"      , "Program usage"},
+        {NULL              , NULL}
     };
  
-
-    ftp_t *ftp = create_ftp();
-    ftp->login(ftp, "172.21.34.18", 21, "antonio", "12345");
-    //ftp->get_data_port(ftp);
-    ftp->pwd(ftp);
-    ftp->list(ftp, "/");
-    ftp->destroy(ftp);
-    return 0;
     get_args(agrc, agrv, opts);
     if(help_flag > 0) {
-        print_usage();
+        print_usage(help_usage);
         exit(1);
     }
 
@@ -113,22 +111,6 @@ int main(int agrc, char *agrv[])
     start_network(ser_or_cli_flag, net_type, socket_type, socket_protocol, ip, port, times, message);
 
     return rt;
-}
-
-/**
- * @brief print_usage 
- */
-static void print_usage()
-{
-    printf("Usage: socket [options] [parameter]\n");
-    printf("The Options arg:\n");
-    printf("  -s, --server     Create a socket server\n");
-    printf("  -c, --client     Create a socket client\n");
-    printf("  -a, --agreement  Agreement of networking. Agreement can be \"[u udp t tcp]\"\n");
-    printf("  -i, --ip         IP address\n");
-    printf("  -p, --port       Port\n");
-    printf("  -t, --times      Times of sending message\n");
-    printf("  -m, --message    Message of sending\n");
 }
 
 void start_network(int ser_or_cli_flag, int net_type, int socket_type, int socket_protocol, char *ip, int port, int times, char *message)
