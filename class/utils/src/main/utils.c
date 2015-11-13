@@ -36,13 +36,32 @@ int main(int agrc, char *agrv[])
     int rt = 0; /* return value of function main */
     struct ele el= {2, NULL};
     void *p = NULL;
+    int help_flag = 0;
+    char *ip = NULL;
+    int port = 0;
+    int num[3];
+    char *files[3] = {NULL};
     struct usage use[] = {
         {"-h, --help", "help"},
-        {"-p, --passwd", "pass word"},
+        {"-p, --passwd", "pass word pass word pass word pass word abcdefghijklmnopqrstuvwxyz"},
+        {NULL, NULL}
+    };
+    struct options opts[] = {
+        {"-h", "--help" , 0, RET_INT, ADDR_ADDR(help_flag)},
+        {"-p", "--port" , 1, RET_INT, ADDR_ADDR(port)},
+        {"-i", "--ip"   , 1, RET_STR, ADDR_ADDR(ip)},
+        {"-n", "--num"  , 3, RET_INT, ADDR_ADDR(num)},
+        {"-f", "--files", 3, RET_STR, ADDR_ADDR(files)},
         {NULL, NULL}
     };
 
-    print_usage(use);
+    get_args(agrc, agrv, opts);
+    printf("ip: %s\n", ip);
+    printf("port: %d\n", port);
+    printf("value: %d, val1: %d, val2: %d\n", num[0], num[1], num[2]);
+    printf("f1: %s, f2: %s, f3: %s\n", files[0], files[1], files[2]);
+
+    if (help_flag) print_usage(use);
     return 0;
 
     linked_list_t *list = linked_list_create();

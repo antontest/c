@@ -73,6 +73,7 @@ int main(int agrc, char *agrv[])
         {"-p", "--port"      , 1, RET_INT, ADDR_ADDR(port)      },
         {"-t", "--times"     , 1, RET_INT, ADDR_ADDR(times)     },
         {"-m", "--message"   , 1, RET_STR, ADDR_ADDR(message)   },
+        {NULL, NULL}
     };
     struct usage help_usage[] = {
         {"-s, --server"    , "Create a socket server"},

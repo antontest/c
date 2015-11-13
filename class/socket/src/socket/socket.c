@@ -82,11 +82,6 @@ struct private_socket_t {
     socket_t public;
 
     /**
-     * @brief socket dealing
-     */
-    socket_base_t *sck;
-
-    /**
      * socket fd
      */
     int fd;
@@ -127,6 +122,11 @@ struct private_socket_t {
     unsigned int can_read_bytes;
 
     /**
+     * @brief state check switch 
+     */
+    int state_check_flag;
+
+    /**
      * socket state check thread
      */
     thread_t *state_check;
@@ -160,8 +160,6 @@ void *check_socket_state_thread(private_socket_t *this)
 
                 this->lock->lock(this->lock);
                 this->state = SOCKET_CLOSED;
-//                close(this->accept_fd);
-//                this->accept_fd = -1;
                 this->lock->unlock(this->lock);
             }
         }
@@ -194,8 +192,7 @@ METHOD(socket_t, listen_, int, private_socket_t *this, int family, int type, int
         return -1;
     }
 
-    if (setsockopt(this->fd, SOL_SOCKET, SO_REUSEADDR, (void*)&on, sizeof(on)) < 0)
-    {        
+    if (setsockopt(this->fd, SOL_SOCKET, SO_REUSEADDR, (void*)&on, sizeof(on)) < 0) {        
         fprintf(stderr, "unable to set SO_REUSEADDR on socket: %s\n", strerror(errno));
         close(this->fd);
         return -1;
@@ -221,7 +218,8 @@ METHOD(socket_t, listen_, int, private_socket_t *this, int family, int type, int
     }
 
     this->state = SOCKET_STARTING;
-    this->state_check = thread_create((void *)check_socket_state_thread, this);
+    if (this->state_check_flag)
+        this->state_check = thread_create((void *)check_socket_state_thread, this);
 
     return this->fd;
 }
@@ -271,8 +269,8 @@ METHOD(socket_t, connect_, int, private_socket_t *this, int family, int type, in
         return -1;
     }
 
-    this->accept_fd = this->fd;
-    this->state = SOCKET_CONNECTED;
+    this->accept_fd   = this->fd;
+    this->state       = SOCKET_CONNECTED;
     this->state_check = thread_create((void *)check_socket_state_thread, this);
 
     return this->fd;
@@ -293,23 +291,17 @@ METHOD(socket_t, accept_, int, private_socket_t *this)
     return this->accept_fd;
 }
 
-METHOD(socket_t, recv_, int,
-        private_socket_t *this, void *buf, int size, int timeout)
+METHOD(socket_t, recv_, int, private_socket_t *this, void *buf, int size, int timeout)
 {
-    int max_fd = 0;
-    int select_fd = 0;
-    int can_read_bytes = 0;
-    struct timeval tv = {0};
-    void *timeout_ptr = NULL;
+    int    can_read_bytes = 0;
+    void   *timeout_ptr   = NULL;
+    struct timeval tv     = {0};
     fd_set fds;
 
-    if (this->accept_fd <= 0) {
-        return -1;
-    }
+    if (this->accept_fd <= 0) return -1;
 
     FD_ZERO(&fds);
     FD_SET(this->accept_fd, &fds);
-    max_fd = this->accept_fd + 1;
     this->lock->lock(this->lock);
     this->state = SOCKET_RECEIVING;
     this->lock->unlock(this->lock);
@@ -319,25 +311,17 @@ METHOD(socket_t, recv_, int,
         tv.tv_usec = timeout % 1000;
         timeout_ptr = &tv;
     }
-    if (select(max_fd, &fds, NULL, NULL, timeout_ptr) < 0) {
+
+    if (select(this->accept_fd + 1, &fds, NULL, NULL, timeout_ptr) < 0) {
         this->lock->lock(this->lock);
         this->state = SOCKET_RECEIVE_ERROR;
         this->lock->unlock(this->lock);
         printf("select failed\n");
         return -1;
     }
+    if (!FD_ISSET(this->accept_fd, &fds)) return -1;
 
-    if (FD_ISSET(this->fd, &fds)) {
-        select_fd = this->fd;
-    }
-    if (!select_fd && FD_ISSET(this->accept_fd, &fds)) {
-        select_fd = this->accept_fd;
-    }
-    if (select_fd <= 0) {
-        return -1;
-    }
-
-    ioctl(select_fd, FIONREAD, &can_read_bytes);
+    ioctl(this->accept_fd, FIONREAD, &can_read_bytes);
     if (can_read_bytes > 0) {
         size = can_read_bytes < size ? can_read_bytes : size;
     } else {
@@ -354,7 +338,7 @@ METHOD(socket_t, recv_, int,
             this->lock->lock(this->lock);
             this->state = SOCKET_RECEIVED;
             this->lock->unlock(this->lock);
-            return recvfrom(this->fd, buf, size, 0, this->host_cli->get_sockaddr(this->host_cli), this->host_cli->get_sockaddr_len(this->host_cli));
+            return recvfrom(this->accept_fd, buf, size, 0, this->host_cli->get_sockaddr(this->host_cli), this->host_cli->get_sockaddr_len(this->host_cli));
         default:
             this->lock->lock(this->lock);
             this->state = SOCKET_RECEIVED;
@@ -363,19 +347,18 @@ METHOD(socket_t, recv_, int,
     }
 }
 
-METHOD(socket_t, send_, int,
-        private_socket_t *this, void *buf, int size)
+METHOD(socket_t, send_, int, private_socket_t *this, void *buf, int size)
 {
     int send_cnt = 0;
 
     if(this->accept_fd <= 0) return -1;
-
     this->lock->lock(this->lock);
     this->state = SOCKET_SENDING;
     this->lock->unlock(this->lock);
+
     switch (this->type) {
         case SOCK_DGRAM:
-            send_cnt = sendto(this->fd, buf, size, 0, (struct sockaddr *)this->host_ser->get_sockaddr(this->host_ser), (socklen_t)sizeof(struct sockaddr));
+            send_cnt = sendto(this->accept_fd, buf, size, 0, (struct sockaddr *)this->host_ser->get_sockaddr(this->host_ser), (socklen_t)sizeof(struct sockaddr));
             break;
         default:
             send_cnt = send(this->accept_fd, buf, size, 0);
@@ -388,6 +371,11 @@ METHOD(socket_t, send_, int,
     return send_cnt;
 }
 
+METHOD(socket_t, set_state_check, void, private_socket_t *this, int on)
+{
+    this->state_check_flag = on;
+}
+
 METHOD(socket_t, get_can_read_bytes, unsigned int, private_socket_t *this)
 {
     while (ioctl(this->accept_fd, FIONREAD, &this->can_read_bytes) == 0 && this->can_read_bytes < 1) usleep(100);
@@ -396,14 +384,12 @@ METHOD(socket_t, get_can_read_bytes, unsigned int, private_socket_t *this)
     return this->can_read_bytes;
 }
 
-METHOD(socket_t, get_ip, char *,
-        private_socket_t *this)
+METHOD(socket_t, get_ip, char *, private_socket_t *this)
 {
     return this->host_ser->get_ip(this->host_ser, NULL, 0);
 }
 
-METHOD(socket_t, get_cli_ip, char *,
-        private_socket_t *this)
+METHOD(socket_t, get_cli_ip, char *, private_socket_t *this)
 {
     return this->host_cli->get_ip(this->host_cli, NULL, 0);
 }
@@ -442,12 +428,7 @@ METHOD(socket_t, get_type, int, private_socket_t *this)
 
 METHOD(socket_t, get_sockfd, int, private_socket_t *this)
 {
-    switch (this->type) {
-        case SOCK_DGRAM:
-            return this->fd;
-        default:
-            return this->accept_fd;
-    }
+    return this->accept_fd;
 }
 
 METHOD(socket_t, get_state, int, private_socket_t *this)
@@ -490,32 +471,35 @@ socket_t *create_socket()
 
     INIT(this,
             .public = {
-            .listen       = _listen_,
-            .accept       = _accept_,
-            .connect      = _connect_,
-            .send         = _send_,
-            .recv         = _recv_,
-            .close        = _close_,
-            .get_ip       = _get_ip,
-            .get_cli_ip   = _get_cli_ip,
-            .get_port     = _get_port,
-            .get_cli_port = _get_cli_port,
-            .get_family   = _get_family,
-            .get_sockaddr = _get_sockaddr,
-            .get_cli_sockaddr = _get_cli_sockaddr,
+            .listen  = _listen_,
+            .accept  = _accept_,
+            .connect = _connect_,
+            .send    = _send_,
+            .recv    = _recv_,
+            .close   = _close_,
+            .destroy = _destroy_,
+
+            .set_state_check = _set_state_check,
+
+            .get_ip             = _get_ip,
+            .get_cli_ip         = _get_cli_ip,
+            .get_port           = _get_port,
+            .get_cli_port       = _get_cli_port,
+            .get_family         = _get_family,
+            .get_sockaddr       = _get_sockaddr,
+            .get_cli_sockaddr   = _get_cli_sockaddr,
             .get_can_read_bytes = _get_can_read_bytes,
-            .get_type     = _get_type,
-            .get_sockfd   = _get_sockfd,
-            .get_state    = _get_state,
-            .print_state  = _print_state,
-            .destroy      = _destroy_,
+            .get_type           = _get_type,
+            .get_sockfd         = _get_sockfd,
+            .get_state          = _get_state,
+            .print_state        = _print_state,
             },
-            .sck       = NULL,
             .host_ser  = NULL,
             .host_cli  = NULL,
             .state     = SOCKET_CLOSED,
             .fd        = -1,
             .accept_fd = -1,
+            .state_check_flag = 0,
     );
 
     threads_init();

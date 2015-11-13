@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <ctype.h>
 
 /**
  * @brief parser agruement from  command line
@@ -15,6 +16,7 @@ void get_args(int agrc, char *agrv[], struct options *opt)
 {
     int i = 0;
     int ret_int = 1;
+    int args_cnt = 0;
     int found_flag = 0;
     struct options *opts = opt;
 
@@ -52,22 +54,29 @@ void get_args(int agrc, char *agrv[], struct options *opt)
                         memcpy(opts->value, "1", 1);
                     }
                 } else {
-                    if (++i >= agrc) {
-                        fprintf(stderr, "agruement [%s] need a parameter\n", agrv[i - 1]);
+                    if ((i + opts->has_args) >= agrc) {
+                        fprintf(stderr, "agruement [%s] need a parameter\n", agrv[i]);
                         exit(1);
                     }
 
-                    switch (opts->value_type) {
-                        case RET_CHR:
-                            memcpy(opts->value, agrv[i], 1);
-                            break;
-                        case RET_INT:
-                            if (i < agrc) ret_int = atoi(agrv[i]);
-                            memcpy(opts->value, &ret_int, sizeof(int));
-                            break;
-                        default:
-                            *(opts->value) = agrv[i];
-                            break;
+                    i++;
+                    args_cnt = opts->has_args;
+                    while (args_cnt-- > 0) {
+                        switch (opts->value_type) {
+                            case RET_CHR:
+                                memcpy(opts->value, agrv[i], 1);
+                                break;
+                            case RET_INT:
+                                if (i < agrc) ret_int = atoi(agrv[i]);
+                                memcpy(opts->value, &ret_int, sizeof(int));
+                                break;
+                            default:
+                                *(opts->value) = agrv[i];
+                                break;
+                        }
+
+                        i++;
+                        opts->value++;
                     }
                 }
 
@@ -77,7 +86,7 @@ void get_args(int agrc, char *agrv[], struct options *opt)
         }
 
         if (!found_flag) {
-            fprintf(stderr, "Invalid arguement\n");
+            fprintf(stderr, "Invalid arguement -- %s\n", agrv[i]);
             exit(1);
         }
     }
@@ -98,11 +107,17 @@ static char *get_proc_name()
     return proc + 1;
 }
 
+#define usage_line_len (30)
 void print_usage(struct usage *help_usage)
 {
-    struct usage *use = help_usage;
-    int opt_len = 0;
-    int opt_max_len = 0;
+    struct usage *use    = help_usage;
+    int opt_name_max_len = 0;
+    int opt_name_len     = 0;
+    int opt_usg_len      = 0;
+    int usg_cnt          = 0;
+    int cpy_cnt          = 0;
+    char buf[usage_line_len] = {0};
+    char c = ' ';
 
     if (!use) return;
     
@@ -110,11 +125,35 @@ void print_usage(struct usage *help_usage)
     printf("The Options arg:\n");
 
     for (use = help_usage; use->opt_name != NULL; use++) {
-        opt_len = strlen(use->opt_name);
-        if (opt_len > opt_max_len) opt_max_len = opt_len;
+        opt_name_len = strlen(use->opt_name);
+        if (opt_name_len > opt_name_max_len) opt_name_max_len = opt_name_len;
     }
 
     for (use = help_usage; use->opt_name != NULL; use++) {
-        printf("  %s%*c%s\n", use->opt_name, opt_max_len + 2 - strlen(use->opt_name), ' ', use->opt_usage);
+        opt_usg_len = strlen(use->opt_usage);
+        opt_name_len = strlen(use->opt_name);
+        if (opt_usg_len > usage_line_len) {
+            memcpy(buf, use->opt_usage + usg_cnt, usage_line_len);
+            usg_cnt += usage_line_len;
+            if (isalpha((use->opt_usage + usg_cnt - 1)[0]))
+                c = '-';
+            printf("  %s%*c%s%c\n", use->opt_name, opt_name_max_len + 2 - opt_name_len, ' ', buf, c);
+            while (usg_cnt < opt_usg_len) {
+                cpy_cnt = usg_cnt + usage_line_len < opt_usg_len ? usage_line_len - 1 : (opt_usg_len - usg_cnt);
+                memcpy(buf, use->opt_usage + usg_cnt, cpy_cnt);
+                buf[cpy_cnt] = '\0';
+                usg_cnt += cpy_cnt;
+                if (usg_cnt < opt_usg_len) {
+                    if (isalpha((use->opt_usage + usg_cnt - 1)[0]))
+                        c = '-';
+                } else {
+                    c = ' ';
+                }
+                printf("  %*c%s%c\n", opt_name_max_len + 2, ' ', buf, c);
+
+            }
+        } else {
+            printf("  %s%*c%s\n", use->opt_name, opt_name_max_len + 2 - opt_name_len, ' ', use->opt_usage);
+        }
     }
 }

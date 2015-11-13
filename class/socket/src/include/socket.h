@@ -134,6 +134,11 @@ struct socket_t {
     void (*close) (socket_t *this);
 
     /**
+     * @brief set socket state check property 
+     */
+    void (*set_state_check) (socket_t *this, int on);
+
+    /**
      * Get the port this socket is listening on.
      *
      * @return				the port
