@@ -11,6 +11,7 @@
 #include <utils/utils.h>
 #include <property.h>
 #include <ftp.h>
+#include <socket_base.h>
 
 /*********************************************************
  ***************    Macros Declaration    ****************

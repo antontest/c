@@ -29,6 +29,7 @@
 #include <thread/mutex.h>
 #include <host.h>
 #include <utils/enum.h>
+#include <socket_base.h>
 
 /* Maximum size of a packet */
 #define MAX_PACKET 10000
@@ -79,6 +80,11 @@ struct private_socket_t {
      * public functions
      */
     socket_t public;
+
+    /**
+     * @brief socket dealing
+     */
+    socket_base_t *sck;
 
     /**
      * socket fd
@@ -164,7 +170,7 @@ void *check_socket_state_thread(private_socket_t *this)
     return NULL;
 }
 
-METHOD(socket_t, listener, int, private_socket_t *this, int family, int type, int prototype, char *ip, unsigned short port)
+METHOD(socket_t, listen_, int, private_socket_t *this, int family, int type, int prototype, char *ip, unsigned short port)
 {
     int on = 1;
 
@@ -220,7 +226,7 @@ METHOD(socket_t, listener, int, private_socket_t *this, int family, int type, in
     return this->fd;
 }
 
-METHOD(socket_t, connecter, int, private_socket_t *this, int family, int type, int prototype, char *ip, unsigned short port)
+METHOD(socket_t, connect_, int, private_socket_t *this, int family, int type, int prototype, char *ip, unsigned short port)
 {
     int on = 1;
 
@@ -272,7 +278,7 @@ METHOD(socket_t, connecter, int, private_socket_t *this, int family, int type, i
     return this->fd;
 }
 
-METHOD(socket_t, accepter, int, private_socket_t *this)
+METHOD(socket_t, accept_, int, private_socket_t *this)
 {
     if ((this->accept_fd = accept(this->fd, this->host_cli->get_sockaddr(this->host_cli), this->host_cli->get_sockaddr_len(this->host_cli))) < 0) {
         fprintf(stderr, "accept failed: %s\n", strerror(errno));
@@ -287,7 +293,7 @@ METHOD(socket_t, accepter, int, private_socket_t *this)
     return this->accept_fd;
 }
 
-METHOD(socket_t, receiver, int,
+METHOD(socket_t, recv_, int,
         private_socket_t *this, void *buf, int size, int timeout)
 {
     int max_fd = 0;
@@ -357,7 +363,7 @@ METHOD(socket_t, receiver, int,
     }
 }
 
-METHOD(socket_t, sender, int,
+METHOD(socket_t, send_, int,
         private_socket_t *this, void *buf, int size)
 {
     int send_cnt = 0;
@@ -460,7 +466,7 @@ METHOD(socket_t, close_, void, private_socket_t *this)
     if (this->accept_fd > 0) close(this->accept_fd);
 }
 
-METHOD(socket_t, destroy, void, private_socket_t *this)
+METHOD(socket_t, destroy_, void, private_socket_t *this)
 {
     _close_(this);
     thread_onoff = 0;
@@ -484,11 +490,12 @@ socket_t *create_socket()
 
     INIT(this,
             .public = {
-            .listen       = _listener,
-            .accept       = _accepter,
-            .connect      = _connecter,
-            .send         = _sender,
-            .recv         = _receiver,
+            .listen       = _listen_,
+            .accept       = _accept_,
+            .connect      = _connect_,
+            .send         = _send_,
+            .recv         = _recv_,
+            .close        = _close_,
             .get_ip       = _get_ip,
             .get_cli_ip   = _get_cli_ip,
             .get_port     = _get_port,
@@ -501,8 +508,9 @@ socket_t *create_socket()
             .get_sockfd   = _get_sockfd,
             .get_state    = _get_state,
             .print_state  = _print_state,
-            .destroy      = _destroy,
+            .destroy      = _destroy_,
             },
+            .sck       = NULL,
             .host_ser  = NULL,
             .host_cli  = NULL,
             .state     = SOCKET_CLOSED,
