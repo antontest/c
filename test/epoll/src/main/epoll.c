@@ -5,8 +5,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <socket/socket_app.h>
+//#include <socket/socket_app.h>
 #include <sys/epoll.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
 /*
 #include <sys/socket.h>
@@ -52,12 +56,15 @@ int main(int agrc, char *agrv[])
     int i = 0;
     char buf[256] = {0};
     struct epoll_event events[10];
-    
-    fd = startup_inet_server(SOCK_STREAM, "127.0.0.1", 5001);
-    if (fd <= 0) {
-        printf("start up tcp server failed\n");
-        return -1;
-    }
+    struct sockaddr_in addr;
+
+    fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (fd < 0) return -1;
+    addr.sin_port = htons(5001);
+    addr.sin_family = AF_INET;
+    addr.sin_addr.s_addr = inet_addr("0.0.0.0");
+    if (bind(fd, (struct sockaddr *)&addr, sizeof(struct sockaddr)) < 0) return -1;
+    if (listen(fd, 5) < 0) return -1;
 
     epfd = epoll_create(10);
     addfd(epfd, fd, 0);
@@ -79,12 +86,12 @@ int main(int agrc, char *agrv[])
                 printf("closed\n");
                 close(events[i].data.fd);
             } else if (events[i].events & EPOLLHUP) {
-                printf("close\n");
+                printf("close 1111\n");
                 close(events[i].data.fd);
             } else if (events[i].events & EPOLLIN) {
-                if (socket_recv(events[i].data.fd, buf, sizeof(buf)) <= 0)
+                if (recv(events[i].data.fd, buf, sizeof(buf), 0) <= 0)
                 {
-                    printf("closed1\n");
+                    printf("closed2222\n");
                     close(events[i].data.fd);
                 }
                 else printf("recv: %s\n", buf);

@@ -40,7 +40,8 @@ int main(int agrc, char *agrv[])
     char *ip = NULL;
     int port = 0;
     int num[3];
-    char *files[3] = {NULL};
+    char *files = {NULL};
+    char **pp = &files;
     struct usage use[] = {
         {"-h, --help", "help"},
         {"-p, --passwd", "pass word pass word pass word pass word abcdefghijklmnopqrstuvwxyz"},
@@ -51,7 +52,7 @@ int main(int agrc, char *agrv[])
         {"-p", "--port" , 1, RET_INT, ADDR_ADDR(port)},
         {"-i", "--ip"   , 1, RET_STR, ADDR_ADDR(ip)},
         {"-n", "--num"  , 3, RET_INT, ADDR_ADDR(num)},
-        {"-f", "--files", 3, RET_STR, ADDR_ADDR(files)},
+        {"-f", "--files", -1, RET_STR, ADDR_ADDR(files)},
         {NULL, NULL}
     };
 
@@ -59,7 +60,13 @@ int main(int agrc, char *agrv[])
     printf("ip: %s\n", ip);
     printf("port: %d\n", port);
     printf("value: %d, val1: %d, val2: %d\n", num[0], num[1], num[2]);
-    printf("f1: %s, f2: %s, f3: %s\n", files[0], files[1], files[2]);
+    //printf("f1: %s, f2: %s, f3: %s\n", *files, *files, *files);
+    //printf("f1: %s, f2: %s, f3: %s\n", *pp, *(pp+1), *(pp+2));
+    pp += 2;
+    printf("11111\n");
+    if (*pp == NULL) printf("NULL");
+    printf("22222\n");
+    //printf("*(pp + 2): %s\n", *pp);
 
     if (help_flag) print_usage(use);
     return 0;
