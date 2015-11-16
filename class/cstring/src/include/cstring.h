@@ -20,14 +20,45 @@ struct cstring {
     const char *(*add) (cstring *this, const char *fmt, ...);
 
     /**
+     * @brief   Insert string to current string  
+     *
+     * @param index  start deleting number
+     * @param fmt new string
+     * @return    pointer to string
+     */
+    const char *(*insert) (cstring *this, unsigned int index, const char *fmt, ...);
+
+    /**
+     * @brief delete string  
+     *
+     * @param index  start deleting number
+     * @param count  delete count
+     */
+    const char *(*delete) (cstring *this, unsigned int index, unsigned int count);
+
+    /**
      * @brief Get string  
      */
     const char *(*get) (cstring *this);
 
     /**
      * @brief Get a piece of string  
+     *
+     * @param count  left charcter count 
      */
-    const char *(*offset) (cstring *this, unsigned int start, unsigned int count);
+    const char *(*left) (cstring *this, unsigned int count);
+
+    /**
+     * @brief Get a piece of string  
+     */
+    const char *(*mid) (cstring *this, unsigned int start, unsigned int count);
+
+    /**
+     * @brief Get a piece of string  
+     *
+     * @param count  right charcter count 
+     */
+    const char *(*right) (cstring *this, unsigned int count);
 
     /**
      * @brief length of string
@@ -44,6 +75,11 @@ struct cstring {
      * @brief destroy instance and free memory  
      */
     void (*destroy) (cstring *this);
+
+    /**
+     * @brief get cstring buffer size
+     */
+    int (*get_size) (cstring *this);
 
     /**
      * @brief transfrom to int
@@ -79,6 +115,27 @@ struct cstring {
      * @brief trim all blank char   
      */
     const char *(*all_trim) (cstring *this);
+
+    /**
+     * @brief compare two string
+     * @return an integer less than, equal to, or
+     *         greater than zero if s1 is found, respectively, to be less
+     *         than, to match, or be greater than s.
+     */
+    int (*compare) (cstring *this, const char *s);
+
+    /**
+     * @brief compare two string
+     * @return an integer less than, equal to, or
+     *         greater than zero if s1 is found, respectively, to be less
+     *         than, to match, or be greater than s.
+     */
+    int (*compare_no_case) (cstring *this, const char *s);
+
+    /**
+     * @brief string wether is empty
+     */
+    int (*is_empty) (cstring *this);
 };
 
 /**
