@@ -158,7 +158,9 @@ struct socket_base_t {
                 appropriately.    
      */
     int (*send) (socket_base_t *this, void *buf, int size, int flags);
+    int (*vsend) (socket_base_t *this, int flags, const char *fmt, ...);
     int (*sendto) (socket_base_t *this, void *buf, int size, int flags, struct sockaddr *dest_addr, int addrlen);
+    int (*vsendto) (socket_base_t *this, int flags, struct sockaddr *dest_addr, int addrlen, const char *fmt, ...);
 
     /**
      * @brief Receive messages from a socket, and may be used to receive data
@@ -219,7 +221,9 @@ struct socket_base_t {
                  the peer has performed an orderly shutdown.
      */
     int (*recv) (socket_base_t *this, void *buf, int size, int flags);
+    char *(*vrecv) (socket_base_t *this, int flags);
     int (*recvfrom) (socket_base_t *this, void *buf, int size, int flags, struct sockaddr *src_addr, int *addrlen);
+    char *(*vrecvfrom) (socket_base_t *this, int flags, struct sockaddr *src_addr, int *addrlen);
 
     /**
      * @brief Close a file descriptor 
@@ -257,6 +261,16 @@ struct socket_base_t {
      * @brief Get socket descriptor
      */
     int (*get_fd) (socket_base_t *this);
+
+    /**
+     * @brief set send buffer size 
+     */
+    void (*set_send_buffer_size) (socket_base_t *this, unsigned int size);
+
+    /**
+     * @brief set recv buffer size 
+     */
+    void (*set_recv_buffer_size) (socket_base_t *this, unsigned int size);
 };
 
 /**

@@ -29,11 +29,11 @@ SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/src/lib)
 ADD_LIBRARY(chunk         SHARED ${CHUNK_SRC})
 ADD_LIBRARY(packet        SHARED ${PACKET_SRC})
 ADD_LIBRARY(socket_shared SHARED ${LIB_SRC})
-ADD_LIBRARY(host          SHARED ${HOST_SRC})
+ADD_LIBRARY(host          STATIC ${HOST_SRC})
 ADD_LIBRARY(manager       SHARED ${MANAGER_SRC})
-ADD_LIBRARY(property      SHARED ${PROPERTY_SRC})
+ADD_LIBRARY(property      STATIC ${PROPERTY_SRC})
 ADD_LIBRARY(ftp           SHARED ${FTP_SRC})
-ADD_LIBRARY(socket_base   SHARED ${BASE_SRC})
+ADD_LIBRARY(socket_base   STATIC ${BASE_SRC})
 
 # generat exec
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR})
@@ -42,7 +42,7 @@ ADD_EXECUTABLE(ftp_client ${FTP_MAIN_SRC})
 
 # link library
 SET_TARGET_PROPERTIES(socket_shared PROPERTIES OUTPUT_NAME "socket")
-TARGET_LINK_LIBRARIES(host          utils)
+# TARGET_LINK_LIBRARIES(host          utils)
 TARGET_LINK_LIBRARIES(chunk         utils)
 TARGET_LINK_LIBRARIES(packet        utils chunk)
 TARGET_LINK_LIBRARIES(socket_shared utils packet chunk host thread enum mutex socket_base)

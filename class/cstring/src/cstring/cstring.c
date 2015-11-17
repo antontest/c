@@ -118,6 +118,7 @@ METHOD(cstring, get_, const char *, private_cstring *this)
 METHOD(cstring, left_, const char *, private_cstring *this, unsigned int count)
 {
     if (count >= this->len) return this->data;
+    if (this->offsets != NULL) free(this->offsets);
     this->offsets = malloc(count + 1);
     memcpy(this->offsets, this->data, count);
     strcat(this->offsets, "\0");
@@ -130,6 +131,7 @@ METHOD(cstring, mid_, const char *, private_cstring *this, unsigned int start, u
     if (start > this->len || (!start && !count)) return NULL;
     if (!count) return this->data + start;
     
+    if (this->offsets != NULL) free(this->offsets);
     this->offsets = malloc(count + 1);
     memcpy(this->offsets, this->data + start, count);
     strcat(this->offsets, "\0");
@@ -140,6 +142,7 @@ METHOD(cstring, mid_, const char *, private_cstring *this, unsigned int start, u
 METHOD(cstring, right_, const char *, private_cstring *this, unsigned int count)
 {
     if (count >= this->len) return this->data;
+    if (this->offsets != NULL) free(this->offsets);
     this->offsets = malloc(count + 1);
     memcpy(this->offsets, this->data + this->len - count, count);
     strcat(this->offsets, "\0");
