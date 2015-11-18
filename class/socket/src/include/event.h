@@ -21,16 +21,6 @@ enum event_mode_t {
 typedef struct event_t event_t;
 struct event_t {
     /**
-     * @brief chose select mode
-     */
-    //int (*create_select) (event_t *this);
-
-    /**
-     * @brief chose epool mode
-     */
-    //int (*create_epoll) (event_t *this);
-
-    /**
      * @brief add socket event
      *
      * @param fd        fd listening on

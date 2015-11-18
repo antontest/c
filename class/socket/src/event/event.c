@@ -5,6 +5,7 @@
 #include <string.h>
 #include <sys/ioctl.h>
 #include <sys/select.h>
+#include <sys/epoll.h>
 #include <thread/thread.h>
 #include <utils/utils.h>
 #include <utils/linked_list.h>
@@ -71,6 +72,14 @@ struct private_event_t {
         } s;
 #define select_fds   fd.s.fds
 #define select_maxfd fd.s.max_fd
+
+        struct {
+            /**
+             * @brief handle of epoll
+             */
+            int epfd;
+        } e;
+#define epoll_fd fd.e.epfd
     } fd;
 
     /**
@@ -159,21 +168,38 @@ void *select_events_handler(private_event_t *this)
     return NULL;
 }
 
+static void *epoll_events_handler(private_event_t *this)
+{
+
+    return NULL;
+}
+
 static int start_event_capture(private_event_t *this, event_mode_t mode)
 {
+    void *handler = NULL;
     switch (mode) {
         case EVENT_MODE_SELECT:
-            this->thread = thread_create((void *)select_events_handler, this);
-            if (!this->thread) return -1;
+            handler = (void *)select_events_handler;
             break;
         case EVENT_MODE_EPOLL:
-            
+            this->epoll_fd = epoll_create(10); 
+            handler = (void *)epoll_events_handler;
             break;
         default:
             break;
     }
+    this->thread = thread_create(handler, this);
+    if (!this->thread) return -1;
 
     return 0;
+}
+
+static int epoll_addfd(private_event_t *this, int fd, event_type_t type)
+{
+    struct epoll_event evt = {0};
+    evt.data.fd = fd;
+    evt.events |= EPOLLIN | EPOLLRDHUP | EPOLLET;
+    return epoll_ctl(this->epoll_fd, EPOLL_CTL_ADD, fd, &evt);
 }
 
 METHOD(event_t, add_, int, private_event_t *this, int fd, event_type_t type, void (*handler) (int fd, void *arg), void *arg)
@@ -214,6 +240,7 @@ METHOD(event_t, add_, int, private_event_t *this, int fd, event_type_t type, voi
         case EVENT_MODE_SELECT:
             this->event_list->insert_last(this->event_list, (void *)pkg);
         case EVENT_MODE_EPOLL:
+            epoll_addfd(this, fd, type);
             break;
         default:
             break;
@@ -298,7 +325,6 @@ event_t *create_event(event_mode_t mode)
         _destroy_(this);
         return NULL;
     }
-    
 
     return &this->public;
 }
