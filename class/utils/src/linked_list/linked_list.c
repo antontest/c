@@ -67,6 +67,12 @@ struct private_linked_list_t {
 	element_t *first;
 
 	/**
+	 * Current element in list.
+	 * NULL if no elements in list.
+	 */
+	element_t *current;
+
+	/**
 	 * Last element in list.
 	 * NULL if no elements in list.
 	 */
@@ -144,6 +150,26 @@ METHOD(linked_list_t, get_first, status_t,
 		return NOT_FOUND;
 	}
 	*item = this->first->value;
+	return SUCCESS;
+}
+
+METHOD(linked_list_t, reset_current, status_t,
+	private_linked_list_t *this)
+{
+	if (this->count == 0)
+		return NOT_FOUND;
+	this->current = this->first;
+	return SUCCESS;
+}
+
+METHOD(linked_list_t, get_next, status_t,
+	private_linked_list_t *this, void **item)
+{
+	if (this->count == 0)
+		return NOT_FOUND;
+	if (!this->current) this->current = this->first;
+	*item = this->current->value;
+	this->current = this->current->next;
 	return SUCCESS;
 }
 
@@ -347,20 +373,25 @@ linked_list_t *linked_list_create()
 		.public = {
 			.get_count = _get_count,
 			.get_first = _get_first,
-			.get_last = _get_last,
-			.find_first = (void*)_find_first,
+			.get_next  = _get_next,
+			.get_last  = _get_last,
+			.reset_current = _reset_current,
+			.find_first   = (void*)_find_first,
 			.insert_first = _insert_first,
-			.insert_last = _insert_last,
+			.insert_last  = _insert_last,
 			.remove_first = _remove_first,
-			.remove_last = _remove_last,
-			.remove = _remove_,
-			.invoke_offset = (void*)_invoke_offset,
+			.remove_last  = _remove_last,
+			.remove          = _remove_,
+			.invoke_offset   = (void*)_invoke_offset,
 			.invoke_function = (void*)_invoke_function,
-			.clone_offset = _clone_offset,
-			.destroy = _destroy,
-			.destroy_offset = _destroy_offset,
+			.clone_offset     = _clone_offset,
+			.destroy          = _destroy,
+			.destroy_offset   = _destroy_offset,
 			.destroy_function = _destroy_function,
 		},
+		.first   = NULL,
+		.current = NULL,
+		.last    = NULL,
 	);
 
 	return &this->public;

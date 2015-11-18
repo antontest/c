@@ -83,6 +83,19 @@ struct linked_list_t {
 	status_t (*get_first) (linked_list_t *this, void **item);
 
 	/**
+	 * Returns the value of the current list item without removing it.
+	 *
+	 * @param item		returned value of first item
+	 * @return			SUCCESS, NOT_FOUND if list is empty
+	 */
+    status_t (*get_next) (linked_list_t *this, void **item);
+
+    /**
+     * @brief reset current pointer
+     */
+    status_t (*reset_current) (linked_list_t *this);
+
+	/**
 	 * Inserts a new item at the end of the list.
 	 *
 	 * @param item		value to insert into list

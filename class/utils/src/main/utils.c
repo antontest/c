@@ -5,7 +5,7 @@
 #include <library.h>
 //#include <utils.h>
 //#include <enum.h>
-//#include <linked_list.h>
+#include <linked_list.h>
 #include <debug.h>
 #include <log.h>
 #include <get_args.h>
@@ -28,15 +28,31 @@ ENUM(st, ST_1, ST_3,
     "ST1",
     "ST2",
     "ST3")
+
+void list_test(linked_list_t *list)
+{
+    struct ele el= {2, NULL};
+    int rt = 1;
+    void *p = NULL;
+
+    list->insert_last(list, &rt);
+    list->insert_last(list, &el);
+    printf("list count: %d\n", list->get_count(list));
+    list->get_first(list, &p);
+    printf("first val: %d\n", *((int *)p));
+    list->get_last(list, &p);
+    printf("lsst val: %d\n", ((struct ele *)p)->data);
+    //free(list);
+
+}
 /*********************************************************
  ******************    Main Function    ******************
  *********************************************************/
 int main(int agrc, char *agrv[])
 {
     int rt = 0; /* return value of function main */
-    struct ele el= {2, NULL};
-    void *p = NULL;
     int help_flag = 0;
+    void *p = NULL;
     char *ip = NULL;
     int port = 0;
     int num[3];
@@ -56,6 +72,7 @@ int main(int agrc, char *agrv[])
         {NULL, NULL}
     };
 
+    if (0) {
     get_args(agrc, agrv, opts);
     printf("ip: %s\n", ip);
     printf("port: %d\n", port);
@@ -69,18 +86,19 @@ int main(int agrc, char *agrv[])
     //printf("*(pp + 2): %s\n", *pp);
 
     if (help_flag) print_usage(use);
-    return 0;
+    return 0; 
+    }
 
     linked_list_t *list = linked_list_create();
-    rt = 1;
-    list->insert_last(list, &rt);
-    list->insert_last(list, &el);
+    list_test(list);
     printf("list count: %d\n", list->get_count(list));
     list->get_first(list, &p);
     printf("first val: %d\n", *((int *)p));
     list->get_last(list, &p);
     printf("lsst val: %d\n", ((struct ele *)p)->data);
     free(list);
+
+    return 0;
 
     printf("name: %s\n", enum_to_name(st, ST_2));
     dbg("%d aaa bbb %s", 1, "ccc");

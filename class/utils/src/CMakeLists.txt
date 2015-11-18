@@ -13,22 +13,22 @@ ADD_DEFINITIONS(-Wall -O2 -Werror)
 AUX_SOURCE_DIRECTORY(main SRC_PATH)
 
 # set source files and lib source files
-SET(CSRC ${SRC_PATH})
-SET(LIST_SRC linked_list/linked_list.c)
+SET(CSRC      ${SRC_PATH})
+SET(LIST_SRC  linked_list/linked_list.c)
 SET(UTILS_SRC utils/utils.c)
-SET(ENUM_SRC enum/enum.c)
+SET(ENUM_SRC  enum/enum.c)
 SET(DEBUG_SRC debug/debug.c)
-SET(ARGS_SRC get_args/get_args.c)
-SET(LOG_SRC log/log.c)
+SET(ARGS_SRC  get_args/get_args.c)
+SET(LOG_SRC   log/log.c)
 
 # lib generation
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/src/lib)
 ADD_LIBRARY(linked_list SHARED ${LIST_SRC})
 ADD_LIBRARY(utils_share SHARED ${UTILS_SRC})
-ADD_LIBRARY(enum SHARED ${ENUM_SRC})
+ADD_LIBRARY(enum        STATIC ${ENUM_SRC})
 ADD_LIBRARY(utils_debug STATIC ${DEBUG_SRC})
-ADD_LIBRARY(get_args STATIC ${ARGS_SRC})
-ADD_LIBRARY(log STATIC ${LOG_SRC})
+ADD_LIBRARY(get_args    STATIC ${ARGS_SRC})
+ADD_LIBRARY(log         STATIC ${LOG_SRC})
 
 # generat exec
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR})
