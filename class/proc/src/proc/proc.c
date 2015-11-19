@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <sys/types.h>
+#include <sys/sysinfo.h>
 #include <sys/stat.h>
 #include <dirent.h>
 #include <errno.h>
@@ -705,6 +706,17 @@ int read_uptime(void) {
     fclose(fp);
 
     return uptime;
+}
+
+/**
+ * @brief read systime 
+ */
+long read_systime()
+{
+    struct sysinfo sys = {0};
+
+    sysinfo(&sys);
+    return sys.uptime;
 }
 
 /**

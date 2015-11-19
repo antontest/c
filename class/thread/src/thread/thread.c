@@ -230,28 +230,6 @@ METHOD(thread_t, join, void*,
 }
 
 /**
- * Create an internal thread object.
- */
-static private_thread_t *thread_create_internal()
-{
-	private_thread_t *this;
-
-	INIT(this,
-		.public = {
-			.cancel = _cancel,
-			.kill = _kill_,
-			.detach = _detach,
-			.join = _join,
-		},
-		.cleanup_handlers = linked_list_create(),
-		.mutex = mutex_create(),
-	);
-	sem_init(&this->created, FALSE, 0);
-
-	return this;
-}
-
-/**
  * Main cleanup function for threads.
  */
 static void thread_cleanup(private_thread_t *this)
@@ -266,6 +244,34 @@ static void thread_cleanup(private_thread_t *this)
 	}
 	this->terminated = TRUE;
 	thread_destroy(this);
+}
+
+METHOD(thread_t, destroy_, void, private_thread_t *this)
+{
+    thread_cleanup(this);
+}
+
+/**
+ * Create an internal thread object.
+ */
+static private_thread_t *thread_create_internal()
+{
+	private_thread_t *this;
+
+	INIT(this,
+		.public = {
+			.cancel  = _cancel,
+			.kill    = _kill_,
+			.detach  = _detach,
+			.join    = _join,
+			.destroy = _destroy_,
+		},
+		.cleanup_handlers = linked_list_create(),
+		.mutex = mutex_create(),
+	);
+	sem_init(&this->created, FALSE, 0);
+
+	return this;
 }
 
 /**

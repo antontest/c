@@ -11,6 +11,7 @@
 #include <proc.h>
 #include <fileio.h>
 #include <signal.h>
+#include <thread/mutex.h>
 #include <thread/thread.h>
 #include <utils/utils.h>
 #include <utils/linked_list.h>
@@ -46,7 +47,7 @@ struct task_t {
     /**
      * @brief id of cmd execute process
      */
-    pid_t id;
+    pid_t pid;
 
     /**
      * @brief task command
@@ -72,6 +73,16 @@ struct task_t {
 typedef struct task_queue_t task_queue_t;
 struct task_queue_t {
     /**
+     * @brief task queue id
+     */
+    int id;
+
+    /**
+     * @brief stop queue
+     */
+    int stop;
+
+    /**
      * @brief task number in this queue
      */
     int task_num;
@@ -90,6 +101,16 @@ struct task_queue_t {
      * @brief fifo
      */
     ipc_t *fifo;
+
+    /**
+     * @brief handler task in queue 
+     */
+    thread_t *handler;
+
+    /**
+     * @brief rwlock
+     */
+    mutex_t *lock;
 
     /**
      * @brief task queue
@@ -114,6 +135,26 @@ int read_config()
 
     if (conf.timeout < 0 || conf.task_queue_cnt < 0) return -1;
     return 0;
+}
+
+static void *task_handler(task_queue_t *taskq)
+{
+    task_t *task = NULL;
+    while (!taskq->stop) {
+        if (taskq->task->get_count(taskq->task) == NOT_FOUND) continue;
+
+        if (taskq->task->get_first(taskq->task, (void **)&task) == NOT_FOUND)
+            continue;
+
+        task->etime = read_systime();
+        cmd_exec(task->cmd, &task->pid);
+
+        taskq->lock->lock(taskq->lock);
+        taskq->task->remove_first(taskq->task, (void **)&task);
+        taskq->lock->unlock(taskq->lock);
+        free(task);
+    }
+    return NULL;
 }
 
 /**
@@ -142,19 +183,19 @@ int task_queue_init()
      */
     ini = create_ini(conf.path);
     task_queue_timeout = ini->get_value(ini, "queue", "timeout");
-    ini->destroy(ini);
     
     /**
      * initial task queue 
      * 1. create fifo 
      * 2. create task queue
      */
+    threads_init();
     for (str = task_queue_timeout, i = 0; i < conf.task_queue_cnt; str = NULL, i++) {
         /**
          * get task queue timeout
          */
         token = strtok_r(str, ":,", &save);
-        if (!token) return -1;
+        if (!token) break;
         queue->timeout = atoi(token);
 
         /**
@@ -169,11 +210,43 @@ int task_queue_init()
          * create task queue
          */
         queue->task = linked_list_create();
-        if (!queue->task) return -1;
+        if (!queue->task) {
+            queue->fifo->destroy(queue->fifo);
+            break;
+        }
 
+        /**
+         * create rwlock
+         */
+        queue->lock = mutex_create();
+        if (!queue->lock) {
+            queue->fifo->destroy(queue->fifo);
+            queue->task->destroy(queue->task);
+            break;
+        }
+
+        /**
+         * create thread handler
+         */
+        queue->handler = thread_create((void *)task_handler, queue);
+        if (!queue->handler) {
+            queue->fifo->destroy(queue->fifo);
+            queue->task->destroy(queue->task);
+            queue->lock->destroy(queue->lock);
+            break;
+        }
+
+        queue->stop = 0;
+        queue->id = i;
         queue++;
     }
-    
+
+    ini->destroy(ini);
+    if (i < 1) return -1;
+    else if (i < conf.task_queue_cnt) {
+        conf.task_queue_cnt = i;
+    }
+
     return 0;
 }
 
@@ -183,17 +256,23 @@ int task_queue_init()
 int task_queue_deinit()
 {
     int i = 0;
-    void *task = NULL;
+    task_t *task = NULL;
     task_queue_t *queue = task_queue;
 
     if (!task_queue) return -1;
 
     for (queue = task_queue, i = 0; i < conf.task_queue_cnt; queue++, i++) {
-        while (queue->task->remove_first(queue->task, &task) != NOT_FOUND)
-            free(task);
+        if (queue->task != NULL) {
+            while (queue->task->remove_first(queue->task, (void **)&task) != NOT_FOUND) {
+                free(task->cmd);
+                free(task);
+            }
+        }
 
-        queue->fifo->destroy(queue->fifo);
-        queue->task->destroy(queue->task);
+        if (queue->fifo) queue->fifo->destroy(queue->fifo);
+        if (queue->task) queue->task->destroy(queue->task);
+        if (queue->handler) queue->handler->destroy(queue->handler);
+        if (queue->lock) queue->lock->destroy(queue->lock);
     }
 
     return 0;
@@ -244,10 +323,32 @@ void* fifo_listen_handler(int fd, task_queue_t *taskq)
 
         newtask = (task_t *)malloc(sizeof(task_t));
         if (!newtask) continue;
+        newtask->cmd = strdup(token);
+        newtask->ctime = read_systime();
+
+        taskq->lock->lock(taskq->lock);
         taskq->task->insert_last(taskq->task, newtask);
+        taskq->lock->unlock(taskq->lock);
         printf("cmd: %s\n", token);
     }
     return NULL;
+}
+
+/**
+ * @brief handle command timeout
+ */
+static void timeout_handle(task_queue_t *taskq)
+{
+    task_t *task = NULL;
+    int i = 0;
+
+    for (i = 0; i < conf.task_queue_cnt; i++) {
+        if (taskq->task->get_first(taskq->task, (void **)&task) == NOT_FOUND) return;
+        if ((read_systime() - task->etime) >= taskq->timeout) {
+            kill(-task->pid, SIGTERM);
+        }
+        taskq++;
+    }
 }
 
 /*********************************************************
@@ -273,8 +374,9 @@ int main(int agrc, char *agrv[])
     /**
      * create fifo fd event listening
      */
-    evt = create_event(EVENT_MODE_SELECT);
+    evt = create_event(EVENT_MODE_SELECT, conf.timeout * 1000);
     if (!evt) goto deinit;
+    evt->exception_handle(evt, EXCEPTION_TIMEOUT, (void *)timeout_handle, task_queue);
     for (i = 0, queue = task_queue; i < conf.task_queue_cnt; i++, queue++) {
         evt->add(evt, queue->fd, EVENT_ON_RECV, (void *)fifo_listen_handler, queue);
     }

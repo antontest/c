@@ -250,6 +250,11 @@ int SYSTEM(const char *format, ...);
 int read_uptime(void);
 
 /**
+ * @brief read systime 
+ */
+long read_systime();
+
+/**
  * @brief create_state_file_by_name 
  *
  * @param app_name [in] process's name

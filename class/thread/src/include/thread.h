@@ -63,6 +63,10 @@ struct thread_t {
 	 */
 	void *(*join)(thread_t *this);
 
+    /**
+     * @brief destroy instance and free memory
+     */
+    void (*destroy) (thread_t *this);
 };
 
 

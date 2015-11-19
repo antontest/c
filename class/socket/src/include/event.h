@@ -18,6 +18,12 @@ enum event_mode_t {
     EVENT_MODE_EPOLL
 };
 
+typedef enum exception_type_t exception_type_t;
+enum exception_type_t {
+    EXCEPTION_TIMEOUT = 1,
+    EXCEPTION_ERROR
+};
+
 typedef struct event_t event_t;
 struct event_t {
     /**
@@ -42,11 +48,16 @@ struct event_t {
      * @brief destroy instance and free memory
      */
     void (*destroy) (event_t *this);
+
+    /**
+     * @brief exception handle
+     */
+    void (*exception_handle) (event_t *this, exception_type_t type, void (*handler) (void *), void *arg);
 };
 
 /**
  * @brief create socket event instance 
  */
-event_t *create_event(event_mode_t mode);
+event_t *create_event(event_mode_t mode, int timeout);
 
 #endif /* __SOCKET_EVENT__ */

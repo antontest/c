@@ -34,6 +34,12 @@ struct event_pkg_t {
     void *arg;
 };
 
+typedef struct callback_t callback_t;
+struct callback_t {
+    void (*handler) (void *arg);
+    void *arg;
+};
+
 typedef struct private_event_t private_event_t;
 struct private_event_t {
     /**
@@ -84,10 +90,25 @@ struct private_event_t {
     } fd;
 
     /**
+     * @brief select or epoll timeout
+     */
+    unsigned int timeout;
+
+    /**
      * @brief stand for add or delete, flag 1 when
      *        add event, flag -1, when delete event
      */
     int flag;
+
+    /**
+     * @brief select or epoll timeout handle 
+     */
+    callback_t timeout_handler;
+
+    /**
+     * @brief select or epoll error handle 
+     */
+    callback_t error_handler;
 };
 static private_event_t *local_free_pointer = NULL;
 
@@ -136,8 +157,8 @@ void *select_events_handler(private_event_t *this)
         /**
          * wait time
          */
-        tv.tv_sec  = 1;
-        tv.tv_usec = 0;
+        tv.tv_sec  = this->timeout / 1000;
+        tv.tv_usec = this->timeout % 1000 * 1000;
     
         /**
          * wait socket event
@@ -146,8 +167,10 @@ void *select_events_handler(private_event_t *this)
         ready_fds_cnt = select(this->select_maxfd, &fds, NULL, NULL, &tv);
         switch (ready_fds_cnt) {
             case 0:
+                if (this->timeout_handler.handler != NULL) this->timeout_handler.handler(this->timeout_handler.arg);
                 break;
             case -1:
+                if (this->error_handler.handler != NULL) this->error_handler.handler(this->error_handler.arg);
                 thread_onoff = 0;
                 break;
             default:
@@ -180,12 +203,13 @@ static void *epoll_events_handler(private_event_t *this)
 
 
     while (thread_onoff) {
-        ready_fds_cnt = epoll_wait(this->epoll_fd, evts, sizeof(evts) / sizeof(struct epoll_event), 1000);    
+        ready_fds_cnt = epoll_wait(this->epoll_fd, evts, sizeof(evts) / sizeof(struct epoll_event), this->timeout);    
         switch (ready_fds_cnt) {
             case -1:
-                perror("epoll_wait");
+                if (this->error_handler.handler != NULL) this->error_handler.handler(this->error_handler.arg);
                 break;
             case 0:
+                if (this->timeout_handler.handler != NULL) this->timeout_handler.handler(this->timeout_handler.arg);
                 break;
             default:
                 for (deal_fds_cnt = 0; deal_fds_cnt < ready_fds_cnt; deal_fds_cnt++) {
@@ -374,6 +398,22 @@ METHOD(event_t, destroy_, void, private_event_t *this)
     free(this);
 }
 
+METHOD(event_t, exception_handle_, void, private_event_t *this, exception_type_t type, void (*handler) (void *), void *arg)
+{
+    switch (type) {
+        case EXCEPTION_TIMEOUT:
+            this->timeout_handler.handler = handler;
+            this->timeout_handler.arg = arg;
+            break;
+        case EXCEPTION_ERROR:
+            this->error_handler.handler = handler;
+            this->error_handler.arg = arg;
+            break;
+        default:
+            break;
+    }
+}
+
 static int start_event_capture(private_event_t *this, event_mode_t mode)
 {
     void *handler = NULL;
@@ -408,7 +448,7 @@ static int start_event_capture(private_event_t *this, event_mode_t mode)
     return 0;
 }
 
-event_t *create_event(event_mode_t mode)
+event_t *create_event(event_mode_t mode, int timeout)
 {
     private_event_t *this;
 
@@ -419,11 +459,13 @@ event_t *create_event(event_mode_t mode)
             .add     = _add_,
             .delete  = _delete_,
             .destroy = _destroy_,
+            .exception_handle = _exception_handle_,
         },
         .event_list = linked_list_create(),
         .thread     = NULL,
         .mode       = mode,
         .flag       = 0,
+        .timeout    = timeout < 0 ? 0 : timeout,
     );
 
     threads_init();
