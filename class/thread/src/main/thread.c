@@ -36,7 +36,14 @@ void* sayhi2(void *arg)
 
 void cleanup(void *arg)
 {
-    printf("clean up\n");
+    printf("clean up.....\n");
+}
+
+void* wait10(void *arg)
+{
+    sleep(5);
+    printf("sleep 5\n");
+    return NULL;
 }
 
 /*********************************************************
@@ -49,10 +56,16 @@ int main(int agrc, char *agrv[])
     thread_t *thread = NULL; //*t = NULL, *t1 = NULL;
     threads_init();
     thread_cancelability(true);
-    thread = thread_create(sayhi, NULL);
+    thread = thread_create(wait10, NULL);
+    thread_cleanup_push(cleanup, NULL);
+    thread_cleanup_push(cleanup, NULL);
 
+    sleep(3);
+    //thread->cancel(thread);
     thread->join(thread);
+    thread_cleanup_pop(1);
     threads_deinit();
+    printf("thread over\n");
 
     return rt;
 }

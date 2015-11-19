@@ -261,7 +261,7 @@ static void thread_cleanup(private_thread_t *this)
 	while (this->cleanup_handlers->remove_last(this->cleanup_handlers,
 											   (void**)&handler) == SUCCESS)
 	{
-		handler->cleanup(handler->arg);
+        handler->cleanup(handler->arg);
 		free(handler);
 	}
 	this->terminated = TRUE;
@@ -294,7 +294,7 @@ static void *thread_main(private_thread_t *this)
 	res = this->main(this->arg);
 	pthread_cleanup_pop(TRUE);
 
-	return res;
+    return res;
 }
 
 /**
@@ -446,7 +446,6 @@ void threads_init()
 {
 	private_thread_t *main_thread = thread_create_internal();
 
-	next_id = 1;
 	main_thread->id = 0;
 	main_thread->thread_id = pthread_self();
 	current_thread = thread_value_create(NULL);
