@@ -137,6 +137,9 @@ int read_config()
     return 0;
 }
 
+/**
+ * @brief task_handler 
+ */
 static void *task_handler(task_queue_t *taskq)
 {
     task_t *task = NULL;
