@@ -24,7 +24,7 @@ SET(FTP_SRC      ftp/ftp.c)
 SET(FTP_MAIN_SRC ftp/ftp-main.c)
 SET(BASE_SRC     base/base.c)
 SET(EVENT_SRC    event/event.c)
-SET(TEST_SRC     event/test.c)
+SET(TEST_SRC     event/sample.c)
 
 # lib generation
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/src/lib)

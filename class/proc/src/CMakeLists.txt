@@ -18,7 +18,7 @@ SET(LIB_SRC proc/proc.c)
 
 # lib generation
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/src/lib)
-ADD_LIBRARY(proc_shared SHARED ${LIB_SRC})
+ADD_LIBRARY(proc_shared STATIC ${LIB_SRC})
 
 # generat exec
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR})

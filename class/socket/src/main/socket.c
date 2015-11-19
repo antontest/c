@@ -175,6 +175,7 @@ void start_network(int ser_or_cli_flag, int net_type, int socket_type, int socke
                 if (status > 0)fprintf(stdout, "[socket send to %s]: %s\n", ip, message);
                 if (times > 0)sleep(1);
             }
+            usleep(100);
             if (socket_type == SOCK_DGRAM) {
                 sck->send(sck, "==end==", strlen("==end=="));
             }

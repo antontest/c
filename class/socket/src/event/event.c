@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <signal.h>
 #include <sys/ioctl.h>
 #include <sys/select.h>
 #include <sys/epoll.h>
@@ -88,6 +89,7 @@ struct private_event_t {
      */
     int flag;
 };
+static private_event_t *local_free_pointer = NULL;
 
 static void set_fds(private_event_t *this)
 {
@@ -113,7 +115,7 @@ static volatile int thread_onoff = 1;
 void *select_events_handler(private_event_t *this)
 {
     int    ready_fds_cnt;
-    int    deal_fds_cnd;
+    int    deal_fds_cnt;
     int    evt_cnt = 0;
     int    can_read_bytes = 0;
     fd_set fds;
@@ -140,7 +142,7 @@ void *select_events_handler(private_event_t *this)
         /**
          * wait socket event
          */
-        deal_fds_cnd = 0;
+        deal_fds_cnt = 0;
         ready_fds_cnt = select(this->select_maxfd, &fds, NULL, NULL, &tv);
         switch (ready_fds_cnt) {
             case 0:
@@ -158,7 +160,7 @@ void *select_events_handler(private_event_t *this)
                         if (can_read_bytes <= 0 && pkg->type != EVENT_ON_CLOSE && pkg->type != EVENT_ON_ACCEPT)
                             continue;
                         if (pkg->event_handler != NULL) pkg->event_handler(pkg->fd, pkg->arg);
-                        if (++deal_fds_cnd >= ready_fds_cnt) break;
+                        if (++deal_fds_cnt >= ready_fds_cnt) break;
                     }
                 }
                 break;
@@ -170,36 +172,102 @@ void *select_events_handler(private_event_t *this)
 
 static void *epoll_events_handler(private_event_t *this)
 {
+    struct epoll_event evts[10];
+    int    ready_fds_cnt;
+    int    deal_fds_cnt;
+    int    evt_cnt = 0;
+    struct event_pkg_t *pkg = NULL;
+
+
+    while (thread_onoff) {
+        ready_fds_cnt = epoll_wait(this->epoll_fd, evts, sizeof(evts) / sizeof(struct epoll_event), 1000);    
+        switch (ready_fds_cnt) {
+            case -1:
+                perror("epoll_wait");
+                break;
+            case 0:
+                break;
+            default:
+                for (deal_fds_cnt = 0; deal_fds_cnt < ready_fds_cnt; deal_fds_cnt++) {
+                    evt_cnt = this->event_list->get_count(this->event_list);
+                    this->event_list->reset_current(this->event_list);
+                    while (evt_cnt-- > 0) {
+                        this->event_list->get_next(this->event_list, (void **)&pkg); 
+                        if (pkg->fd != evts[deal_fds_cnt].data.fd) continue;
+                        if (evts[deal_fds_cnt].events & EPOLLRDHUP) {
+                            if (pkg->type != EVENT_ON_CLOSE) continue;
+                            else
+                                epoll_ctl(this->epoll_fd, EPOLL_CTL_DEL, evts[deal_fds_cnt].data.fd, &evts[deal_fds_cnt]);
+                        }
+                            
+                        if ((pkg->type == EVENT_ON_ACCEPT) ||
+                            (evts[deal_fds_cnt].events & EPOLLIN) || 
+                            (evts[deal_fds_cnt].events & EPOLLRDHUP) || 
+                            (evts[deal_fds_cnt].events & EPOLLOUT)) {
+                            if (pkg->event_handler != NULL) {
+                                pkg->event_handler(pkg->fd, pkg->arg);
+                            }
+                            break;
+                        }
+                    }
+                }
+                break;
+        }
+    }
 
     return NULL;
 }
 
-static int start_event_capture(private_event_t *this, event_mode_t mode)
+static void signal_handler(int sig, siginfo_t *siginfo, void *context)
 {
-    void *handler = NULL;
-    switch (mode) {
-        case EVENT_MODE_SELECT:
-            handler = (void *)select_events_handler;
-            break;
-        case EVENT_MODE_EPOLL:
-            this->epoll_fd = epoll_create(10); 
-            handler = (void *)epoll_events_handler;
+    switch (sig) {
+        case SIGINT:
+        case SIGTERM:
+            local_free_pointer->public.destroy(&local_free_pointer->public);
+            exit(1);
             break;
         default:
             break;
     }
-    this->thread = thread_create(handler, this);
-    if (!this->thread) return -1;
-
-    return 0;
 }
 
-static int epoll_addfd(private_event_t *this, int fd, event_type_t type)
+static int epoll_event_add(private_event_t *this, int fd, event_type_t type)
 {
-    struct epoll_event evt = {0};
+    struct epoll_event evt  = {0};
+    struct event_pkg_t *pkg = NULL;
+    int epctl   = EPOLL_CTL_ADD;
+    int evt_cnt = 0;
+
+    evt_cnt = this->event_list->get_count(this->event_list);
+    this->event_list->reset_current(this->event_list);
+    while (evt_cnt-- > 0) {
+        this->event_list->get_next(this->event_list, (void **)&pkg);
+        if (pkg->fd == fd) {
+            epctl = EPOLL_CTL_MOD;
+            break;
+        }
+    }
+
+    switch (type) {
+        case EVENT_ON_ACCEPT:
+            evt.events |= EPOLLIN | EPOLLHUP | EPOLLRDHUP;
+            break;
+        case EVENT_ON_RECV:
+            evt.events |= EPOLLIN;
+            break;
+        case EVENT_ON_CONNECT:
+            evt.events |= EPOLLOUT;
+            break;
+        case EVENT_ON_CLOSE:
+            evt.events |= EPOLLIN | EPOLLRDHUP | EPOLLHUP;
+            break;
+        default:
+            break;
+    }
     evt.data.fd = fd;
-    evt.events |= EPOLLIN | EPOLLRDHUP | EPOLLET;
-    return epoll_ctl(this->epoll_fd, EPOLL_CTL_ADD, fd, &evt);
+    evt.events |= EPOLLET;
+
+    return epoll_ctl(this->epoll_fd, epctl, fd, &evt);
 }
 
 METHOD(event_t, add_, int, private_event_t *this, int fd, event_type_t type, void (*handler) (int fd, void *arg), void *arg)
@@ -237,15 +305,14 @@ METHOD(event_t, add_, int, private_event_t *this, int fd, event_type_t type, voi
      * add socket event
      */
     switch (this->mode) {
-        case EVENT_MODE_SELECT:
-            this->event_list->insert_last(this->event_list, (void *)pkg);
         case EVENT_MODE_EPOLL:
-            epoll_addfd(this, fd, type);
+            epoll_event_add(this, fd, type);
             break;
         default:
             break;
     }
 
+    this->event_list->insert_last(this->event_list, (void *)pkg);
     this->flag = 1;
     return 0;
 }
@@ -262,29 +329,40 @@ METHOD(event_t, delete_, int, private_event_t *this, int fd, event_type_t type)
      * delete socket event
      */
     switch (this->mode) {
-        case EVENT_MODE_SELECT:
-            this->event_list->reset_current(this->event_list);
-            while (evt_cnt-- > 0) {
-                this->event_list->get_next(this->event_list, (void **)&del_evt_pkg);
-                if (del_evt_pkg->fd == fd && (del_evt_pkg->type == type || type == EVENT_ON_ALL)) {
-                    this->event_list->remove(this->event_list, del_evt_pkg, NULL);
-                    del_evt_pkg = NULL;
-                    this->flag = -1;
-                }
-            }
-            if (evt_cnt >=0 && del_evt_pkg == NULL) return 0;
-            break;
         case EVENT_MODE_EPOLL:
             break;
         default:
             break;  
     }
 
+    this->event_list->reset_current(this->event_list);
+    while (evt_cnt-- > 0) {
+        this->event_list->get_next(this->event_list, (void **)&del_evt_pkg);
+        if (del_evt_pkg->fd == fd && (del_evt_pkg->type == type || type == EVENT_ON_ALL)) {
+            if (this->mode == EVENT_MODE_EPOLL) {
+                struct epoll_event del_evt = {0};
+                del_evt.data.fd = fd;
+                epoll_ctl(this->epoll_fd, EPOLL_CTL_DEL, fd, &del_evt);
+            }
+            this->event_list->remove(this->event_list, del_evt_pkg, NULL);
+            del_evt_pkg = NULL;
+            this->flag = -1;
+        }
+    }
+    if (evt_cnt >=0 && del_evt_pkg == NULL) return 0;
+
     return -1;
 }
 
 METHOD(event_t, destroy_, void, private_event_t *this)
 {
+    if (this->thread != NULL) {
+        thread_onoff = 0;
+        sleep(1);
+        this->thread->cancel(this->thread);
+        threads_deinit();
+    }
+
     if (this->event_list != NULL) {
         void *p = NULL;
 
@@ -293,13 +371,41 @@ METHOD(event_t, destroy_, void, private_event_t *this)
         this->event_list->destroy(this->event_list);
     }
     
-    if (this->thread != NULL) {
-        thread_onoff = 0;
-        sleep(1);
-        this->thread->cancel(this->thread);
-        threads_deinit();
-    }
     free(this);
+}
+
+static int start_event_capture(private_event_t *this, event_mode_t mode)
+{
+    void *handler = NULL;
+    struct sigaction act;
+    
+    /**
+     * act signal
+     */
+    memset(&act, 0, sizeof(act));
+    act.sa_sigaction = &signal_handler;
+    act.sa_flags = SA_SIGINFO;
+    sigaction(SIGINT, &act, NULL);
+    sigaction(SIGTERM, &act, NULL);
+
+    /**
+     * act socket event
+     */
+    switch (mode) {
+        case EVENT_MODE_SELECT:
+            handler = (void *)select_events_handler;
+            break;
+        case EVENT_MODE_EPOLL:
+            this->epoll_fd = epoll_create(10); 
+            handler = (void *)epoll_events_handler;
+            break;
+        default:
+            break;
+    }
+    this->thread = thread_create(handler, this);
+    if (!this->thread) return -1;
+
+    return 0;
 }
 
 event_t *create_event(event_mode_t mode)
@@ -310,9 +416,9 @@ event_t *create_event(event_mode_t mode)
 
     INIT(this,
         .public = {
-            .add           = _add_,
-            .delete        = _delete_,
-            .destroy       = _destroy_,
+            .add     = _add_,
+            .delete  = _delete_,
+            .destroy = _destroy_,
         },
         .event_list = linked_list_create(),
         .thread     = NULL,
@@ -326,5 +432,6 @@ event_t *create_event(event_mode_t mode)
         return NULL;
     }
 
+    local_free_pointer = this;
     return &this->public;
 }

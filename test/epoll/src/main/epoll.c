@@ -42,7 +42,8 @@ int reset_oneshot(int epfd, int fd)
     struct epoll_event evt = {0};
 
     evt.data.fd = fd;
-    evt.events |= EPOLLIN | EPOLLHUP | EPOLLRDHUP | EPOLLONESHOT;
+    //evt.events |= EPOLLIN | EPOLLHUP | EPOLLRDHUP | EPOLLONESHOT;
+    evt.events |= EPOLLIN | EPOLLRDHUP | EPOLLONESHOT;
     return epoll_ctl(epfd, EPOLL_CTL_MOD, fd, &evt);
 }
 

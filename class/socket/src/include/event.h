@@ -4,11 +4,11 @@
 typedef enum event_type_t event_type_t;
 enum event_type_t
 {
-    EVENT_ON_ACCEPT  = 1 << 1,
-    EVENT_ON_CONNECT = 1 << 2,
-    EVENT_ON_RECV    = 1 << 3,
-    EVENT_ON_CLOSE   = 1 << 4,
-    EVENT_ON_ALL     = 1 << 5
+    EVENT_ON_ACCEPT  = 1   << 1,
+    EVENT_ON_CONNECT = 1   << 2,
+    EVENT_ON_RECV    = 1   << 3,
+    EVENT_ON_CLOSE   = 1   << 4,
+    EVENT_ON_ALL     = 111 << 1
 };
 
 typedef enum event_mode_t event_mode_t;

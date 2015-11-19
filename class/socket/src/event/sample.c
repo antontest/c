@@ -35,7 +35,8 @@ void on_accept(int fd, void *arg)
 
 int main(int argc, char **argv)
 {
-    evt = create_event(EVENT_MODE_SELECT);
+    //evt = create_event(EVENT_MODE_SELECT);
+    evt = create_event(EVENT_MODE_EPOLL);
     socket_base_t *sck = create_socket_base();   
     int fd = 0;
 
