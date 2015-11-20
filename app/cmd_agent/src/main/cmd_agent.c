@@ -323,6 +323,7 @@ void* fifo_listen_handler(int fd, task_queue_t *taskq)
 
     if (fd != taskq->fd) return NULL;
     taskq->fifo->read(taskq->fifo, buf, sizeof(buf));
+
     for (str = buf; ; str = NULL) {
         token = strtok_r(str, "\n:;,", &save);
         if (!token) break;
@@ -356,6 +357,9 @@ static void timeout_handler(task_queue_t *taskq)
     }
 }
 
+/**
+ * @brief handle command error
+ */
 static void error_handler(task_queue_t *taskq)
 {
     perror("select");

@@ -93,6 +93,22 @@ struct private_ipc_t {
 #define shm_size       ipc.shm.addr->shm_size
 #define shm_data_size  ipc.shm.addr->data_size
 #define shm_data       ipc.shm.addr->data 
+
+        /**
+         * @brief signal communication
+         */
+        struct {
+            /**
+             * @brief sigaction struct info
+             */
+            struct sigaction act;
+
+            /**
+             * @brief deal with signal
+             */
+            void (*signal_handler) (int sig,siginfo_t *info, void *text);
+        } sig;
+#define sig_act ipc.sig.act
     } ipc;
 
     /**
@@ -191,6 +207,17 @@ METHOD(ipc_t, mkshm, int, private_ipc_t *this, key_t key, size_t size)
     this->shm_created = 1;
 
     return 0;
+}
+
+METHOD(ipc_t, mksig_, void, private_ipc_t *this, void (*signal_handler) (int sig,siginfo_t *info, void *text))
+{
+    this->sig_act.sa_sigaction = (void *)signal_handler;
+    this->sig_act.sa_flags = SA_SIGINFO;
+}
+
+METHOD(ipc_t, sigact_, int, private_ipc_t *this, int sig)
+{
+    return sigaction(sig, &this->sig_act, NULL);
 }
 
 METHOD(ipc_t, read_, int, private_ipc_t *this, void *buf, int size)
@@ -314,11 +341,13 @@ ipc_t *create_ipc()
 
     INIT(this,
         .public = {
-            .mkpipe  = _mkpipe_,
-            .mkfifo  = _mkfifo_,
-            .reopen  = _reopen_,
-            .mkshm   = _mkshm,
+            .mkpipe = _mkpipe_,
+            .mkfifo = _mkfifo_,
+            .reopen = _reopen_,
+            .mkshm  = _mkshm,
+            .mksig  = _mksig_,
 
+            .sigact  = _sigact_,
             .read    = _read_,
             .write   = _write_,
             .close   = _close_,

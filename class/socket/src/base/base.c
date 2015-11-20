@@ -5,6 +5,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <linux/un.h>
 #include <stdarg.h>
 #include <host.h>
 #include <utils/utils.h>

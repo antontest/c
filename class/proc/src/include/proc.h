@@ -1,5 +1,6 @@
 #ifndef __PROC_H__
 #define __PROC_H__
+#include <signal.h>
 
 typedef enum shm_state_t shm_state_t;
 enum shm_state_t {
@@ -65,6 +66,18 @@ struct ipc_t {
      * @param size shmflg specifies both IPC_CREAT and IPC_EXCL and a shared memory  segment
      */
     int (*mkshm) (ipc_t *this, key_t key, size_t size);
+
+    /**
+     * @brief signal communication
+     */
+    void (*mksig) (ipc_t *this, void (*signal_handler) (int sig, siginfo_t *info, void *text));
+
+    /**
+     * @brief act signal dealing
+     *
+     * @param sig signal
+     */
+    int (*sigact) (ipc_t *this, int sig);
 
     /**
      * @brief attempts to read up to count bytes from file descriptor fd into the buffer starting at buf
