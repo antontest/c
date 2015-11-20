@@ -33,7 +33,7 @@ CPPOBJS := $(CPPSRCS:.cpp=.o)
 #-g 生成调试信息
 #-pedantic参数与-ansi一起使用 会自动拒绝编译非ANSI程序
 #-fomit-frame-pointer 去除函数框架
-LPFLAGS:=-lstdc++ -Wall -O2 -fomit-frame-pointer -g -ansi -Werr -lm -lpthread
+LPFLAGS:=-lstdc++ -Wall -O2 -fomit-frame-pointer -g -ansi -lm -lpthread
 
 #生成依赖信息 -MM是只生成自己的头文件信息，-M 包含了标准库头文件信息。
 #-MT 或 -MQ都可以改变生成的依赖  xxx.o:src/xxx.h 为 src/xxx.o:src/xxx.h 当然。前面的 src/xxx.o需自己指定

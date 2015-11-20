@@ -56,6 +56,7 @@ struct ipc_t {
      * @return          fifo handl(fd), if succ
      */
     int (*mkfifo) (ipc_t *this, const char *pathname, const int mode);
+    int (*reopen) (ipc_t *this);
 
     /**
      * @brief shared memory segment associate

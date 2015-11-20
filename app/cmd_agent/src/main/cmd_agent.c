@@ -207,7 +207,7 @@ int task_queue_init()
         sprintf(fifo_path, "%s%d", FIFO_PATH, i);
         queue->fifo = create_ipc();
         if (!queue->fifo) return -1;
-        queue->fd = queue->fifo->mkfifo(queue->fifo, fifo_path, O_RDONLY | O_NONBLOCK);
+        queue->fd = queue->fifo->mkfifo(queue->fifo, fifo_path, O_RDWR | O_NONBLOCK);
 
         /**
          * create task queue
@@ -259,6 +259,7 @@ int task_queue_init()
 int task_queue_deinit()
 {
     int i = 0;
+    char fifo_path[128] = {0};
     task_t *task = NULL;
     task_queue_t *queue = task_queue;
 
@@ -272,6 +273,8 @@ int task_queue_deinit()
             }
         }
 
+        sprintf(fifo_path, "%s%d", FIFO_PATH, i);
+        if (!access(fifo_path, F_OK)) unlink(fifo_path);
         if (queue->fifo) queue->fifo->destroy(queue->fifo);
         if (queue->task) queue->task->destroy(queue->task);
         if (queue->handler) queue->handler->destroy(queue->handler);
@@ -297,7 +300,7 @@ static void free_memory()
 /**
  * @brief error handler 
  */
-static void error_handler(int sig,siginfo_t *info, void *text)
+static void signal_handler(int sig,siginfo_t *info, void *text)
 {
     switch (sig) {
         case SIGINT:
@@ -336,11 +339,10 @@ void* fifo_listen_handler(int fd, task_queue_t *taskq)
     }
     return NULL;
 }
-
 /**
  * @brief handle command timeout
  */
-static void timeout_handle(task_queue_t *taskq)
+static void timeout_handler(task_queue_t *taskq)
 {
     task_t *task = NULL;
     int i = 0;
@@ -352,6 +354,11 @@ static void timeout_handle(task_queue_t *taskq)
         }
         taskq++;
     }
+}
+
+static void error_handler(task_queue_t *taskq)
+{
+    perror("select");
 }
 
 /*********************************************************
@@ -379,7 +386,8 @@ int main(int agrc, char *agrv[])
      */
     evt = create_event(EVENT_MODE_SELECT, conf.timeout * 1000);
     if (!evt) goto deinit;
-    evt->exception_handle(evt, EXCEPTION_TIMEOUT, (void *)timeout_handle, task_queue);
+    evt->exception_handle(evt, EXCEPTION_TIMEOUT, (void *)timeout_handler, task_queue);
+    evt->exception_handle(evt, EXCEPTION_ERROR, (void *)error_handler, task_queue);
     for (i = 0, queue = task_queue; i < conf.task_queue_cnt; i++, queue++) {
         evt->add(evt, queue->fd, EVENT_ON_RECV, (void *)fifo_listen_handler, queue);
     }
@@ -387,10 +395,12 @@ int main(int agrc, char *agrv[])
     /**
      * act error handler
      */
-    act.sa_sigaction = (void *)error_handler;
+    act.sa_sigaction = (void *)signal_handler;
     act.sa_flags =  SA_SIGINFO;
-    sigaction(SIGINT, &act, NULL);
+    sigaction(SIGINT,  &act, NULL);
     sigaction(SIGTERM, &act, NULL);
+    sigaction(SIGKILL, &act, NULL);
+    sigaction(SIGSTOP, &act, NULL);
 
     sleep(20);    
     rt = 0;

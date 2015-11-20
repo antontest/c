@@ -53,11 +53,17 @@ struct private_ipc_t {
             int fd;
 
             /**
+             * @brief open mode
+             */
+            int mode;
+
+            /**
              * @brief fifo path
              */
             char *fifo_path;
         } fifo;
 #define fifo_fd   ipc.fifo.fd
+#define fifo_mode ipc.fifo.mode
 #define fifo_path ipc.fifo.fifo_path
 
         /**
@@ -114,6 +120,7 @@ METHOD(ipc_t, mkfifo_, int, private_ipc_t *this, const char *pathname, int mode)
     char *p = NULL;
 
     this->type = IPC_FIFO;
+    this->fifo_mode = mode;
     if (!pathname || this->fifo_path != NULL || mode < 0) return -1;
 
     this->fifo_path = strdup(pathname);
@@ -135,6 +142,32 @@ METHOD(ipc_t, mkfifo_, int, private_ipc_t *this, const char *pathname, int mode)
 
     this->fifo_fd = open(pathname, mode);
     if (this->fifo_fd < 0) unlink(pathname);
+    *p = '/';
+    return this->fifo_fd;
+}
+
+METHOD(ipc_t, reopen_, int, private_ipc_t *this)
+{
+    char *p = NULL;
+
+    this->type = IPC_FIFO;
+    if (!this->fifo_path || this->fifo_mode < 0) return -1;
+
+    if (strstr(this->fifo_path, "/") != NULL) {
+        p = this->fifo_path + strlen(this->fifo_path) - 1;
+        while (p >= this->fifo_path) {
+            if (*p == '/') break;
+            p--;
+        }
+        *p = '\0';
+    }
+
+    if (!(this->fifo_mode& 0x01) && access(this->fifo_path, F_OK)) {
+        if (mkfifo(this->fifo_path, 0777)) return -1;
+    } 
+
+    this->fifo_fd = open(this->fifo_path, this->fifo_mode);
+    if (this->fifo_fd < 0) unlink(this->fifo_path);
     *p = '/';
     return this->fifo_fd;
 }
@@ -205,15 +238,15 @@ METHOD(ipc_t, close_, void, private_ipc_t *this)
 {
     switch (this->type) {
         case IPC_FIFO:
-            if (this->fifo_fd > 0) close(this->fifo_fd);
+            if (this->fifo_fd > 0) {
+                close(this->fifo_fd);
+                this->fifo_fd   = -1;
             
-            if (this->fifo_path) {
-                unlink(this->fifo_path);
-                free(this->fifo_path);
+                if (this->fifo_path) {
+                    unlink(this->fifo_path);
+                }
             }
 
-            this->fifo_fd   = -1;
-            this->fifo_path = NULL;
             break;
         case IPC_SHM:
             shmdt(this->shm_addr);
@@ -257,10 +290,13 @@ METHOD(ipc_t, destroy_, void, private_ipc_t *this)
     switch (this->type) {
         case IPC_FIFO:
             if (this->fifo_fd > 0) close(this->fifo_fd);
-            if (this->fifo_path) free(this->fifo_path);
-            
             this->fifo_fd   = -1;
-            this->fifo_path = NULL;
+
+            if (this->fifo_path) {
+                unlink(this->fifo_path);
+                free(this->fifo_path);
+                this->fifo_path = NULL;
+            }
             break;
         case IPC_SHM:
             shmdt(this->shm_addr);
@@ -280,6 +316,7 @@ ipc_t *create_ipc()
         .public = {
             .mkpipe  = _mkpipe_,
             .mkfifo  = _mkfifo_,
+            .reopen  = _reopen_,
             .mkshm   = _mkshm,
 
             .read    = _read_,
