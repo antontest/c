@@ -11,6 +11,7 @@
 #include <utils/utils.h>
 #include <utils/linked_list.h>
 
+#define DFT_EPOLL_EVTS_MAX_SIZE (10)
 typedef struct event_pkg_t event_pkg_t;
 struct event_pkg_t {
     /**
@@ -195,7 +196,7 @@ void *select_events_handler(private_event_t *this)
 
 static void *epoll_events_handler(private_event_t *this)
 {
-    struct epoll_event evts[10];
+    struct epoll_event evts[DFT_EPOLL_EVTS_MAX_SIZE];
     int    ready_fds_cnt;
     int    deal_fds_cnt;
     int    evt_cnt = 0;
@@ -436,7 +437,7 @@ static int start_event_capture(private_event_t *this, event_mode_t mode)
             handler = (void *)select_events_handler;
             break;
         case EVENT_MODE_EPOLL:
-            this->epoll_fd = epoll_create(10); 
+            this->epoll_fd = epoll_create(DFT_EPOLL_EVTS_MAX_SIZE); 
             handler = (void *)epoll_events_handler;
             break;
         default:

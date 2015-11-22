@@ -95,7 +95,8 @@ METHOD(socket_base_t, init_addr, struct sockaddr *, private_socket_base_t *this,
 METHOD(socket_base_t, bind_, int, private_socket_base_t *this, char *ip, unsigned int port)
 {
     this->sock_type = SOCKET_SERVER;
-    this->host      = host_create_from_string_and_family(ip, this->family, port);
+    if (!this->host)
+        this->host = host_create_from_string_and_family(ip, this->family, port);
     if (!this->host) return -1;
 
     return bind(this->fd, this->host->get_sockaddr(this->host), *(int *)this->host->get_sockaddr_len(this->host));
@@ -116,7 +117,8 @@ METHOD(socket_base_t, accept_, int, private_socket_base_t *this, struct sockaddr
 
 METHOD(socket_base_t, connect_, int, private_socket_base_t *this, char *ip, unsigned int port)
 {
-    this->host = host_create_from_string_and_family(ip, this->family, port);
+    if (!this->host)
+        this->host = host_create_from_string_and_family(ip, this->family, port);
     if (!this->host) return -1;
 
     return connect(this->fd, this->host->get_sockaddr(this->host), sizeof(struct sockaddr));

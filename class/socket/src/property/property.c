@@ -24,7 +24,7 @@
 #include <netpacket/packet.h>
 #include <stdarg.h>
 #include <header.h>
-
+#include <utils/utils.h>
 
 /*************************************************************
 *************************  macro  ****************************
@@ -85,239 +85,191 @@ struct socket_type {
     char *type_name;
 } ;
 
-/*************************************************************
-*****  Function Declaration Of Socket Property Settings  *****
-**************************************************************/
+typedef struct private_property_t private_property_t;
+struct private_property_t {
+    /**
+     * @brief public interface 
+     */
+    property_t public;
 
-/**
- * @brief get local machine's ip address.
- * 
- * @param family [in] AF_INET or AF_INET6.
- * @param ifname [in] interface name.
- *
- * @return ip address string, if succ; NULL, if failed.
- */
-static char local_ip[NI_MAXHOST] = {0};
-char *get_local_ip(int family, const char *ifname, int only_first)
-{
-    const  char *ifname_lo = "lo";
-    struct ifaddrs *ifaddr, *ifa;
-    char   ip_buf[48] = {0};
+    /**
+     * @brief socket descriptor
+     */
+    int fd;
+};
+#define socket_fd     this->fd
+#define socket_buffer this->buffer
 
-    if (getifaddrs(&ifaddr) == -1) return NULL;
-
-    memset(local_ip, 0, sizeof(local_ip));
-    for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) {
-        if (ifa->ifa_addr == NULL) continue;
-
-        if (family > 0 && family != ifa->ifa_addr->sa_family) continue;
-        if (!strcasecmp(ifa->ifa_name, ifname_lo)) continue;
-        if (ifname != NULL && strcasecmp(ifa->ifa_name, ifname)) continue;
-
-        switch (ifa->ifa_addr->sa_family) {
-            case AF_INET:
-                getnameinfo(ifa->ifa_addr, sizeof(struct sockaddr_in), ip_buf, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
-                strcat(local_ip, ip_buf);
-                strcat(local_ip, " ");
-                break;
-            case AF_INET6:
-                getnameinfo(ifa->ifa_addr, sizeof(struct sockaddr_in6), ip_buf, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
-                strcat(local_ip, ip_buf);
-                strcat(local_ip, " ");
-                break;
-            default:
-                break;
-        }
-        
-        if (strlen(local_ip) > 0 && only_first > 0) break;
-    }
-    freeifaddrs(ifaddr);
-    
-    return local_ip;
-}
-
-/**
- * @brief get hardware address by interface name
- *
- * @param ifname [in]  interface name
- * @param mac    [out] hardware addree
- *
- * @return 0, if succ; -1, if failed
- */
-static unsigned char local_mac[6] = {0};
-unsigned char *get_mac_addr(char *ifname)
-{
-    int    fd = -1;
-    struct ifreq ifreq;
-    char   *ifname_ptr = NULL;
-    char   *if_save = NULL;
-    char   *if_ptr = NULL;
-
-    if (!ifname) ifname = get_ifname(0);
-    if (!ifname) return NULL;
-    if ((fd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-        return NULL;
-
-    for (ifname_ptr = ifname; ifname_ptr != NULL; ifname_ptr = NULL) {
-        if_save = strtok_r(ifname_ptr, " ", &if_ptr);
-        if (!if_save) break;
-        memset(&ifreq, 0, sizeof(ifreq));
-        strcpy(ifreq.ifr_name, if_save);
-
-        if (ioctl(fd, SIOCGIFHWADDR, &ifreq) < 0)
-            break;
-
-        memcpy((void *)local_mac, (void *)ifreq.ifr_hwaddr.sa_data, sizeof(local_mac));
-    }
-
-    return local_mac;
-}
-
-/**
- a* @brief get subnet ip address 
- *
- * @param ip   [in] ip
- * @param mask [in] mask
- * @usage: get_subnet_addr("172.21.34.25", "255.255.0.0")
- * 
- * @return subnet ip address, if succ;
- */
-char * get_subnet_addr(const char *ip, const char *mask)
-{
-    struct in_addr lip, lmask, subnet;
-
-    if (ip == NULL || mask == NULL) return NULL;
-
-    inet_aton(ip, &lip);
-    inet_aton(mask, &lmask);
-    subnet.s_addr = lip.s_addr & lmask.s_addr;
-    strcpy(local_ip, inet_ntoa(subnet));
-
-    return local_ip;
-}
-
-/**
- * @brief convert mask to bits of mask
- *
- * @param mask [in] mask address
- * @usage: mask_to_bits("255.255.255.0")
- *
- * @return bits of mask, if succ; -1, if failed
- */
-int mask_to_bits(const char *mask)
-{
-    int i = 0;
-    int n = 0;
-    struct in_addr addr;
-    int bits = sizeof(unsigned int) * 8;
-
-    if (!match_ip(mask)) return -1;
-
-    inet_pton(AF_INET, mask, &addr);
-    for (i = bits - 1; i >=0; i--)
-    {
-        if (addr.s_addr & (0x01 << i))
-            n++;
-    }
-
-    return n;
-}
-
-/**
- * @brief get bytes which can be readed in the recvive buffer.
- *
- * @param fd [in] socket fd
- *
- * @return data bytes which can be readed, if succ; -1, if failed.
- */
-int get_can_read_bytes(int fd)
+METHOD(property_t, get_can_read_bytes_, int, private_property_t *this)
 {
     int can_read_bytes = -1;
 
-    ioctl(fd, FIONREAD, &can_read_bytes);
+    ioctl(socket_fd, FIONREAD, &can_read_bytes);
     return can_read_bytes;
 }
 
-/**
- * @brief set socket unblock 
- *
- * @param fd [in] socket fd
- *
- * @return 0, if succ; -1 , if fail
- */
-int make_socket_nonblock(int fd)
+METHOD(property_t, get_recv_buf_size_, int, private_property_t *this)
+{
+    int buf_size = 0;
+    int len = sizeof(buf_size);
+
+    if (getsockopt(socket_fd, SOL_SOCKET, SO_RCVBUF, &buf_size, (socklen_t *)&len) < 0)
+        return -1;
+    return buf_size;
+}
+
+METHOD(property_t, get_send_buf_size_, int, private_property_t *this)
+{
+    int buf_size = 0;
+    int len = sizeof(buf_size);
+
+    if (getsockopt(socket_fd, SOL_SOCKET, SO_SNDBUF, &buf_size, (socklen_t *)&len) < 0)
+        return -1;
+    return buf_size;
+}
+
+METHOD(property_t, get_recv_timeout, int, private_property_t *this)
+{
+    struct timeval tv = {0};
+    int len = sizeof(tv);
+
+    if (getsockopt(socket_fd, SOL_SOCKET, SO_RCVTIMEO, &tv, (socklen_t *)&len))
+        return -1;
+    return (tv.tv_sec * 1000 + tv.tv_usec);
+}
+
+METHOD(property_t, get_send_timeout, int, private_property_t *this)
+{
+    struct timeval tv = {0};
+    int len = sizeof(tv);
+
+    if (getsockopt(socket_fd, SOL_SOCKET, SO_SNDTIMEO, &tv, (socklen_t *)&len))
+        return -1;
+    return (tv.tv_sec * 1000 + tv.tv_usec);
+}
+
+METHOD(property_t, get_protocol_, int, private_property_t *this)
+{
+    int type = -1;
+    int len = sizeof(type);
+
+    if (getsockopt(socket_fd, SOL_SOCKET, SO_PROTOCOL, &type, (socklen_t *)&len))
+        return -1;
+    return type;
+}
+
+METHOD(property_t, get_family_, int, private_property_t *this)
+{
+    int type = -1;
+    int len = sizeof(type);
+
+    if (getsockopt(socket_fd, SOL_SOCKET, SO_TYPE, &type, (socklen_t *)&len))
+        return -1;
+    return type;
+}
+
+METHOD(property_t, get_error_, int, private_property_t *this)
+{
+    int error = 0;
+    socklen_t len = sizeof(error);
+
+    if (getsockopt(socket_fd, SOL_SOCKET, SO_ERROR, &error, &len))
+        return -1;
+    return error;
+}
+
+METHOD(property_t, get_interface_state_, int, private_property_t *this, const char *ifname)
+{
+    struct ifreq ifr;
+
+    if (!ifname) return -1;
+    memset(&ifr, 0, sizeof(ifr));
+    strcpy(ifr.ifr_name, ifname);
+    xioctl(socket_fd, SIOCGIFFLAGS, (char *)&ifr, NULL);
+    return ifr.ifr_flags & IFF_UP ? 1 : 0;
+}
+
+
+METHOD(property_t, set_recv_buf_size_, int, private_property_t *this, int size)
+{
+    return setsockopt(socket_fd, SOL_SOCKET, SO_RCVBUF, &size, sizeof(size));
+}
+
+METHOD(property_t, set_send_buf_size_, int, private_property_t *this, int size)
+{
+    return setsockopt(socket_fd, SOL_SOCKET, SO_SNDBUF, &size, sizeof(size));
+}
+
+METHOD(property_t, set_recv_timeout_, int, private_property_t *this, int tm_ms)
+{
+    struct timeval tv = {0};
+    int len = sizeof(tv);
+
+    tv.tv_sec = tm_ms / 1000;
+    tv.tv_usec = tm_ms % 1000;
+    if (setsockopt(socket_fd, SOL_SOCKET, SO_RCVTIMEO, &tv, len))
+        return -1;
+    return 0;
+}
+
+METHOD(property_t, set_send_timeout_, int, private_property_t *this, int tm_ms)
+{
+    struct timeval tv = {0};
+    int len = sizeof(tv);
+
+    tv.tv_sec = tm_ms / 1000;
+    tv.tv_usec = tm_ms % 1000;
+    if (setsockopt(socket_fd, SOL_SOCKET, SO_SNDTIMEO, &tv, len))
+        return -1;
+    return 0;
+}
+
+
+METHOD(property_t, make_nonblock_, int, private_property_t *this)
 {
     int flag = 0;
     
-    if ((flag = fcntl(fd, F_GETFL, 0)) < 0)
+    if ((flag = fcntl(socket_fd, F_GETFL, 0)) < 0)
         return -1;
 
-    if (fcntl(fd, F_SETFL, flag | O_NONBLOCK) < 0)
+    if (fcntl(socket_fd, F_SETFL, flag | O_NONBLOCK) < 0)
         return -1;
 
     return 0;
 }
 
-/**
- * @brief set socket block 
- *
- * @param fd [in] socket fd
- *
- * @return 0, if succ; -1 , if fail
- */
-int make_socket_block(int fd)
+METHOD(property_t, make_block_, int, private_property_t *this)
 {
     int flag = 0;
     
-    if ((flag = fcntl(fd, F_GETFL, 0)) < 0)
+    if ((flag = fcntl(socket_fd, F_GETFL, 0)) < 0)
         return -1;
 
-    if (fcntl(fd, F_SETFL, flag & ~O_NONBLOCK) < 0)
+    if (fcntl(socket_fd, F_SETFL, flag & ~O_NONBLOCK) < 0)
         return -1;
 
     return 0;
 }
 
-/**
- * @brief make listen socket reuseable 
- *
- * @param fd [in] socket fd
- *
- * @return 0, if succ; -1, if fail
- */
-int make_listen_socket_reuseable(int fd, int on)
+METHOD(property_t, make_reuseable, int, private_property_t *this, int onoff)
 {
-    return setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (void *)&on, sizeof(on));
+    return setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, (void *)&onoff, sizeof(onoff));
 }
 
-/**
- * @brief make socket child can't exec 
- *
- * @param fd [in] socket fd
- * 
- * @return 0, if succ; -1, if fail
- */
-int make_socket_closenexec(int fd)
+METHOD(property_t, make_closenexec_, int, private_property_t *this)
 {
     int flags = 0;
 
-    if ((flags = fcntl(fd, F_GETFD, NULL)) < 0) 
+    if ((flags = fcntl(socket_fd, F_GETFD, NULL)) < 0) 
         return -1;
 
-    if (fcntl(fd, F_SETFD, flags | FD_CLOEXEC) == -1)
+    if (fcntl(socket_fd, F_SETFD, flags | FD_CLOEXEC) == -1)
         return -1;
 
     return 0;
 }
 
-/**
- * @brief make socket keep alive 
- *
- * @param fd [in] socket fd
- *
- * @return 0, if succ; -1, if fail
- */
-int make_socket_keep_alive(int fd)
+METHOD(property_t, make_keepalive_, int, private_property_t *this)
 {
     int keep_alive = 1;     /* open keep alive attribute */
     int keep_idle = 60;     /* if connection no data exchanges in 60 seconds, then detect */
@@ -328,7 +280,7 @@ int make_socket_keep_alive(int fd)
     /**
      * open keepalive mechanism
      */
-    if (setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, \
+    if (setsockopt(socket_fd, SOL_SOCKET, SO_KEEPALIVE, \
                 &keep_alive, sizeof(keep_alive)) == -1)
         return -1;
 
@@ -337,385 +289,208 @@ int make_socket_keep_alive(int fd)
      * actually useful. */  
   
     /* Send first probe after interval. */  
-    if (setsockopt(fd, IPPROTO_TCP, TCP_KEEPIDLE, \
+    if (setsockopt(socket_fd, IPPROTO_TCP, TCP_KEEPIDLE, \
                 &keep_idle, sizeof(keep_idle)) == -1)
         return -1;
 
     /* Send next probes after the specified interval. Note that we set the 
      * delay as interval / 3, as we send three probes before detecting 
      * an error (see the next setsockopt call). */  
-    if (setsockopt(fd, IPPROTO_TCP, TCP_KEEPINTVL, \
+    if (setsockopt(socket_fd, IPPROTO_TCP, TCP_KEEPINTVL, \
                 &keep_interval, sizeof(keep_interval)) == -1)
         return -1;
 
     /* Consider the socket in error state after three we send three ACK 
      * probes without getting a reply. */  
-    if (setsockopt(fd, IPPROTO_TCP, TCP_KEEPCNT, \
+    if (setsockopt(socket_fd, IPPROTO_TCP, TCP_KEEPCNT, \
                 &keep_count, sizeof(keep_count)) == -1)
         return -1;
 
     return 0;
 }
 
-/**
- * @brief set size of socket recv buffer 
- *
- * @param fd        [in] socket fd
- * @param buf_size  [in] buffer size
- *
- * @return 0, if succ; -1, if failed.
- */
-int set_socket_recv_buf(int fd, int buf_size)
-{
-    return setsockopt(fd, SOL_SOCKET, SO_RCVBUF, &buf_size, sizeof(buf_size));
-}
-
-/**
- * @brief set size of socket send buffer 
- *
- * @param fd        [in] socket fd
- * @param buf_size  [in] buffer size
- *
- * @return 0, if succ; -1, if failed.
- */
-int set_socket_send_buf(int fd, int buf_size)
-{
-    return setsockopt(fd, SOL_SOCKET, SO_SNDBUF, &buf_size, sizeof(buf_size));
-}
-
-/**
- * @brief get size of socket recv buffer 
- *
- * @param fd        [in] socket fd
- *
- * @return recv buffer size, if succ; -1, if failed.
- */
-int get_socket_recv_buf(int fd)
-{
-    int buf_size = 0;
-    int len = sizeof(buf_size);
-
-    if (getsockopt(fd, SOL_SOCKET, SO_RCVBUF, &buf_size, (socklen_t *)&len) < 0)
-        return -1;
-    return buf_size;
-}
-
-/**
- * @brief get size of socket send buffer 
- *
- * @param fd        [in] socket fd
- *
- * @return send buffer size, if succ; -1, if failed.
- */
-int get_socket_send_buf(int fd)
-{
-    int buf_size = 0;
-    int len = sizeof(buf_size);
-
-    if (getsockopt(fd, SOL_SOCKET, SO_SNDBUF, &buf_size, (socklen_t *)&len) < 0)
-        return -1;
-    return buf_size;
-}
-
-/**
- * @brief set socket close action 
- *
- * @param fd     [in] socket fd
- * @param switch [in] swith of close action
- * @param tm_s   [in] time
- *
- * @return 0, if succ; -1, if failed
- */
-int make_socket_close_action(int fd, int on, int tm_s)
+METHOD(property_t, make_close_action_, int, private_property_t *this, int onoff, int tm)
 {
     struct linger so_linger = {0};
 
-    so_linger.l_onoff = on;
-    so_linger.l_linger = tm_s;
+    so_linger.l_onoff  = onoff;
+    so_linger.l_linger = tm;
 
-    if (setsockopt(fd, SOL_SOCKET, SO_LINGER, &so_linger, sizeof(so_linger)))
+    if (setsockopt(socket_fd, SOL_SOCKET, SO_LINGER, &so_linger, sizeof(so_linger)))
         return -1;
     return 0;
 }
 
-/**
- * @brief set socket broadcast 
- *
- * @param fd [in] socket fd
- * @param on [in] switch
- *
- * @return 0, if succ; -1, if failed
- */
-int make_socket_broadcast(int fd, int on)
+METHOD(property_t, make_broadcast_, int, private_property_t *this, int onoff)
 {
-    if (setsockopt(fd, SOL_SOCKET, SO_BROADCAST, &on, sizeof(on)))
+    if (setsockopt(socket_fd, SOL_SOCKET, SO_BROADCAST, &onoff, sizeof(onoff)))
         return -1;
     return 0;
 }
 
-/**
- * @brief set socket multicast loop 
- *
- * @param fd [in] socket fd
- * @param on [in] switch
- *
- * @return 0, if succ; -1, if failed
- */
-int make_socket_multicast_loop(int fd, int on)
-{
-    if (setsockopt(fd, IPPROTO_IP, IP_MULTICAST_LOOP, &on, sizeof(on)))
-        return -1;
-    return 0;
-}
-
-/**
- * @brief set socket multicast ttl 
- *
- * @param fd  [in] socket fd
- * @param ttl [in] ttl
- *
- * @return 0, if succ; -1, if failed
- */
-int make_socket_multicast_ttl(int fd, int ttl)
-{
-    if (setsockopt(fd, IPPROTO_IP, IP_MULTICAST_TTL, &ttl, sizeof(ttl)))
-        return -1;
-    return 0;
-
-}
-
-/**
- * @brief add socket to multicast member ship
- *
- * @param fd  [in] socket fd
- * @param mrq [in] struct of multicast memver ship
- *
- * @return  0, if succ; -1, if failed.
- */
-int add_socket_to_membership(int fd, struct ip_mreq *mrq)
-{
-    if (setsockopt(fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, mrq, sizeof(struct ip_mreq)))
-        return -1;
-    return 0;
-}
-
-/**
- * @brief drop socket from multicast member ship
- *
- * @param fd  [in] socket fd
- * @param mrq [in] struct of multicast memver ship
- *
- * @return  0, if succ; -1, if failed.
- */
-int drop_socket_from_membership(int fd, struct ip_mreq *mrq)
-{
-    if (setsockopt(fd, IPPROTO_IP, IP_DROP_MEMBERSHIP, mrq, sizeof(struct ip_mreq)))
-        return -1;
-    return 0;
-
-}
-
-/**
- * @brief get socket timeout of sending 
- *
- * @param fd  [in] socket fd
- *
- * @return send timeout, if succ; -1, if failed
- */
-int get_socket_send_timeout(int fd)
-{
-    struct timeval tv = {0};
-    int len = sizeof(tv);
-
-    if (getsockopt(fd, SOL_SOCKET, SO_SNDTIMEO, &tv, (socklen_t *)&len))
-        return -1;
-    return (tv.tv_sec * 1000 + tv.tv_usec);
-}
-
-/**
- * @brief get socket timeout of recving 
- *
- * @param fd  [in] socket fd
- *
- * @return recv timeout, if succ; -1, if failed
- */
-int get_socket_recv_timeout(int fd)
-{
-    struct timeval tv = {0};
-    int len = sizeof(tv);
-
-    if (getsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &tv, (socklen_t *)&len))
-        return -1;
-    return (tv.tv_sec * 1000 + tv.tv_usec);
-}
-
-/**
- * @brief set socket timeout of sending 
- *
- * @param fd     [in] socket fd
- * @param tm_ms  [in] timeout
- *
- * @return 0, if succ; -1, if failed
- */
-int make_socket_send_timeout(int fd, int tm_ms)
-{
-    struct timeval tv = {0};
-    int len = sizeof(tv);
-
-    tv.tv_sec = tm_ms / 1000;
-    tv.tv_usec = tm_ms % 1000;
-    if (setsockopt(fd, SOL_SOCKET, SO_SNDTIMEO, &tv, len))
-        return -1;
-    return 0;
-}
-
-/**
- * @brief set socket timeout of recving 
- *
- * @param fd     [in] socket fd
- * @param tm_ms  [in] timeout
- *
- * @return 0, if succ; -1, if failed
- */
-int make_socket_recv_timeout(int fd, int tm_ms)
-{
-    struct timeval tv = {0};
-    int len = sizeof(tv);
-
-    tv.tv_sec = tm_ms / 1000;
-    tv.tv_usec = tm_ms % 1000;
-    if (setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &tv, len))
-        return -1;
-    return 0;
-}
-
-/**
- * @brief get socket protocol 
- *
- * @param fd  [in] socket fd
- *
- * @return protocol type, if succ; -1, if failed
- */
-int get_socket_protocol(int fd)
-{
-    int type = -1;
-    int len = sizeof(type);
-
-    if (getsockopt(fd, SOL_SOCKET, SO_PROTOCOL, &type, (socklen_t *)&len))
-        return -1;
-    return type;
-}
-
-/**
- * @brief get socket type 
- *
- * @param fd  [in] socket fd
- *
- * @return socket type, if succ; -1, if failed
- */
-int get_socket_type(int fd)
-{
-    int type = -1;
-    int len = sizeof(type);
-
-    if (getsockopt(fd, SOL_SOCKET, SO_TYPE, &type, (socklen_t *)&len))
-        return -1;
-    return type;
-}
-
-/**
- * @brief get name of socket type
- *
- * @param fd [in] socket fd
- *
- * @return socket type's name, if succ; NULL, if failed.
- */
-char* get_socket_type_str(int fd)
-{
-    int type = -1;
-    int len = sizeof(type);
-    int i = 0;
-    struct socket_type sock_type[] = {
-        MACRO_STR(SOCK_STREAM)      ,   /* Sequenced, reliable, connection-based  byte streams.  */ 
-        MACRO_STR(SOCK_DGRAM)       ,   /* Connectionless, unreliable datagrams  of fixed maximum length.  */
-        MACRO_STR(SOCK_RAW)         ,   /* Raw protocol interface.  */
-        MACRO_STR(SOCK_RDM)         ,   /* Reliably-delivered messages.  */
-        MACRO_STR(SOCK_SEQPACKET)   ,   /* Sequenced, reliable, connection-based,  datagrams of fixed maximum length.  */
-        MACRO_STR(SOCK_PACKET)      ,   /* Linux specific way of getting packets  at the dev level.  For writing rarp and  other similar things on the user level. */
-        {-1, NULL}						/* End */
-    };
-
-    if (getsockopt(fd, SOL_SOCKET, SO_TYPE, \
-                &type, (socklen_t *)&len))
-    {
-        perror("getsockopt so_sndtimeo");
-        return NULL;
-    }
-    
-    while (sock_type[i].type_name != NULL)
-    {
-        if (sock_type[i].type_macro == type)
-            break;
-        i++;
-    }
-
-    return sock_type[i].type_name;
-}
-
-/**
- * @brief make network card hybrid mode
- *
- * @param ifname [in] interface name like eth0,eth2 and so on
- * @param fd     [in] socket fd
- * @param on     [in] hybrid mode swith
- *
- * @return 0, if succ; -1, if failed. 
- */
-int make_socket_promisc(const char *ifname, int fd, int on)
+METHOD(property_t, make_promisc_, int, private_property_t *this, const char *ifname, int onoff)
 {
     struct ifreq req;
 
     strcpy(req.ifr_name, ifname);
-    if (ioctl(fd, SIOCGIFFLAGS, &req) < 0)
+    if (ioctl(socket_fd, SIOCGIFFLAGS, &req) < 0)
         return -1;
 
-    if (on) req.ifr_flags |= IFF_PROMISC;
+    if (onoff) req.ifr_flags |= IFF_PROMISC;
     else req.ifr_flags &= ~IFF_PROMISC;
 
-    if (ioctl(fd, SIOCSIFFLAGS, &req) < 0)
+    if (ioctl(socket_fd, SIOCSIFFLAGS, &req) < 0)
         return -1;
     return 0;
 }
 
-/**
- * @brief get interface index 
- *
- * @param fd   [in] socket fd
- * @param req  [out] struct ifreq, return interface name
- *
- * @return 0, if succ; -1, if failed.
- */
-int get_interface_index(int fd, struct ifreq *req)
+METHOD(property_t, make_multicast_loop_, int, private_property_t *this, int onoff)
 {
-    if (ioctl(fd, SIOCGIFINDEX, &req) < 0)
+    if (setsockopt(socket_fd, IPPROTO_IP, IP_MULTICAST_LOOP, &onoff, sizeof(onoff)))
         return -1;
     return 0;
 }
 
-/**
- * @brief get interface name 
- *
- * @param ifname [out] interface name
- *
- * @return 0, if succ; -1, if failed.
- */
-static char local_ifname[128] = {0};
-char *get_ifname(int only_first)
+METHOD(property_t, make_multicast_ttl_, int, private_property_t *this, int ttl)
+{
+    if (setsockopt(socket_fd, IPPROTO_IP, IP_MULTICAST_TTL, &ttl, sizeof(ttl)))
+        return -1;
+    return 0;
+
+}
+
+METHOD(property_t, add_to_membership_, int, private_property_t *this, struct ip_mreq *mrq)
+{
+    if (setsockopt(socket_fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, mrq, sizeof(struct ip_mreq)))
+        return -1;
+    return 0;
+}
+
+METHOD(property_t, drop_from_membership_, int, private_property_t *this, struct ip_mreq *mrq)
+{
+    if (setsockopt(socket_fd, IPPROTO_IP, IP_DROP_MEMBERSHIP, mrq, sizeof(struct ip_mreq)))
+        return -1;
+    return 0;
+
+}
+
+METHOD(property_t, set_fd_, void, private_property_t *this, int fd)
+{
+    socket_fd = fd;
+}
+
+METHOD(property_t, destroy_, void, private_property_t *this)
+{
+    free(this);
+}
+
+property_t *create_property(int fd)
+{
+    private_property_t *this;
+
+    INIT(this,
+        .public = {
+            .get_can_read_bytes = _get_can_read_bytes_,
+            .get_recv_buf_size  = _get_recv_buf_size_,
+            .get_send_buf_size  = _get_send_buf_size_,
+            .get_recv_timeout   = _get_recv_timeout,
+            .get_send_timeout   = _get_send_timeout,
+            .get_protocol       = _get_protocol_,
+            .get_family         = _get_family_,
+            .get_error          = _get_error_,
+            .get_interface_state = _get_interface_state_,
+
+            .set_recv_buf_size  = _set_recv_buf_size_,
+            .set_send_buf_size  = _set_send_buf_size_,
+            .set_recv_timeout   = _set_recv_timeout_,
+            .set_send_timeout   = _set_send_timeout_,
+
+            .make_block      = _make_block_,
+            .make_nonblock   = _make_nonblock_,
+            .make_reuseable  = _make_reuseable,
+            .make_closenexec = _make_closenexec_,
+            .make_keepalive  = _make_keepalive_,
+            .make_broadcast  = _make_broadcast_,
+            .make_close_action = _make_close_action_,
+            .make_promisc    = _make_promisc_,
+            .make_multicast_loop = _make_multicast_loop_,
+            .make_multicast_ttl  = _make_multicast_ttl_,
+            .add_to_membership    = _add_to_membership_,
+            .drop_from_membership = _drop_from_membership_,
+
+            .set_fd  = _set_fd_,
+            .destroy = _destroy_,
+        },
+        .fd     = fd,
+    );
+
+    return &this->public;
+}
+
+
+char *get_local_ip(int family, const char *ifname, char *ip, int size)
+{
+    const  char *ifname_lo = "lo";
+    struct ifaddrs *ifaddr, *ifa;
+    char   ip_buf[48] = {0};
+    int    used_cnt   = 0;
+
+    if (getifaddrs(&ifaddr) == -1) return NULL;
+    if (!ip) return NULL;
+
+    for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) {
+        if (ifa->ifa_addr == NULL) continue;
+
+        if (family > 0 && family != ifa->ifa_addr->sa_family) continue;
+        if (!strcasecmp(ifa->ifa_name, ifname_lo)) continue;
+        if (ifname != NULL && strcasecmp(ifa->ifa_name, ifname)) continue;
+
+        switch (ifa->ifa_addr->sa_family) {
+            case AF_INET:
+                getnameinfo(ifa->ifa_addr, sizeof(struct sockaddr_in), ip_buf, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
+                used_cnt += snprintf(ip + used_cnt, size - 1, "%s ", ip_buf);
+                break;
+            case AF_INET6:
+                getnameinfo(ifa->ifa_addr, sizeof(struct sockaddr_in6), ip_buf, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
+                used_cnt += snprintf(ip + used_cnt, size - 1, "%s ", ip_buf);
+            default:
+                break;
+        }
+        if (used_cnt >= size) break;
+    }
+    ip[used_cnt] = '\0';
+    freeifaddrs(ifaddr);
+    
+    return ip;
+}
+
+unsigned char *get_mac(const char *ifname, unsigned char *mac, int size)
+{
+    struct ifreq ifreq;
+    int fd = -1;
+
+    if (!mac) return NULL;
+    if (!ifname) return NULL;
+    if ((fd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+        return NULL;
+
+    memset(&ifreq, 0, sizeof(ifreq));
+    strncpy(ifreq.ifr_name, ifname, sizeof(ifreq.ifr_name));
+    if (ioctl(fd, SIOCGIFHWADDR, &ifreq) < 0)
+        return NULL;
+
+    memcpy((void *)mac, (void *)ifreq.ifr_hwaddr.sa_data, size);
+    return mac;
+}
+
+char *get_ifname(char *ifname, int size)
 {
     struct ifreq ifr;
     struct ifconf ifc;
-    char buf[2048];
+    int used_cnt  = 0;
+    char buf[256];
 
+    if (!ifname || size < 1) return NULL;
     int sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);
     if (sock == -1) return NULL;
 
@@ -727,7 +502,6 @@ char *get_ifname(int only_first)
     struct ifreq* it = ifc.ifc_req;
     const struct ifreq* const end = it + (ifc.ifc_len / sizeof(struct ifreq));
     
-    memset(local_ifname, 0, sizeof(local_ifname));
     for (; it != end; ++it) 
     {
         strcpy(ifr.ifr_name, it->ifr_name);
@@ -737,20 +511,14 @@ char *get_ifname(int only_first)
             { // don't count loopback
                 if (ioctl(sock, SIOCGIFHWADDR, &ifr) == 0) 
                 {
-		            strcat(local_ifname, ifr.ifr_name);
-                    strcat(local_ifname, " ");
-                    if (only_first > 0) break;
+		            used_cnt += snprintf(ifname + used_cnt, size - 1, "%s ", ifr.ifr_name);
                 }
             }
         }
-        else
-        {
-            printf("get mac info error\n");
-            return NULL;
-        }
+        else continue;
     }
 
-    return local_ifname;
+    return ifname;
 }
 
 /**
@@ -781,35 +549,6 @@ int is_big_endian()
 }
 
 /**
- * @brief ip is legal
- *
- * @param ip [in] ip address
- *
- * @return 1, if legal; 0, if illage
- */
-int match_ip(const char *ip)
-{
-    int rt = 0;
-    int point_count = 0;
-    const char *p = ip;
-    struct in_addr addr ;
-    
-    if (p == NULL) goto ret;
-    while (*p != '\0')
-    {
-        if (*p == '.') point_count++;
-        p++;
-    }
-    if (point_count != 3 || (p - ip) < 7) goto ret;
-
-    if (!inet_aton(ip, &addr)) goto ret;
-    rt = inet_aton(inet_ntoa(addr), NULL);
-
-ret:
-    return rt;
-}
-
-/**
  * @brief get_eth_rate
  *
  * @param ifname [in] interface name
@@ -835,23 +574,6 @@ int get_eth_speed(const char *ifname)
         return -1;
 
     return ep.speed;
-}
-
-/**
- * @brief get_socket_error 
- *
- * @param fd [in] socket
- *
- * @return socket error, if succ; -1, if failed;
- */
-int get_socket_error(int fd)
-{
-    int error = 0;
-    socklen_t len = sizeof(error);
-
-    if (getsockopt(fd, SOL_SOCKET, SO_ERROR, &error, &len))
-        return -1;
-    return error;
 }
 
 #define BUFSIZE 8192
@@ -961,19 +683,18 @@ static void parse_routes(struct nlmsghdr *nlhdr, struct route_info *rt_info,char
  *
  * @param gateway [out] ip address of gateway
  * @param ifname  [out] interface name
- *
  * @return 0, if succ; -1; if failed
  */
-static char local_gateway[128] = {0};
-char *get_gateway()
+char *get_gateway(char *gateway, int size)
 {
     struct nlmsghdr *nlmsg;
     //struct rtmsg *rt_msg;
     struct route_info *rt_info;
     char msg_buf[BUFSIZE];
     int sock, len, msg_seq = 0;
-    char ifname_buf[10] = {0};
+    char ifname_buf[10]  = {0};
     char gateway_buf[48] = {0};
+    int used_cnt = 0;
  
     if((sock = socket(PF_NETLINK, SOCK_DGRAM, NETLINK_ROUTE)) < 0)
         return NULL;
@@ -996,27 +717,21 @@ char *get_gateway()
         return NULL;
 
     rt_info = (struct route_info *)malloc(sizeof(struct route_info));
-    memset(local_gateway, 0, sizeof(local_gateway));
-    memset(local_ifname, 0, sizeof(local_ifname));
+    memset(gateway, 0, size);
     for(; NLMSG_OK(nlmsg, len); nlmsg = NLMSG_NEXT(nlmsg, len)){
         memset(rt_info, 0, sizeof(struct route_info));
         parse_routes(nlmsg, rt_info, gateway_buf, ifname_buf);
-        if (!strstr(local_gateway, gateway_buf)) {
-            strcat(local_gateway, gateway_buf);
-            strcat(local_gateway, " ");
+        if (!strstr(gateway, gateway_buf)) {
+            used_cnt += snprintf(gateway + used_cnt, size - 1, "%s ", gateway_buf);
         }
-        /*
-        if (!strstr(local_ifname, ifname_buf)) {
-            strcat(local_ifname, ifname_buf);
-            strcat(local_ifname, " ");
-        }
-        */
+        if (used_cnt >= size) break;
     }
+    gateway[used_cnt] = '\0';
 
     free(rt_info);
     close(sock);
    
-    return local_gateway;
+    return gateway;
 }
 
 /**
@@ -1049,24 +764,6 @@ int xioctl(int fd, unsigned int request, void *argp, const char *fmt, ...)
 }
 
 /**
- * @brief get_interface_state 
- *
- * @param fd      [in] socket fd
- * @param ifname  [in] interface name
- *
- * @return 1, if up; 0, if down
- */
-int get_interface_state(int fd, const char *ifname)
-{
-    struct ifreq ifr;
-
-    memset(&ifr, 0, sizeof(ifr));
-    strcpy(ifr.ifr_name, ifname);
-    xioctl(fd, SIOCGIFFLAGS, (char *)&ifr, NULL);
-    return ifr.ifr_flags & IFF_UP ? 1 : 0;
-}
-
-/**
  * @brief get_net_mac 
  *
  * @param ip     [in]  target ip address
@@ -1080,6 +777,8 @@ unsigned char *get_net_mac(char *dstip, int timeout)
     int fd, len;
     struct sockaddr addr;
     struct frame_arp snd_buf, recv_buf;
+    char ifname_buf[128] = {0};
+    char local_ip_buf[128] = {0};
     char *ifname = NULL;
     char *if_save = NULL;
     char *ip_save = NULL;
@@ -1098,17 +797,20 @@ unsigned char *get_net_mac(char *dstip, int timeout)
     /**
      * check ifname
      */
-    ifname = get_ifname(0);
+    ifname = get_ifname(ifname_buf, sizeof(ifname_buf));
     if_save = strtok(ifname, " ");
     if (if_save == NULL) return net_mac;
     
     /**
      * local info
      */
-    ip_save = get_local_ip(AF_INET, ifname, 1);
+    get_local_ip(AF_INET, if_save, local_ip_buf, sizeof(local_ip_buf));
+    ip_save = strtok(local_ip_buf, " ");
+    if (!ip_save) return NULL;
     ip2arr(src_ip_buf, src_ip);
     ip2arr(dstip, dst_ip);
-    src_mac = get_mac_addr(ip_save);
+    ip_save = strtok(local_ip_buf, " ");
+    src_mac = get_mac(if_save, src_mac, sizeof(src_mac));
     if (!memcmp(dst_ip, src_ip, 4)) {
         return net_mac;
     }
