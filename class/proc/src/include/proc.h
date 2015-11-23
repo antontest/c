@@ -1,6 +1,16 @@
 #ifndef __PROC_H__
 #define __PROC_H__
 #include <signal.h>
+#include <utils/enum.h>
+
+typedef enum {
+    APP_NOAPP    = -1,
+    APP_RUNNING  = 0,
+    APP_CRASHED,
+    APP_STOPPED,
+    APP_STARTING,
+    APP_TIMEOUT
+} app_state_t;
 
 typedef enum shm_state_t shm_state_t;
 enum shm_state_t {
@@ -213,6 +223,16 @@ int get_proc_name(pid_t pid, char *name, int size);
 int check_proc_unique(const char *proc_name);
 
 /**
+ * @brief process running count
+ *
+ * @param name [in] process name
+ *
+ * @return count of already running, if process unique;  
+ *          otherwise return 0
+ */
+int proc_running_cnt(const char *proc_name);
+
+/**
  * @brief get proc exe path by pid
  *
  * @param pid  [in]  process id
@@ -318,4 +338,21 @@ int check_app_start_conflict(const char *app_name, const char *state_file, int (
  */
 int app_state_check(const char *app_name, int pid_num, int uptime, const char *state_file, int (*app_state_check_cb)(void));
 
+/**
+ * @brief set_app_state_file_path 
+ */
+void set_app_state_file_path(const char *path);
+
+/**
+ * @brief print app state 
+ *
+ * @param app   app name
+ * @param state app state
+ */
+void print_app_state(const char *app, app_state_t state);
+
+/**
+ * @brief app_state_string 
+ */
+const char *app_state_string(app_state_t state);
 #endif

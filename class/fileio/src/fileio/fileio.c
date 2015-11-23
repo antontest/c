@@ -548,6 +548,7 @@ METHOD(cfg_t, get_cfg_value, char *, private_cfg_t *this, const char *keyname)
     const char *split = this->split;
 
     if (!keyname || !split) return NULL;
+    this->file->seek(this->file, SEEK_SET, 0);
     while ((read_ptr = this->file->read(this->file)) != NULL) {
         ret_ptr = strtok_r(read_ptr, split, &save_ptr);
         if (!ret_ptr) continue;
@@ -630,7 +631,7 @@ cfg_t *create_cfg(const char *filename)
 {
     private_cfg_t *this;
 
-    if (filename == NULL && access(filename, F_OK) != 0) return NULL;
+    if (filename != NULL && access(filename, F_OK) != 0) return NULL;
     INIT(this,
         .public = {
             .get_value = _get_cfg_value,
@@ -641,7 +642,8 @@ cfg_t *create_cfg(const char *filename)
         .file = create_fileio(filename, "r"),
         .split = ":=",
     );
-    if (!this->file) {
+    if (!this->file || !this->file->get_file_handle(this->file)) {
+        if (this->file != NULL) this->file->destroy(this->file);
         free(this);
         return NULL;
     }
@@ -697,6 +699,7 @@ METHOD(ini_t, get_ini_value, char *, private_ini_t *this, const char *appname, c
     if (!appname || !keyname) return NULL;
     sprintf(ini_app_name, "[%s]", appname);
 
+    this->file->seek(this->file, SEEK_SET, 0);
     while ((read_ptr = this->file->read(this->file)) != NULL) {
         a_trim(read_ptr);
         read_ptr = strtok(read_ptr, "\n");
@@ -827,7 +830,7 @@ ini_t *create_ini(const char *filename)
 {
     private_ini_t *this;
 
-    if (filename == NULL && access(filename, F_OK) != 0) return NULL;
+    if (filename != NULL && access(filename, F_OK) != 0) return NULL;
     INIT(this,
         .public = {
             .get_value = _get_ini_value,
@@ -838,7 +841,8 @@ ini_t *create_ini(const char *filename)
         .file = create_fileio(filename, "r"),
         .split = ":=",
     );
-    if (!this->file) {
+    if (!this->file || !this->file->get_file_handle(this->file)) {
+        if (this->file != NULL) this->file->destroy(this->file);
         free(this);
         return NULL;
     }

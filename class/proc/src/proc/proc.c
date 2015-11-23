@@ -11,6 +11,7 @@
 #include <stdarg.h>
 #include <fcntl.h>
 #include <utils/utils.h>
+#include <utils/enum.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include "proc.h"
@@ -369,13 +370,15 @@ ipc_t *create_ipc()
 
 #define APP_STATE_FILE_PATH "/var/run/app_state"
 
-typedef enum {
-    APP_RUNNING = 0,
-    APP_CRASHED,
-    APP_STOPPED,
-    APP_STARTING,
-    APP_TIMEOUT
-} app_state_t;
+static char app_state_file_path[128] = APP_STATE_FILE_PATH;
+
+/**
+ * @brief set_app_state_file_path 
+ */
+void set_app_state_file_path(const char *path)
+{
+    strncpy(app_state_file_path, path, sizeof(app_state_file_path));
+}
 
 /**
  * @brief execl shell script
@@ -411,10 +414,11 @@ int cmd_exec(const char *cmd, int *pid)
         {
             if (errno != EINTR) goto ret;
         }
+        if (rt == 127) rt = 0;
     }
 
 ret:
-    return p_id;
+    return rt;
 }
 
 /**
@@ -649,6 +653,46 @@ int check_proc_unique(const char *proc_name)
 }
 
 /**
+ * @brief process running count
+ *
+ * @param name [in] process name
+ *
+ * @return count of already running, if process unique;  
+ *          otherwise return 0
+ */
+int proc_running_cnt(const char *proc_name)
+{
+    struct dirent *dir = NULL;
+    DIR *dirp = NULL;
+    FILE *fp = NULL;
+    char name[64] = {0};
+    char path[128] = {0};
+    int cnt = 0;
+
+    if ((dirp = opendir("/proc/")) == NULL) return -1;
+
+    while ((dir = readdir(dirp)) != NULL)
+    {
+        if (dir->d_name && (atoi(dir->d_name)) > 0)
+        {
+            sprintf(path, "/proc/%s/status", dir->d_name);
+            
+            if ((fp = fopen(path, "r")) == NULL) continue;
+            if (fscanf(fp, "Name:%s", name) == -1) 
+                name[0] = '\0';
+            if (fp != NULL) fclose(fp);
+
+            if (strcmp(name, proc_name)) continue;
+            cnt++;
+        }
+    }
+
+    if (dirp != NULL) closedir(dirp);
+
+    return cnt;
+}
+
+/**
  * @brief get proc exe path by pid
  *
  * @param pid  [in]  process id
@@ -744,18 +788,16 @@ free:
  */
 int SYSTEM(const char *format, ...)
 {
-    pid_t pid = -1;
+    int ret = -1;
     char buf[1024] = {0};
     va_list arg;
 
     va_start(arg, format);
     vsnprintf(buf, sizeof(buf), format, arg);
     va_end(arg);
+    ret = cmd_exec(buf, NULL);
 
-    pid = cmd_exec(buf, NULL);
-    usleep(10);
-
-    return pid;
+    return ret;
 }
 
 /**
@@ -802,7 +844,7 @@ int create_state_file_by_name(const char *app_name) {
     }
 
     pid = getpid();
-    snprintf(path, sizeof(path), "%s%s", APP_STATE_FILE_PATH, app_name);
+    snprintf(path, sizeof(path), "%s%s", app_state_file_path, app_name);
     if ((fp = fopen(path, "w")) != NULL) {
         fprintf(fp, "pid:%d-uptime:%d-status:%d", pid, read_uptime(), APP_STARTING);
     } else {
@@ -825,7 +867,7 @@ void unlink_state_file_by_name(const char *app_name) {
         return;
     }
 
-    snprintf(path, sizeof(path), "%s%s", APP_STATE_FILE_PATH, app_name);
+    snprintf(path, sizeof(path), "%s%s", app_state_file_path, app_name);
     if (access(path, F_OK) != 0) {
         return;
     }
@@ -847,7 +889,7 @@ int is_state_file_exist(const char *app_name) {
         return -1;
     }
 
-    snprintf(path, sizeof(path), "%s%s", APP_STATE_FILE_PATH, app_name);
+    snprintf(path, sizeof(path), "%s%s", app_state_file_path, app_name);
     if (access(path, F_OK) != 0) {
         return -1;
     }
@@ -935,7 +977,7 @@ int app_state_check(const char *app_name, int pid_num, int uptime, const char *s
     sscanf(app_state, "%*[^:]:%*[^:]:%[^-]", app_uptime);
 
     if (pid_num) {
-        if (!check_proc_unique(app_name)) {
+        if (proc_running_cnt(app_name)) {
             ret = APP_RUNNING;
         } else {
             ret = APP_STOPPED;
@@ -992,3 +1034,33 @@ int app_state_check(const char *app_name, int pid_num, int uptime, const char *s
     
     return chk_result;
 }
+
+ENUM(app_state_str, APP_NOAPP, APP_TIMEOUT, 
+    "no app",
+    "running",
+    "crashed",
+    "stopped",
+    "starting",
+    "timeout"
+);
+/**
+ * @brief print app state 
+ *
+ * @param app   app name
+ * @param state app state
+ */
+void print_app_state(const char *app, app_state_t state)
+{
+    if (!app) return;
+    printf("[%s] %s\n", app, enum_to_name(app_state_str, state));
+}
+
+
+/**
+ * @brief app_state_string 
+ */
+const char *app_state_string(app_state_t state)
+{
+    return enum_to_name(app_state_str, state);
+}
+

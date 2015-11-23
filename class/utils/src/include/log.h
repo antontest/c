@@ -1,6 +1,6 @@
 #ifndef __LOG_H__
 #define __LOG_H__
-#include <debug.h>
+#include "debug.h"
 
 typedef struct log_t log_t;
 

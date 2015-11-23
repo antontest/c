@@ -1,1 +1,0 @@
-/usr/bin/cc     CMakeFiles/ipv6.dir/main/ipv6.c.o  -o ../../ipv6  -L/home/anton/program/c/test/ipv6/src/lib -rdynamic 

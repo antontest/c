@@ -11,15 +11,20 @@
 #include <proc.h>
 #include <fileio.h>
 #include <signal.h>
+#include <pthread.h>
 #include <thread/mutex.h>
 #include <thread/thread.h>
 #include <utils/utils.h>
-#include <utils/linked_list.h>
+#include <data/linked_list.h>
 #include <socket/event.h>
+#include <utils/get_args.h>
 
 event_t *evt = NULL;
-#define FIFO_PATH "./"
+#define DFT_FIFO_PATH "/home/anton/var/run/cmd_agent/"
+//#define CONFIG_FILE_PATH "/home/anton/usr/bin/cmd_agent.cfg"
 #define CONFIG_FILE_PATH "./cmd_agent.cfg"
+static char *default_fifo_path = DFT_FIFO_PATH;
+static char *default_conf_path = CONFIG_FILE_PATH;
 typedef struct conf_t conf_t;
 struct conf_t {
     /**
@@ -126,10 +131,10 @@ struct task_queue_t {
  */
 int read_config()
 {
-    ini_t *ini = create_ini(conf.path);
+    ini_t *ini = create_ini(default_conf_path);
     if (!ini) return -1;
 
-    conf.task_queue_cnt = atoi(ini->get_value(ini,"queue", "max_cnt"));
+    conf.task_queue_cnt = atoi(ini->get_value(ini, "queue", "max_cnt"));
     conf.timeout = atoi(ini->get_value(ini,"cmd", "timeout"));
     ini->destroy(ini);
 
@@ -184,7 +189,7 @@ int task_queue_init()
     /**
      * read task queue timeout
      */
-    ini = create_ini(conf.path);
+    ini = create_ini(default_conf_path);
     task_queue_timeout = ini->get_value(ini, "queue", "timeout");
     
     /**
@@ -204,7 +209,7 @@ int task_queue_init()
         /**
          * create fifo 
          */
-        sprintf(fifo_path, "%s%d", FIFO_PATH, i);
+        sprintf(fifo_path, "%s%d", default_fifo_path, i);
         queue->fifo = create_ipc();
         if (!queue->fifo) return -1;
         queue->fd = queue->fifo->mkfifo(queue->fifo, fifo_path, O_RDWR | O_NONBLOCK);
@@ -273,7 +278,7 @@ int task_queue_deinit()
             }
         }
 
-        sprintf(fifo_path, "%s%d", FIFO_PATH, i);
+        sprintf(fifo_path, "%s%d", DFT_FIFO_PATH, i);
         if (!access(fifo_path, F_OK)) unlink(fifo_path);
         if (queue->fifo) queue->fifo->destroy(queue->fifo);
         if (queue->task) queue->task->destroy(queue->task);
@@ -374,6 +379,39 @@ int main(int agrc, char *agrv[])
     int i = 0;
     struct sigaction act;
     task_queue_t *queue = NULL;
+    int help_flag = 0;
+    int sleep_time = 0;
+    char *fifo_path = NULL;
+    char *conf_path = NULL;
+    struct options opts[] = {
+        {"-h", "--help",      0, RET_INT, ADDR_ADDR(help_flag)},
+        {"-p", "--fifo_path", 1, RET_STR, ADDR_ADDR(fifo_path)},
+        {"-t", "--time",      1, RET_INT, ADDR_ADDR(sleep_time)},
+        {"-c", "--conf_path", 1, RET_STR, ADDR_ADDR(conf_path)},
+        {NULL, NULL}
+    };
+    struct usage usage_info[] = {
+        {"-h, --help",      "Show usage"},
+        {"-p, --fifo_path", "FIFO path"},
+        {"-c, --conf_path", "config file path"},
+        {"-t, --time",      "Sleep time. Sleep forever if equal to 0."},
+        {NULL, NULL}
+    };
+
+    /**
+     * parser command line
+     */
+    get_args(agrc, agrv, opts);
+    if (help_flag) {
+        print_usage(usage_info);
+        goto deinit;
+    }
+    if (fifo_path != NULL) default_fifo_path = fifo_path;
+    if (conf_path != NULL) default_conf_path = conf_path;
+    if (access(default_conf_path, R_OK)) goto deinit;
+    if (access(default_fifo_path, R_OK)) {
+        if (SYSTEM("mkdir -p %s", default_fifo_path)) goto deinit;
+    }
 
     /**
      * read config
@@ -406,7 +444,10 @@ int main(int agrc, char *agrv[])
     sigaction(SIGKILL, &act, NULL);
     sigaction(SIGSTOP, &act, NULL);
 
-    sleep(20);    
+    if (!sleep_time) {
+        while(1) sleep(2);
+    }
+    else sleep(sleep_time);
     rt = 0;
 deinit:
     /**

@@ -18,7 +18,7 @@ SET(LIB_SRC proc/proc.c)
 
 # lib generation
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/src/lib)
-ADD_LIBRARY(proc_shared STATIC ${LIB_SRC})
+ADD_LIBRARY(proc_shared SHARED ${LIB_SRC})
 
 # generat exec
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR})
@@ -26,6 +26,7 @@ ADD_EXECUTABLE(proc ${CSRC})
 
 # link library
 SET_TARGET_PROPERTIES(proc_shared PROPERTIES OUTPUT_NAME "proc")
+TARGET_LINK_LIBRARIES(proc_shared enum)
 TARGET_LINK_LIBRARIES(proc proc_shared)
 
 # -------------- INSTALL -------------- #

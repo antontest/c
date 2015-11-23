@@ -6,6 +6,7 @@
 #include <ftp.h>
 #include <utils/utils.h>
 
+#define DFT_FTP_SERVER_PORT (21)
 int main(int argc, char **argv)
 {
     int help_flag   = 0;
@@ -40,7 +41,16 @@ int main(int argc, char **argv)
         exit(0);
     }
 
-    if (!server || !user || !passwd || port < 1) return -1;
+    if (!server) {
+        printf("Please input ftp server IP address\n");
+        return -1;
+    }
+    if (!user || !passwd) {
+        printf("Please input ftp user or passwd!\n");
+        return -1;
+    }
+
+    if (port < 1) port = DFT_FTP_SERVER_PORT;
     ftp = create_ftp();
     if (!ftp) return -1;
 
