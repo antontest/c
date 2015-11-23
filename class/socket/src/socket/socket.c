@@ -371,6 +371,27 @@ METHOD(socket_t, send_, int, private_socket_t *this, void *buf, int size)
     return send_cnt;
 }
 
+METHOD(socket_t, close_, void, private_socket_t *this)
+{
+    if (this->fd > 0) close(this->fd);
+    if (this->accept_fd > 0) close(this->accept_fd);
+}
+
+METHOD(socket_t, destroy_, void, private_socket_t *this)
+{
+    _close_(this);
+    thread_onoff = 0;
+    usleep(1000);
+
+    if (this->state_check) this->state_check->cancel(this->state_check);
+    if (this->lock) this->lock->destroy(this->lock);
+    if (this->host_ser != NULL) this->host_ser->destroy(this->host_ser);
+    if (this->host_cli != NULL) this->host_cli->destroy(this->host_cli);
+    
+    threads_deinit();
+    free(this);
+}
+
 METHOD(socket_t, set_state_check, void, private_socket_t *this, int on)
 {
     this->state_check_flag = on;
@@ -439,27 +460,6 @@ METHOD(socket_t, get_state, int, private_socket_t *this)
 METHOD(socket_t, print_state, void, private_socket_t *this)
 {
     fprintf(stdout, "[socket state] %s\n", enum_to_name(socket_state_name, this->state));
-}
-
-METHOD(socket_t, close_, void, private_socket_t *this)
-{
-    if (this->fd > 0) close(this->fd);
-    if (this->accept_fd > 0) close(this->accept_fd);
-}
-
-METHOD(socket_t, destroy_, void, private_socket_t *this)
-{
-    _close_(this);
-    thread_onoff = 0;
-    usleep(1000);
-
-    if (this->state_check) this->state_check->cancel(this->state_check);
-    if (this->lock) this->lock->destroy(this->lock);
-    if (this->host_ser != NULL) this->host_ser->destroy(this->host_ser);
-    if (this->host_cli != NULL) this->host_cli->destroy(this->host_cli);
-    
-    threads_deinit();
-    free(this);
 }
 
 /*

@@ -90,12 +90,24 @@ int main(int agrc, char *agrv[])
     }
 
     linked_list_t *list = linked_list_create();
+    struct ele el= {2, NULL};
+    rt = 1;
+
+    list->insert_last(list, &rt);
+    list->insert_last(list, &el);
+    printf("list count: %d\n", list->get_count(list));
+    list->get_first(list, &p);
+    printf("first val: %d\n", *((int *)p));
+    list->get_last(list, &p);
+    printf("lsst val: %d\n", ((struct ele *)p)->data);
+    /*
     list_test(list);
     printf("list count: %d\n", list->get_count(list));
     list->get_first(list, &p);
     printf("first val: %d\n", *((int *)p));
     list->get_last(list, &p);
     printf("lsst val: %d\n", ((struct ele *)p)->data);
+    */
     free(list);
 
     return 0;

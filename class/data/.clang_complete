@@ -1,0 +1,10 @@
+-I /usr/include/ 
+-I ~/usr/include/
+-I .
+-I ./src
+-I ./src/extra_lib
+-I ./src/stack
+-I ./src/lib
+-I ./src/main
+-I ./src/data
+-I ./src/include

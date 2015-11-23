@@ -4,12 +4,14 @@
 #include <unistd.h>
 #include <string.h>
 #include <signal.h>
+#include <sys/types.h>
+#include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <sys/select.h>
 #include <sys/epoll.h>
 #include <thread/thread.h>
 #include <utils/utils.h>
-#include <utils/linked_list.h>
+#include <data/linked_list.h>
 
 #define DFT_EPOLL_EVTS_MAX_SIZE (10)
 typedef struct event_pkg_t event_pkg_t;
@@ -76,10 +78,16 @@ struct private_event_t {
             /**
              * @brief fd sets listening on
              */
-            fd_set fds;
+            fd_set rfds;
+
+            /**
+             * @brief fd sets listening on
+             */
+            fd_set wfds;
         } s;
-#define select_fds   fd.s.fds
-#define select_maxfd fd.s.max_fd
+#define select_rfds   fd.s.rfds
+#define select_wfds   fd.s.wfds
+#define select_maxfd  fd.s.max_fd
 
         struct {
             /**
@@ -122,11 +130,12 @@ static void set_fds(private_event_t *this)
     evt_cnt = this->event_list->get_count(this->event_list);
     if (evt_cnt < 1) return;
 
-    FD_ZERO(&this->select_fds);
+    FD_ZERO(&this->select_rfds);
     this->event_list->reset_current(this->event_list);
     while (evt_cnt-- > 0) {
         this->event_list->get_next(this->event_list, (void **)&pkg);
-        FD_SET(pkg->fd, &this->select_fds);
+        if (pkg->type == EVENT_ON_CONNECT) FD_SET(pkg->fd, &this->select_wfds);
+        else FD_SET(pkg->fd, &this->select_rfds);
 
         if (pkg->fd > max_fd) max_fd = pkg->fd;
     }
@@ -140,7 +149,7 @@ void *select_events_handler(private_event_t *this)
     int    deal_fds_cnt;
     int    evt_cnt = 0;
     int    can_read_bytes = 0;
-    fd_set fds;
+    fd_set rfds, wfds;
     struct timeval tv = {0};
     struct event_pkg_t *pkg = NULL;
 
@@ -148,12 +157,14 @@ void *select_events_handler(private_event_t *this)
         /**
          * set event fds
          */
-        FD_ZERO(&fds);
         if (this->flag) {
             set_fds(this);
             this->flag = 0;
         }
-        fds = this->select_fds;
+        FD_ZERO(&rfds);
+        FD_ZERO(&wfds);
+        rfds = this->select_rfds;
+        wfds = this->select_wfds;
 
         /**
          * wait time
@@ -165,7 +176,7 @@ void *select_events_handler(private_event_t *this)
          * wait socket event
          */
         deal_fds_cnt = 0;
-        ready_fds_cnt = select(this->select_maxfd, &fds, NULL, NULL, &tv);
+        ready_fds_cnt = select(this->select_maxfd, &rfds, &wfds, NULL, &tv);
         switch (ready_fds_cnt) {
             case 0:
                 if (this->timeout_handler.handler != NULL) this->timeout_handler.handler(this->timeout_handler.arg);
@@ -179,10 +190,14 @@ void *select_events_handler(private_event_t *this)
                 this->event_list->reset_current(this->event_list);
                 while (evt_cnt-- > 0) {
                      this->event_list->get_next(this->event_list, (void **)&pkg); 
-                    if (FD_ISSET(pkg->fd, &fds)) {
+                    if (FD_ISSET(pkg->fd, &rfds)) {
                         ioctl(pkg->fd, FIONREAD, &can_read_bytes);
                         if (can_read_bytes <= 0 && pkg->type != EVENT_ON_CLOSE && pkg->type != EVENT_ON_ACCEPT)
                             continue;
+                        if (pkg->event_handler != NULL) pkg->event_handler(pkg->fd, pkg->arg);
+                        if (++deal_fds_cnt >= ready_fds_cnt) break;
+                    } else if (FD_ISSET(pkg->fd, &wfds)) {
+                        if (pkg->type != EVENT_ON_CONNECT) continue;
                         if (pkg->event_handler != NULL) pkg->event_handler(pkg->fd, pkg->arg);
                         if (++deal_fds_cnt >= ready_fds_cnt) break;
                     }
