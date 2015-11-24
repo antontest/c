@@ -153,7 +153,7 @@ METHOD(socket_base_t, vsend_, int, private_socket_base_t *this, int flags, const
 
 METHOD(socket_base_t, sendto_, int, private_socket_base_t *this, void *buf, int size, int flags, struct sockaddr *dest_addr, int addrlen)
 {
-    if (this->sock_type == SOCKET_SERVER) return sendto(this->accept_fd, buf, size, flags, dest_addr, (socklen_t)addrlen);
+    if (this->sock_type == SOCKET_SERVER) return sendto(this->fd, buf, size, flags, dest_addr, (socklen_t)addrlen);
     return sendto(this->fd, buf, size, flags, dest_addr, (socklen_t)addrlen);
 }
 
@@ -168,7 +168,7 @@ METHOD(socket_base_t, vsendto_, int, private_socket_base_t *this, int flags, str
     this->snd_buffer[size + 1] = '\0';
     va_end(arg);
 
-    if (this->sock_type == SOCKET_SERVER) return sendto(this->accept_fd, this->snd_buffer, size, flags, dest_addr, (socklen_t)addrlen);
+    if (this->sock_type == SOCKET_SERVER) return sendto(this->fd, this->snd_buffer, size, flags, dest_addr, (socklen_t)addrlen);
     return sendto(this->fd, this->snd_buffer, size, flags, dest_addr, (socklen_t)addrlen);
 }
 

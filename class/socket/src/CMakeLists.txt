@@ -25,7 +25,9 @@ SET(FTP_MAIN_SRC ftp/ftp-main.c)
 SET(BASE_SRC     base/base.c)
 SET(EVENT_SRC    event/event.c)
 SET(TEST_SRC     event/sample.c)
-SET(PTEST_SRC   property/sample.c)
+SET(PTEST_SRC    property/sample.c)
+SET(CAST_SRC     cast/cast.c)
+SET(CAST_TEST_SRC cast/sample.c)
 
 # lib generation
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/src/lib)
@@ -38,6 +40,7 @@ ADD_LIBRARY(property      STATIC ${PROPERTY_SRC})
 ADD_LIBRARY(ftp           SHARED ${FTP_SRC})
 ADD_LIBRARY(socket_base   SHARED ${BASE_SRC})
 ADD_LIBRARY(event         SHARED ${EVENT_SRC})
+ADD_LIBRARY(cast          SHARED ${CAST_SRC})
 
 # generat exec
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR})
@@ -45,6 +48,7 @@ ADD_EXECUTABLE(socket ${CSRC})
 ADD_EXECUTABLE(ftp_client ${FTP_MAIN_SRC})
 ADD_EXECUTABLE(test ${TEST_SRC})
 ADD_EXECUTABLE(property_test ${PTEST_SRC})
+ADD_EXECUTABLE(cast_test ${CAST_TEST_SRC})
 
 # link library
 SET_TARGET_PROPERTIES(socket_shared PROPERTIES OUTPUT_NAME "socket")
@@ -60,6 +64,8 @@ TARGET_LINK_LIBRARIES(ftp_client    socket_shared get_args ftp)
 TARGET_LINK_LIBRARIES(event         thread linked_list)
 TARGET_LINK_LIBRARIES(test          socket_base event linked_list)
 TARGET_LINK_LIBRARIES(property_test property)
+TARGET_LINK_LIBRARIES(cast          socket_base)
+TARGET_LINK_LIBRARIES(cast_test     socket_base cast utils property)
 
 # -------------- INSTALL -------------- #
 # install path setting
