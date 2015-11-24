@@ -68,7 +68,7 @@ struct private_pool_t {
 #define task_lock      this->task_list_lock
 #define manager_thread this->manager
 #define pool_has_work  this->has_work
-//#define thread_lock  this->thread_list_lock
+#define pthread_lock   this->thread_list_lock
 
 /**
  * @brief thread count in this thread pool
@@ -172,13 +172,20 @@ METHOD(pool_t, destroy_, void, private_pool_t *this)
     thread_pkg_t *thread = NULL;
     thread_task_t *task = NULL;
 
+    /**
+     * destroy manager thread and free memory
+     */
     if (manager_thread) {
         this->stop = 1;
         if (task_bsem) task_bsem->post(task_bsem);
+
         usleep(10);
         manager_thread->cancel(manager_thread);
     }
 
+    /**
+     * destroy thread pool
+     */
     if (pthread_list) {
         thread_cnt = pthread_list->get_count(pthread_list);
         while (thread_cnt-- > 0) {
@@ -193,6 +200,7 @@ METHOD(pool_t, destroy_, void, private_pool_t *this)
             thread->bsem->destroy(thread->bsem);
             thread->lock->unlock(thread->lock);
             thread->lock->destroy(thread->lock);
+            if (thread->task) free(thread->task);
             free(thread);
         }
         free(pthread_list);
@@ -207,11 +215,16 @@ METHOD(pool_t, destroy_, void, private_pool_t *this)
         free(ptask_list);
     }
 
+    if (pthread_lock) pthread_lock->destroy(pthread_lock);
     if (task_lock) task_lock->destroy(task_lock);
-    if (thread_lock) thread_lock->destroy(thread_lock);
-    if (task_bsem) task_bsem->destroy(task_bsem);
     if (pool_has_work) pool_has_work->destroy(pool_has_work);
     free(this);
+
+    /**
+     * destroy global memory
+     */
+    if (thread_lock) thread_lock->destroy(thread_lock);
+    if (task_bsem) task_bsem->destroy(task_bsem);
 }
 
 static void thread_handler(thread_pkg_t *this)
