@@ -67,6 +67,11 @@ struct thread_t {
      * @brief destroy instance and free memory
      */
     void (*destroy) (thread_t *this);
+
+    /**
+     * @brief get thread id
+     */
+    int (*get_id) (thread_t *this);
 };
 
 

@@ -251,6 +251,11 @@ METHOD(thread_t, destroy_, void, private_thread_t *this)
     thread_cleanup(this);
 }
 
+METHOD(thread_t, get_id_, int, private_thread_t *this)
+{
+    return this->id;
+}
+
 /**
  * Create an internal thread object.
  */
@@ -265,6 +270,8 @@ static private_thread_t *thread_create_internal()
 			.detach  = _detach,
 			.join    = _join,
 			.destroy = _destroy_,
+
+			.get_id  = _get_id_,
 		},
 		.cleanup_handlers = linked_list_create(),
 		.mutex = mutex_create(),
