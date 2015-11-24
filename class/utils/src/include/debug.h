@@ -16,8 +16,8 @@ typedef enum level_t level_t;
  * Debug message group.
  */
 enum debug_t {
-        /** no dedug module info */
-        DBG_NULL = -1,
+    /** no dedug module info */
+    DBG_NULL = -1,
 	/** daemon specific */
 	DBG_DMN = 1,
 	/** utils */
@@ -40,6 +40,8 @@ enum debug_t {
 	DBG_LOG,
 	/** applications other than daemons */
 	DBG_APP,
+	/** applications other than daemons */
+	DBG_WDG,
 	/** libstrongswan */
 	DBG_LIB,
 	/** number of groups */

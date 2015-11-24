@@ -14,7 +14,7 @@ AUX_SOURCE_DIRECTORY(main SRC_PATH)
 SET(CSRC ${SRC_PATH})
 
 # set lib source files
-SET(EXTERNAL_LIBS fileio linked_list get_args proc utils_debug enum)
+SET(EXTERNAL_LIBS fileio linked_list get_args proc utils_debug enum log)
 FILE(GLOB_RECURSE LIBS ${PROJECT_SOURCE_DIR}/src/extra_lib/*.a)
 IF(LIBS)
     STRING(REGEX REPLACE .*lib\(.*\).a$ \\1 LIBS ${LIBS})
@@ -41,3 +41,4 @@ endif()
 
 # install target
 INSTALL(TARGETS watchdog RUNTIME DESTINATION bin)
+INSTALL(FILES ../wdg_conf.ini DESTINATION bin)

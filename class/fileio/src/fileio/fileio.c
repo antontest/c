@@ -540,6 +540,15 @@ struct private_cfg_t {
     char split[10];
 };
 
+static int is_file(const char *path)
+{
+    struct stat st;
+
+    if (lstat(path, &st) != 0) return -1;
+    if (S_ISREG(st.st_mode)) return 1;
+    return 0;
+}
+
 METHOD(cfg_t, get_cfg_value, char *, private_cfg_t *this, const char *keyname)
 {
     char *read_ptr = NULL;
@@ -631,6 +640,7 @@ cfg_t *create_cfg(const char *filename)
 {
     private_cfg_t *this;
 
+    if (is_file(filename) != 1) return NULL;
     if (filename != NULL && access(filename, F_OK) != 0) return NULL;
     INIT(this,
         .public = {
@@ -830,6 +840,7 @@ ini_t *create_ini(const char *filename)
 {
     private_ini_t *this;
 
+    if (is_file(filename) != 1) return NULL;
     if (filename != NULL && access(filename, F_OK) != 0) return NULL;
     INIT(this,
         .public = {

@@ -8,16 +8,25 @@
 #include <sys/wait.h>
 #include <utils/utils.h>
 #include <data/linked_list.h>
-#include <get_args.h>
+#include <utils/get_args.h>
 #include <fileio.h>
 #include <signal.h>
 #include <proc.h>
 #include <utils/log.h>
 #include <utils/debug.h>
 
+#define APP_PID_FILE_PATH "/home/anton/var/app/"
 #define DFT_WDG_CONF_PATH "./wdg_conf.ini"
+#define RC_BIN_PATH "/home/anton/usr/bin/"
+#define DFT_WDG_LOG_FILE  NULL
 #define WDG_NAME "watchdog"
 #define DFT_APP_TIME_OUT (10)
+
+static char *default_app_pid_file_path = APP_PID_FILE_PATH;
+static char *default_wdg_conf_path = DFT_WDG_CONF_PATH;
+static char *default_wdg_log_file = DFT_WDG_LOG_FILE;
+static char *default_rc_bin_path  = RC_BIN_PATH;
+
 typedef struct app_pkg_t app_pkg_t;
 struct app_pkg_t {
     /**
@@ -49,13 +58,11 @@ app_pkg_t *create_app_pkg(const char *name)
 
 typedef struct wdg_conf_t wdg_conf_t;
 struct wdg_conf_t {
-    const char *conf_path;
     const char *name;
     unsigned  int  chk_period;
     linked_list_t  *app_list;
     ipc_t *sig_hd;
 } wdg_conf = {
-    .conf_path = DFT_WDG_CONF_PATH,
     .name      = WDG_NAME,
     .app_list  = NULL,
 };
@@ -79,7 +86,7 @@ int read_config()
     app_pkg_t *app = NULL;
     ini_t *cfg = NULL;
 
-    cfg = create_ini(wdg_conf.conf_path);
+    cfg = create_ini(default_wdg_conf_path);
     if (!cfg) return -1;
 
     period = cfg->get_value(cfg, "period", "period");
@@ -141,6 +148,7 @@ void wdg_deinit()
         if (app->name != NULL) free(app->name);
         free(app);
     }
+    log_deinit();
     free(wdg_conf.app_list);
 }
 
@@ -160,17 +168,22 @@ void error_handler(int sig, siginfo_t *info, void *text)
     }
 }
 
+/**
+ * @brief check apps state
+ */
 static int app_state(const char *name)
 {
     char cmd[64] = {0};
 
-    snprintf(cmd, sizeof(cmd), "/home/anton/usr/bin/rc_%s", name);
+    snprintf(cmd, sizeof(cmd), "%src_%s", default_rc_bin_path, name);
     if (access(cmd, X_OK)) return APP_NOAPP;
-    snprintf(cmd, sizeof(cmd), "/home/anton/usr/bin/rc_%s state", name);
+    snprintf(cmd, sizeof(cmd), "%src_%s state > /dev/null", default_rc_bin_path, name);
     return WEXITSTATUS(system(cmd));
 }
 
-#define APP_PID_FILE_PATH "/home/anton/var/app/"
+/**
+ * @brief app_state_chk 
+ */
 void app_state_chk()
 {
     int app_cnt = 0;
@@ -182,7 +195,7 @@ void app_state_chk()
     while (app_cnt-- > 0) {
         wdg_conf.app_list->get_next(wdg_conf.app_list, (void **)&app);
         status = app_state(app->name);
-        dbg("[%s] %s", app->name, app_state_string(status));
+        log_notice0(DBG_WDG, "[%s] %s", app->name, app_state_string(status));
     }
 }
 
@@ -193,12 +206,58 @@ int main(int agrc, char *agrv[])
 {
     /* return value of function main */
     int ret = -1; 
+    int help_flag = 0;
     struct timeval tv = {0};
+    char *wdg_conf_path = NULL;
+    char *wdg_log_file  = NULL;
+    char *app_pid_file_path = NULL;
+    char *rc_bin_path = NULL;
+    struct options opts[] = {
+        {"-h", "--help",      0, RET_INT, ADDR_ADDR(help_flag)},
+        {"-c", "--conf_path", 1, RET_STR, ADDR_ADDR(wdg_conf_path)},
+        {"-l", "--log_path",  1, RET_STR, ADDR_ADDR(wdg_log_file)},
+        {"-p", "--pid_path",  1, RET_STR, ADDR_ADDR(app_pid_file_path)},
+        {"-r", "--rc_path",   1, RET_STR, ADDR_ADDR(rc_bin_path)},
+        {NULL, NULL}
+    };
+    struct usage usg[] = {
+        {"-h, --help",      "Show usage"},
+        {"-c, --conf_path", "path of config file"},
+        {"-l, --log_path",  "path of watchdog log file saving"},
+        {"-p, --pid_path",  "path of apps pid file saving"},
+        {"-r, --rc_path",   "path of apps rc bin"},
+        {NULL, NULL}
+    };
 
+    /**
+     * parser parameters
+     */
+    get_args(agrc, agrv, opts);
+    if (help_flag) {
+        print_usage(usg);
+        goto over;
+    }
+    if (wdg_conf_path) default_wdg_conf_path = wdg_conf_path;
+    if (wdg_log_file) default_wdg_log_file = wdg_log_file;
+    if (app_pid_file_path) default_app_pid_file_path = app_pid_file_path;
+    if (rc_bin_path) default_rc_bin_path = rc_bin_path;
+
+    /**
+     * 1. check_proc_unique 
+     * 2. read config 
+     * 3. create log instance
+     */
+    if (log_init(default_wdg_log_file) < 0) goto over;
     if (!check_proc_unique(WDG_NAME)) goto over;
-    if (read_config() < 0) goto over;
-    dbg("read config succ");
+    if (read_config() < 0) {
+        log_notice0(DBG_WDG, "read config failed");
+        goto over;
+    }
+    log_notice0(DBG_WDG, "read config successfully");
 
+    /**
+     * create ipc
+     */
     wdg_conf.sig_hd = create_ipc();
     if (!wdg_conf.sig_hd) goto over;
     wdg_conf.sig_hd->mksig(wdg_conf.sig_hd, error_handler);
@@ -207,6 +266,9 @@ int main(int agrc, char *agrv[])
     wdg_conf.sig_hd->sigact(wdg_conf.sig_hd, SIGKILL);
     wdg_conf.sig_hd->sigact(wdg_conf.sig_hd, SIGSTOP);
 
+    /**
+     * check apps state cyclely
+     */
     while (1) {
         tv.tv_sec = wdg_conf.chk_period / 1000;
         tv.tv_usec = wdg_conf.chk_period % 1000 * 1000;

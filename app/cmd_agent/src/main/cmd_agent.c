@@ -14,6 +14,7 @@
 #include <pthread.h>
 #include <thread/mutex.h>
 #include <thread/thread.h>
+#include <thread/bsem.h>
 #include <utils/utils.h>
 #include <data/linked_list.h>
 #include <socket/event.h>
@@ -118,6 +119,11 @@ struct task_queue_t {
     mutex_t *lock;
 
     /**
+     * @brief bsem
+     */
+    bsem_t *bsem;
+
+    /**
      * @brief task queue
      */
     linked_list_t *task;
@@ -149,6 +155,7 @@ static void *task_handler(task_queue_t *taskq)
 {
     task_t *task = NULL;
     while (!taskq->stop) {
+        taskq->bsem->wait(taskq->bsem);
         if (taskq->task->get_count(taskq->task) == NOT_FOUND) continue;
 
         if (taskq->task->get_first(taskq->task, (void **)&task) == NOT_FOUND)
@@ -234,6 +241,17 @@ int task_queue_init()
         }
 
         /**
+         * create rwlock
+         */
+        queue->bsem = bsem_create(0);
+        if (!queue->bsem) {
+            queue->fifo->destroy(queue->fifo);
+            queue->task->destroy(queue->task);
+            queue->lock->destroy(queue->lock);
+            break;
+        }
+
+        /**
          * create thread handler
          */
         queue->handler = thread_create((void *)task_handler, queue);
@@ -241,6 +259,7 @@ int task_queue_init()
             queue->fifo->destroy(queue->fifo);
             queue->task->destroy(queue->task);
             queue->lock->destroy(queue->lock);
+            queue->bsem->destroy(queue->bsem);
             break;
         }
 
@@ -271,6 +290,10 @@ int task_queue_deinit()
     if (!task_queue) return -1;
 
     for (queue = task_queue, i = 0; i < conf.task_queue_cnt; queue++, i++) {
+        queue->stop = 1;
+        usleep(100);
+        queue->bsem->post(queue->bsem);
+
         if (queue->task != NULL) {
             while (queue->task->remove_first(queue->task, (void **)&task) != NOT_FOUND) {
                 free(task->cmd);
@@ -284,6 +307,7 @@ int task_queue_deinit()
         if (queue->task) queue->task->destroy(queue->task);
         if (queue->handler) queue->handler->destroy(queue->handler);
         if (queue->lock) queue->lock->destroy(queue->lock);
+        if (queue->bsem) queue->bsem->destroy(queue->bsem);
     }
 
     return 0;
@@ -309,7 +333,9 @@ static void signal_handler(int sig,siginfo_t *info, void *text)
 {
     switch (sig) {
         case SIGINT:
+        case SIGKILL:
         case SIGTERM:
+        case SIGSTOP:
             free_memory();
             exit(1);
             break;
@@ -341,7 +367,8 @@ void* fifo_listen_handler(int fd, task_queue_t *taskq)
         taskq->lock->lock(taskq->lock);
         taskq->task->insert_last(taskq->task, newtask);
         taskq->lock->unlock(taskq->lock);
-        printf("cmd: %s\n", token);
+        taskq->bsem->post(taskq->bsem);
+        printf("--->>>> %s\n", token);
     }
     return NULL;
 }

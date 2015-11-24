@@ -36,7 +36,7 @@ log_t *log_create(const char *log_file);
 /**
  * Create the log instance.
  */
-void log_init(const char *log_file);
+int log_init(const char *log_file);
 
 /**
  * Free the log instance.
@@ -45,11 +45,16 @@ void log_deinit();
 
 extern log_t *default_log;
 
-#define log_dedug(group, log_fmt, ...) \
+#define log_debug(group, log_fmt, ...) \
     do { \
         char *file_name = strrchr(__FILE__, '/'); \
         default_log->log(default_log, group, LEVEL_DEBUG, "[%s:%d][%s] " log_fmt , \
         file_name + 1, __LINE__, __func__, ##__VA_ARGS__); \
+    } while (0)
+
+#define log_debug0(group, log_fmt, ...) \
+    do { \
+        default_log->log(default_log, group, LEVEL_DEBUG, log_fmt, ##__VA_ARGS__); \
     } while (0)
 
 #define log_warn(group, log_fmt, ...) \
@@ -79,6 +84,11 @@ extern log_t *default_log;
         char *file_name = strrchr(__FILE__, '/'); \
         default_log->log(default_log, group, LEVEL_NOTICE, "[%s:%d][%s] " log_fmt , \
         file_name + 1, __LINE__, __func__, ##__VA_ARGS__); \
+    } while (0)
+
+#define log_notice0(group, log_fmt, ...) \
+    do { \
+        default_log->log(default_log, group, LEVEL_NOTICE, log_fmt , ##__VA_ARGS__); \
     } while (0)
 
 #define log_private(group, log_fmt, ...) \

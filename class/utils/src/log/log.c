@@ -4,6 +4,8 @@
 #include <time.h>
 #include <unistd.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <sys/utsname.h>
 #include <stdarg.h>
 
@@ -23,6 +25,7 @@ ENUM(debug_name, DBG_DMN, DBG_LIB,
         "DBG",
         "LOG",
         "APP",
+        "WDG",
         "LIB",
 );
 
@@ -186,6 +189,15 @@ METHOD(log_t, destroy_, void, private_log_t *this)
     this = NULL;
 }
 
+static int is_file(const char *filename)
+{
+    struct stat st;
+
+    if (lstat(filename, &st) != 0) return -1;
+    if (S_ISREG(st.st_mode)) return 1;
+    return 0;
+}
+
 /**
  * Create the log instance
  */
@@ -203,10 +215,8 @@ log_t *log_create(const char *log_file)
         .default_level  = LEVEL_DEBUG,
     );
 
-    if (!log_file) goto ret;
-    this->default_stream = fopen(log_file, "a+");
-
-ret:
+    if (log_file != NULL && is_file(log_file) == 1) 
+        this->default_stream = fopen(log_file, "a+");
     return &this->public;
 }
 
@@ -215,9 +225,13 @@ struct log_t *default_log = NULL;
 /**
  * Create the default log instance
  */
-void log_init(const char *log_file)
+int log_init(const char *log_file)
 {
+    if (log_file != NULL && is_file(log_file) != 1)
+        return -1;
+
     default_log = log_create(log_file);
+    return 0;
 }
 
 /**

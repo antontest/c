@@ -14,7 +14,7 @@ AUX_SOURCE_DIRECTORY(main SRC_PATH)
 SET(CSRC ${SRC_PATH})
 
 # set lib source files
-SET(EXTERNAL_LIBS fileio proc linked_list event thread get_args)
+SET(EXTERNAL_LIBS fileio proc linked_list event thread get_args bsem)
 FILE(GLOB_RECURSE LIBS ${PROJECT_SOURCE_DIR}/src/extra_lib/*.a)
 IF(LIBS)
     STRING(REGEX REPLACE .*lib\(.*\).a$ \\1 LIBS ${LIBS})

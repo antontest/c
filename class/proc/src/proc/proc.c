@@ -963,6 +963,7 @@ int app_state_check(const char *app_name, int pid_num, int uptime, const char *s
     FILE *fp = NULL;
     int chk_result = 0;
     int ret = -1;
+    int app_conf_status = -1;
 
     if (is_state_file_exist(app_name) != 0) {
         return APP_STOPPED;
@@ -974,10 +975,10 @@ int app_state_check(const char *app_name, int pid_num, int uptime, const char *s
     idx = rindex(app_state, ':');
     status = atoi(++idx);
     fseek(fp, -strlen(idx), SEEK_CUR);
-    sscanf(app_state, "%*[^:]:%*[^:]:%[^-]", app_uptime);
+    sscanf(app_state, "%*[^:]:%*[^:]:%[^-]-%*[^:]:%d", app_uptime, &app_conf_status);
 
     if (pid_num) {
-        if (proc_running_cnt(app_name)) {
+        if (proc_running_cnt(app_name) >= 1) {
             ret = APP_RUNNING;
         } else {
             ret = APP_STOPPED;
@@ -1003,6 +1004,11 @@ int app_state_check(const char *app_name, int pid_num, int uptime, const char *s
             break;
         case APP_RUNNING:
             chk_result = APP_RUNNING;
+            fprintf(fp, "%d", chk_result);
+            break;
+        case APP_STOPPED:
+            if (app_conf_status == APP_STARTING) chk_result = APP_TIMEOUT;
+            else chk_result = APP_CRASHED;
             fprintf(fp, "%d", chk_result);
             break;
         case APP_CRASHED:
