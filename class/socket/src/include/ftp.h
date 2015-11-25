@@ -37,6 +37,50 @@ struct ftp_t  {
     char *(*pwd) (ftp_t *this);
 
     /**
+     * @brief get file size on ftp server
+     * @param path  file path
+     * @return      file size
+     */
+    int (*size) (ftp_t *this, const char *path);
+
+    /**
+     * @brief change directroy
+     * @param path  file path
+     * @return 0, if succ; -1, if failed
+     */
+    int (*cd) (ftp_t *this, const char *path);
+
+    /**
+     * @brief make directroy on ftp server
+     * @param ftp_path path on ftp server
+     * @param path new directroy
+     * @return 0, if succ; -1, if failed
+     */
+    int (*mkdir) (ftp_t *this, const char *ftp_path, const char *dir_path);
+
+    /**
+     * @brief make directroy on ftp server
+     * @param ftp_path path on ftp server
+     * @param path new directroy
+     * @return 0, if succ; -1, if failed
+     */
+    int (*rmdir) (ftp_t *this, const char *ftp_path, const char *dir_path);
+
+    /**
+     * @brief download one file from ftp server
+     * @param path  file path
+     * @return      file size
+     */
+    int (*download) (ftp_t *this, const char *path);
+
+    /**
+     * @brief upload one file from ftp server
+     * @param path  file path
+     * @return      file size
+     */
+    int (*upload) (ftp_t *this, const char *ftp_path, const char *file_path);
+
+    /**
      * @brief close ftp instance
      */
     void (*close) (ftp_t *this);

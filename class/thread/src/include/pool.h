@@ -8,7 +8,7 @@ struct pool_t {
      * @param work  task 
      * @param arg   parameter of task
      */
-    int (*add) (pool_t *this, void (*work) (void *), void *arg);
+    int (*addjob) (pool_t *this, void (*job) (void *), void *arg);
 
     /**
      * @brief destroy instance and free memory 

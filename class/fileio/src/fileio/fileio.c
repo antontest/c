@@ -295,10 +295,10 @@ METHOD(fileio_t, readrl_, char *, private_fileio_t *this, char *buffer, int size
 METHOD(fileio_t, readrn_, int, private_fileio_t *this, char *buffer, int size)
 {
     if (!this->fp || !buffer || size < 1) return -1;
-    return fread(buffer, size, 1, this->fp);
+    return fread(buffer, 1, size, this->fp);
 }
 
-METHOD(fileio_t, write_, int, private_fileio_t *this, const char *buf)
+METHOD(fileio_t, write_, int, private_fileio_t *this, char *buf)
 {
     int write_size = 0;
     
@@ -307,6 +307,12 @@ METHOD(fileio_t, write_, int, private_fileio_t *this, const char *buf)
     fflush(this->fp);
 
     return write_size;
+}
+
+METHOD(fileio_t, writen_, int, private_fileio_t *this, char *buffer, int size)
+{
+    if (!this->fp || !buffer || size < 1) return -1;
+    return fwrite(buffer, 1, size, this->fp);
 }
 
 METHOD(fileio_t, vwrite_, int, private_fileio_t *this, const char *fmt, ...)
@@ -329,6 +335,11 @@ METHOD(fileio_t, seek_, int, private_fileio_t *this, int offset, int whence)
     return ftell(this->fp);
 }
 
+METHOD(fileio_t, fflush_, int, private_fileio_t *this)
+{
+    return fflush(this->fp);
+}
+
 METHOD(fileio_t, truncate_, void, private_fileio_t *this, unsigned int length)
 {
     if (ftruncate(fileno(this->fp), length) < 0) return;
@@ -340,6 +351,7 @@ METHOD(fileio_t, close_, void, private_fileio_t *this)
     if (this->fp != NULL) fclose(this->fp);
     if (this->read_buffer != NULL) memset(this->read_buffer, 0, this->read_buf_size);
     if (this->write_buffer != NULL) memset(this->write_buffer, 0, this->write_buf_size);
+    this->fp = NULL;
 }
 
 METHOD(fileio_t, destroy_, void, private_fileio_t *this)
@@ -485,8 +497,10 @@ fileio_t *create_fileio(const char *filename, const char *mode)
             .readrl   = _readrl_,
             .readrn   = _readrn_,
             .write    = _write_,
+            .writen   = _writen_,
             .vwrite   = _vwrite_,
             .seek     = _seek_,
+            .fflush   = _fflush_,
             .truncate = _truncate_,
             .close    = _close_,
             .destroy  = _destroy_,

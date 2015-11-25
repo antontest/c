@@ -168,7 +168,16 @@ struct fileio_t {
      * @param buf   string writing
      * @return      writed number of string, if succ; -1, if failed;
      */
-    int (*write) (fileio_t *this, const char *buf);
+    int (*write) (fileio_t *this, char *buf);
+
+    /**
+     * @brief Write string to file
+     *
+     * @param buffer read buffer
+     * @param size   read buffer size
+     * @return       number of reading 
+     */
+    int (*writen) (fileio_t *this, char *buffer, int size);
 
     /**
      * @brief Write string with format
@@ -186,6 +195,11 @@ struct fileio_t {
      * @param whence  whence is set to SEEK_SET, SEEK_CUR, or SEEK_END
      */
     int (*seek) (fileio_t *this, int offset, int whence);
+
+    /**
+     * @brief flush a stream
+     */
+    int (*fflush) (fileio_t *this);
 
     /**
      * @briefe a file to a specified length
