@@ -22,6 +22,11 @@ struct stack_t {
     int (*remove) (stack_t *this, void* item, int (*compare) (void *, void *));
 
     /**
+     * @brief clear stack
+     */
+    void (*clear) (stack_t *this);
+
+    /**
      * @brief destroy instance and free memory
      */
     void (*destroy) (stack_t *this);

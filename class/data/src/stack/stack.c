@@ -123,6 +123,17 @@ METHOD(stack_t, remove_, int, private_stack_t *this, void *item, int (*compare) 
     return removed;
 }
 
+METHOD(stack_t, clear_, void, private_stack_t *this)
+{
+    void *element = NULL;
+
+    while (this->count-- > 0) {
+        _pull_(this, &element);
+        if (element) free(element);
+        element = NULL;
+    }
+}
+
 METHOD(stack_t, destroy_, void, private_stack_t *this)
 {
     void *element = NULL;
@@ -146,6 +157,7 @@ stack_t *create_stack()
             .push = _push_,
             .pull = _pull_,
             .remove  = _remove_,
+            .clear   = _clear_,
             .destroy = _destroy_,
 
             .get_count = _get_count_,

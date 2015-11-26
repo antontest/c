@@ -317,6 +317,18 @@ METHOD(linked_list_t, clone_offset, linked_list_t*,
 	return clone;
 }
 
+METHOD(linked_list_t, clear_, void, private_linked_list_t *this)
+{
+    void *element = NULL;
+    int cnt = this->count;
+
+    while (cnt-- > 0) {
+        _remove_first(this, &element);
+        if (element) free(element);
+        element = NULL;
+    }
+}
+
 METHOD(linked_list_t, destroy, void,
 	private_linked_list_t *this)
 {
@@ -385,6 +397,7 @@ linked_list_t *linked_list_create()
 			.invoke_offset   = (void*)_invoke_offset,
 			.invoke_function = (void*)_invoke_function,
 			.clone_offset     = _clone_offset,
+			.clear            = _clear_,
 			.destroy          = _destroy,
 			.destroy_offset   = _destroy_offset,
 			.destroy_function = _destroy_function,

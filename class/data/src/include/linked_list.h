@@ -173,6 +173,11 @@ struct linked_list_t {
 	 */
 	linked_list_t *(*clone_offset) (linked_list_t *this, size_t offset);
 
+    /**
+     * @brief clear linked_list
+     */
+    void (*clear) (linked_list_t *this);
+
 	/**
 	 * Destroys a linked_list object.
 	 */
