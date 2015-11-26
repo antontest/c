@@ -105,7 +105,6 @@ METHOD(local_socket_t, listen_, int, private_local_socket_t *this, int backlog)
 
 METHOD(local_socket_t, accept_, int, private_local_socket_t *this, struct sockaddr *addr)
 {
-    if (server_type != TCP_SERVER) return -1;
     socklen_t len = sizeof(struct sockaddr);
     accept_fd = accept(local_fd, addr, &len);
     return accept_fd;
@@ -113,7 +112,6 @@ METHOD(local_socket_t, accept_, int, private_local_socket_t *this, struct sockad
 
 METHOD(local_socket_t, connect_, int, private_local_socket_t *this)
 {
-    if (server_type != TCP_CLIENT) return -1;
     return connect(local_fd, (struct sockaddr *)local_addr, sizeof(struct sockaddr));
 }
 
@@ -123,6 +121,8 @@ METHOD(local_socket_t, send_, int, private_local_socket_t *this, void *buf, int 
     
     switch (server_type) {
         case TCP_CLIENT:
+        case UDP_CLIENT:
+        case UDP_SERVER:
             send_fd = local_fd;
             break;
         case TCP_SERVER:
@@ -146,6 +146,8 @@ METHOD(local_socket_t, recv_, int, private_local_socket_t *this, void *buf, int 
 
     switch (server_type) {
         case TCP_CLIENT:
+        case UDP_CLIENT:
+        case UDP_SERVER:
             recv_fd = local_fd;
             break;
         case TCP_SERVER:
@@ -169,17 +171,21 @@ METHOD(local_socket_t, close_, int, private_local_socket_t *this)
     switch (server_type) {
         case TCP_CLIENT:
         case UDP_CLIENT:
+            break;
         case UDP_SERVER:
+            if (local_addr && local_addr->sun_path != NULL) {
+                unlink(local_addr->sun_path);
+            }
             break;
         case TCP_SERVER:
             close(accept_fd);
+            if (local_addr && local_addr->sun_path != NULL) {
+                unlink(local_addr->sun_path);
+            }
             break;
         default:
             return -1;
             break;
-    }
-    if (local_addr && local_addr->sun_path != NULL) {
-        unlink(local_addr->sun_path);
     }
     return close(local_fd);
 }

@@ -230,10 +230,8 @@ METHOD(ipc_t, read_, int, private_ipc_t *this, void *buf, int size)
             return read(this->fifo_fd, buf, size);
         case IPC_SHM:
             if (this->shm_state == SHM_CREATING || this->shm_state == SHM_EMPTY) return -1;
-            while (this->shm_state != SHM_WRITED) usleep(100);
             readed_size = size < this->shm_data_size ? size : this->shm_data_size;
             memcpy(buf, this->shm_data, readed_size);
-            this->shm_state = SHM_READED;
             return readed_size;
         default:
             return -1;
@@ -254,8 +252,8 @@ METHOD(ipc_t, write_, int, private_ipc_t *this, void *buf, int size)
             this->shm_state     = SHM_WRITING;
             writed_size = size < this->shm_size ? size : this->shm_size;
             memcpy(this->shm_data, buf, writed_size);
-            this->shm_state     = SHM_WRITED;
             this->shm_data_size = writed_size;
+            this->shm_state     = SHM_WRITED;
             return writed_size;   
         default:
             return -1;

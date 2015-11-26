@@ -30,6 +30,9 @@ SET(CAST_SRC     cast/cast.c)
 SET(CAST_TEST    cast/sample.c)
 SET(LOCAL_SOCKET local/local.c)
 SET(LOCAL_TEST   local/sample.c)
+SET(MSG_SRC      message/message.c)
+SET(MSG_TEST     message/sample.c)
+SET(MSG_SEND     message/msg_send.c)
 
 # lib generation
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/src/lib)
@@ -44,6 +47,7 @@ ADD_LIBRARY(socket_base   SHARED ${BASE_SRC})
 ADD_LIBRARY(event         SHARED ${EVENT_SRC})
 ADD_LIBRARY(cast          SHARED ${CAST_SRC})
 ADD_LIBRARY(local_socket  SHARED ${LOCAL_SOCKET})
+ADD_LIBRARY(message       SHARED ${MSG_SRC})
 
 # generat exec
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR})
@@ -53,6 +57,8 @@ ADD_EXECUTABLE(event_test ${EVENT_TEST})
 ADD_EXECUTABLE(property_test ${PTEST_SRC})
 ADD_EXECUTABLE(cast_test ${CAST_TEST})
 ADD_EXECUTABLE(local_test ${LOCAL_TEST})
+ADD_EXECUTABLE(message_test ${MSG_TEST})
+ADD_EXECUTABLE(msg_send ${MSG_SEND})
 
 # link library
 SET_TARGET_PROPERTIES(socket_shared PROPERTIES OUTPUT_NAME "socket")
@@ -71,6 +77,9 @@ TARGET_LINK_LIBRARIES(property_test property)
 TARGET_LINK_LIBRARIES(cast          socket_base)
 TARGET_LINK_LIBRARIES(cast_test     socket_base cast utils property)
 TARGET_LINK_LIBRARIES(local_test    local_socket)
+TARGET_LINK_LIBRARIES(message       local_socket proc mutex bsem thread)
+TARGET_LINK_LIBRARIES(message_test  local_socket proc mutex bsem thread message event)
+TARGET_LINK_LIBRARIES(msg_send      local_socket proc mutex bsem thread message event)
 
 # -------------- INSTALL -------------- #
 # install path setting

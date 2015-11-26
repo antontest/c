@@ -217,7 +217,6 @@ static void *epoll_events_handler(private_event_t *this)
     int    evt_cnt = 0;
     struct event_pkg_t *pkg = NULL;
 
-
     while (thread_onoff) {
         ready_fds_cnt = epoll_wait(this->epoll_fd, evts, sizeof(evts) / sizeof(struct epoll_event), this->timeout);    
         switch (ready_fds_cnt) {
