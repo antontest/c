@@ -340,6 +340,7 @@ METHOD(linked_list_t, destroy, void,
 		/* values are not destroyed so memory leaks are possible
 		 * if list is not empty when deleting */
 	}
+	clear_(this);
 	free(this);
 }
 

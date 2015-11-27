@@ -136,10 +136,7 @@ METHOD(stack_t, clear_, void, private_stack_t *this)
 
 METHOD(stack_t, destroy_, void, private_stack_t *this)
 {
-    void *element = NULL;
-    while (pull_(this, &element) != -1) {
-        free(element);
-    }
+    clear_(this);
     free(this);
 }
 
