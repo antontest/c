@@ -397,16 +397,11 @@ METHOD(event_t, destroy_, void, private_event_t *this)
 {
     if (this->thread != NULL) {
         thread_onoff = 0;
-        sleep(1);
+        usleep(100);
         this->thread->cancel(this->thread);
-        threads_deinit();
     }
 
     if (this->event_list != NULL) {
-        void *p = NULL;
-
-        this->event_list->reset_current(this->event_list);
-        while (this->event_list->remove_first(this->event_list, &p) != NOT_FOUND) free(p);
         this->event_list->destroy(this->event_list);
     }
     

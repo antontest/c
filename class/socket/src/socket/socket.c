@@ -449,6 +449,11 @@ METHOD(socket_t, get_type, int, private_socket_t *this)
 
 METHOD(socket_t, get_sockfd, int, private_socket_t *this)
 {
+    return this->fd;
+}
+
+METHOD(socket_t, get_acceptfd, int, private_socket_t *this)
+{
     return this->accept_fd;
 }
 
@@ -491,6 +496,7 @@ socket_t *create_socket()
             .get_can_read_bytes = _get_can_read_bytes,
             .get_type           = _get_type,
             .get_sockfd         = _get_sockfd,
+            .get_acceptfd       = _get_acceptfd,
             .get_state          = _get_state,
             .print_state        = _print_state,
             },

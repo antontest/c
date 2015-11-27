@@ -138,8 +138,9 @@ METHOD(ipc_t, mkfifo_, int, private_ipc_t *this, const char *pathname, int mode)
 
     this->type = IPC_FIFO;
     this->fifo_mode = mode;
-    if (!pathname || this->fifo_path != NULL || mode < 0) return -1;
+    if (!pathname || mode < 0) return -1;
 
+    if (this->fifo_path) free(this->fifo_path);
     this->fifo_path = strdup(pathname);
     if (!this->fifo_path) return -1;
 
@@ -267,10 +268,6 @@ METHOD(ipc_t, close_, void, private_ipc_t *this)
             if (this->fifo_fd > 0) {
                 close(this->fifo_fd);
                 this->fifo_fd   = -1;
-            
-                if (this->fifo_path) {
-                    unlink(this->fifo_path);
-                }
             }
 
             break;
@@ -319,14 +316,13 @@ METHOD(ipc_t, destroy_, void, private_ipc_t *this)
             this->fifo_fd   = -1;
 
             if (this->fifo_path) {
-                unlink(this->fifo_path);
                 free(this->fifo_path);
                 this->fifo_path = NULL;
             }
             break;
         case IPC_SHM:
             shmdt(this->shm_addr);
-            //shmctl(this->shm_id, IPC_RMID, 0);
+            shmctl(this->shm_id, IPC_RMID, 0);
             break;
         default:
             break;

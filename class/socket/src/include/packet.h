@@ -9,8 +9,8 @@
 typedef struct packet_t packet_t;
 
 #include <utils/utils.h>
-#include <host.h>
-#include <chunk.h>
+#include "host.h"
+#include "chunk.h"
 
 /**
  * Abstraction of an IP/UDP-Packet, contains data, sender and receiver.
