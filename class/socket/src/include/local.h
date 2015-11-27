@@ -69,6 +69,7 @@ struct local_socket_t {
      *              error, -1 is returned, and errno is set appropriately.
      */
     int (*connect) (local_socket_t *this);
+    int (*connect_addr) (local_socket_t *this, struct sockaddr *addr);
 
     /**
      * @brief  The  send()  call  may be used only when the socket is in a

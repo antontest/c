@@ -4,9 +4,14 @@
 #include <string.h>
 #include <unistd.h>
 
+struct mymsg {
+    msg_t msg;
+    int   id;
+};
+
 static void msg_handler(msg_t *msg)
 {
-    printf("mod %d: recv message\n", msg->dst_mod);
+    printf("id %d, mod %d: recv message\n", ((struct mymsg *)msg)->id, msg->dst_mod);
 }
 
 int main(int argc, char **argv)
@@ -17,7 +22,7 @@ int main(int argc, char **argv)
     cfg.handler = msg_handler;
     msg_mod_t *mod = create_msg_mod();
 
-    if (mod->register_mod(mod, &cfg)) return -1;
+    if (mod->act(mod, &cfg)) return -1;
 
     sleep(20);
     mod->destroy(mod); 

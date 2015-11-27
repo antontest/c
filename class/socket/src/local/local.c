@@ -57,7 +57,7 @@ struct private_local_socket_t {
 METHOD(local_socket_t, socket_, int, private_local_socket_t *this, int type)
 {
     local_type = type;
-    local_fd = socket(AF_UNIX, type, 0);
+    local_fd = socket(PF_LOCAL, type, 0);
     switch (type) {
         case SOCK_STREAM:
             server_type = TCP_CLIENT;
@@ -78,14 +78,14 @@ METHOD(local_socket_t, init_addr, struct sockaddr *, private_local_socket_t *thi
     if (!local_addr) return NULL;
     memset(local_addr, 0, sizeof(struct sockaddr_un));
     local_addr->sun_family = AF_UNIX;
-    strncpy(local_addr->sun_path, path, sizeof(local_addr->sun_path));
+    strncpy(local_addr->sun_path, path, sizeof(local_addr->sun_path) - 1);
+    local_addr->sun_path[sizeof(local_addr->sun_path) - 1] = '\0';
     return (struct sockaddr *)local_addr;
 }
 
 METHOD(local_socket_t, bind_, int, private_local_socket_t *this)
 {
     if (!local_addr) return -1;
-    if (!access(local_addr->sun_path, F_OK)) return -1;
     switch (server_type) {
         case TCP_CLIENT:
             server_type = TCP_SERVER;
@@ -94,7 +94,7 @@ METHOD(local_socket_t, bind_, int, private_local_socket_t *this)
             server_type = UDP_SERVER;
             break;
     }
-    return bind(local_fd, (struct sockaddr *)local_addr, sizeof(struct sockaddr));
+    return bind(local_fd, (struct sockaddr *)local_addr, strlen(local_addr->sun_path) + sizeof(local_addr->sun_family) + 1);
 }
 
 METHOD(local_socket_t, listen_, int, private_local_socket_t *this, int backlog)
@@ -112,7 +112,18 @@ METHOD(local_socket_t, accept_, int, private_local_socket_t *this, struct sockad
 
 METHOD(local_socket_t, connect_, int, private_local_socket_t *this)
 {
-    return connect(local_fd, (struct sockaddr *)local_addr, sizeof(struct sockaddr));
+    if (server_type & TCP_CLIENT)
+        return connect(local_fd, (struct sockaddr *)local_addr, sizeof(struct sockaddr));
+    else
+        return connect(local_fd, (struct sockaddr *)local_addr, strlen(local_addr->sun_path) + sizeof(local_addr->sun_family) + 1);
+}
+
+METHOD(local_socket_t, connect_addr_, int, private_local_socket_t *this, struct sockaddr *addr)
+{
+    if (server_type & TCP_CLIENT)
+        return connect(local_fd, (struct sockaddr *)addr, sizeof(struct sockaddr));
+    else
+        return connect(local_fd, (struct sockaddr *)addr, strlen(((struct sockaddr_un *)addr)->sun_path) + sizeof(((struct sockaddr_un *)addr)->sun_family) + 1);
 }
 
 METHOD(local_socket_t, send_, int, private_local_socket_t *this, void *buf, int size, int flags)
@@ -232,19 +243,20 @@ local_socket_t *create_local_socket()
 
     INIT(this, 
         .public = {
-            .socket    = _socket_,
-            .init_addr = _init_addr,
-            .bind      = _bind_,
-            .listen    = _listen_,
-            .accept    = _accept_,
-            .connect   = _connect_,
-            .send      = _send_,
-            .sendto    = _sendto_,
-            .recv      = _recv_,
-            .recvfrom  = _recvfrom_,
-            .close     = _close_,
-            .shutdown  = _shutdown_,
-            .destroy   = _destroy_,
+            .socket       = _socket_,
+            .init_addr    = _init_addr,
+            .bind         = _bind_,
+            .listen       = _listen_,
+            .accept       = _accept_,
+            .connect      = _connect_,
+            .connect_addr = _connect_addr_,
+            .send         = _send_,
+            .sendto       = _sendto_,
+            .recv         = _recv_,
+            .recvfrom     = _recvfrom_,
+            .close        = _close_,
+            .shutdown     = _shutdown_,
+            .destroy      = _destroy_,
             
             .get_fd          = _get_fd,
             .get_accepted_fd = _get_accepted_fd,

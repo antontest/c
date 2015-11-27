@@ -7,7 +7,7 @@ INCLUDE_DIRECTORIES($ENV{INCLUDE_PATH} ${PROJECT_SOURCE_DIR}/src/include)
 LINK_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/lib)
 
 # set c compile parameters
-ADD_DEFINITIONS(-Wall -O2 -Werror)
+ADD_DEFINITIONS(-Wall -O2 -Werror -g)
 
 # add source path
 AUX_SOURCE_DIRECTORY(main SRC_PATH)
