@@ -6,6 +6,8 @@
 #include <string.h>
 #include <unistd.h>
 #include <stack.h>
+#include <queue.h>
+#include <sort.h>
 
 /*********************************************************
  **************    Function Declaration    ***************
@@ -22,13 +24,16 @@ int main(int agrc, char *agrv[])
 {
     int rt = 0; /* return value of function main */
     stack_t *t = create_stack();
-    struct ele e = {1, "num1"};
-    //struct ele *r = NULL;
+    struct ele e[] = {
+        {1, "num1"},
+        {2, "num2"},
+        {3, "num3"}
+    };
     void *item = NULL;
 
-    rt = 100;
-    t->push(t, &rt);
-    t->push(t, &e);
+    t->push(t, &e[0]);
+    t->push(t, &e[2]);
+    t->push(t, &e[1]);
     int num = 101;
     t->push(t, &num);
 

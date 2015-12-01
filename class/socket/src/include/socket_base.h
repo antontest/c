@@ -237,7 +237,7 @@ struct socket_base_t {
      *
      * @return returns zero on success.  On error, -1 is returned, and errno is set appropriately. 
      */
-    int (*close) (socket_base_t *this, int fd);
+    int (*close) (socket_base_t *this);
 
     /**
      * @brief  Shut down part of a full-duplex connection

@@ -8,6 +8,8 @@
 #include <unistd.h>
 #endif
 
+static int threads_init_flags = 0;
+static int threads_deinit_flags = 0;
 #ifdef HAVE_SYS_GETTID
 #include <sys/syscall.h>
 static inline pid_t gettid()
@@ -457,6 +459,7 @@ void thread_exit(void *val)
  */
 void threads_init()
 {
+    if (threads_init_flags) return;
 	private_thread_t *main_thread = thread_create_internal();
 
 	main_thread->id = 0;
@@ -473,6 +476,7 @@ void threads_init()
 		sigaction(SIG_CANCEL, &action, NULL);
 	}
 #endif /* HAVE_PTHREAD_CANCEL */
+    threads_init_flags = 1;
 }
 
 /**
@@ -480,11 +484,13 @@ void threads_init()
  */
 void threads_deinit()
 {
+    if (threads_deinit_flags) return;
 	private_thread_t *main_thread = (private_thread_t*)thread_current();
 
 	main_thread->mutex->lock(main_thread->mutex);
 	thread_destroy(main_thread);
 	current_thread->destroy(current_thread);
 	id_mutex->destroy(id_mutex);
+	threads_deinit_flags = 1;
 }
 

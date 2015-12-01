@@ -206,9 +206,12 @@ METHOD(socket_base_t, vrecvfrom_, char *, private_socket_base_t *this, int flags
     return this->rcv_buffer;
 }
 
-METHOD(socket_base_t, close_, int, private_socket_base_t *this, int fd)
+METHOD(socket_base_t, close_, int, private_socket_base_t *this)
 {
-    return close(this->fd);
+    int ret = 0, ret1 = 0;
+    ret = close(this->fd);
+    ret1 = close(this->accept_fd);
+    return ret | ret1;
 }
 
 METHOD(socket_base_t, shutdown_, int, private_socket_base_t *this, int fd, int how)

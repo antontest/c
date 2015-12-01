@@ -336,3 +336,26 @@ msg_t *create_new_msg(mod_id_t src_mod, mod_id_t dst_mod, msg_id_t msg_id, void 
 
     return msg;
 }
+
+msg_t *create_new_wdg_msg(mod_id_t src_mod, mod_id_t dst_mod, msg_id_t msg_id, const char *name, int timeout, int is_restart)
+{
+    struct wdg_app_msg_t {
+        msg_t msg;
+        wdg_app_info_t app_info;
+    } *wdg_app_msg;
+
+    INIT(wdg_app_msg, 
+        .msg = {
+            .src_mod = src_mod,
+            .dst_mod = dst_mod,
+            .msg_id  = msg_id,
+            .msg_len = sizeof(wdg_app_info_t),
+        },
+        .app_info = {
+            .name       = name,
+            .timeout    = timeout,
+            .is_restart = is_restart,
+        },
+    );
+    return (msg_t *)wdg_app_msg;
+}

@@ -15,6 +15,8 @@
 #define app_name "watchdog"
 #define app_file_path "/home/anton/var/app/"
 #define app_path "/home/anton/usr/bin/watchdog"
+#define app_conf_path "/home/anton/usr/bin/wdg_conf.ini"
+#define app_log_path "/home/anton/var/log/wdg_log.log"
 static int app_state()
 {
     return app_state_check(app_name, 1, 10, app_file_path app_name, NULL);    
@@ -32,7 +34,7 @@ static int app_start()
     if (access(app_path, X_OK)) return -1;
     if (check_app_start_conflict(app_name, app_file_path, app_stop)) return 0;
     if (create_state_file_by_name(app_name) < 0) return -1;
-    if (system(app_path " &")) {}
+    if (system(app_path " -c " app_conf_path " -l " app_log_path " &")) {}
 
     return 0;
 }

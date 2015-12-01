@@ -14,9 +14,13 @@
 #include <proc.h>
 #include <utils/log.h>
 #include <utils/debug.h>
+#include <socket/socket.h>
+#include <socket/message.h>
+#include <thread/thread.h>
+#include <thread/mutex.h>
 
 #define APP_PID_FILE_PATH "/home/anton/var/app/"
-#define DFT_WDG_CONF_PATH "./wdg_conf.ini"
+#define DFT_WDG_CONF_PATH "/home/anton/usr/bin/wdg_conf.ini"
 #define RC_BIN_PATH "/home/anton/usr/bin/"
 #define DFT_WDG_LOG_FILE  NULL
 #define WDG_NAME "watchdog"
@@ -43,14 +47,21 @@ struct app_pkg_t {
      * @brief timeout of starting
      */
     int timeout;
+
+    /**
+     * restart flag
+     */
+    int is_restart;
 };
 
-app_pkg_t *create_app_pkg(const char *name)
+app_pkg_t *create_app_pkg(const char *name, int timeout, int is_restart)
 {
     app_pkg_t *this;
     
     INIT(this, 
         .name = strdup(name),
+        .timeout = timeout,
+        .is_restart = is_restart,
     );
 
     return this;
@@ -62,14 +73,46 @@ struct wdg_conf_t {
     unsigned  int  chk_period;
     linked_list_t  *app_list;
     ipc_t *sig_hd;
+    msg_mod_t *wdg_mod;
+    mutex_t *app_lock;
 } wdg_conf = {
     .name      = WDG_NAME,
     .app_list  = NULL,
+    .wdg_mod   = NULL,
+    .sig_hd    = NULL,
+    .app_lock  = NULL
 };
 
 /*********************************************************
  **************    Function Declaration    ***************
  *********************************************************/
+/**
+ * @brief handle message
+ */
+static void msg_handler(struct msg_t *msg)
+{
+    wdg_app_info_t *app_info = NULL;
+    app_pkg_t *app_pkg = NULL; 
+
+    printf("wdg msg comming\n");
+    switch (msg->msg_id) {
+        case MSG_ID_APP_CHECK_ADD:
+            printf("add app check\n");
+            app_info = (wdg_app_info_t *)msg->data;
+            app_pkg = create_app_pkg(app_info->name, app_info->timeout, app_info->is_restart);
+            if (!app_pkg) return;
+            printf("add app check\n");
+            wdg_conf.app_lock->lock(wdg_conf.app_lock);
+            wdg_conf.app_list->insert_last(wdg_conf.app_list, app_pkg);
+            wdg_conf.app_lock->unlock(wdg_conf.app_lock);
+            break;
+        case MSG_ID_APP_CHECK_DEL:
+            break;
+        default:
+            break;
+    }
+}
+
 /**
  * @brief read config parameters 
  *
@@ -82,6 +125,7 @@ int read_config()
     char *period = NULL;
     char *app_list = NULL;
     char *app_timeout = NULL;
+    char *app_restart = NULL;
     char *token, *save, *str;
     app_pkg_t *app = NULL;
     ini_t *cfg = NULL;
@@ -109,7 +153,7 @@ int read_config()
         token = strtok_r(str, ";,", &save);
         if (token == NULL) break;
 
-        app = create_app_pkg(token);
+        app = create_app_pkg(token, 0, 0);
         wdg_conf.app_list->insert_last(wdg_conf.app_list, app);
     }
 
@@ -127,6 +171,20 @@ int read_config()
         app->timeout = DFT_APP_TIME_OUT;
     }
 
+    app_restart = cfg->get_value(cfg, "app", "restart");
+    wdg_conf.app_list->reset_current(wdg_conf.app_list);
+    for (str = app_restart, i = 0; i < wdg_conf.app_list->get_count(wdg_conf.app_list); str = NULL, i++) {
+        token = strtok_r(str, ";,", &save);
+        if (!token) break;
+
+        wdg_conf.app_list->get_next(wdg_conf.app_list, (void **)&app);
+        app->is_restart = atoi(token);
+        if (app->is_restart < 0) app->timeout = 0;
+    }
+    for (; i < wdg_conf.app_list->get_count(wdg_conf.app_list); i++) {
+        app->is_restart = 0;
+    }
+
     ret = 0;
 over:
     if (cfg != NULL) cfg->destroy(cfg);
@@ -141,6 +199,12 @@ void wdg_deinit()
 {
     app_pkg_t *app = NULL;
 
+    if (wdg_conf.app_lock) {
+        wdg_conf.app_lock->unlock(wdg_conf.app_lock);
+        usleep(100);
+        wdg_conf.app_lock->destroy(wdg_conf.app_lock);
+    }
+    if (wdg_conf.wdg_mod) wdg_conf.wdg_mod->destroy(wdg_conf.wdg_mod);
     if (wdg_conf.sig_hd != NULL) wdg_conf.sig_hd->destroy(wdg_conf.sig_hd);
     if (!wdg_conf.app_list) return;
     wdg_conf.app_list->reset_current(wdg_conf.app_list);
@@ -166,6 +230,54 @@ void error_handler(int sig, siginfo_t *info, void *text)
             exit(1);
             break;
     }
+}
+
+/**
+ * @brief watchdog init 
+ */
+static int wdg_init()
+{
+    mod_cfg_t cfg = {0};
+
+    /**
+     * init lock
+     */
+    wdg_conf.app_lock = mutex_create();
+    if (!wdg_conf.app_lock) {
+        log_notice0(DBG_WDG, "create mutex failed");
+        return -1;
+    }
+
+    /**
+     * register watchdog message recving module
+     */
+    wdg_conf.wdg_mod = create_msg_mod();
+    if (!wdg_conf.wdg_mod) {
+        log_notice0(DBG_WDG, "create watchdog message module failed");
+        return -1;
+    }
+    cfg.name = "watchdog";
+    cfg.handler = (void *)msg_handler;
+    if (wdg_conf.wdg_mod->act(wdg_conf.wdg_mod, &cfg) < 0) {
+        log_notice0(DBG_WDG, "register watchdog module failed");
+        return -1;
+    }
+
+    /**
+     * create ipc
+     */
+    wdg_conf.sig_hd = create_ipc();
+    if (!wdg_conf.sig_hd) {
+        log_notice0(DBG_WDG, "create ipc failed");
+        return -1;
+    }
+    wdg_conf.sig_hd->mksig(wdg_conf.sig_hd, error_handler);
+    wdg_conf.sig_hd->sigact(wdg_conf.sig_hd, SIGINT);
+    wdg_conf.sig_hd->sigact(wdg_conf.sig_hd, SIGTERM);
+    wdg_conf.sig_hd->sigact(wdg_conf.sig_hd, SIGKILL);
+    wdg_conf.sig_hd->sigact(wdg_conf.sig_hd, SIGSTOP);
+
+    return 0;
 }
 
 /**
@@ -196,6 +308,14 @@ void app_state_chk()
         wdg_conf.app_list->get_next(wdg_conf.app_list, (void **)&app);
         status = app_state(app->name);
         log_notice0(DBG_WDG, "[%s] %s", app->name, app_state_string(status));
+
+        switch (status) {
+            case APP_CRASHED:
+                if (app->is_restart) SYSTEM("%s restart", app->name);
+                break;
+            default:
+                break;
+        }
     }
 }
 
@@ -256,15 +376,9 @@ int main(int agrc, char *agrv[])
     log_notice0(DBG_WDG, "read config successfully");
 
     /**
-     * create ipc
+     * watchdog init
      */
-    wdg_conf.sig_hd = create_ipc();
-    if (!wdg_conf.sig_hd) goto over;
-    wdg_conf.sig_hd->mksig(wdg_conf.sig_hd, error_handler);
-    wdg_conf.sig_hd->sigact(wdg_conf.sig_hd, SIGINT);
-    wdg_conf.sig_hd->sigact(wdg_conf.sig_hd, SIGTERM);
-    wdg_conf.sig_hd->sigact(wdg_conf.sig_hd, SIGKILL);
-    wdg_conf.sig_hd->sigact(wdg_conf.sig_hd, SIGSTOP);
+    wdg_init();
 
     /**
      * check apps state cyclely

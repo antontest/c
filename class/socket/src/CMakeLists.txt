@@ -33,6 +33,8 @@ SET(LOCAL_TEST   local/sample.c)
 SET(MSG_SRC      message/message.c)
 SET(MSG_TEST     message/sample.c)
 SET(MSG_SEND     message/msg_send.c)
+SET(LISTEN_SRC   listener/listener.c)
+SET(LISTEN_TEST  listener/sample.c)
 
 # lib generation
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/src/lib)
@@ -48,6 +50,7 @@ ADD_LIBRARY(event         SHARED ${EVENT_SRC})
 ADD_LIBRARY(cast          SHARED ${CAST_SRC})
 ADD_LIBRARY(local_socket  SHARED ${LOCAL_SOCKET})
 ADD_LIBRARY(message       SHARED ${MSG_SRC})
+ADD_LIBRARY(listener      SHARED ${LISTEN_SRC})
 
 # generat exec
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR})
@@ -59,6 +62,7 @@ ADD_EXECUTABLE(cast_test ${CAST_TEST})
 ADD_EXECUTABLE(local_test ${LOCAL_TEST})
 ADD_EXECUTABLE(message_test ${MSG_TEST})
 ADD_EXECUTABLE(msg_send ${MSG_SEND})
+ADD_EXECUTABLE(listener_test ${LISTEN_TEST})
 
 # link library
 SET_TARGET_PROPERTIES(socket_shared PROPERTIES OUTPUT_NAME "socket")
@@ -80,6 +84,8 @@ TARGET_LINK_LIBRARIES(local_test    local_socket)
 TARGET_LINK_LIBRARIES(message       local_socket proc mutex bsem thread)
 TARGET_LINK_LIBRARIES(message_test  local_socket proc mutex bsem thread message event)
 TARGET_LINK_LIBRARIES(msg_send      local_socket proc mutex bsem thread message event)
+TARGET_LINK_LIBRARIES(listener      socket_base event pthread chunk packet)
+TARGET_LINK_LIBRARIES(listener_test socket_base event pthread listener)
 
 # -------------- INSTALL -------------- #
 # install path setting

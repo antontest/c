@@ -193,7 +193,7 @@ static int is_file(const char *filename)
 {
     struct stat st;
 
-    if (lstat(filename, &st) != 0) return -1;
+    if (lstat(filename, &st) != 0) return 1;
     if (S_ISREG(st.st_mode)) return 1;
     return 0;
 }
@@ -227,7 +227,7 @@ struct log_t *default_log = NULL;
  */
 int log_init(const char *log_file)
 {
-    if (log_file != NULL && is_file(log_file) != 1)
+    if (log_file != NULL && is_file(log_file) == 0)
         return -1;
 
     default_log = log_create(log_file);
