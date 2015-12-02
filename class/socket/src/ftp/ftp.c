@@ -3,11 +3,14 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
 #include <sys/stat.h>
 #include <ftp.h>
 #include <utils/utils.h>
 #include <fileio.h>
 #include <socket.h>
+#include <stdarg.h>
 
 #define FTP_PORT "21"
 #define FTP_SERV "localhost"

@@ -1,7 +1,5 @@
 #ifndef __SOCKET_H__
 #define __SOCKET_H__
-
-#include "packet.h"
 #include <utils/utils.h>
 
 typedef enum socket_state_t socket_state_t;

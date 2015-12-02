@@ -22,7 +22,6 @@
 #include <net/if.h>
 
 #include <socket.h>
-#include <chunk.h>
 #include <sys/epoll.h>
 #include <signal.h>
 #include <thread/thread.h>
