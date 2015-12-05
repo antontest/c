@@ -23,6 +23,7 @@
 #include <proc.h>
 #include <task_manager.h>
 #include <time.h>
+#include <arpa/inet.h>
 
 #define MSG_BODY_BUFF_SIZE (512)
 #define CMD_AGENT_PATH "/home/anton/var/run/cmd_agent/"
