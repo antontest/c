@@ -4,6 +4,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <socket/socket.h>
+#include <socket/socket_common.h>
 #include <time.h>
 
 int main(int argc, char **argv)
