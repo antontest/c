@@ -22,11 +22,11 @@ ADD_LIBRARY(fileio_static STATIC ${LIB_SRC})
 
 # generat exec
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR})
-ADD_EXECUTABLE(fileio ${CSRC})
+ADD_EXECUTABLE(fileio_bin ${CSRC})
 
 # link library
 SET_TARGET_PROPERTIES(fileio_static PROPERTIES OUTPUT_NAME "fileio")
-TARGET_LINK_LIBRARIES(fileio fileio_static)
+TARGET_LINK_LIBRARIES(fileio_bin fileio_static)
 
 # -------------- INSTALL -------------- #
 # install path setting
