@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
+#include <sys/time.h>
 #include <thread.h>
 #include <bsem.h>
 #include <mutex.h>
@@ -30,7 +31,17 @@ struct private_pool_t {
     /**
      * @brief thread pool size
      */
-    int size;
+    int min_size;
+
+    /**
+     * @brief thread pool size
+     */
+    int cur_size;
+
+    /**
+     * @brief thread pool size
+     */
+    int max_size;
 
     /**
      * @brief thread of managing thread and task
@@ -61,33 +72,29 @@ struct private_pool_t {
      * @brief deal with task add and remove
      */
     bsem_t *has_work;
-};
-#define pthread_list   this->thread_list
-#define ptask_list     this->task_list
-#define pool_size      this->size
-#define task_lock      this->task_list_lock
-#define manager_thread this->manager
-#define pool_has_work  this->has_work
-#define pthread_lock   this->thread_list_lock
 
-/**
- * @brief thread count in this thread pool
- */
-int pool_used_cnt = 0;
+    /**
+     * @brief deal with task add and remove
+     */
+    bsem_t *has_idle_thread;
+};
+#define pthread_list     this->thread_list
+#define ptask_list       this->task_list
+#define pool_min_size    this->min_size
+#define pool_cur_size    this->cur_size
+#define pool_max_size    this->max_size
+#define task_lock        this->task_list_lock
+#define manager_thread   this->manager
+#define pool_has_work    this->has_work
+#define pthread_lock     this->thread_list_lock
+#define has_idle_pthread this->has_idle_thread
 
 /**
  * @brief lock of thread list;
  */
 mutex_t *thread_list_lock = NULL;
-
-/**
- * @brief deal with task add and remove
- */
-bsem_t *btask = NULL;
-#define pool_used    pool_used_cnt
 #define thread_lock  thread_list_lock
-#define task_bsem    btask
-static private_pool_t *pool_ptr = NULL;
+static linked_list_t *pool_list = NULL;
 
 typedef struct thread_task_t thread_task_t;
 struct thread_task_t {
@@ -149,6 +156,21 @@ struct thread_pkg_t {
      * @brief task lock
      */
     mutex_t *lock;
+
+    /**
+     * @brief belong to
+     */
+    private_pool_t *pool;
+
+    /**
+     * @brief thread start time
+     */
+    struct timeval start_time;
+
+    /**
+     * @brief thread idle time
+     */
+    struct timeval idle_time;
 };
 
 thread_pkg_t *create_thread_pkg()
@@ -165,6 +187,91 @@ thread_pkg_t *create_thread_pkg()
     return this;
 }
 
+/**
+ * @brief thread handler 
+ */
+static void thread_handler(thread_pkg_t *this)
+{
+    while (!this->stop) {
+        /**
+         * thread waiting for job
+         */ 
+        this->wait_job->wait(this->wait_job);
+        if (this->stop) break;
+
+        /**
+         * if has work to do
+         */
+        if (this->task->work != NULL) {
+            thread_lock->lock(thread_lock);
+            thread_lock->unlock(thread_lock);
+
+            this->lock->lock(this->lock);
+            this->state = THREAD_WORKING;
+            this->task->work(this->task->arg);
+
+            this->task->work = NULL;
+            this->task->arg  = NULL;
+            this->lock->unlock(this->lock);
+
+            thread_lock->lock(thread_lock);
+            this->pool->has_idle_thread->post(this->pool->has_idle_thread);
+            this->state = THREAD_IDLE;
+            gettimeofday(&this->idle_time, NULL);
+            thread_lock->unlock(thread_lock);
+        }
+    }
+}
+
+/**
+ * @brief create new thread to thread pool
+ */
+static int thread_pkg_init(private_pool_t *this)
+{
+    thread_pkg_t *thread = NULL;
+
+    thread = create_thread_pkg();
+    if (!thread) return -1;
+
+    thread->task = create_thread_task(NULL, NULL);
+    if (!thread->task) return -1;
+
+    thread->wait_job = bsem_create(1);
+    if (!thread->wait_job) return -1;
+    thread->lock = mutex_create();
+    if (!thread->lock) return -1;
+
+    thread->thread = thread_create((void *)thread_handler, thread);
+    if (!thread->thread) return -1;
+
+    thread->id = thread->thread->get_id(thread->thread);
+    thread->state = THREAD_IDLE;
+    thread->pool = this;
+    gettimeofday(&thread->start_time, NULL);
+
+    pthread_lock->lock(pthread_lock);
+    pthread_list->insert_last(pthread_list, thread);
+    pthread_lock->unlock(pthread_lock);
+    pool_cur_size++;
+
+    return 0;
+}
+
+static void thread_pkg_deinit(thread_pkg_t *thread)
+{
+    if (!thread) return;
+    thread->stop = 1;
+    thread->wait_job->post(thread->wait_job);
+    usleep(10);
+
+    thread->thread->cancel(thread->thread);
+    thread->wait_job->destroy(thread->wait_job);
+    thread->lock->unlock(thread->lock);
+    thread->lock->destroy(thread->lock);
+    if (thread->task) free(thread->task);
+    free(thread);
+}
+
 METHOD(pool_t, destroy_, void, private_pool_t *this)
 {
     int task_cnt   = 0;
@@ -177,7 +284,7 @@ METHOD(pool_t, destroy_, void, private_pool_t *this)
      */
     if (manager_thread) {
         this->stop = 1;
-        if (task_bsem) task_bsem->post(task_bsem);
+        if (has_idle_pthread) has_idle_pthread->post(has_idle_pthread);
         if (pool_has_work) pool_has_work->post(pool_has_work);
 
         usleep(10);
@@ -191,18 +298,7 @@ METHOD(pool_t, destroy_, void, private_pool_t *this)
         thread_cnt = pthread_list->get_count(pthread_list);
         while (thread_cnt-- > 0) {
             pthread_list->remove_first(pthread_list, (void **)&thread);
-            if (!thread) continue;
-
-            thread->stop = 1;
-            thread->wait_job->post(thread->wait_job);
-            usleep(10);
-
-            thread->thread->cancel(thread->thread);
-            thread->wait_job->destroy(thread->wait_job);
-            thread->lock->unlock(thread->lock);
-            thread->lock->destroy(thread->lock);
-            if (thread->task) free(thread->task);
-            free(thread);
+            thread_pkg_deinit(thread);
         }
         free(pthread_list);
     }
@@ -231,44 +327,7 @@ METHOD(pool_t, destroy_, void, private_pool_t *this)
      * destroy global memory
      */
     if (thread_lock) thread_lock->destroy(thread_lock);
-    if (task_bsem) task_bsem->destroy(task_bsem);
-}
-
-/**
- * @brief thread handler 
- */
-static void thread_handler(thread_pkg_t *this)
-{
-    while (!this->stop) {
-        /**
-         * thread waiting for job
-         */ 
-        this->wait_job->wait(this->wait_job);
-        if (this->stop) break;
-
-        /**
-         * if has work to do
-         */
-        if (this->task->work != NULL) {
-            thread_lock->lock(thread_lock);
-            pool_used++;
-            thread_lock->unlock(thread_lock);
-
-            this->lock->lock(this->lock);
-            this->state = THREAD_WORKING;
-            this->task->work(this->task->arg);
-
-            this->task->work = NULL;
-            this->task->arg  = NULL;
-            this->lock->unlock(this->lock);
-
-            thread_lock->lock(thread_lock);
-            pool_used--;
-            task_bsem->post(task_bsem);
-            this->state = THREAD_IDLE;
-            thread_lock->unlock(thread_lock);
-        }
-    }
+    if (has_idle_pthread) has_idle_pthread->destroy(has_idle_pthread);
 }
 
 /**
@@ -284,7 +343,7 @@ static void thread_manager_handler(private_pool_t *this)
          * waiting for jobs and idle thread
          */
         pool_has_work->wait(pool_has_work);
-        task_bsem->wait(task_bsem);
+        has_idle_pthread->wait(has_idle_pthread);
         if (this->stop) break;
 
         /**
@@ -326,44 +385,20 @@ static void thread_manager_handler(private_pool_t *this)
  */
 static void error_handler(int sig, siginfo_t *info, void *text)
 {
+    void *pool_ptr = NULL;
     switch (sig) {
         case SIGINT:
         case SIGTERM:
         case SIGKILL:
         case SIGSTOP:
-            _destroy_(pool_ptr);
+            if (pool_list) {
+                while (pool_list->remove_first(pool_list, &pool_ptr) != NOT_FOUND) {
+                    _destroy_(pool_ptr);
+                }
+            }
             exit(1);
             break;
     }
-}
-
-/**
- * @brief create new thread to thread pool
- */
-static int add_one_new_thread_to_pool(private_pool_t *this)
-{
-    thread_pkg_t *thread = NULL;
-
-    thread = create_thread_pkg();
-    if (!thread) return -1;
-
-    thread->task = create_thread_task(NULL, NULL);
-    if (!thread->task) return -1;
-
-    thread->wait_job = bsem_create(1);
-    if (!thread->wait_job) return -1;
-    thread->lock = mutex_create();
-    if (!thread->lock) return -1;
-
-    thread->thread = thread_create((void *)thread_handler, thread);
-    if (!thread->thread) return -1;
-    thread->id = thread->thread->get_id(thread->thread);
-    thread->state = THREAD_IDLE;
-    pthread_lock->lock(pthread_lock);
-    pthread_list->insert_last(pthread_list, thread);
-    pthread_lock->unlock(pthread_lock);
-
-    return 0;
 }
 
 /**
@@ -389,8 +424,8 @@ static int init_pool(private_pool_t *this)
      * 3. create thread lock
      */
     threads_init();
-    task_bsem = bsem_create(pool_size);
-    if (!task_bsem) return -1;
+    has_idle_pthread = bsem_create(this->min_size);
+    if (!has_idle_pthread) return -1;
     thread_lock = mutex_create();
     if (!thread_lock) return -1;
     manager_thread = thread_create((void *)thread_manager_handler, this);
@@ -399,10 +434,10 @@ static int init_pool(private_pool_t *this)
     /**
      * create thread in pool
      */
-    for (i = 0; i < pool_size; i++) {
-        if (add_one_new_thread_to_pool(this) < 0) break;
+    for (i = 0; i < pool_min_size; i++) {
+        if (thread_pkg_init(this) < 0) break;
     }
-    if (i < pool_size) return -1;
+    if (i < pool_min_size) return -1;
     this->created = 1;
 
     return 0;
@@ -426,11 +461,10 @@ METHOD(pool_t, addjob_, int, private_pool_t *this, void (*job) (void *), void *a
     return 0;
 }
 
-pool_t *create_pool(int size)
+pool_t *create_pool(int min_size, int max_size)
 {
     private_pool_t *this;
 
-    if (pool_ptr) return &pool_ptr->public;
     INIT(this,
         .public = {
             .addjob  = _addjob_,
@@ -438,7 +472,9 @@ pool_t *create_pool(int size)
         },
         .created  = 0,
         .stop     = 0, 
-        .size     = size,
+        .min_size = min_size,
+        .cur_size = 0,
+        .max_size = max_size,
         .manager  = NULL,
         .has_work = bsem_create(0),
         .thread_list = linked_list_create(),
@@ -452,6 +488,7 @@ pool_t *create_pool(int size)
         return NULL;
     }
 
-    pool_ptr = this;
+    if (!pool_list) pool_list = linked_list_create();
+    pool_list->insert_last(pool_list, this);
     return &this->public;
 }

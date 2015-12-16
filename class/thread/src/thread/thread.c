@@ -246,6 +246,7 @@ static void thread_cleanup(private_thread_t *this)
 	}
 	this->terminated = TRUE;
 	thread_destroy(this);
+	this = NULL;
 }
 
 METHOD(thread_t, destroy_, void, private_thread_t *this)
@@ -308,7 +309,7 @@ static void *thread_main(private_thread_t *this)
 
 	res = this->main(this->arg);
 	pthread_cleanup_pop(TRUE);
-
+    this = NULL;
     return res;
 }
 
