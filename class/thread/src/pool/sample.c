@@ -12,7 +12,7 @@ void sayhi(void *arg)
 int main(int argc, char **argv)
 {
     int i = 0;
-    int cnt = 20;
+    int cnt = 100;
     int num[10] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
     pool_t *pool = create_pool(5, 20, 1);
     if (!pool) {
@@ -24,10 +24,9 @@ int main(int argc, char **argv)
         for (i = 0; i < 10; i++) {
             pool->addjob(pool, sayhi, &num[i]);
         }
-        sleep(1);
+        usleep(200000);
         printf("\n-----------------%d------------------\n\n", cnt);
     }
-    sleep(5);
 
     pool->destroy(pool);
 

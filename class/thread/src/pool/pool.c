@@ -218,7 +218,6 @@ static void thread_handler(thread_pkg_t *this)
             this->lock->lock(this->lock);
             this->state = THREAD_WORKING;
             this->task->work(this->task->arg);
-
             this->task->work = NULL;
             this->task->arg  = NULL;
             this->lock->unlock(this->lock);
@@ -415,11 +414,9 @@ static void task_manager_handler(private_pool_t *this)
             task_lock->unlock(task_lock);
 
             thread->lock->lock(thread->lock);
-            memset(thread->task, 0, sizeof(thread_task_t));
             memcpy(thread->task, task, sizeof(thread_task_t));
             free(task);
-
-            usleep(1); /* sleep a while for let thread task take effect */
+            usleep(3); /* sleep a while for let thread task take effect */
             thread->lock->unlock(thread->lock);
             thread->wait_job->post(thread->wait_job);
         }
