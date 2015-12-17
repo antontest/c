@@ -5,6 +5,67 @@
 #include "utils/utils.h"
 #include "cond.h"
 
+/**
+ * Add the given number of milliseconds to the given timeval struct
+ *
+ * @param tv		timeval struct to modify
+ * @param ms		number of milliseconds
+ */
+static void timeval_add_ms_static(struct timeval *tv, u_int ms)
+{
+    tv->tv_usec += ms * 1000;
+    while (tv->tv_usec >= 1000000 /* 1s */)
+    {
+        tv->tv_usec -= 1000000;
+        tv->tv_sec++;
+    }
+}
+
+/**
+ * Get a timestamp from a monotonic time source.
+ *
+ * While the time()/gettimeofday() functions are affected by leap seconds
+ * and system time changes, this function returns ever increasing monotonic
+ * time stamps.
+ *
+ * @param tv		timeval struct receiving monotonic timestamps, or NULL
+ * @return			monotonic timestamp in seconds
+ */
+static long time_monotonic_static(struct timeval *tv)
+{
+#if defined(HAVE_CLOCK_GETTIME) && \
+    (defined(HAVE_CONDATTR_CLOCK_MONOTONIC) || \
+     defined(HAVE_PTHREAD_COND_TIMEDWAIT_MONOTONIC))
+    /* as we use time_monotonic_static() for condvar operations, we use the
+     * monotonic time source only if it is also supported by pthread. */
+    timespec_t ts;
+
+    if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0)
+    {
+        if (tv)
+        {
+            tv->tv_sec = ts.tv_sec;
+            tv->tv_usec = ts.tv_nsec / 1000;
+        }
+        return ts.tv_sec;
+    }
+#endif /* HAVE_CLOCK_GETTIME && (...) */
+    /* Fallback to non-monotonic timestamps:
+     * On MAC OS X, creating monotonic timestamps is rather difficult. We
+     * could use mach_absolute_time() and catch sleep/wakeup notifications.
+     * We stick to the simpler (non-monotonic) gettimeofday() for now.
+     * But keep in mind: we need the same time source here as in condvar! */
+    if (!tv)
+    {
+        return time(NULL);
+    }
+    if (gettimeofday(tv, NULL) != 0)
+    {	/* should actually never fail if passed pointers are valid */
+        return -1;
+    }
+    return tv->tv_sec;
+}
+
 typedef struct private_mutex_t private_mutex_t;
 typedef struct private_cond_t private_cond_t;
 
@@ -70,13 +131,13 @@ METHOD(cond_t, timed_wait, bool, private_cond_t *this, private_mutex_t *mutex, u
 	struct timeval tv;
 	unsigned int s, ms;
 
-	time_monotonic(&tv);
+	time_monotonic_static(&tv);
 
 	s = timeout / 1000;
 	ms = timeout % 1000;
 
 	tv.tv_sec += s;
-	timeval_add_ms(&tv, ms);
+	timeval_add_ms_static(&tv, ms);
 	return timed_wait_abs(this, mutex, tv);
 }
 

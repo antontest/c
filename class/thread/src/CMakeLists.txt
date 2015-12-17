@@ -35,15 +35,15 @@ ADD_LIBRARY(pool SHARED ${POOL_SRC})
 
 # generat exec
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR})
-ADD_EXECUTABLE(thread ${CSRC})
+ADD_EXECUTABLE(thread_bin ${CSRC})
 ADD_EXECUTABLE(pool_test ${POOL_TEST_SRC})
 
 # link library
 SET_TARGET_PROPERTIES(thread_share PROPERTIES OUTPUT_NAME "thread")
-TARGET_LINK_LIBRARIES(thread_share mutex pthread linked_list utils thread_value)
-TARGET_LINK_LIBRARIES(bsem mutex cond utils)
-TARGET_LINK_LIBRARIES(thread_rwlock mutex cond thread_share)
-TARGET_LINK_LIBRARIES(thread thread_share)
+TARGET_LINK_LIBRARIES(thread_share mutex pthread linked_list thread_value)
+TARGET_LINK_LIBRARIES(bsem mutex cond)
+TARGET_LINK_LIBRARIES(thread_rwlock mutex cond thread_share utils)
+TARGET_LINK_LIBRARIES(thread_bin thread_share)
 TARGET_LINK_LIBRARIES(pool thread_share linked_list bsem mutex)
 TARGET_LINK_LIBRARIES(pool_test pool thread_share linked_list bsem mutex)
 

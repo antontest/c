@@ -4,6 +4,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <socket/socket.h>
+#include <socket/socket_common.h>
 #include <time.h>
 #include <sys/types.h>
 #include <sys/socket.h>

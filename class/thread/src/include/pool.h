@@ -18,8 +18,10 @@ struct pool_t {
 
 /**
  * @brief create pool instance 
- * @param size   pool thread size
+ * @param min_size   pool thread min size
+ * @param max_size   pool thread max size
+ * @param enable_thread_manager enable or disable thread manager
  */
-pool_t *create_pool(int size);
+pool_t *create_pool(int min_size, int max_size, int enable_thread_manager);
 
 #endif /* __POOL_H__ */
