@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <cgi.h>
 
 /*********************************************************
  **************    Function Declaration    ***************
@@ -65,29 +66,30 @@ int main(int agrc, char *agrv[])
     char *req_method = NULL;
     char username[64] = {0};
     char password[64] = {0};
+    char rem[2] = {0};
     char *input = NULL;
-    int i = 0, j = 0;
+    cgi_t *cgi = cgi_create();
+    data_parser_t data[] = {
+        {"rem", rem, NULL, NULL},
+        {"Username", username, NULL, NULL},
+        {"Password", password, NULL, NULL},
+        {NULL, NULL, NULL, NULL}
+    };
 
     printf("Content-type: text/html\n\n");
     printf("The following is query reuslt:<br><br>");
     req_method = getenv("REQUEST_METHOD");
     printf("req_method:%s<br><br>", req_method);
-    input = getcgidata(stdin, req_method);
+    //input = getcgidata(stdin, req_method);
+    input = cgi->get_data(cgi);
     printf("input:%s<br><br>", input);
-    for ( i = 9; i < (int)strlen(input); i++ ) {
-        if ( input[i] == '&' ) {
-            username[j] = '\0';
-            break;
-        }                   
-        username[j++] = input[i];
-    }
-
-    for ( i = 19 + strlen(username), j = 0; i < (int)strlen(input); i++ ) {
-        password[j++] = input[i];
-    }
-    password[j] = '\0';
+    cgi->parser_data(cgi, data);
+    printf("username:%s<br>", username);
+    printf("password:%s<br>", password);
+    printf("rem:%s<br><br>", rem);
 
     printf("Your Username is %s<br>Your Password is %s<br> \n", username, password);
+    cgi->destroy(cgi);
 
     return rt;
 }
