@@ -37,7 +37,7 @@ ENDIF()
 # install path setting
 SET(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT 1)
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-    SET(CMAKE_INSTALL_PREFIX "/home/anton/web/html/" CACHE PATH "default install path" FORCE)
+    SET(CMAKE_INSTALL_PREFIX "/home/anton/web/html/cgi_bin/" CACHE PATH "default install path" FORCE)
 endif()
 
 # install target

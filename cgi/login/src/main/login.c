@@ -69,13 +69,14 @@ int main(int agrc, char *agrv[])
     char rem[2] = {0};
     char *input = NULL;
     cgi_t *cgi = cgi_create();
-    data_parser_t data[] = {
+    cgi_func_tab_t data[] = {
         {"rem", rem, NULL, NULL},
         {"Username", username, NULL, NULL},
         {"Password", password, NULL, NULL},
         {NULL, NULL, NULL, NULL}
     };
 
+    //cgi->error_print(cgi, "test");
     printf("Content-type: text/html\n\n");
     printf("The following is query reuslt:<br><br>");
     req_method = getenv("REQUEST_METHOD");
@@ -87,6 +88,7 @@ int main(int agrc, char *agrv[])
     printf("username:%s<br>", username);
     printf("password:%s<br>", password);
     printf("rem:%s<br><br>", rem);
+    cgi->alert(cgi, "test Username: %s", username);
 
     printf("Your Username is %s<br>Your Password is %s<br> \n", username, password);
     cgi->destroy(cgi);

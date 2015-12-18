@@ -14,7 +14,7 @@ AUX_SOURCE_DIRECTORY(main SRC_PATH)
 
 # set source files and lib source files
 SET(CSRC ${SRC_PATH})
-SET(LIB_SRC cgi/cgi.c)
+SET(LIB_SRC cgi/cgi.c linked_list/linked_list.c)
 
 # lib generation
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/src/lib)
