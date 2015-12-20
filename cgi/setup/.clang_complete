@@ -1,0 +1,17 @@
+-I /usr/include/ 
+-I ~/usr/include/
+-I .
+-I ./build
+-I ./build/src_bin
+-I ./build/src_bin/CMakeFiles
+-I ./build/src_bin/CMakeFiles/setup.cgi.dir
+-I ./build/src_bin/CMakeFiles/setup.cgi.dir/main
+-I ./build/CMakeFiles
+-I ./build/CMakeFiles/3.4.0-rc1
+-I ./build/CMakeFiles/3.4.0-rc1/CompilerIdC
+-I ./build/CMakeFiles/3.4.0-rc1/CompilerIdCXX
+-I ./build/CMakeFiles/CMakeTmp
+-I ./src
+-I ./src/login
+-I ./src/main
+-I ./src/ftp

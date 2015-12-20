@@ -3,7 +3,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 include($ENV{CMAKE_PATH}/func/func.cmake)
 
 # set include and lib path
-INCLUDE_DIRECTORIES($ENV{INCLUDE_PATH} ${PROJECT_SOURCE_DIR}/src/include)
+INCLUDE_DIRECTORIES($ENV{INCLUDE_PATH} ${PROJECT_SOURCE_DIR}/src/include ${PROJECT_SOURCE_DIR}/src/ftp)
 LINK_DIRECTORIES($ENV{LIB_PATH} ${PROJECT_SOURCE_DIR}/src/lib)
 
 # set c compile parameters
@@ -11,7 +11,7 @@ ADD_DEFINITIONS(-Wall -O2 -Werror -g)
 
 # set source files 
 AUX_SOURCE_DIRECTORY(main SRC_PATH)
-SET(CSRC ${SRC_PATH})
+SET(CSRC ${SRC_PATH} ftp/ftp.c)
 
 # set lib source files
 SET(EXTERNAL_LIBS cgi)
@@ -22,23 +22,23 @@ ENDIF()
 
 # generat exec
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR})
-ADD_EXECUTABLE(login.cgi ${CSRC})
-#SET_TARGET_PROPERTIES(login.cgi PROPERTIES OUTPUT_NAME "login")
+ADD_EXECUTABLE(setup.cgi ${CSRC})
+#SET_TARGET_PROPERTIES(setup.cgi PROPERTIES OUTPUT_NAME "login")
 
 # link library
 IF(LIBS)
-    TARGET_LINK_LIBRARIES(login.cgi ${LIBS})
+    TARGET_LINK_LIBRARIES(setup.cgi ${LIBS})
 ENDIF()
 IF(EXTERNAL_LIBS)
-    TARGET_LINK_LIBRARIES(login.cgi ${EXTERNAL_LIBS})
+    TARGET_LINK_LIBRARIES(setup.cgi ${EXTERNAL_LIBS})
 ENDIF()
 
 # -------------- INSTALL -------------- #
 # install path setting
 SET(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT 1)
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-    SET(CMAKE_INSTALL_PREFIX "/home/anton/web/html/cgi_bin/" CACHE PATH "default install path" FORCE)
+    SET(CMAKE_INSTALL_PREFIX "/home/anton/web/html/" CACHE PATH "default install path" FORCE)
 endif()
 
 # install target
-INSTALL(TARGETS login.cgi RUNTIME DESTINATION .)
+INSTALL(TARGETS setup.cgi RUNTIME DESTINATION .)

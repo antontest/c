@@ -13,8 +13,14 @@
 #define BODY_END       printf("</BODY>");
 #define TITLE(title)   printf("<TITLE>%s</TITLE>", title)
 #define H2(h2)         printf("<H2>%s</H2>\n", h2)
-#define ALERT(msg)     printf("<script>alert(\"%s\")</script>", msg)
-#define HTML_GOTO(url)       printf("<script>location.href=\"%s\";</script>", url)
+#define ALERT(...)     \
+    do { \
+        printf("<script>alert(\'"); \
+        fprintf(stdout, ##__VA_ARGS__); \
+        printf("\')</script>"); \
+    } while(0)
+#define HTML_GOTO(url) printf("<script>location.href=\"%s\";</script>", url)
+#define HTTP_REFERER   getenv("HTTP_REFERER")
 
 typedef enum request_method_t request_method_t;
 enum request_method_t {
@@ -23,10 +29,17 @@ enum request_method_t {
     REQUEST_METHOD_POST   = 1 << 2,
 };
 
+typedef enum var_type_t var_type_t;
+enum var_type_t {
+    VAR_IS_UNKOWN = -1,
+    VAR_IS_FILE   = 0,
+    VAR_IS_VAR,
+};
+
 typedef struct cgi_func_tab_t cgi_func_tab_t;
 struct cgi_func_tab_t {
-    const char *name;
-    char *value;
+    char *name;
+    var_type_t type;
     int (*get_func_cb) (char *input, char *err_msg);
     int (*set_func_cb) (char *output, char *err_msg);
 };
@@ -34,6 +47,8 @@ struct cgi_func_tab_t {
 typedef struct cgi_form_entry_t cgi_form_entry_t;
 struct cgi_form_entry_t {
     char *attr;
+    char *next_file;
+    char *this_file;
     char *file_name;
     char *content_type;
     char *data;
@@ -55,9 +70,19 @@ struct cgi_t {
     char* (*get_data) (cgi_t *this);
 
     /**
+     * @brief next_file  
+     */
+    char* (*get_next_file) (cgi_t *this);
+
+    /**
      * @brief parser data 
      */
-    void (*parser_data) (cgi_t *this, cgi_func_tab_t *data);
+    void (*read_back) (cgi_t *this, cgi_func_tab_t *data);
+
+    /**
+     * @brief parser data 
+     */
+    void (*write_back) (cgi_t *this, cgi_func_tab_t *data);
 
     /**
      * @brief print error information
