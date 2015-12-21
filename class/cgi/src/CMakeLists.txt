@@ -18,15 +18,15 @@ SET(LIB_SRC cgi/cgi.c linked_list/linked_list.c)
 
 # lib generation
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/src/lib)
-ADD_LIBRARY(cgi_shared STATIC ${LIB_SRC})
+ADD_LIBRARY(cgi_static STATIC ${LIB_SRC})
 
 # generat exec
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR})
 ADD_EXECUTABLE(cgi ${CSRC})
 
 # link library
-SET_TARGET_PROPERTIES(cgi_shared PROPERTIES OUTPUT_NAME "cgi")
-TARGET_LINK_LIBRARIES(cgi cgi_shared)
+SET_TARGET_PROPERTIES(cgi_static PROPERTIES OUTPUT_NAME "cgi")
+TARGET_LINK_LIBRARIES(cgi cgi_static)
 
 # -------------- INSTALL -------------- #
 # install path setting

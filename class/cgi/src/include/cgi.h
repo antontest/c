@@ -36,24 +36,25 @@ enum var_type_t {
     VAR_IS_VAR,
 };
 
-typedef struct cgi_func_tab_t cgi_func_tab_t;
-struct cgi_func_tab_t {
-    char *name;
-    var_type_t type;
-    int (*get_func_cb) (char *input, char *err_msg);
-    int (*set_func_cb) (char *output, char *err_msg);
-};
-
 typedef struct cgi_form_entry_t cgi_form_entry_t;
 struct cgi_form_entry_t {
     char *attr;
     char *next_file;
     char *this_file;
+    char *next_path;
     char *file_name;
     char *content_type;
     char *data;
     int  data_len;
     request_method_t req_method_type;
+};
+
+typedef struct cgi_func_tab_t cgi_func_tab_t;
+struct cgi_func_tab_t {
+    char *name;
+    var_type_t type;
+    int (*get_func_cb) (char *input, char *err_msg, cgi_form_entry_t *entry);
+    int (*set_func_cb) (char *output, char *err_msg, cgi_form_entry_t *entry);
 };
 
 typedef struct cgi_t cgi_t;

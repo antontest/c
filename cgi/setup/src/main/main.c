@@ -58,12 +58,14 @@ int main(int agrc, char *agrv[])
     int rt = 0; /* return value of function main */
     cgi_t *cgi = cgi_create();
     cgi_func_tab_t data[] = {
-        {"h_rem",        VAR_IS_VAR,  get_rem,        set_rem},
-        {"h_ipsec_mode", VAR_IS_VAR,  get_ipsec_mode, NULL},
-        {"username",     VAR_IS_VAR,  get_username,   set_username},
-        {"password",     VAR_IS_VAR,  NULL,           set_password},
-        {"ftp_content",  VAR_IS_FILE, get_ftp_file,   NULL},
-        {NULL,           VAR_IS_VAR,  NULL,           NULL}
+        {"h_rem",         VAR_IS_VAR,  (void *)get_rem,           (void *)set_rem},
+        {"h_ipsec_mode",  VAR_IS_VAR,  (void *)get_ipsec_mode,    NULL},
+        {"username",      VAR_IS_VAR,  (void *)get_username,      (void *)set_username},
+        {"password",      VAR_IS_VAR,  NULL,                      (void *)set_password},
+        {"ftp_dir",       VAR_IS_FILE, (void *)get_ftp_dir,       NULL},
+        {"ftp_file_name", VAR_IS_FILE, (void *)get_ftp_file_name, NULL},
+        {"ftp_file_size", VAR_IS_FILE, (void *)get_ftp_file_size, NULL},
+        {NULL,            VAR_IS_VAR,  NULL,                      NULL}
     };
 
     cgi->get_data(cgi);

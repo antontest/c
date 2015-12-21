@@ -53,6 +53,8 @@ struct private_cgi_t {
 #define cgi_errmsg_buf    this->err_msg
 #define cgi_next_file     this->form_data.next_file
 #define cgi_this_file     this->form_data.this_file
+#define cgi_next_path     this->form_data.next_path
+#define cgi_form_entry    this->form_data
 
 /**
  * @brief cgi_get_env 
@@ -125,8 +127,9 @@ METHOD(cgi_t, read_back_, void, private_cgi_t *this, cgi_func_tab_t *data)
 {
     cgi_func_tab_t *p = data;
     comm_entry_t comm_entry[] = {
-        {"next_file", &cgi_next_file},
         {"this_file", &cgi_this_file},
+        {"next_file", &cgi_next_file},
+        {"next_path", &cgi_next_path},
         {NULL}
     };
     comm_entry_t *pcomm_entry = NULL;
@@ -149,7 +152,7 @@ METHOD(cgi_t, read_back_, void, private_cgi_t *this, cgi_func_tab_t *data)
         bzero(cgi_errmsg_buf, DFT_CGI_ERRMSG_BUF_SIZE);
 
         parser_data_by_name(cgi_form_data, p->name, &cgi_input_buf);
-        if (p->set_func_cb(cgi_input_buf, cgi_errmsg_buf) < 0 && 
+        if (p->set_func_cb(cgi_input_buf, cgi_errmsg_buf, &cgi_form_entry) < 0 && 
             strlen(cgi_errmsg_buf) > 0) {
             break;
         }
@@ -209,7 +212,7 @@ METHOD(cgi_t, write_back_, void, private_cgi_t *this, cgi_func_tab_t *data)
         for (pdata = data; pdata != NULL && pdata->name != NULL; pdata++) {
             if(!strcasestr(name, pdata->name)) continue;
             if (!pdata->get_func_cb) continue;
-            ret = pdata->get_func_cb(cgi_output_buf, cgi_errmsg_buf);
+            ret = pdata->get_func_cb(cgi_output_buf, cgi_errmsg_buf, &cgi_form_entry);
             type = pdata->type;
             break;
         }
@@ -219,7 +222,7 @@ METHOD(cgi_t, write_back_, void, private_cgi_t *this, cgi_func_tab_t *data)
             printf("%s", buf);
         }
 
-        if (ret < 0) this->public.alert(&this->public, cgi_errmsg_buf); 
+        if (ret < 0 && strlen(cgi_errmsg_buf) > 0) this->public.alert(&this->public, cgi_errmsg_buf); 
         else printf("%s", cgi_output_buf);
 
         if (type != VAR_IS_FILE) {
@@ -249,8 +252,9 @@ METHOD(cgi_t, destroy_, void, private_cgi_t *this)
     if (!cgi_output_buf) free(cgi_output_buf);
     if (!cgi_errmsg_buf) free(cgi_errmsg_buf);
     if (!form_data_list) form_data_list->destroy(form_data_list);
-    if (!cgi_next_file)  free(cgi_next_file);
     if (!cgi_this_file)  free(cgi_this_file);
+    if (!cgi_next_file)  free(cgi_next_file);
+    if (!cgi_next_path)  free(cgi_next_path);
 
     free(this);
     this = NULL;
