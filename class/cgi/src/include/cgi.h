@@ -29,16 +29,17 @@ enum request_method_t {
     REQUEST_METHOD_POST   = 1 << 2,
 };
 
-typedef enum var_type_t var_type_t;
-enum var_type_t {
-    VAR_IS_UNKOWN = -1,
-    VAR_IS_FILE   = 0,
-    VAR_IS_VAR,
+typedef enum key_type_t key_type_t;
+enum key_type_t {
+    KEY_IS_UNKOWN = -1,
+    KEY_IS_FILE   = 0,
+    KEY_IS_VAR,
 };
 
 typedef struct cgi_form_entry_t cgi_form_entry_t;
 struct cgi_form_entry_t {
     char *attr;
+    char *todo;
     char *next_file;
     char *this_file;
     char *next_path;
@@ -52,9 +53,12 @@ struct cgi_form_entry_t {
 typedef struct cgi_func_tab_t cgi_func_tab_t;
 struct cgi_func_tab_t {
     char *name;
-    var_type_t type;
+    key_type_t type;
     int (*get_func_cb) (char *input, char *err_msg, cgi_form_entry_t *entry);
     int (*set_func_cb) (char *output, char *err_msg, cgi_form_entry_t *entry);
+    int (*err_func_cb) (char *output, char *err_msg, cgi_form_entry_t *entry);
+    int readable;
+    int writeable;
 };
 
 typedef struct cgi_t cgi_t;
@@ -68,7 +72,17 @@ struct cgi_t {
      * @brief get data from brower  
      * @return data of form
      */
-    char* (*get_data) (cgi_t *this);
+    char* (*get_form_data) (cgi_t *this);
+
+    /**
+     * @brief file todo
+     */
+    char* (*get_file_todo) (cgi_t *this);
+
+    /**
+     * @brief this_file
+     */
+    char* (*get_this_file) (cgi_t *this);
 
     /**
      * @brief next_file  
@@ -78,12 +92,17 @@ struct cgi_t {
     /**
      * @brief parser data 
      */
-    void (*read_back) (cgi_t *this, cgi_func_tab_t *data);
+    void (*read_action) (cgi_t *this, cgi_func_tab_t *data);
 
     /**
      * @brief parser data 
      */
-    void (*write_back) (cgi_t *this, cgi_func_tab_t *data);
+    void (*write_action) (cgi_t *this, cgi_func_tab_t *func_tab);
+
+    /**
+     * @brief parser form data and action get_func_cb and set_func_cb
+     */
+    int (*parser_and_action) (cgi_t *this, cgi_func_tab_t *func_tab);
 
     /**
      * @brief print error information
@@ -107,6 +126,7 @@ struct cgi_t {
  * @param result return result
  */
 void cgi_get_env(char *env, char **result);
+void html_alert(char *errmsg);
 
 /**
  * @brief create cgi instance 

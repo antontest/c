@@ -55,6 +55,20 @@ struct private_cgi_t {
 #define cgi_this_file     this->form_data.this_file
 #define cgi_next_path     this->form_data.next_path
 #define cgi_form_entry    this->form_data
+#define cgi_file_todo     this->form_data.todo
+
+void html_alert(char *msg)
+{
+    CONTENT_TEXT;
+    HTML_START;
+    HEAD_START;
+    TITLE("alert");
+    HEAD_END;
+    BODY_START;
+    ALERT(msg);
+    BODY_END;
+    HTML_END;
+}
 
 /**
  * @brief cgi_get_env 
@@ -77,7 +91,7 @@ METHOD(cgi_t, get_req_method_, request_method_t, private_cgi_t *this)
     return cgi_req_method;
 }
 
-METHOD(cgi_t, get_data_, char *, private_cgi_t *this)
+METHOD(cgi_t, get_form_data_, char *, private_cgi_t *this)
 {
     int content_len = 0;
     switch (_get_req_method_(this)) {
@@ -123,10 +137,11 @@ struct comm_entry_t {
     char **value;
 };
 
-METHOD(cgi_t, read_back_, void, private_cgi_t *this, cgi_func_tab_t *data)
+METHOD(cgi_t, read_action_, void, private_cgi_t *this, cgi_func_tab_t *func_tab)
 {
-    cgi_func_tab_t *p = data;
+    cgi_func_tab_t *p = func_tab;
     comm_entry_t comm_entry[] = {
+        {"todo",      &cgi_file_todo},
         {"this_file", &cgi_this_file},
         {"next_file", &cgi_next_file},
         {"next_path", &cgi_next_path},
@@ -145,8 +160,8 @@ METHOD(cgi_t, read_back_, void, private_cgi_t *this, cgi_func_tab_t *data)
         return;
     }
 
-    if (!data) return;
-    for (p = data; p->name != NULL; p++) {
+    if (!func_tab) return;
+    for (p = func_tab; p->name != NULL; p++) {
         if (!p->set_func_cb) continue;
         bzero(cgi_input_buf, DFT_CGI_INPUT_BUF_SIZE);
         bzero(cgi_errmsg_buf, DFT_CGI_ERRMSG_BUF_SIZE);
@@ -154,30 +169,44 @@ METHOD(cgi_t, read_back_, void, private_cgi_t *this, cgi_func_tab_t *data)
         parser_data_by_name(cgi_form_data, p->name, &cgi_input_buf);
         if (p->set_func_cb(cgi_input_buf, cgi_errmsg_buf, &cgi_form_entry) < 0 && 
             strlen(cgi_errmsg_buf) > 0) {
+            ALERT(cgi_errmsg_buf);
+            if (p->err_func_cb) p->err_func_cb(cgi_input_buf, cgi_errmsg_buf, &cgi_form_entry); 
             break;
         }
     }
 }
 
+METHOD(cgi_t, get_file_todo_, char *, private_cgi_t *this)
+{
+    if (cgi_form_data_len < 1)
+        _get_form_data_(this);
+    return cgi_file_todo;
+}
+
+METHOD(cgi_t, get_this_file_, char *, private_cgi_t *this)
+{
+    if (cgi_form_data_len < 1)
+        _get_form_data_(this);
+    return cgi_this_file;
+}
+
 METHOD(cgi_t, get_next_file_, char *, private_cgi_t *this)
 {
     if (cgi_form_data_len < 1)
-        _get_data_(this);
+        _get_form_data_(this);
     return cgi_next_file;
 }
 
-METHOD(cgi_t, write_back_, void, private_cgi_t *this, cgi_func_tab_t *data)
+METHOD(cgi_t, write_action_, void, private_cgi_t *this, cgi_func_tab_t *func_tab)
 {
-    int  ret   = 0;
-    FILE *fp   = NULL;
-    char *name = NULL;
-    char *pos  = NULL;
-    char *value_start_pos = NULL;
-    char *value_end_pos   = NULL;
-    char value_end_char   = 0;
+    int  ret       = 0;
+    FILE *fp       = NULL;
+    char *name     = NULL;
     char buf[1024] = {0};
-    var_type_t type = VAR_IS_UNKOWN;
-    cgi_func_tab_t *pdata = data;
+    char *value_start_pos     = NULL;
+    char *value_end_pos       = NULL;
+    key_type_t type           = KEY_IS_UNKOWN;
+    cgi_func_tab_t *pfunc_tab = func_tab;
 
     if (!cgi_next_file || strlen(cgi_next_file) < 1) 
         return;
@@ -188,36 +217,29 @@ METHOD(cgi_t, write_back_, void, private_cgi_t *this, cgi_func_tab_t *data)
     }
 
     while (fgets(buf, DFT_CGI_OUTPUT_BUF_SIZE, fp) != NULL) {
-        pos = strcasestr(buf, "value");
-        if (!pos) {
+        value_start_pos = strstr(buf, "@");
+        if (!value_start_pos) {
             printf("%s", buf);
             continue;
         }
 
-        pos += sizeof("value");
-        while (*pos == ' ') pos++;
-        while (*pos == '=') pos++;
-        while (*pos == ' ') pos++;
-        while (*pos == '\"') pos++;
-        if (*pos != '@') {
+        value_end_pos = strstr(value_start_pos + 1, "#");
+        if (!value_end_pos) {
             printf("%s", buf);
             continue;
         }
 
-        name = value_start_pos = pos;
-        while (*pos != '\"' && *pos != '\0' && *pos != '>') pos++;
-        value_end_char = *pos;
-        value_end_pos = pos;
-        *pos='\0';
-        for (pdata = data; pdata != NULL && pdata->name != NULL; pdata++) {
-            if(!strcasestr(name, pdata->name)) continue;
-            if (!pdata->get_func_cb) continue;
-            ret = pdata->get_func_cb(cgi_output_buf, cgi_errmsg_buf, &cgi_form_entry);
-            type = pdata->type;
+        name = value_start_pos + 1;
+        *value_end_pos='\0';
+        for (pfunc_tab = func_tab; pfunc_tab != NULL && pfunc_tab->name != NULL; pfunc_tab++) {
+            if(!strcasestr(name, pfunc_tab->name)) continue;
+            if (!pfunc_tab->get_func_cb) continue;
+            ret = pfunc_tab->get_func_cb(cgi_output_buf, cgi_errmsg_buf, &cgi_form_entry);
+            type = pfunc_tab->type;
             break;
         }
 
-        if (type != VAR_IS_FILE) {
+        if (type != KEY_IS_FILE) {
             *value_start_pos = '\0';
             printf("%s", buf);
         }
@@ -225,14 +247,20 @@ METHOD(cgi_t, write_back_, void, private_cgi_t *this, cgi_func_tab_t *data)
         if (ret < 0 && strlen(cgi_errmsg_buf) > 0) this->public.alert(&this->public, cgi_errmsg_buf); 
         else printf("%s", cgi_output_buf);
 
-        if (type != VAR_IS_FILE) {
-            *value_end_pos = value_end_char;
-            printf("%s", value_end_pos);
+        if (type != KEY_IS_FILE) {
+            printf("%s", value_end_pos + 1);
         }
 
         bzero(cgi_output_buf, DFT_CGI_OUTPUT_BUF_SIZE);
     }
     fclose(fp);
+}
+
+METHOD(cgi_t, parser_and_action_, int, private_cgi_t *this, cgi_func_tab_t *func_tab)
+{
+    _read_action_(this, func_tab);
+    _write_action_(this, func_tab);
+    return 0;
 }
 
 METHOD(cgi_t, alert_, void, private_cgi_t *this, const char *fmt, ...)
@@ -255,6 +283,7 @@ METHOD(cgi_t, destroy_, void, private_cgi_t *this)
     if (!cgi_this_file)  free(cgi_this_file);
     if (!cgi_next_file)  free(cgi_next_file);
     if (!cgi_next_path)  free(cgi_next_path);
+    if (!cgi_file_todo)  free(cgi_file_todo);
 
     free(this);
     this = NULL;
@@ -282,14 +311,17 @@ cgi_t *cgi_create()
 
     INIT(this,
         .public = {
-            .get_req_method = _get_req_method_,
-            .get_data       = _get_data_,
-            .read_back      = _read_back_,
-            .write_back     = _write_back_,
-            .get_next_file  = _get_next_file_,
-            .error_print    = _error_print_,
-            .alert          = _alert_,
-            .destroy        = _destroy_,
+            .get_req_method    = _get_req_method_,
+            .get_form_data     = _get_form_data_,
+            .read_action       = _read_action_,
+            .write_action      = _write_action_,
+            .parser_and_action = _parser_and_action_,
+            .get_file_todo     = _get_file_todo_,
+            .get_this_file     = _get_this_file_,
+            .get_next_file     = _get_next_file_,
+            .error_print       = _error_print_,
+            .alert             = _alert_,
+            .destroy           = _destroy_,
         },
         .form_data = {
             .attr            = NULL,

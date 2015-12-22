@@ -3,7 +3,10 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 include($ENV{CMAKE_PATH}/func/func.cmake)
 
 # set include and lib path
-INCLUDE_DIRECTORIES($ENV{INCLUDE_PATH} ${PROJECT_SOURCE_DIR}/src/include ${PROJECT_SOURCE_DIR}/src/ftp)
+INCLUDE_DIRECTORIES($ENV{INCLUDE_PATH} 
+    ${PROJECT_SOURCE_DIR}/src/include 
+    ${PROJECT_SOURCE_DIR}/src/login
+    ${PROJECT_SOURCE_DIR}/src/ftp)
 LINK_DIRECTORIES($ENV{LIB_PATH} ${PROJECT_SOURCE_DIR}/src/lib)
 
 # set c compile parameters
@@ -11,7 +14,9 @@ ADD_DEFINITIONS(-Wall -O2 -Werror -g)
 
 # set source files 
 AUX_SOURCE_DIRECTORY(main SRC_PATH)
-SET(CSRC ${SRC_PATH} ftp/ftp.c)
+SET(CSRC ${SRC_PATH} 
+    login/login.c
+    ftp/ftp.c)
 
 # set lib source files
 SET(EXTERNAL_LIBS cgi)
