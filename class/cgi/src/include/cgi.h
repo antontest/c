@@ -3,6 +3,7 @@
 
 #define QUERY_STRING   getenv("QUERY_STRING")
 #define REQUEST_METHOD getenv("REQUEST_METHOD")
+#define CONTENT_TYPE   getenv("CONTENT_TYPE")
 #define CONTENT_LENGTH atoi(getenv("CONTENT_LENGTH"))
 #define CONTENT_TEXT   printf("Content-type: text/html\r\n\r\n")
 #define HTML_START     printf("<HTML>")
@@ -43,7 +44,13 @@ struct cgi_form_entry_t {
     char *next_file;
     char *this_file;
     char *next_path;
+
+    char *sign_code;
+    int   sign_code_len;
+    char *form_name;
     char *file_name;
+    int  file_size;
+
     char *content_type;
     char *data;
     int  data_len;

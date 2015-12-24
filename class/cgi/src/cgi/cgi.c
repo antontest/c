@@ -56,6 +56,12 @@ struct private_cgi_t {
 #define cgi_next_path     this->form_data.next_path
 #define cgi_form_entry    this->form_data
 #define cgi_file_todo     this->form_data.todo
+#define cgi_form_type     this->form_data.content_type
+#define cgi_form_name     this->form_data.form_name 
+#define cgi_file_name     this->form_data.file_name
+#define cgi_file_size     this->form_data.file_size
+#define cgi_sign_code     this->form_data.sign_code
+#define cgi_sign_code_len this->form_data.sign_code_len
 
 void html_alert(char *msg)
 {
@@ -148,7 +154,74 @@ METHOD(cgi_t, read_action_, void, private_cgi_t *this, cgi_func_tab_t *func_tab)
         {NULL}
     };
     comm_entry_t *pcomm_entry = NULL;
+    char *content_type = CONTENT_TYPE;
+    char *pstart = NULL, *pend = NULL;
+    int len = 0;
+    FILE *fp = NULL;
 
+    char buf[102400] = {0};
+    sprintf(buf, "echo \"%s\" > /home/anton/t.txt", cgi_form_data);
+    if (system(buf)) {}
+
+    if (content_type && !strncasecmp(content_type, "multipart/form-data", sizeof("multipart/form-data") - 1)) {
+
+        pend = pstart = cgi_form_data;
+        while (strncmp(pend, "\r\n", 2) && *pend != '\0') pend++;
+        cgi_sign_code_len = pend - pstart;
+        cgi_sign_code = (char *)malloc(cgi_sign_code_len + 1);
+        cgi_sign_code[cgi_sign_code_len] = '\0';
+        ALERT("cgi_sign_code_len: %d", cgi_sign_code_len);
+
+        pend = pstart = strcasestr(cgi_form_data, "name");
+        if (pend) pend = pstart = pstart + strlen("name=");
+        while (*pend != ';' && *pend != '\r' && *pend != '\n' && *pend != '\0') pend++;
+        len = pend - pstart;
+        cgi_form_name = (char *)malloc(len + 1);
+        memcpy(cgi_form_name, pstart, len);
+        cgi_form_name[len] = '\0';
+        ALERT("form_name: %s", cgi_form_name);
+
+        pend = pstart = strcasestr(cgi_form_data, "filename");
+        if (pend) pend = pstart = pstart + strlen("filename=");
+        while (*pend != ';' && *pend !='\r' && *pend != '\n' && *pend != '\0') pend++;
+        len = pend - pstart;
+        cgi_file_name = (char *)malloc(len + 1);
+        memcpy(cgi_file_name, pstart, len);
+        cgi_file_name[len] = '\0';
+        ALERT("file_name: %s", cgi_file_name);
+
+        /*
+        while (*pend != '\0' && (*pend == '\r' || *pend == '\n')) pend++;
+        while (*pend != '\0' && *pend != '\r') pend++;
+        while (*pend != '\0' && (*pend == '\r' || *pend == '\n')) pend++;
+
+        pstart = pend;
+        while (*pend != '\0' && *pend != '\r') pend++;
+        *pend = '\0';
+        cgi_file_size = pend - pstart;
+        ALERT("%d", cgi_file_size);
+        */
+
+        while (strncmp(pend, "\r\n\r\n", 4)) pend++;
+        pend += 4;
+
+        fp = fopen("/home/anton/working/program/c/cgi/upload/a", "w");
+        len = cgi_form_data + cgi_form_data_len - pend;
+        while (len-- > 0) {
+            if (*pend != '\r') fputc(*pend, fp);
+            else {
+                if (((cgi_form_data + cgi_form_data_len - pend) >= cgi_sign_code_len + 2) && 
+                        strncmp(pend + 2, cgi_sign_code, cgi_sign_code_len)) {
+                    ALERT("1");
+                    fputc(*pend, fp);
+                }
+                
+            }
+            pend++;
+        }
+        fclose(fp);
+        return;
+    }
 
     if (!cgi_form_data || cgi_form_data_len < 1) return;
     for (pcomm_entry = comm_entry; pcomm_entry->name != NULL; pcomm_entry++) {
@@ -274,16 +347,23 @@ METHOD(cgi_t, alert_, void, private_cgi_t *this, const char *fmt, ...)
     ALERT(msg);
 }
 
+static void free_cgi_form_entry(cgi_form_entry_t *entry) 
+{
+    if (entry->this_file) free(entry->this_file);
+    if (entry->next_file) free(entry->next_file);
+    if (entry->next_path) free(entry->next_path);
+    if (entry->form_name) free(entry->form_name);
+    if (entry->file_name) free(entry->file_name);
+    if (entry->todo)      free(entry->todo);
+}
+
 METHOD(cgi_t, destroy_, void, private_cgi_t *this)
 {
-    if (!cgi_form_data)  free(cgi_form_data);
-    if (!cgi_output_buf) free(cgi_output_buf);
-    if (!cgi_errmsg_buf) free(cgi_errmsg_buf);
-    if (!form_data_list) form_data_list->destroy(form_data_list);
-    if (!cgi_this_file)  free(cgi_this_file);
-    if (!cgi_next_file)  free(cgi_next_file);
-    if (!cgi_next_path)  free(cgi_next_path);
-    if (!cgi_file_todo)  free(cgi_file_todo);
+    if (cgi_form_data)  free(cgi_form_data);
+    if (cgi_output_buf) free(cgi_output_buf);
+    if (cgi_errmsg_buf) free(cgi_errmsg_buf);
+    if (form_data_list) form_data_list->destroy(form_data_list);
+    free_cgi_form_entry(&this->form_data);
 
     free(this);
     this = NULL;
