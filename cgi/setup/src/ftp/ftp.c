@@ -25,7 +25,7 @@ int get_ftp_file_name(char *outbuf, char *errmsg, cgi_form_entry_t *form_entry)
     char path[256] = {0};
 
     if (!form_entry->next_path) {
-        form_entry->next_path = ".";
+        form_entry->next_path = strdup(".");
         snprintf(path, sizeof(path), "%s", FTP_PATH);
     }
     else snprintf(path, sizeof(path), "%s/%s", FTP_PATH, form_entry->next_path);

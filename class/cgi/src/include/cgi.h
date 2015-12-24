@@ -41,8 +41,8 @@ typedef struct cgi_form_entry_t cgi_form_entry_t;
 struct cgi_form_entry_t {
     char *attr;
     char *todo;
-    char *next_file;
     char *this_file;
+    char *next_file;
     char *next_path;
 
     char *sign_code;

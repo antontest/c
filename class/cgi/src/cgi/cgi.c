@@ -44,6 +44,7 @@ struct private_cgi_t {
      */
     char *err_msg;
 };
+
 #define cgi_form_data     this->form_data.data
 #define cgi_form_data_len this->form_data.data_len
 #define cgi_req_method    this->form_data.req_method_type
@@ -51,8 +52,8 @@ struct private_cgi_t {
 #define cgi_input_buf     this->input
 #define cgi_output_buf    this->output
 #define cgi_errmsg_buf    this->err_msg
-#define cgi_next_file     this->form_data.next_file
 #define cgi_this_file     this->form_data.this_file
+#define cgi_next_file     this->form_data.next_file
 #define cgi_next_path     this->form_data.next_path
 #define cgi_form_entry    this->form_data
 #define cgi_file_todo     this->form_data.todo
@@ -143,9 +144,95 @@ struct comm_entry_t {
     char **value;
 };
 
+static int upload_file(private_cgi_t *this)
+{
+    char *pstart = NULL, *pend = NULL;
+    int len = 0;
+    FILE *fp = NULL;
+    char filepath[128] = "/home/anton/ftp/";
+
+    /**
+     * get upload file sign code
+     */
+    pend = pstart = cgi_form_data;
+    while (strncmp(pend, "\r\n", 2) && *pend != '\0') pend++;
+    cgi_sign_code_len = pend - pstart;
+    cgi_sign_code = (char *)malloc(cgi_sign_code_len + 1);
+    if (!cgi_sign_code) return -1;
+    memcpy(cgi_sign_code, pstart, cgi_sign_code_len);
+    cgi_sign_code[cgi_sign_code_len] = '\0';
+
+    /**
+     * get form name
+     */
+    pend = pstart = strcasestr(cgi_form_data, "name");
+    if (!pend) return -1;
+    pend = pstart + strlen("name=");
+    while (*pend == '"' && *pend != '\0') pend++;
+    pstart = pend;
+    while (*pend != ';' && *pend != '\r' && 
+            *pend != '\n' && *pend != '\0' && 
+            *pend != '"') pend++;
+    len = pend - pstart;
+    cgi_form_name = (char *)malloc(len + 1);
+    memcpy(cgi_form_name, pstart, len);
+    cgi_form_name[len] = '\0';
+
+    /**
+     * get upload file name
+     */
+    pend = pstart = strcasestr(cgi_form_data, "filename");
+    if (!pend) return -1;
+    pend = pstart + strlen("filename=");
+    while (*pend == '"' && *pend != '\0') pend++;
+    pstart = pend;
+    while (*pend != ';' && *pend !='\r' && 
+            *pend != '\n' && *pend != '\0' && 
+            *pend != '"') pend++;
+    len = pend - pstart;
+    cgi_file_name = (char *)malloc(len + 1);
+    memcpy(cgi_file_name, pstart, len);
+    cgi_file_name[len] = '\0';
+
+    /**
+     * goto file start position
+     */
+    while (strncmp(pend, "\r\n\r\n", 4)) pend++;
+    pend += 4;
+
+    /**
+     * open file
+     */
+    strncat(filepath, cgi_file_name, sizeof(filepath) - strlen(filepath) - 1);
+    fp = fopen(filepath, "w");
+    if (!fp) return -1;
+
+    /**
+     * upload file
+     */
+    len = cgi_form_data + cgi_form_data_len - pend;
+    while (len-- > 0) {
+        if (*pend != '\r') fputc(*pend, fp);
+        else {
+            if ((len >= cgi_sign_code_len + 2) && 
+                    strncmp(pend + 2, cgi_sign_code, cgi_sign_code_len)) {
+                fputc(*pend, fp);
+            } else {
+                break;
+            }
+
+        }
+        pend++;
+    }
+    fclose(fp);
+    return 0;
+}
+
 METHOD(cgi_t, read_action_, void, private_cgi_t *this, cgi_func_tab_t *func_tab)
 {
-    cgi_func_tab_t *p = func_tab;
+    char *content_type = CONTENT_TYPE;
+    cgi_func_tab_t *p  = func_tab;
+    comm_entry_t *pcomm_entry = NULL;
     comm_entry_t comm_entry[] = {
         {"todo",      &cgi_file_todo},
         {"this_file", &cgi_this_file},
@@ -153,73 +240,10 @@ METHOD(cgi_t, read_action_, void, private_cgi_t *this, cgi_func_tab_t *func_tab)
         {"next_path", &cgi_next_path},
         {NULL}
     };
-    comm_entry_t *pcomm_entry = NULL;
-    char *content_type = CONTENT_TYPE;
-    char *pstart = NULL, *pend = NULL;
-    int len = 0;
-    FILE *fp = NULL;
 
-    char buf[102400] = {0};
-    sprintf(buf, "echo \"%s\" > /home/anton/t.txt", cgi_form_data);
-    if (system(buf)) {}
-
-    if (content_type && !strncasecmp(content_type, "multipart/form-data", sizeof("multipart/form-data") - 1)) {
-
-        pend = pstart = cgi_form_data;
-        while (strncmp(pend, "\r\n", 2) && *pend != '\0') pend++;
-        cgi_sign_code_len = pend - pstart;
-        cgi_sign_code = (char *)malloc(cgi_sign_code_len + 1);
-        cgi_sign_code[cgi_sign_code_len] = '\0';
-        ALERT("cgi_sign_code_len: %d", cgi_sign_code_len);
-
-        pend = pstart = strcasestr(cgi_form_data, "name");
-        if (pend) pend = pstart = pstart + strlen("name=");
-        while (*pend != ';' && *pend != '\r' && *pend != '\n' && *pend != '\0') pend++;
-        len = pend - pstart;
-        cgi_form_name = (char *)malloc(len + 1);
-        memcpy(cgi_form_name, pstart, len);
-        cgi_form_name[len] = '\0';
-        ALERT("form_name: %s", cgi_form_name);
-
-        pend = pstart = strcasestr(cgi_form_data, "filename");
-        if (pend) pend = pstart = pstart + strlen("filename=");
-        while (*pend != ';' && *pend !='\r' && *pend != '\n' && *pend != '\0') pend++;
-        len = pend - pstart;
-        cgi_file_name = (char *)malloc(len + 1);
-        memcpy(cgi_file_name, pstart, len);
-        cgi_file_name[len] = '\0';
-        ALERT("file_name: %s", cgi_file_name);
-
-        /*
-        while (*pend != '\0' && (*pend == '\r' || *pend == '\n')) pend++;
-        while (*pend != '\0' && *pend != '\r') pend++;
-        while (*pend != '\0' && (*pend == '\r' || *pend == '\n')) pend++;
-
-        pstart = pend;
-        while (*pend != '\0' && *pend != '\r') pend++;
-        *pend = '\0';
-        cgi_file_size = pend - pstart;
-        ALERT("%d", cgi_file_size);
-        */
-
-        while (strncmp(pend, "\r\n\r\n", 4)) pend++;
-        pend += 4;
-
-        fp = fopen("/home/anton/working/program/c/cgi/upload/a", "w");
-        len = cgi_form_data + cgi_form_data_len - pend;
-        while (len-- > 0) {
-            if (*pend != '\r') fputc(*pend, fp);
-            else {
-                if (((cgi_form_data + cgi_form_data_len - pend) >= cgi_sign_code_len + 2) && 
-                        strncmp(pend + 2, cgi_sign_code, cgi_sign_code_len)) {
-                    ALERT("1");
-                    fputc(*pend, fp);
-                }
-                
-            }
-            pend++;
-        }
-        fclose(fp);
+    if (content_type != NULL && 
+        !strncasecmp(content_type, "multipart/form-data", sizeof("multipart/form-data") - 1)) {
+        upload_file(this);
         return;
     }
 
@@ -349,12 +373,14 @@ METHOD(cgi_t, alert_, void, private_cgi_t *this, const char *fmt, ...)
 
 static void free_cgi_form_entry(cgi_form_entry_t *entry) 
 {
+    if (entry->todo)      free(entry->todo);
     if (entry->this_file) free(entry->this_file);
     if (entry->next_file) free(entry->next_file);
     if (entry->next_path) free(entry->next_path);
+
+    if (entry->sign_code) free(entry->sign_code);
     if (entry->form_name) free(entry->form_name);
     if (entry->file_name) free(entry->file_name);
-    if (entry->todo)      free(entry->todo);
 }
 
 METHOD(cgi_t, destroy_, void, private_cgi_t *this)
@@ -405,8 +431,13 @@ cgi_t *cgi_create()
         },
         .form_data = {
             .attr            = NULL,
+            .todo            = NULL,
             .next_file       = NULL,
             .this_file       = NULL,
+            .next_path       = NULL,
+
+            .sign_code       = NULL,
+            .form_name       = NULL,
             .file_name       = NULL,
             .content_type    = NULL,
             .data            = NULL,
