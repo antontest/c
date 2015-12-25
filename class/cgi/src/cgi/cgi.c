@@ -10,7 +10,7 @@
 #include <../linked_list/linked_list.h>
 
 #define DFT_CGI_INPUT_BUF_SIZE  (1024)
-#define DFT_CGI_OUTPUT_BUF_SIZE (1024)
+#define DFT_CGI_OUTPUT_BUF_SIZE (4096)
 #define DFT_CGI_ERRMSG_BUF_SIZE (256)
 typedef struct private_cgi_t private_cgi_t;
 struct private_cgi_t {
@@ -101,10 +101,15 @@ METHOD(cgi_t, get_req_method_, request_method_t, private_cgi_t *this)
 METHOD(cgi_t, get_form_data_, char *, private_cgi_t *this)
 {
     int content_len = 0;
+    char *get_string = NULL;
+
     switch (_get_req_method_(this)) {
         case REQUEST_METHOD_GET:
-            cgi_form_data = QUERY_STRING;
-            cgi_form_data_len = content_len = cgi_form_data != NULL ? strlen(cgi_form_data) : 0;
+            get_string = QUERY_STRING;
+            if (get_string) {
+                cgi_form_data = strdup(get_string);
+                cgi_form_data_len = content_len = strlen(cgi_form_data);
+            }
             break;
         case REQUEST_METHOD_POST:
             content_len   = CONTENT_LENGTH;
@@ -313,7 +318,7 @@ METHOD(cgi_t, write_action_, void, private_cgi_t *this, cgi_func_tab_t *func_tab
         return;
     }
 
-    while (fgets(buf, DFT_CGI_OUTPUT_BUF_SIZE, fp) != NULL) {
+    while (fgets(buf, sizeof(buf), fp) != NULL) {
         value_start_pos = strstr(buf, "@");
         if (!value_start_pos) {
             printf("%s", buf);

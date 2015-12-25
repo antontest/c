@@ -14,11 +14,6 @@
 /*********************************************************
  **************    Function Declaration    ***************
  *********************************************************/
-static int get_ipsec_mode(char *input, char *errmsg)
-{
-    strcpy(input, "aka");
-    return 0;
-}
 
 /*********************************************************
  ******************    Main Function    ******************
@@ -29,7 +24,6 @@ int main(int agrc, char *agrv[])
     cgi_t *cgi = cgi_create();
     cgi_func_tab_t data[] = {
         {"h_rem",         KEY_IS_VAR,  (void *)get_rem,           (void *)set_rem},
-        {"h_ipsec_mode",  KEY_IS_VAR,  (void *)get_ipsec_mode,    NULL},
         {"username",      KEY_IS_VAR,  (void *)get_username,      (void *)set_username},
         {"password",      KEY_IS_VAR,  NULL,                      (void *)set_password},
         {"ftp_dir",       KEY_IS_VAR, (void *)get_ftp_dir,       NULL},
