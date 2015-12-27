@@ -89,10 +89,34 @@ void cgi_get_env(char *env, char **resulst)
     if (!(*resulst)) *resulst = "";
 }
 
+/**
+ * @brief read_cgi_info 
+ */
+static int read_cgi_info()
+{
+    cgi_get_env("SERVER_SOFTWARE", &cgi_info.server_software);
+    cgi_get_env("SERVER_NAME", &cgi_info.server_name);
+    cgi_get_env("SERVER_PROTOCOL", &cgi_info.server_protocol);
+    cgi_get_env("SERVER_PORT", &cgi_info.server_port);
+    cgi_get_env("GATEWAY_INTERFACE", &cgi_info.gateway_interface);
+    cgi_get_env("REQUEST_METHOD", &cgi_info.request_method);
+    cgi_get_env("PATH_INFO", &cgi_info.path_info);
+    cgi_get_env("PATH_TRANSLATED", &cgi_info.path_translated);
+    cgi_get_env("SCRIPT_NAME", &cgi_info.script_name);
+    cgi_get_env("QUERY_STRING", &cgi_info.query_string);
+    cgi_get_env("REMOTE_HOST", &cgi_info.remote_host);
+    cgi_get_env("REMOTE_ADDR", &cgi_info.remote_addr);
+    cgi_get_env("REMOTE_USER", &cgi_info.remote_user);
+    cgi_get_env("REMOTE_IDENT", &cgi_info.remote_ident);
+    cgi_get_env("AUTH_TYPE", &cgi_info.auth_type);
+    cgi_get_env("CONTENT_LENGTH", &cgi_info.conent_length);
+
+    return 0;
+}
+
 METHOD(cgi_t, get_req_method_, request_method_t, private_cgi_t *this)
 {
-    char *method = REQUEST_METHOD;
-    if (!strcasecmp(method, "POST")) cgi_req_method = REQUEST_METHOD_POST;
+    if (!strcasecmp(cgi_info.request_method, "POST")) cgi_req_method = REQUEST_METHOD_POST;
     else cgi_req_method = REQUEST_METHOD_GET;
 
     return cgi_req_method;
@@ -101,18 +125,17 @@ METHOD(cgi_t, get_req_method_, request_method_t, private_cgi_t *this)
 METHOD(cgi_t, get_form_data_, char *, private_cgi_t *this)
 {
     int content_len = 0;
-    char *get_string = NULL;
 
     switch (_get_req_method_(this)) {
         case REQUEST_METHOD_GET:
-            get_string = QUERY_STRING;
-            if (get_string) {
-                cgi_form_data = strdup(get_string);
+            if (cgi_info.query_string) {
+                cgi_form_data = strdup(cgi_info.query_string);
                 cgi_form_data_len = content_len = strlen(cgi_form_data);
             }
             break;
         case REQUEST_METHOD_POST:
-            content_len   = CONTENT_LENGTH;
+            cgi_form_data_len = content_len = !cgi_info.conent_length ? 0 : atoi(cgi_info.conent_length);
+            if (!content_len) break;
             cgi_form_data = (char *)malloc(content_len + 1);
 
             if (!cgi_form_data || content_len < 1) return "\n"; 
@@ -129,6 +152,12 @@ METHOD(cgi_t, get_form_data_, char *, private_cgi_t *this)
     return cgi_form_data;
 }
 
+/**
+ * @brief parser_data_by_name 
+ * @param data   form data
+ * @param name   parameter name 
+ * @param output parameter value
+ */
 static char *parser_data_by_name(char *data, char *name, char **output)
 {
     char *p = *output;
@@ -192,8 +221,8 @@ static int upload_file(private_cgi_t *this)
     while (*pend == '"' && *pend != '\0') pend++;
     pstart = pend;
     while (*pend != ';' && *pend !='\r' && 
-            *pend != '\n' && *pend != '\0' && 
-            *pend != '"') pend++;
+           *pend != '\n' && *pend != '\0' && 
+           *pend != '"') pend++;
     len = pend - pstart;
     cgi_file_name = (char *)malloc(len + 1);
     memcpy(cgi_file_name, pstart, len);
@@ -233,9 +262,11 @@ static int upload_file(private_cgi_t *this)
     return 0;
 }
 
-METHOD(cgi_t, read_action_, void, private_cgi_t *this, cgi_func_tab_t *func_tab)
+METHOD(cgi_t, parse_form_input_, int, private_cgi_t *this, cgi_func_tab_t *func_tab)
 {
     char *content_type = CONTENT_TYPE;
+    char post_file_name[28] = {0};
+    char *name_end_pos = NULL;
     cgi_func_tab_t *p  = func_tab;
     comm_entry_t *pcomm_entry = NULL;
     comm_entry_t comm_entry[] = {
@@ -246,24 +277,57 @@ METHOD(cgi_t, read_action_, void, private_cgi_t *this, cgi_func_tab_t *func_tab)
         {NULL}
     };
 
+    if (!cgi_form_data || cgi_form_data_len < 1) return 0;
+
+    /**
+     * get cgi content type
+     */
     if (content_type != NULL && 
         !strncasecmp(content_type, "multipart/form-data", sizeof("multipart/form-data") - 1)) {
-        upload_file(this);
-        return;
+        if (upload_file(this) < 0) {
+            ALERT("upload file %s failed!", cgi_file_name);
+        } else {
+            ALERT("upload file %s succ!", cgi_file_name);
+        }
+        return 0;
     }
 
-    if (!cgi_form_data || cgi_form_data_len < 1) return;
+    /**
+     * get cgi common parameters from form data
+     */
     for (pcomm_entry = comm_entry; pcomm_entry->name != NULL; pcomm_entry++) {
         if (!parser_data_by_name(cgi_form_data, pcomm_entry->name, &cgi_input_buf)) continue;
         if (!(*pcomm_entry->value)) *pcomm_entry->value = strdup(cgi_input_buf);
     }
 
-    if (cgi_req_method == REQUEST_METHOD_GET) {
-        return;
+    /**
+     * check this file and next file
+     */
+    if (!cgi_this_file && cgi_next_file) cgi_this_file = strdup(cgi_next_file);
+    if (cgi_this_file && !cgi_next_file) cgi_next_file = strdup(cgi_this_file);
+    if (!cgi_this_file && !cgi_next_file) return -1;
+
+    /**
+     * get this file name
+     */
+    if (!func_tab) return -1;
+    name_end_pos = strstr(cgi_this_file, ".htm");
+    if (!name_end_pos) return -1;
+    memcpy(post_file_name, cgi_this_file, name_end_pos - cgi_this_file);
+
+    /**
+     * find this file action function callback
+     */
+    for (p = func_tab; p->name != NULL; p++) {
+        if (p->type != KEY_IS_FILE) continue;
+        if (strcmp(post_file_name, p->name)) continue;
+        break;
     }
 
-    if (!func_tab) return;
-    for (p = func_tab; p->name != NULL; p++) {
+    /**
+     * parser data
+     */
+    for (; p->name != NULL && p->type != KEY_IS_FILE; p++) {
         if (!p->set_func_cb) continue;
         bzero(cgi_input_buf, DFT_CGI_INPUT_BUF_SIZE);
         bzero(cgi_errmsg_buf, DFT_CGI_ERRMSG_BUF_SIZE);
@@ -276,6 +340,8 @@ METHOD(cgi_t, read_action_, void, private_cgi_t *this, cgi_func_tab_t *func_tab)
             break;
         }
     }
+
+    return 0;
 }
 
 METHOD(cgi_t, get_file_todo_, char *, private_cgi_t *this)
@@ -299,7 +365,7 @@ METHOD(cgi_t, get_next_file_, char *, private_cgi_t *this)
     return cgi_next_file;
 }
 
-METHOD(cgi_t, write_action_, void, private_cgi_t *this, cgi_func_tab_t *func_tab)
+METHOD(cgi_t, write_to_html_, int, private_cgi_t *this, cgi_func_tab_t *func_tab)
 {
     int  ret       = 0;
     FILE *fp       = NULL;
@@ -311,11 +377,11 @@ METHOD(cgi_t, write_action_, void, private_cgi_t *this, cgi_func_tab_t *func_tab
     cgi_func_tab_t *pfunc_tab = func_tab;
 
     if (!cgi_next_file || strlen(cgi_next_file) < 1) 
-        return;
+        return -1;
 
     if (!(fp = fopen(cgi_next_file, "rb+"))) {
         HTML_GOTO("not_found.htm");
-        return;
+        return -1;
     }
 
     while (fgets(buf, sizeof(buf), fp) != NULL) {
@@ -356,12 +422,13 @@ METHOD(cgi_t, write_action_, void, private_cgi_t *this, cgi_func_tab_t *func_tab
         bzero(cgi_output_buf, DFT_CGI_OUTPUT_BUF_SIZE);
     }
     fclose(fp);
+    return 0;
 }
 
 METHOD(cgi_t, parser_and_action_, int, private_cgi_t *this, cgi_func_tab_t *func_tab)
 {
-    _read_action_(this, func_tab);
-    _write_action_(this, func_tab);
+    _parser_and_action_(this, func_tab);
+    _write_to_html_(this, func_tab);
     return 0;
 }
 
@@ -424,8 +491,8 @@ cgi_t *cgi_create()
         .public = {
             .get_req_method    = _get_req_method_,
             .get_form_data     = _get_form_data_,
-            .read_action       = _read_action_,
-            .write_action      = _write_action_,
+            .parse_form_input  = _parse_form_input_,
+            .write_to_html     = _write_to_html_,
             .parser_and_action = _parser_and_action_,
             .get_file_todo     = _get_file_todo_,
             .get_this_file     = _get_this_file_,
@@ -461,5 +528,7 @@ cgi_t *cgi_create()
     }
     CONTENT_TEXT;
 
+    read_cgi_info();
+    _get_form_data_(this);
     return &this->public;
 }

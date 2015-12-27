@@ -15,8 +15,7 @@
 int main(void)  
 {  
     cgi_t *cgi = cgi_create();
-    cgi->get_form_data(cgi);
-    cgi->read_action(cgi, NULL);
+    cgi->parse_form_input(cgi, NULL);
     cgi->destroy(cgi);
     return 0;
 }  

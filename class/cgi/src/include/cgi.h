@@ -37,6 +37,26 @@ enum key_type_t {
     KEY_IS_VAR,
 };
 
+typedef struct cgi_info_t cgi_info_t;
+struct cgi_info_t {
+    char *server_software;
+    char *server_name;
+    char *server_protocol;
+    char *server_port;
+    char *gateway_interface;
+    char *request_method;
+    char *path_info;
+    char *path_translated;
+    char *script_name;
+    char *query_string;
+    char *remote_host;
+    char *remote_addr;
+    char *remote_user;
+    char *remote_ident;
+    char *auth_type;
+    char *conent_length;
+} cgi_info;
+
 typedef struct cgi_form_entry_t cgi_form_entry_t;
 struct cgi_form_entry_t {
     char *attr;
@@ -99,12 +119,12 @@ struct cgi_t {
     /**
      * @brief parser data 
      */
-    void (*read_action) (cgi_t *this, cgi_func_tab_t *data);
+    int (*parse_form_input) (cgi_t *this, cgi_func_tab_t *data);
 
     /**
      * @brief parser data 
      */
-    void (*write_action) (cgi_t *this, cgi_func_tab_t *func_tab);
+    int (*write_to_html) (cgi_t *this, cgi_func_tab_t *func_tab);
 
     /**
      * @brief parser form data and action get_func_cb and set_func_cb
