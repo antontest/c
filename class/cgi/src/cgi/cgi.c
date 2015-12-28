@@ -9,6 +9,11 @@
 #include <utils/utils.h>
 #include <../linked_list/linked_list.h>
 
+char *content_type_s[] = {
+    "application/x-www-form-urlencoded",
+    "multipart/form-data",
+};
+
 #define DFT_CGI_INPUT_BUF_SIZE  (1024)
 #define DFT_CGI_OUTPUT_BUF_SIZE (4096)
 #define DFT_CGI_ERRMSG_BUF_SIZE (256)
@@ -305,6 +310,9 @@ METHOD(cgi_t, parse_form_input_, int, private_cgi_t *this, cgi_func_tab_t *func_
 
     if (!cgi_form_data || cgi_form_data_len < 1) return 0;
 
+    char buf[10240] = {0};
+    snprintf(buf, sizeof(buf), "echo \"%s\" > cgi.txt", cgi_form_data);
+    if (system(buf)) {}
     /**
      * get cgi content type
      */
@@ -528,7 +536,6 @@ cgi_t *cgi_create()
             .destroy           = _destroy_,
         },
         .form_data = {
-            .attr            = NULL,
             .todo            = NULL,
             .next_file       = NULL,
             .this_file       = NULL,
