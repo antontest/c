@@ -114,6 +114,16 @@ static int read_cgi_info()
     return 0;
 }
 
+static void replace_plus_with_blank(char *s)
+{
+    if (!s) return;
+
+    while (*s != '\0') {
+        if (*s == '+') *s = ' ';
+        s++;
+    }
+}
+
 METHOD(cgi_t, get_req_method_, request_method_t, private_cgi_t *this)
 {
     if (!strcasecmp(cgi_info.request_method, "POST")) cgi_req_method = REQUEST_METHOD_POST;
@@ -149,6 +159,7 @@ METHOD(cgi_t, get_form_data_, char *, private_cgi_t *this)
             break;
     }
 
+    replace_plus_with_blank(cgi_form_data);
     return cgi_form_data;
 }
 
