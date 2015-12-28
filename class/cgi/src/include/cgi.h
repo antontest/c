@@ -23,11 +23,21 @@
 #define HTML_GOTO(url) printf("<script>location.href=\"%s\";</script>", url)
 #define HTTP_REFERER   getenv("HTTP_REFERER")
 
+char *content_type_s[] = {
+    "application/x-www-form-urlencoded",
+    "multipart/form-data",
+};
+typedef enum content_type_t content_type_t;
+enum content_type_t {
+    CONTENT_TYPE_TEXT = 0,
+    CONTENT_TYPE_MULTI_PART
+};
+
 typedef enum request_method_t request_method_t;
 enum request_method_t {
+    REQUEST_METHOD_GET    = 0,
+    REQUEST_METHOD_POST ,
     REQUEST_METHOD_UNKOWN = -1,
-    REQUEST_METHOD_GET    = 1 << 1,
-    REQUEST_METHOD_POST   = 1 << 2,
 };
 
 typedef enum key_type_t key_type_t;
@@ -154,6 +164,13 @@ struct cgi_t {
  */
 void cgi_get_env(char *env, char **result);
 void html_alert(char *errmsg);
+
+/**
+ * cgi header output
+ */
+void cgi_header_location(char *redirect_url);
+void cgi_header_status(int status, char *status_msg);
+void cgi_header_content_type(char *mime_type);
 
 /**
  * @brief create cgi instance 

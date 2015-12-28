@@ -89,6 +89,21 @@ void cgi_get_env(char *env, char **resulst)
     if (!(*resulst)) *resulst = "";
 }
 
+void cgi_header_location(char *redirect_url)
+{
+    fprintf(stdout, "Location: %s\r\n\r\n", redirect_url);
+}
+
+void cgi_header_status(int status, char *status_msg)
+{
+    fprintf(stdout, "Status: %d %s\r\n\r\n", status, status_msg);
+}
+
+void cgi_header_content_type(char *mime_type)
+{
+    fprintf(stdout, "Content-type: %s\r\n\r\n", mime_type);
+}
+
 /**
  * @brief read_cgi_info 
  */
