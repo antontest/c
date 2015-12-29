@@ -43,8 +43,8 @@ enum key_type_t {
     KEY_IS_VAR,
 };
 
-typedef struct cgi_info_t cgi_info_t;
-struct cgi_info_t {
+typedef struct cgi_form_info_t cgi_form_info_t;
+struct cgi_form_info_t {
     char *server_software;
     char *server_name;
     char *server_protocol;
@@ -60,11 +60,15 @@ struct cgi_info_t {
     char *remote_user;
     char *remote_ident;
     char *auth_type;
-    char *conent_length;
-} cgi_info;
+    char *content_type;
+    char *content_length;
+} cgi_form_info;
 
 typedef struct cgi_form_entry_t cgi_form_entry_t;
 struct cgi_form_entry_t {
+    /**
+     * cgi form sign code
+     */
     char *content_disposition;
     char *sign_code;
     int   sign_code_len;
@@ -81,11 +85,14 @@ struct cgi_form_entry_t {
     int  data_len;
     request_method_t req_method_type;
 
+    /**
+     * html common parameter
+     */
     char *todo;
     char *this_file;
+    char *this_file_name;
     char *next_file;
     char *next_path;
-
 };
 
 typedef struct cgi_func_tab_t cgi_func_tab_t;
