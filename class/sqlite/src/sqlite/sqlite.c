@@ -37,15 +37,15 @@ METHOD(sqlite_t, open_, int, private_sqlite_t *this, char *db)
     int ret = sqlite3_open(db, &sqlite_db);
     if (!ret) this->status = SQLITE_OPENED;
     else if (ret < 0) print_err_msg();
-
     return ret;
 }
 
 METHOD(sqlite_t, exec_, int, private_sqlite_t *this, char *sql)
 {
-    if (sqlite3_exec(sqlite_db, sql, NULL, NULL, &sqlite_err) < 0)
-        print_err_msg();
-    return 0;
+    int ret = 0;
+    ret = sqlite3_exec(sqlite_db, sql, NULL, NULL, &sqlite_err);
+    if (ret < 0) print_err_msg();
+    return ret;
 }
 
 /*
@@ -64,7 +64,6 @@ METHOD(sqlite_t, get_data_, int, private_sqlite_t *this, char *sql, sql_cb_t cal
 {
     int ret = 0;
     if (!sql) return 0;
-
     ret = sqlite3_exec(sqlite_db, sql, callback, NULL, &sqlite_err);
     if (ret) print_err_msg();
     return 0;
