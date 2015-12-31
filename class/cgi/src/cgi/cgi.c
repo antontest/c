@@ -370,7 +370,7 @@ static int parse_form_comm_input(private_cgi_t *this)
     return 0;
 }
 
-static int parse_form_input(private_cgi_t *this, cgi_func_tab_t *func_tab)
+static int parse_form_input_data(private_cgi_t *this, cgi_func_tab_t *func_tab)
 {
     char *value = NULL;
     cgi_func_tab_t *pfunc_tab  = func_tab;
@@ -619,9 +619,8 @@ METHOD(cgi_t, parse_form_input_, int, private_cgi_t *this, cgi_func_tab_t *func_
             return -1;
             break;
     }
-    if (parse_form_input(this, func_tab) < 0) {
-        cgi_header_status(500, "Error reading form data");
-    }
+
+    parse_form_input_data(this, func_tab);
 
     return 0;
 }
