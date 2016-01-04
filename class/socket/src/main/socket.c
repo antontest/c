@@ -62,17 +62,26 @@ int main(int agrc, char *agrv[])
     char *ip             = NULL;
     int  port            = 0;
     int  rt              = 0;
+    int  local_ip_flag   = 0;
+    char local_ip[256]   = {0};
+    int gateway_ip_flag  = {0};
+    char gateway_ip[128] = {0};
+    char *ifname         = NULL;
+    unsigned char local_mac[6] = {0};
 
     struct options opts[] = {
-        {"-h", "--help"      , 0, RET_INT, ADDR_ADDR(help_flag) },
-        {"-6", NULL          , 0, RET_INT, ADDR_ADDR(ipv6_flag) },
-        {"-s", "--server"    , 0, RET_INT, ADDR_ADDR(ser_flag)  },
-        {"-c", "--client"    , 0, RET_INT, ADDR_ADDR(cli_flag)  },
-        {"-a", "--agreement" , 1, RET_STR, ADDR_ADDR(protocol)  },
-        {"-i", "--ip"        , 1, RET_STR, ADDR_ADDR(ip)        },
-        {"-p", "--port"      , 1, RET_INT, ADDR_ADDR(port)      },
-        {"-t", "--times"     , 1, RET_INT, ADDR_ADDR(times)     },
-        {"-m", "--message"   , 1, RET_STR, ADDR_ADDR(message)   },
+        {"-h", "--help"      , 0, RET_INT, ADDR_ADDR(help_flag)     },
+        {"-6", NULL          , 0, RET_INT, ADDR_ADDR(ipv6_flag)     },
+        {"-s", "--server"    , 0, RET_INT, ADDR_ADDR(ser_flag)      },
+        {"-c", "--client"    , 0, RET_INT, ADDR_ADDR(cli_flag)      },
+        {"-a", "--agreement" , 1, RET_STR, ADDR_ADDR(protocol)      },
+        {"-i", "--ip"        , 1, RET_STR, ADDR_ADDR(ip)            },
+        {"-p", "--port"      , 1, RET_INT, ADDR_ADDR(port)          },
+        {"-t", "--times"     , 1, RET_INT, ADDR_ADDR(times)         },
+        {"-m", "--message"   , 1, RET_STR, ADDR_ADDR(message)       },
+        {"-l", "--localip"   , 0, RET_INT, ADDR_ADDR(local_ip_flag) },
+        {"-g", "--gatewayip" , 0, RET_INT, ADDR_ADDR(gateway_ip_flag)},
+        {NULL, "--mac"       , 1, RET_STR, ADDR_ADDR(ifname)        },
         {NULL, NULL}
     };
     struct usage help_usage[] = {
@@ -83,19 +92,66 @@ int main(int agrc, char *agrv[])
         {"-p, --port"      , "Port"},
         {"-t, --times"     , "Times of sending message"},
         {"-m, --message"   , "Message of sending"},
+        {"-l, --localip"   , "Local ip address"},
+        {"-g, --gatewayip" , "Gateway ip address"},
+        {"    --mac"       , "Get mac address. Must add interface name."},
         {"-h, --help"      , "Program usage"},
         {NULL              , NULL}
     };
  
+    /**
+     * check count of cmdline arguemnts
+     */
+    if (agrc <= 1) {
+       print_usage(help_usage);
+       exit(-1);
+    }
+
+    /**
+     * parser args
+     */
     get_args(agrc, agrv, opts);
     if(help_flag > 0) {
         print_usage(help_usage);
         exit(1);
     }
 
+    if (ifname) {
+        if (get_mac(ifname, local_mac, sizeof(local_mac)) < 0)
+            return -1;
+        print_mac(local_mac, NULL);
+        return 0;
+    }
     if (ipv6_flag > 0) net_type = AF_INET6;
+
+    /**
+     * Get Local IP Address
+     */
+    if (local_ip_flag) {
+        if (get_local_ip(net_type, NULL, local_ip, sizeof(local_ip)) < 0) {
+            exit(-1);
+        }
+        printf("%s\n", local_ip);
+        exit(0);
+    }
+
+    if (gateway_ip_flag) {
+        if (get_gateway(gateway_ip, sizeof(gateway_ip)) < 0) {
+            exit(-1);
+        }
+        printf("%s\n", gateway_ip);
+        exit(0);
+    }
+
+    /**
+     * socket server or client
+     */
     if (ser_flag > 0) ser_or_cli_flag = SOCKET_SERVER;
     else if (cli_flag > 0) ser_or_cli_flag = SOCKET_CLIENT;
+
+    /**
+     * socket protocol
+     */
     if (protocol != NULL) {
         if (!strncmp("u", protocol, sizeof("u")) || !strncmp("udp", protocol, sizeof("udp"))) {
             socket_protocol = IPPROTO_UDP;
@@ -110,11 +166,26 @@ int main(int agrc, char *agrv[])
         
     }
 
+    /**
+     * start up socket
+     */
     start_network(ser_or_cli_flag, net_type, socket_type, socket_protocol, ip, port, times, message);
 
     return rt;
 }
 
+/**
+ * @brief start network 
+ *
+ * @param ser_or_cli_flag   flag of server or client
+ * @param net_type          type of network [AF_INET, AF_INET6]
+ * @param socket_type       type socket socket [SOCK_DGRAM, SOCK_STREAM and so on]
+ * @param socket_protocol   protocol of network [tcp, udp, 0 and so on]
+ * @param ip                ip address
+ * @param port              port of socket
+ * @param times             times of message sending
+ * @param message           message of sending
+ */
 void start_network(int ser_or_cli_flag, int net_type, int socket_type, int socket_protocol, char *ip, int port, int times, char *message)
 {
     int status = 0;

@@ -995,7 +995,7 @@ void arr2mac(const unsigned char *mac_arr, char mac[])
 void print_mac(const unsigned char *mac, const char *info)
 {
     if (info == NULL)
-        printf("mac: %02x:%02x:%02x:%02x:%02x:%02x\n", mac[0], 
+        printf("%02x:%02x:%02x:%02x:%02x:%02x\n", mac[0], 
                 mac[1], mac[2], mac[3], mac[4], mac[5]);
     else 
         printf("%s: %02x:%02x:%02x:%02x:%02x:%02x\n", info, mac[0], 

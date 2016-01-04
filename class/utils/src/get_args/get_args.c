@@ -135,7 +135,7 @@ static char *get_proc_name()
     return proc + 1;
 }
 
-#define usage_line_len (30)
+#define usage_line_len (50)
 void print_usage(struct usage *help_usage)
 {
     struct usage *use    = help_usage;
@@ -144,7 +144,7 @@ void print_usage(struct usage *help_usage)
     int opt_usg_len      = 0;
     int usg_cnt          = 0;
     int cpy_cnt          = 0;
-    char buf[usage_line_len] = {0};
+    char buf[usage_line_len + 1] = {0};
     char c = ' ';
 
     if (!use) return;
@@ -158,6 +158,7 @@ void print_usage(struct usage *help_usage)
     }
 
     for (use = help_usage; use->opt_name != NULL; use++) {
+        usg_cnt = 0;
         opt_usg_len = strlen(use->opt_usage);
         opt_name_len = strlen(use->opt_name);
         if (opt_usg_len > usage_line_len) {
@@ -166,6 +167,7 @@ void print_usage(struct usage *help_usage)
             if (isalpha((use->opt_usage + usg_cnt - 1)[0]))
                 c = '-';
             printf("  %s%*c%s%c\n", use->opt_name, opt_name_max_len + 2 - opt_name_len, ' ', buf, c);
+
             while (usg_cnt < opt_usg_len) {
                 cpy_cnt = usg_cnt + usage_line_len < opt_usg_len ? usage_line_len - 1 : (opt_usg_len - usg_cnt);
                 memcpy(buf, use->opt_usage + usg_cnt, cpy_cnt);
@@ -183,5 +185,6 @@ void print_usage(struct usage *help_usage)
         } else {
             printf("  %s%*c%s\n", use->opt_name, opt_name_max_len + 2 - opt_name_len, ' ', use->opt_usage);
         }
+        memset(buf, 0, sizeof(buf));
     }
 }

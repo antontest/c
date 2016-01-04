@@ -281,8 +281,8 @@ int arp_cheat(const char *iifname, const char *iattack_ip,
     arp_request_send(info.fd, (struct sockaddr *)&info.addr, info.attack_ip, info.local_ip, info.local_mac);
     printf("\033[0;32msuccess send arp request to %d.%d.%d.%d\n\033[0m", info.attack_ip[0], 
             info.attack_ip[1], info.attack_ip[2], info.attack_ip[3]);
-    tm = timer_creat(15 * 1000, timer_to_arp_send, (void *)&info, 1);
-    timer_start(tm);
+    tm = timer_start(timer_to_arp_send, &info, 1);
+    tm->start(tm);
     pthread_exit(NULL);
 
     return 0;

@@ -32,6 +32,9 @@ SET(MSG_TEST     message/sample.c)
 SET(MSG_SEND     message/msg_send.c)
 SET(LISTEN_SRC   listener/listener.c)
 SET(LISTEN_TEST  listener/sample.c)
+SET(ARP_SRC      arp/arp.c)
+SET(ARP_TEST_SRC arp/arp-test.c)
+SET(TEST_SRC arp/arp_test.c)
 
 # lib generation
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/src/lib)
@@ -45,6 +48,7 @@ ADD_LIBRARY(cast          SHARED ${CAST_SRC})
 ADD_LIBRARY(local_socket  SHARED ${LOCAL_SOCKET})
 ADD_LIBRARY(message       SHARED ${MSG_SRC})
 ADD_LIBRARY(listener      SHARED ${LISTEN_SRC})
+ADD_LIBRARY(arp           SHARED ${ARP_SRC})
 
 # generat exec
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR})
@@ -57,6 +61,7 @@ ADD_EXECUTABLE(local_test ${LOCAL_TEST})
 ADD_EXECUTABLE(message_test ${MSG_TEST})
 ADD_EXECUTABLE(msg_send ${MSG_SEND})
 ADD_EXECUTABLE(listener_test ${LISTEN_TEST})
+ADD_EXECUTABLE(arp_test ${ARP_TEST_SRC})
 
 # link library
 SET_TARGET_PROPERTIES(socket_shared PROPERTIES OUTPUT_NAME "socket")
@@ -76,6 +81,8 @@ TARGET_LINK_LIBRARIES(message_test  local_socket proc mutex bsem thread message 
 TARGET_LINK_LIBRARIES(msg_send      local_socket proc mutex bsem thread message event)
 TARGET_LINK_LIBRARIES(listener      socket_base event pthread chunk packet)
 TARGET_LINK_LIBRARIES(listener_test socket_base event pthread listener)
+TARGET_LINK_LIBRARIES(arp           property)
+TARGET_LINK_LIBRARIES(arp_test      property arp)
 
 # -------------- INSTALL -------------- #
 # install path setting
