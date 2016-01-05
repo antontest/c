@@ -12,6 +12,7 @@
 #include <property.h>
 #include <ftp.h>
 #include <socket_base.h>
+#include <arp.h>
 
 /*********************************************************
  ***************    Macros Declaration    ****************
@@ -68,6 +69,8 @@ int main(int agrc, char *agrv[])
     char gateway_ip[128] = {0};
     char *ifname         = NULL;
     unsigned char local_mac[6] = {0};
+    char *remote_mac     = NULL;
+    char remote_ip[20]   = {0};
 
     struct options opts[] = {
         {"-h", "--help"      , 0, RET_INT, ADDR_ADDR(help_flag)     },
@@ -82,26 +85,29 @@ int main(int agrc, char *agrv[])
         {"-l", "--localip"   , 0, RET_INT, ADDR_ADDR(local_ip_flag) },
         {"-g", "--gatewayip" , 0, RET_INT, ADDR_ADDR(gateway_ip_flag)},
         {NULL, "--mac"       , 1, RET_STR, ADDR_ADDR(ifname)        },
+        {"-r", "--remoteip"  , 1, RET_STR, ADDR_ADDR(remote_mac)    },
         {NULL, NULL}
     };
     struct usage help_usage[] = {
-        {"-s, --server"    , "Create a socket server"},
-        {"-c, --client"    , "Create a socket client"},
-        {"-a, --agreement" , "Agreement of networking. Agreement can be \"[u udp t tcp]\""},
-        {"-i, --ip"        , "IP address"},
-        {"-p, --port"      , "Port"},
-        {"-t, --times"     , "Times of sending message"},
-        {"-m, --message"   , "Message of sending"},
-        {"-l, --localip"   , "Local ip address"},
-        {"-g, --gatewayip" , "Gateway ip address"},
-        {"    --mac"       , "Get mac address. Must add interface name."},
-        {"-h, --help"      , "Program usage"},
-        {NULL              , NULL}
+        {"-s, --server",                 "Create a socket server"},
+        {"-c, --client",                 "Create a socket client"},
+        {"-a, --agreement [Agreement]",  "Agreement of networking. Agreement can be \"[u udp t tcp]\""},
+        {"-i, --ip [ip address]",        "IP address"},
+        {"-p, --port [port]",            "Port"},
+        {"-t, --times [times]",          "Times of sending message"},
+        {"-m, --message [message]",      "Message of sending"},
+        {"-l, --localip",                "Local ip address"},
+        {"-g, --gatewayip",              "Gateway ip address"},
+        {"--mac [interface name]",       "Get mac address by interface name."},
+        {"-r, --remoteip [mac address]", "Get remote ip address."},
+        {"-h, --help",                   "Program usage"},
+        {NULL,                           NULL}
     };
  
     /**
      * check count of cmdline arguemnts
      */
+    set_print_usage_width(60);
     if (agrc <= 1) {
        print_usage(help_usage);
        exit(-1);
@@ -116,17 +122,30 @@ int main(int agrc, char *agrv[])
         exit(1);
     }
 
+    /**
+     * get mac addree by interface name
+     */
     if (ifname) {
         if (get_mac(ifname, local_mac, sizeof(local_mac)) < 0)
             return -1;
         print_mac(local_mac, NULL);
         return 0;
     }
-    if (ipv6_flag > 0) net_type = AF_INET6;
+
+    /**
+     * get remote ip address by mac address
+     */
+    if (remote_mac) {
+        if (get_remote_ip_by_mac(remote_mac, remote_ip, sizeof(remote_ip), 0) < 0)
+            return -1;
+        printf("%s\n", remote_ip);
+        return 0;
+    }
 
     /**
      * Get Local IP Address
      */
+    if (ipv6_flag > 0) net_type = AF_INET6;
     if (local_ip_flag) {
         if (get_local_ip(net_type, NULL, local_ip, sizeof(local_ip)) < 0) {
             exit(-1);
@@ -135,6 +154,9 @@ int main(int agrc, char *agrv[])
         exit(0);
     }
 
+    /**
+     * get gateway ip address
+     */ 
     if (gateway_ip_flag) {
         if (get_gateway(gateway_ip, sizeof(gateway_ip)) < 0) {
             exit(-1);

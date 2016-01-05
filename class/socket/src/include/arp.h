@@ -47,4 +47,16 @@ struct arp_t {
  */
 arp_t *arp_create();
 
+/**
+ * @brief get remote ip by mac address 
+ *
+ * @param mac        [in]  mac address
+ * @param ip         [out] remote ip address
+ * @param size       [in]  size of ip buffer
+ * @param timeout_ms [in]  timeout
+ *
+ * @return 0, if succ; -1, if timeout or failed
+ */
+int get_remote_ip_by_mac(char *mac, char *ip, int size, int timeout_ms);
+
 #endif /* __ARP_H__ */

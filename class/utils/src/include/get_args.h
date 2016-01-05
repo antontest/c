@@ -65,4 +65,8 @@ void get_args(int agrc, char *agrv[], struct options *opt);
  */
 void print_usage(struct usage *help_usage);
 
+/**
+ * @brief set_print_usage_width 
+ */
+void set_print_usage_width(int width);
 #endif /* __GET_ARGS_H__ */

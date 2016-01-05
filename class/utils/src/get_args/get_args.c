@@ -135,7 +135,7 @@ static char *get_proc_name()
     return proc + 1;
 }
 
-#define usage_line_len (50)
+static int usage_line_len = 50;
 void print_usage(struct usage *help_usage)
 {
     struct usage *use    = help_usage;
@@ -144,10 +144,13 @@ void print_usage(struct usage *help_usage)
     int opt_usg_len      = 0;
     int usg_cnt          = 0;
     int cpy_cnt          = 0;
-    char buf[usage_line_len + 1] = {0};
+    char *buf            = NULL;
+    //char buf[usage_line_len + 1] = {0};
     char c = ' ';
 
     if (!use) return;
+    buf = (char *)malloc(usage_line_len + 1);
+    if (!buf) return;
     
     printf("Usage: %s [Options] [Parameters]\n", get_proc_name());
     printf("The Options arg:\n");
@@ -185,6 +188,16 @@ void print_usage(struct usage *help_usage)
         } else {
             printf("  %s%*c%s\n", use->opt_name, opt_name_max_len + 2 - opt_name_len, ' ', use->opt_usage);
         }
-        memset(buf, 0, sizeof(buf));
+        memset(buf, 0, sizeof(usage_line_len + 1));
     }
+
+    if (buf) free(buf);
+}
+
+/**
+ * @brief set_print_usage_width 
+ */
+void set_print_usage_width(int width)
+{
+    usage_line_len = width;
 }

@@ -357,7 +357,7 @@ METHOD(socket_t, send_, int, private_socket_t *this, void *buf, int size)
 
     switch (this->type) {
         case SOCK_DGRAM:
-            send_cnt = sendto(this->accept_fd, buf, size, 0, (struct sockaddr *)this->host_ser->get_sockaddr(this->host_ser), (socklen_t)sizeof(struct sockaddr));
+            send_cnt = sendto(this->accept_fd, buf, size, 0, (struct sockaddr *)this->host_cli->get_sockaddr(this->host_cli), (socklen_t)sizeof(struct sockaddr));
             break;
         default:
             send_cnt = send(this->accept_fd, buf, size, 0);

@@ -13,6 +13,7 @@
 #include <errno.h>
 #include <sys/select.h>
 #include <time.h>
+#include <thread/thread.h>
 
 typedef struct private_arp_t private_arp_t;
 struct private_arp_t {
@@ -209,16 +210,15 @@ METHOD(arp_t, recv_, int, private_arp_t *this, arp_type_t type, void *buf, int s
 
                     if (ntohs(recv_buf.fh.protocol) != 0x0806) break;
                     if (ntohs(recv_buf.ah.ar_op) != type) break;
-                    if (memcmp(this->dst_ip, recv_buf.ah.src_ip, sizeof(this->dst_ip))) break;
-                    print_mac(recv_buf.fh.src_mac, NULL);
-                    if (buf) strncpy(buf, (void *)&recv_buf, size);
+                    //if (memcmp(this->dst_ip, recv_buf.ah.src_ip, sizeof(this->dst_ip))) break;
+                    if (buf) memcpy(buf, &recv_buf, size);
                     recived = 1;
                     break;
                 }
                 break;
         }
 
-        if (timeout_ms > 0) {
+        if (!recived && timeout_ms > 0) {
             gettimeofday(&cur, NULL);
             if (cur.tv_sec > end.tv_sec || (cur.tv_sec == end.tv_sec && cur.tv_usec >= end.tv_usec)) {
                 ret = -1;
@@ -272,4 +272,145 @@ arp_t *arp_create()
     this->hdr.ah.ar_pln = 4;
 
     return &this->public;
+}
+
+typedef struct arp_msg_packet_t arp_msg_packet_t;
+struct arp_msg_packet_t {
+    arp_t *arp;
+    char  *ip;
+    int   ip_size;
+    char  *mac;
+    int   stop;
+    int   timeout;
+    int   found;
+};
+
+static void arp_msg_handler(arp_msg_packet_t *pkg)
+{
+    struct frame_arp recv_buf;
+    struct timeval cur, end;
+    unsigned char mac[6] = {0};
+    int ret              = 0;
+
+    /**
+     * init timeout
+     */
+    if (pkg->timeout > 0) {
+        gettimeofday(&end, NULL);
+        end.tv_sec += pkg->timeout / 1000 + (end.tv_usec + pkg->timeout % 1000 * 1000) / 1000000 ;
+        end.tv_usec = (end.tv_usec + pkg->timeout % 1000 * 1000) % 1000000;
+    }
+
+    pkg->found = 0;
+    mac2arr(pkg->mac, mac);
+    while (1) {
+        /**
+         * recv arp msg
+         */
+        ret = pkg->arp->recv(pkg->arp, ARP_REPLY, (void *)&recv_buf, sizeof(recv_buf), 10);
+
+        /**
+         * compare mac address
+         */
+        if (ret > 0 && !memcmp(mac, recv_buf.fh.src_mac, sizeof(mac))) {
+            pkg->found = 1;
+            break;
+        }
+
+        /**
+         * check timeout
+         */
+        if (pkg->timeout > 0) {
+            gettimeofday(&cur, NULL);
+            if (cur.tv_sec > end.tv_sec || (cur.tv_sec == end.tv_sec && cur.tv_usec >= end.tv_usec)) {
+                pkg->found = 0;
+                break;
+            }
+        }
+    }
+
+    /**
+     * found the mac, return ip address
+     */
+    if (pkg->found == 1) {
+        snprintf(pkg->ip, pkg->ip_size, "%d.%d.%d.%d", 
+                recv_buf.ah.src_ip[0],
+                recv_buf.ah.src_ip[1],
+                recv_buf.ah.src_ip[2],
+                recv_buf.ah.src_ip[3]
+                );
+    }
+
+    pkg->stop = 1;
+}
+
+/**
+ * @brief get remote ip by mac address 
+ *
+ * @param mac        [in]  mac address
+ * @param ip         [out] remote ip address
+ * @param size       [in]  size of ip buffer
+ * @param timeout_ms [in]  timeout
+ *
+ * @return 0, if succ; -1, if timeout or failed
+ */
+int get_remote_ip_by_mac(char *mac, char *ip, int size, int timeout_ms)
+{
+    arp_msg_packet_t msg_pakcet;
+    thread_t *thread  = NULL;
+    arp_t *arp        = NULL;
+    char local_ip[64] = {0};
+    char *ip_save     = NULL;
+    char *save_str    = NULL;
+    char *pos         = NULL;
+    int i             = 0;
+
+    if (!ip || size < 1 || !mac) return -1;
+
+    /**
+     * init 
+     * 1. thread init;
+     * 2. create arp instance;
+     * 3. start arp, if open succ;
+     */
+    threads_init();
+    arp = arp_create();
+    if (arp->open(arp, NULL) < 0)
+        return -1;
+
+    /**
+     * get local ip address
+     */
+    get_local_ip(AF_INET, NULL, local_ip, sizeof(local_ip));
+    ip_save = strtok_r(local_ip, " ;:,", &save_str);
+    if (!ip_save) goto over; 
+
+    /**
+     * package information
+     */
+    msg_pakcet.stop = 0;
+    msg_pakcet.arp  = arp;
+    msg_pakcet.mac  = mac;
+    msg_pakcet.ip   = ip;
+    msg_pakcet.ip_size = size;
+    thread = thread_create((void *)arp_msg_handler, &msg_pakcet);
+
+    /**
+     * send arp request
+     */
+    while (!msg_pakcet.stop && i++ < 255) {
+        pos = strrchr(ip_save, '.');
+        sprintf(pos + 1, "%d%c", i, '\0');
+        arp->send(arp, ARP_REQUEST, NULL, NULL, ip_save, NULL);
+    }
+    thread->join(thread);
+
+    /**
+     * destroy and free memory
+     */
+over:
+    arp->destroy(arp);
+    threads_deinit();
+
+    return msg_pakcet.found == 1 ? 0 : -1;
 }
