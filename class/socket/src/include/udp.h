@@ -4,29 +4,37 @@
 typedef struct udp_t udp_t;
 struct udp_t {
     /**
-     * @brief server listen
+     * @brief create socket
      *
-     * @param ip   [in] ip address listening on, can be NULL;
-     * @param port [in] port listening on, must be more than 0;
-     * @return     socket fd, if succ; -1, if failed;
+     * @param family  [in] AF_INET, AF_INET6
+     * @param ip      [in] ip address 
+     * @param port    [in] port
+     * @return         socket fd, if succ; -1, if failed
      */
-    int (*listen) (udp_t *this, int family, char *ip, int port);
+    int (*socket) (udp_t *this, int family, char *ip, int port);
+
+    /**
+     * @brief server bind
+     * @return 0, if succ; -1, if failed;
+     */
+    int (*bind) (udp_t *this);
 
     /**
      * @brief connect to server 
-     *
-     * @param ip   [in] ip address of server;
-     * @param port [in] port of server listening on;
-     * @return     socket fd, if succ; -1, if failed;
+     * @return 0, if succ; -1, if failed;
      */
-    int (*connect) (udp_t *this, int family, char *ip, int port);
+    int (*connect) (udp_t *this);
 
     /**
-     * @brief tcp server accept 
+     * @brief sendto message
      *
-     * @return accept fd, if succ; -1, if failed
+     * @param buf      [in] message buffer 
+     * @param size     [in] size of message buffer 
+     * @param dst_ip   [in] ip address of server 
+     * @param dst_port [in] port of server listening
+     * @return         count of message sended, if succ; -1, if failed
      */
-    int (*accept) (udp_t *this);
+    int (*sendto) (udp_t *this, void *buf, int size, char *dst_ip, int dst_port);
 
     /**
      * @brief send message
@@ -34,8 +42,19 @@ struct udp_t {
      * @param buf  [in] message buffer
      * @param size [in] size of message
      * @return     count of message sended, if succ; -1, if failed;
-     */
+      */
     int (*send) (udp_t *this, void *buf, int size);
+
+    /**
+     * @brief recvfrom message
+     *
+     * @param buf      [out] message buffer 
+     * @param size     [in]  size of buffer 
+     * @param src_ip   [in]  source ip address 
+     * @param src_port [in]  source port
+     * @return         count of message recved, if succ; -1, if failed
+     */
+    int (*recvfrom) (udp_t *this, void *buf, int size, char *src_ip, int src_port);
 
     /**
      * @brief recv message

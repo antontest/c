@@ -42,6 +42,7 @@ METHOD(tcp_t, listen_, int, private_tcp_t *this, int family, char *ip, int port)
     /**
      * create socket
      */
+    if (tcp_fd > 0) close(tcp_fd);
     tcp_fd = socket(family, SOCK_STREAM, 0);
     if (tcp_fd < 0) {
         perror("socket()");
@@ -51,8 +52,8 @@ METHOD(tcp_t, listen_, int, private_tcp_t *this, int family, char *ip, int port)
     /**
      * create host
      */
-    if (!ip) ip = "%any";
-    tcp_host = host_create_from_string_and_family(ip, family, port);
+    if (tcp_host) tcp_host->destroy(tcp_host);
+    tcp_host = host_create_from_string_and_family(ip ? ip : "%any", family, port);
     if (!tcp_host) {
         printf("create host failed\n");
         return -1;
@@ -86,8 +87,8 @@ METHOD(tcp_t, connect_, int, private_tcp_t *this, int family, char *ip, int port
     /**
      * create socket
      */
-    tcp_accept_fd = socket(family, SOCK_STREAM, 0);
-    if (tcp_accept_fd < 0) {
+    if (tcp_accept_fd <= 0) tcp_accept_fd = socket(family, SOCK_STREAM, 0);
+    if (tcp_accept_fd <= 0) {
         perror("socket()");
         return -1;
     }
@@ -95,8 +96,13 @@ METHOD(tcp_t, connect_, int, private_tcp_t *this, int family, char *ip, int port
     /**
      * create host
      */
-    if (!ip) ip = "%any";
-    tcp_host = host_create_from_string_and_family(ip, family, port);
+    if (tcp_host) {
+        if (tcp_host->get_family(tcp_host) != family || tcp_host->get_port(tcp_host) != port || strcmp(tcp_host->get_ip(tcp_host, NULL, 0), ip)) {
+            tcp_host->destroy(tcp_host);
+            tcp_host = NULL;
+    }
+    }
+    if (!tcp_host) tcp_host = host_create_from_string_and_family(ip ? ip : "%any", family, port);
     if (!tcp_host) {
         printf("create host failed\n");
         return -1;
@@ -137,8 +143,8 @@ METHOD(tcp_t, close_, int, private_tcp_t *this)
 
 METHOD(tcp_t, destroy_, void, private_tcp_t *this)
 {
-    if (tcp_accept_fd) close(tcp_accept_fd);
     if (tcp_fd) close(tcp_fd);
+    if (tcp_accept_fd) close(tcp_accept_fd);
     if (tcp_host) tcp_host->destroy(tcp_host);
     free(this);
 }

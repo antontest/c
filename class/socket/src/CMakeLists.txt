@@ -38,6 +38,7 @@ SET(TEST_SRC     arp/arp_test.c)
 SET(TCP_SRC      tcp/tcp.c)
 SET(TCP_TEST_SRC tcp/tcp-test.c)
 SET(UDP_SRC      udp/udp.c)
+SET(UDP_TEST_SRC udp/udp-test.c)
 
 # lib generation
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/src/lib)
@@ -68,6 +69,7 @@ ADD_EXECUTABLE(msg_send      ${MSG_SEND})
 ADD_EXECUTABLE(listener_test ${LISTEN_TEST})
 ADD_EXECUTABLE(arp_test      ${ARP_TEST_SRC})
 ADD_EXECUTABLE(tcp_test      ${TCP_TEST_SRC})
+ADD_EXECUTABLE(udp_test      ${UDP_TEST_SRC})
 
 # link library
 SET_TARGET_PROPERTIES(socket_shared PROPERTIES OUTPUT_NAME "socket")
@@ -92,6 +94,7 @@ TARGET_LINK_LIBRARIES(arp_test      property arp)
 TARGET_LINK_LIBRARIES(tcp           host utils)
 TARGET_LINK_LIBRARIES(tcp_test      host tcp)
 TARGET_LINK_LIBRARIES(udp           host utils)
+TARGET_LINK_LIBRARIES(udp_test      host udp)
 
 # -------------- INSTALL -------------- #
 # install path setting
