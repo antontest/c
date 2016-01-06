@@ -39,6 +39,7 @@ SET(TCP_SRC      tcp/tcp.c)
 SET(TCP_TEST_SRC tcp/tcp-test.c)
 SET(UDP_SRC      udp/udp.c)
 SET(UDP_TEST_SRC udp/udp-test.c)
+SET(IFACE_SRC    iface/iface.c)
 
 # lib generation
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/src/lib)
@@ -55,6 +56,7 @@ ADD_LIBRARY(listener      SHARED ${LISTEN_SRC})
 ADD_LIBRARY(arp           SHARED ${ARP_SRC})
 ADD_LIBRARY(tcp           SHARED ${TCP_SRC})
 ADD_LIBRARY(udp           SHARED ${UDP_SRC})
+ADD_LIBRARY(iface         SHARED ${IFACE_SRC})
 
 # generat exec
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR})
