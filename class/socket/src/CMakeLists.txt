@@ -40,6 +40,8 @@ SET(TCP_TEST_SRC tcp/tcp-test.c)
 SET(UDP_SRC      udp/udp.c)
 SET(UDP_TEST_SRC udp/udp-test.c)
 SET(IFACE_SRC    iface/iface.c)
+SET(CHUNK_SRC    chunk/chunk.c)
+SET(CHUNK_T_SRC  chunk/chunk-test.c)
 
 # lib generation
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/src/lib)
@@ -57,6 +59,7 @@ ADD_LIBRARY(arp           SHARED ${ARP_SRC})
 ADD_LIBRARY(tcp           SHARED ${TCP_SRC})
 ADD_LIBRARY(udp           SHARED ${UDP_SRC})
 ADD_LIBRARY(iface         SHARED ${IFACE_SRC})
+ADD_LIBRARY(chunk         SHARED ${CHUNK_SRC})
 
 # generat exec
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR})
@@ -72,6 +75,7 @@ ADD_EXECUTABLE(listener_test ${LISTEN_TEST})
 ADD_EXECUTABLE(arp_test      ${ARP_TEST_SRC})
 ADD_EXECUTABLE(tcp_test      ${TCP_TEST_SRC})
 ADD_EXECUTABLE(udp_test      ${UDP_TEST_SRC})
+ADD_EXECUTABLE(chunk_test    ${CHUNK_T_SRC})
 
 # link library
 SET_TARGET_PROPERTIES(socket_shared PROPERTIES OUTPUT_NAME "socket")
@@ -89,7 +93,7 @@ TARGET_LINK_LIBRARIES(local_test    local_socket)
 TARGET_LINK_LIBRARIES(message       local_socket proc mutex bsem thread)
 TARGET_LINK_LIBRARIES(message_test  local_socket proc mutex bsem thread message event)
 TARGET_LINK_LIBRARIES(msg_send      local_socket proc mutex bsem thread message event)
-TARGET_LINK_LIBRARIES(listener      socket_base event pthread chunk packet)
+TARGET_LINK_LIBRARIES(listener      socket_base event pthread)
 TARGET_LINK_LIBRARIES(listener_test socket_base event pthread listener)
 TARGET_LINK_LIBRARIES(arp           property thread)
 TARGET_LINK_LIBRARIES(arp_test      property arp)
@@ -97,6 +101,7 @@ TARGET_LINK_LIBRARIES(tcp           host utils)
 TARGET_LINK_LIBRARIES(tcp_test      host tcp)
 TARGET_LINK_LIBRARIES(udp           host utils)
 TARGET_LINK_LIBRARIES(udp_test      host udp)
+TARGET_LINK_LIBRARIES(chunk_test    chunk)
 
 # -------------- INSTALL -------------- #
 # install path setting
