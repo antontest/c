@@ -1,0 +1,144 @@
+HTTP/1.1 200 OK
+Server: Apache-Coyote/1.1
+X-Powered-By: Servlet 2.5; JBoss-5.0/JBossWeb-2.1
+Set-Cookie: JSESSIONID=08B265E343930A56679E4AD0B2AF562D; Path=/ejbca; Secure
+Content-Type: text/html;charset=UTF-8
+Content-Length: 4393
+Date: Fri, 08 Jan 2016 07:25:45 GMT
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+
+
+
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Certificate Enrollment from CSR - EJBCA</title>
+	<link rel="shortcut icon" href="../images/favicon.png" type="image/png" />
+    <link rel="stylesheet" href="../styles.css" type="text/css" />
+    <script type="text/javascript" src="../scripts/functions.js"></script>
+    <script type="text/vbscript" src="../scripts/functions.vbs"></script>
+  </head>
+
+  <body>
+    <div id="header">
+		<div id="banner">
+			<a href="../index.jsp"><img src="../images/logotype.png" alt="EJBCA" /></a>
+		</div>
+    </div>
+    <div class="menucontainer">
+      <div class="menu">
+        <ul>
+          <li><div class="menuheader">Enroll</div>
+            <ul>
+              <li>
+                <a href="browser.jsp">Create Browser Certificate</a>
+              </li>
+              <li>
+                <a href="server.jsp">Create Certificate from CSR</a>
+              </li>
+              <li>
+                <a href="keystore.jsp">Create Keystore</a>
+              </li>
+              <li>
+                <a href="cvcert.jsp">Create CV certificate</a>
+              </li>
+              
+            </ul>
+          </li>  
+          <li><div class="menuheader">Retrieve</div>
+            <ul>
+              <li>
+                <a href="../retrieve/ca_certs.jsp">Fetch CA &amp; OCSP Certificates</a>
+              </li>
+              <li>
+                <a href="../retrieve/ca_crls.jsp">Fetch CA CRLs</a>
+              </li>
+              <li>
+                <a href="../retrieve/latest_cert.jsp">Fetch User's Latest Certificate</a>
+              </li>
+            </ul>
+          </li>  
+          <li><div class="menuheader">Inspect</div>
+            <ul>
+              <li>
+                <a href="../inspect/request.jsp">Inspect certificate/CSR</a>
+              </li>
+            </ul>
+          </li>
+          <li><div class="menuheader">Miscellaneous</div>
+            <ul>
+              <li>
+                <a href="../retrieve/list_certs.jsp">List  User's Certificates</a>
+              </li>
+              <li>
+                <a href="../retrieve/check_status.jsp">Check Certificate Status</a>
+              </li>
+              <li>
+                
+                <a href="https://172.21.34.121:8443/ejbca/adminweb/index.jsp">Administration</a>
+            </li>
+              
+              <li>
+                <a href="../doc/concepts.html" target="_ejbcaDocWindow">Documentation</a>
+              </li>
+              
+            </ul>
+          </li>  
+        </ul>
+      </div>
+    </div>
+    <div class="main">
+      <div class="content">
+
+<h1 class="title">Certificate enrollment from a CSR</h1>
+<p>Please give your username and password, select a PEM- or DER-formated certification request file (CSR) for upload, 
+or paste a PEM-formated request into the field below and click OK to fetch your certificate. 
+</p>
+
+<p>A PEM-formatted request is a BASE64 encoded certificate request starting with<br />
+  <code>-----BEGIN CERTIFICATE REQUEST-----</code><br />
+  and ending with<br />
+  <code>-----END CERTIFICATE REQUEST-----</code>
+</p>
+
+<form name="EJBCA" action="../certreq" method="post" enctype="multipart/form-data">
+  <fieldset >
+    <legend>Enroll</legend>
+	<label for="user">Username</label>
+	<input type="text" size="40" name="user" id="user" accesskey="u" />
+	<br />
+	<label for="password">Password</label>
+	<input type="password" size="40" name="password" id="password" accesskey="p" />
+
+	<br />
+	<br />
+	<label for="pkcs10file">Request file</label>
+	<input type="file" size="40" name="pkcs10file" id="pkcs10file"></input>
+	<br />
+	<label for="pkcs10req">or pasted request</label>
+	<textarea rows="15" cols="66" name="pkcs10req" id="pkcs10req"></textarea>
+
+	<br />
+	<br />
+	<label for="resulttype">Result type</label>
+	<select name="resulttype" id="resulttype">
+		<option value="1">PEM certificate</option> 
+		<option value="2">PKCS#7 certificate</option>
+	</select>
+	<br />
+	<label for="ok"></label>
+	<input type="submit" id="ok" value="OK" />
+  </fieldset>
+</form>
+
+      </div>
+    </div>
+  </body>
+</html>
+

@@ -127,6 +127,11 @@ void cgi_header_content_type(char *mime_type)
     fprintf(stdout, "Content-type: %s\r\n\r\n", mime_type);
 }
 
+void cgi_header_content_length(int len)
+{
+    fprintf(stdout, "Content-Length: %d\r\n", len);
+}
+
 /**
  * @brief read_cgi_form_info 
  */
@@ -807,7 +812,7 @@ cgi_t *cgi_create()
         _destroy_(this);
         return NULL;
     }
-    CONTENT_TEXT;
+    //CONTENT_TEXT;
 
     read_cgi_form_info();
     _get_form_data_(this);

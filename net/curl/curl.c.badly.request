@@ -1,0 +1,184 @@
+/**
+ * usual head files
+ */
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <curl/curl.h>
+
+/*********************************************************
+ **************    Function Declaration    ***************
+ *********************************************************/
+int write_data(void *buffer, int size, int nmemb, void *stream)
+{
+    FILE *fp = (FILE *)stream;
+    fwrite(buffer, size, nmemb, fp);
+    return size * nmemb;
+}
+
+/*********************************************************
+ ******************    Main Function    ******************
+ *********************************************************/
+int main(int agrc, char *agrv[])
+{
+    int rt = 0; /* return value of function main */
+    CURL *curl = NULL;
+    struct curl_httppost *formpost=NULL;  
+    struct curl_httppost *lastptr=NULL;  
+    struct curl_slist *headerlist=NULL;  
+    FILE *fp;
+
+    fp = fopen("./post", "wb");
+    if (!fp) return -1;
+    
+    curl = curl_easy_init();
+    if (!curl) return -1;
+
+    curl_formadd(&formpost, 
+            &lastptr, 
+            CURLFORM_COPYNAME, "user",
+            CURLFORM_COPYCONTENTS, "anton",
+            CURLFORM_END);
+    curl_formadd(&formpost, 
+            &lastptr, 
+            CURLFORM_COPYNAME, "password",
+            CURLFORM_COPYCONTENTS, "123456",
+            CURLFORM_END);
+    curl_formadd(&formpost, 
+            &lastptr, 
+            CURLFORM_COPYNAME, "pkcs10file",
+            CURLFORM_COPYCONTENTS, "anton_req.pem",
+            CURLFORM_END);
+    curl_formadd(&formpost, 
+            &lastptr, 
+            CURLFORM_COPYNAME, "sendfile",
+            CURLFORM_FILE, "/home/anton/ipsec/req/anton/anton_req.pem", 
+            CURLFORM_END);
+    curl_formadd(&formpost, 
+            &lastptr, 
+            CURLFORM_COPYNAME, "filename",
+            CURLFORM_COPYCONTENTS, "anton_req.pem",
+            CURLFORM_END);
+/*     curl_formadd(&formpost,  */
+/*             &lastptr,  */
+/*             CURLFORM_COPYNAME, "pkcs10req", */
+/*             CURLFORM_COPYCONTENTS, "-----BEGIN CERTIFICATE REQUEST-----\ */
+/*             MIICdDCCAVwCAQAwLzELMAkGA1UEBhMCQ04xEDAOBgNVBAoTB1NlcmNvbW0xDjAM\ */
+/*             BgNVBAMTBWFudG9uMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0Dt/\ */
+/*             jUiYvkrvxQbZLWVpj9QRnW0jpp7BQ1EDHkDAtAwwZ2OfGv+pipGcGWd/WLaMLDsy\ */
+/*             7qoOnhKaqnHVNutqbmUPVJtqlfUVJpp+qN0ubw8mE2XGCmnH4NVVS8Fi3sdpsCRm\ */
+/*             2NHIZ48aKpBuLNpZ2rK/nbt7U8nDNGf3puwDlp1aP+Z52DVqvDdVpnPL5+thJnli\ */
+/*             JeitlpD3mNEFiRm2aQ4lDF+D+Jn8AMTefDvjeBZZXn9Z4NVtQnwiIEp6uJmMDSpD\ */
+/*             YbiVLoRMw/ODQLbnEGiRpYysQu19Qb8FIVonvxtVR7np373IDNbArdwzOUIbzxYy\ */
+/*             sDqjyOi1xGB4jOJqVQIDAQABoAAwDQYJKoZIhvcNAQELBQADggEBAGe+Sgkb4g62\ */
+/*             Z3tGwFIupsMOF3UL4WPxGZsYg4IxCbHzLmGh3wRw2cn1qBrPA5j2uvI2n+4MqxRf\ */
+/*             m8/CRMMPCpQJo2OCAUsII+zZOwRvIujJ7VOIr/up1Ma2oi0DxwqZ0fAp0EBeJAG9\ */
+/*             kpTS1hugTsT8dJpcpEfl0AgUWJWk+dLwOJylWnH+KbP7hQygD9p6tzjNfWmWDiq9\ */
+/*             uiAGGXA7igbQ6aTOc7EzHMR0uno90KyYudYOtY1Y7XD5tauH3VMfL5Rr/Nilq9oQ\ */
+/*             RlMpjsZlAbjRD3Dz3YQwure8qXDX0RCK3xkeWPfB3qlgp0LBmiuurv4og1uF0z7w\ */
+/*             Ce0/bk3dVpM=\ */
+/*             -----END CERTIFICATE REQUEST-----", */
+/*             CURLFORM_END); */
+    curl_formadd(&formpost, 
+            &lastptr, 
+            CURLFORM_COPYNAME, "resulttype",
+            CURLFORM_COPYCONTENTS, "1", 
+            CURLFORM_END);
+    curl_formadd(&formpost,  
+            &lastptr,  
+               CURLFORM_COPYNAME, "submit",  
+               CURLFORM_COPYCONTENTS, "send",  
+               CURLFORM_END);  
+  
+    static const char buf[] = "Expect:";  
+    CURLM *multi_handle;
+    multi_handle = curl_multi_init();  
+    headerlist = curl_slist_append(headerlist, buf);  
+    if (!multi_handle) return -1;
+
+    curl_easy_setopt(curl, CURLOPT_URL, "https://172.21.34.121:8443/ejbca/certreq");
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerlist);  
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0);  
+    curl_easy_setopt(curl, CURLOPT_SSLCERT, "file.crt.pem");
+    curl_easy_setopt(curl, CURLOPT_SSLKEY, "file.key.pem");
+    curl_easy_setopt(curl, CURLOPT_SSLCERTPASSWD, "ejbca");
+    curl_easy_setopt(curl, CURLOPT_SSLKEYPASSWD, "ejbca");
+    curl_easy_setopt(curl, CURLOPT_CAPATH, "/home/anton/ftp/");
+    curl_easy_setopt(curl, CURLOPT_CAINFO, "file.crt.pem");  
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, 0);
+    //curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
+    //curl_easy_setopt(curl, CURLOPT_USERPWD, "anton:123456");
+    curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);  
+
+    int still_running;
+    curl_multi_add_handle(multi_handle, curl);  
+    curl_multi_perform(multi_handle, &still_running);  
+    //curl_easy_perform(curl);
+
+    do {  
+      struct timeval timeout;  
+      int rc; /* select() return code */  
+  
+      fd_set fdread;  
+      fd_set fdwrite;  
+      fd_set fdexcep;  
+      int maxfd            = -1;
+  
+      long curl_timeo      = -1;
+  
+      FD_ZERO(&fdread);  
+      FD_ZERO(&fdwrite);  
+      FD_ZERO(&fdexcep);  
+  
+      /* set a suitable timeout to play around with */  
+      timeout.tv_sec       = 1;
+      timeout.tv_usec      = 0;
+  
+      curl_multi_timeout(multi_handle, &curl_timeo);  
+      if(curl_timeo       >= 0) {
+        timeout.tv_sec     = curl_timeo / 1000;
+        if(timeout.tv_sec > 1)  
+          timeout.tv_sec   = 1;
+        else  
+          timeout.tv_usec  = (curl_timeo % 1000) * 1000;
+      }  
+  
+      /* get file descriptors from the transfers */  
+      curl_multi_fdset(multi_handle, &fdread, &fdwrite, &fdexcep, &maxfd);  
+  
+      /* In a real-world program you OF COURSE check the return code of the 
+         function calls.  On success, the value of maxfd is guaranteed to be 
+         greater or equal than -1.  We call select(maxfd + 1, ...), specially in 
+         case of (maxfd == -1), we call select(0, ...), which is basically equal 
+         to sleep. */  
+  
+      rc                   = select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
+  
+      switch(rc) {  
+      case -1:  
+        /* select error */  
+        break;  
+      case 0:  
+      default:  
+        /* timeout or readable/writable sockets */  
+        printf("perform!\n");  
+        curl_multi_perform(multi_handle, &still_running);  
+        printf("running: %d!\n", still_running);  
+        break;  
+      }  
+    } while(still_running);  
+  
+    curl_multi_cleanup(multi_handle);  
+  
+    /* always cleanup */  
+    curl_easy_cleanup(curl);  
+  
+    /* then cleanup the formpost chain */  
+    curl_formfree(formpost);  
+  
+    /* free slist */  
+    curl_slist_free_all (headerlist);  
+    return rt;
+}

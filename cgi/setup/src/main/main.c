@@ -34,6 +34,7 @@ int main(int agrc, char *agrv[])
         {NULL,            KEY_IS_UNKOWN,      NULL,              NULL}
     };
 
+    cgi_header_content_type("text/html");
     cgi->parse_form_input(cgi, data);
     cgi->write_to_html(cgi, data);
     cgi->destroy(cgi);

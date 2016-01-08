@@ -6,6 +6,7 @@
 #define CONTENT_TYPE   getenv("CONTENT_TYPE")
 #define CONTENT_LENGTH atoi(getenv("CONTENT_LENGTH"))
 #define CONTENT_TEXT   printf("Content-type: text/html\r\n\r\n")
+#define DOWNLOAD_TEXT  printf("Content-type: application/octet-stream\r\n\r\n")
 #define HTML_START     printf("<HTML>")
 #define HTML_END       printf("</HTML>")
 #define HEAD_START     printf("<HEAD>")
@@ -179,6 +180,7 @@ void html_alert(char *errmsg);
 void cgi_header_location(char *redirect_url);
 void cgi_header_status(int status, char *status_msg);
 void cgi_header_content_type(char *mime_type);
+void cgi_header_content_length(int len);
 
 /**
  * @brief create cgi instance 

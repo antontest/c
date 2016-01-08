@@ -28,11 +28,44 @@ static int file_upload(char *input, char *errmsg, cgi_form_entry_t *entry)
     return 0;
 }
 
+static int todo(char *input, char *errmsg, cgi_form_entry_t *entry)
+{
+    FILE *fp = NULL;
+    int len = 0;
+    char c;
+
+    if (!strcmp(input, "download")) {
+        fp = fopen("/home/anton/ftp/test", "rb");
+        if (!fp) return -1;
+
+        fseek(fp, 0, SEEK_END);
+        len = ftell(fp);
+        if (len < 1) goto over;
+        fseek(fp, 0, SEEK_SET);
+
+        fprintf(stdout, "Content-Disposition:attachment;filename=%s\r\n", "test");
+        cgi_header_content_length(len);
+        cgi_header_content_type("application/octet-stream");
+
+        c = getc(fp);
+        while (!feof(fp)) {
+            putc(c, stdout);
+            c = getc(fp);
+        }
+        fflush(fp);
+    }
+
+over:
+    if (fp) fclose(fp);
+    return 0;
+}
+
 int main(void)  
 {  
     cgi_func_tab_t func_tab[] = {
         {"upload",   KEY_IS_FILE, NULL, NULL},
         {"filename", KEY_IS_VAR,  NULL, (void *)file_upload},
+        {"todo",     KEY_IS_VAR,  NULL, (void *)todo},
         {NULL}
     };
 
