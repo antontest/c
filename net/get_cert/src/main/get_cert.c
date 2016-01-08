@@ -102,6 +102,7 @@ int main(int argc, char *argv[])
         curl_formfree(formpost);
         /* free slist */ 
         curl_slist_free_all (headerlist);
+        curl_global_cleanup();
     }
     return 0;
 }
