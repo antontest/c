@@ -23,7 +23,8 @@ int main(int agrc, char *agrv[])
     curl_global_init(CURL_GLOBAL_ALL);
     curl = curl_easy_init();
     curl_easy_setopt(curl, CURLOPT_URL, "https://192.168.0.106:8443/ejbca/adminweb/ra/editendentity.jsp");
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "action=edituser&hiddenprofile=1&username=lte&selectchangestatus=10&buttonedituser=Save&textfieldpassword=123456&textfieldconfirmpassword=123456&checkboxcleartextpassword=true&textfieldsubjectdn13=lte&textfieldsubjectdn15=Sercomm&textfieldsubjectdn19=CN&selectcertificateprofile=1&selectca=1866329767&selecttoken=1"); 
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "action=edituser&hiddenprofile=1&username=lte&selectchangestatus=10&buttonedituser=Save&textfieldpassword=123456&textfieldconfirmpassword=123456&checkboxcleartextpassword=true&textfieldsubjectdn13=lte&textfieldsubjectdn15=Sercomm&textfieldsubjectdn19=CN&selectcertificateprofile=1&selecttoken=1&selectca=1866329767");
+    //curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "action=edituser&hiddenprofile=1&username=lte&selectchangestatus=10&buttonedituser=Save&textfieldpassword=123456&textfieldconfirmpassword=123456&checkboxcleartextpassword=true&textfieldsubjectdn13=lte&textfieldsubjectdn15=Sercomm&textfieldsubjectdn19=CN&selectcertificateprofile=1&selectca=1866329767&selecttoken=1"); 
     //curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "action=edituser&hiddenprofile=1&username=lte&selectchangestatus=10&buttonedituser=Save&textfieldpassword=123456&textfieldconfirmpassword=123456&radiomaxfailedlogins=unlimited&checkboxcleartextpassword=true&textfieldsubjectdn13=lte&textfieldsubjectdn15=Sercomm&textfieldsubjectdn19=CN&selectcertificateprofile=1&selectca=1866329767&selecttoken=1"); 
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
     curl_easy_setopt(curl, CURLOPT_CAPATH, "/home/anton/download/req/file.sa.crt.pem");
