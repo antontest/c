@@ -95,7 +95,7 @@ void html_alert(char *msg)
     TITLE("alert");
     HEAD_END;
     BODY_START;
-    ALERT(msg);
+    ALERT("%s", msg);
     BODY_END;
     HTML_END;
 }
@@ -409,7 +409,7 @@ static int parse_form_input_data(private_cgi_t *this, cgi_func_tab_t *func_tab)
 
         if (pfunc_tab->set_func_cb(value, cgi_errmsg_buf, &cgi_form_entry) < 0 && 
             strlen(cgi_errmsg_buf) > 0) {
-            ALERT(cgi_errmsg_buf);
+            ALERT("%s", cgi_errmsg_buf);
             if (pfunc_tab->err_func_cb) pfunc_tab->err_func_cb(cgi_input_buf, cgi_errmsg_buf, &cgi_form_entry); 
             break;
         }
@@ -575,10 +575,6 @@ METHOD(cgi_t, parse_form_input_, int, private_cgi_t *this, cgi_func_tab_t *func_
 {
     if (!cgi_form_data || cgi_form_data_len < 1) return 0;
 
-    char buf[30240] = {0};
-    snprintf(buf, sizeof(buf), "echo \"%s\" > /home/anton/cgi.txt", cgi_form_data);
-    if (system(buf)) {}
-
     /**
      * parse form input data by request method(post, get)
      * 1. post 
@@ -726,7 +722,7 @@ METHOD(cgi_t, alert_, void, private_cgi_t *this, const char *fmt, ...)
     va_start(arg, fmt);
     vsnprintf(msg, sizeof(msg), fmt, arg);
     va_end(arg);
-    ALERT(msg);
+    ALERT("%s", msg);
 }
 
 static void free_cgi_form_entry(cgi_form_entry_t *entry) 

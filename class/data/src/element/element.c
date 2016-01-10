@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <utils/utils.h>
+#include <utils.h>
 
 element_t *create_element(void *value)
 {

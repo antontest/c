@@ -80,7 +80,7 @@ ADD_EXECUTABLE(chunk_test    ${CHUNK_T_SRC})
 # link library
 SET_TARGET_PROPERTIES(socket_shared PROPERTIES OUTPUT_NAME "socket")
 TARGET_LINK_LIBRARIES(socket_shared utils host thread enum mutex socket_base)
-TARGET_LINK_LIBRARIES(socket_base   host)
+TARGET_LINK_LIBRARIES(socket_base   host utils)
 TARGET_LINK_LIBRARIES(ftp           fileio socket_shared)
 TARGET_LINK_LIBRARIES(socket        socket_shared get_args property ftp socket_base arp)
 TARGET_LINK_LIBRARIES(ftp_client    socket_shared get_args ftp)

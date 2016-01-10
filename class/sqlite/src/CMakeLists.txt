@@ -41,4 +41,4 @@ install_hfiles(include include)
 install_lib(lib lib)
 
 # install target
-INSTALL(TARGETS sqlite_bin RUNTIME DESTINATION bin)
+#INSTALL(TARGETS sqlite_bin RUNTIME DESTINATION bin)

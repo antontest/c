@@ -1,0 +1,6 @@
+#! /bin/bash
+# Name : ./install_sqlite_dev
+# Func : 
+# Time : 2016-01-09 16:23:49
+
+sudo apt-get install libsqlite3-dev
