@@ -136,18 +136,6 @@ next:
     if (!pos) return -1;
 
     /**
-     * change end entity status
-     */
-    p = html_data;
-    while (p->name != NULL && p->type != HTML_UNKOWN) {
-        if (!strcmp(p->name, "selectchangestatus")) {
-            strcpy(p->value, "10");
-            break;
-        }
-        p++;
-    }
-
-    /**
      * add selectca
      */
     p = html_data;
@@ -262,6 +250,18 @@ int change_end_entiry_status(CURL *curl, struct html_data_t *html_data)
         p++;
     }
 
+    /**
+     * change end entity status
+     */
+    p = html_data;
+    while (p->name != NULL && p->type != HTML_UNKOWN) {
+        if (!strcmp(p->name, "selectchangestatus")) {
+            strcpy(p->value, "10");
+            break;
+        }
+        p++;
+    }
+
     post_data = gen_requst_string(html_data);
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post_data);
     curl_easy_setopt(curl, CURLOPT_POST, 1); 
@@ -275,11 +275,12 @@ int change_end_entiry_status(CURL *curl, struct html_data_t *html_data)
     return 0;
 }
 
-int get_cert(CURL *curl)
+int get_cert(CURL *curl, struct html_data_t *html_data)
 {
     struct curl_httppost *formpost = NULL;
     struct curl_httppost *lastptr  = NULL;
     struct curl_slist *headerlist  = NULL;
+    struct html_data_t *p = html_data;
     const char buf[] = "Expect:";
     FILE *fp = NULL;
     CURLcode res;
@@ -344,6 +345,19 @@ int get_cert(CURL *curl)
     if(res != CURLE_OK) {
         fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
     }
+
+    /**
+     * change end entity status
+     */
+    p = html_data;
+    while (p->name != NULL && p->type != HTML_UNKOWN) {
+        if (!strcmp(p->name, "selectchangestatus")) {
+            strcpy(p->value, "40");
+            break;
+        }
+        p++;
+    }
+
 
 over:
     if (fp) fclose(fp);
@@ -417,7 +431,7 @@ int main(int argc, char *argv[])
     /**
      * gen cert
      */
-    if (get_cert(curl) < 0)
+    if (get_cert(curl, html_data) < 0)
         goto cleanup;
 
     /**
