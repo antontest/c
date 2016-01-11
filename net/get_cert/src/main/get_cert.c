@@ -1,10 +1,15 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <curl/curl.h>
+#include <sys/wait.h>
 
-static const char *edit_endentity_htm = "editendentity.htm";
-static const char *cert = "operator_cert.pem";
+#define END_ENTITY_HTM_PATH "edit_end_entity.htm"
+#define CA_CERT "ca_cert.pem"
+#define EJBCA_SERVER_IP "https://172.21.34.121:8443/ejbca"
+#define SSL_CERT_KEY_PATH "/home/anton/download/req/"
+
 size_t write_data(void* buffer,size_t size,size_t nmemb,void *stream)  
 {  
     FILE *fptr = (FILE*)stream;  
@@ -24,13 +29,31 @@ struct html_data_t {
     char value[56];
 };
 
-char *gen_requst_string(struct html_data_t *html_data)
+static struct html_data_t html_data[] = {
+    {"action", HTML_INPUT},
+    {"hiddenprofile", HTML_INPUT},
+    {"username", HTML_INPUT},
+    {"selectchangestatus", HTML_SELECT},
+    {"buttonedituser", HTML_INPUT},
+    {"textfieldpassword", HTML_INPUT},
+    {"textfieldconfirmpassword", HTML_INPUT},
+    {"checkboxcleartextpassword", HTML_INPUT},
+    {"textfieldsubjectdn13", HTML_INPUT},
+    {"textfieldsubjectdn15", HTML_INPUT},
+    {"textfieldsubjectdn19", HTML_INPUT},
+    {"selectcertificateprofile", HTML_SELECT},
+    {"selecttoken", HTML_SELECT},
+    {"selectca", HTML_UNKOWN},
+    {"buttonedituser", HTML_INPUT},
+    {NULL}
+};
+
+char *gen_requst_string()
 {
     static char requst_data[1024] = {0};
     struct html_data_t *p = html_data;
     int len = 0;
 
-    if (!html_data) return NULL;
     while (p->name != NULL) {
         if (p->type == HTML_UNKOWN) {
             p++;
@@ -45,21 +68,26 @@ char *gen_requst_string(struct html_data_t *html_data)
     return requst_data;
 }
 
-int get_end_entiry_data(CURL *curl, struct html_data_t *html_data)
+int get_end_entiry_data(CURL *curl, const char *username)
 {
     char buf[1024] = {0};
     char key[56]   = {0};
     char caid[28]  = {0};
+    char url[256]  = {0};
     char *pos = NULL;
     FILE *fp  = NULL;
     char *pvalue;
     struct html_data_t *p = html_data;
     CURLcode res;
 
-    fp = fopen(edit_endentity_htm, "w");
+    fp = fopen(END_ENTITY_HTM_PATH, "w");
     if (!fp) return -1;
 
-    curl_easy_setopt(curl, CURLOPT_URL, "https://192.168.0.106:8443/ejbca/adminweb/ra/editendentity.jsp?username=lte");
+    /**
+     * send html get request
+     */
+    snprintf(url, sizeof(url), EJBCA_SERVER_IP "/adminweb/ra/editendentity.jsp?username=%s", username);
+    curl_easy_setopt(curl, CURLOPT_URL, url);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp); 
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1);   
@@ -70,7 +98,10 @@ int get_end_entiry_data(CURL *curl, struct html_data_t *html_data)
         return -1;
     }
 
-    fp = fopen(edit_endentity_htm, "r");
+    /**
+     * deal with requst data
+     */
+    fp = fopen(END_ENTITY_HTM_PATH, "r");
     if (!fp) return -1;
     while (fgets(buf, sizeof(buf), fp) != NULL && p->name != NULL) {
         if (p->type == HTML_UNKOWN)
@@ -80,6 +111,9 @@ int get_end_entiry_data(CURL *curl, struct html_data_t *html_data)
         pos = strstr(buf, key);
         if (!pos) continue;
         
+        /**
+         * get key value
+         */
         if (p->type == HTML_INPUT) {
             pos = strstr(buf, "value");
             if (!pos) return -1;
@@ -136,7 +170,7 @@ next:
     if (!pos) return -1;
 
     /**
-     * add selectca
+     * set selectca id
      */
     p = html_data;
     while (p->name != NULL) {
@@ -151,20 +185,24 @@ next:
     return 0;
 }
 
-int change_ca(CURL *curl, const char *ca_name, struct html_data_t *html_data)
+int change_ca(CURL *curl, const char *ca_name, const char *user)
 {
     struct html_data_t *p = html_data;
     FILE *fp = NULL;
     char buf[1024] = {0};
     char key[128] = {0};
+    char url[256] = {0};
     char *pos = NULL;
     char *requst_data = NULL;
     CURLcode res;
 
     if (!ca_name || !p) return -1;
-    fp = fopen(edit_endentity_htm, "r");
+    fp = fopen(END_ENTITY_HTM_PATH, "r");
     if (!fp) return -1;
 
+    /**
+     * find ca name position
+     */
     snprintf(key, sizeof(key), "[CANAME] = \"%s\"", ca_name);
     while (fgets(buf, sizeof(buf), fp) != NULL) {
         pos = strstr(buf, ca_name);
@@ -172,6 +210,9 @@ int change_ca(CURL *curl, const char *ca_name, struct html_data_t *html_data)
     }
     if (!pos) return -1;
 
+    /**
+     * get ca id
+     */
     while (fgets(buf, sizeof(buf), fp) != NULL) {
         pos = strstr(buf, "CAID");
         if (!pos) continue;
@@ -193,6 +234,9 @@ int change_ca(CURL *curl, const char *ca_name, struct html_data_t *html_data)
     }
     if (!pos) return -1;
 
+    /**
+     * change edituser event to change issuer ca
+     */
     p = html_data;
     while (p->name != NULL) {
         if (!strcmp(p->name, "buttonedituser")) { 
@@ -212,10 +256,12 @@ int change_ca(CURL *curl, const char *ca_name, struct html_data_t *html_data)
     }
 
     /**
-     * post to change end entity status
+     * post to change issuer ca
      */
-    curl_easy_setopt(curl, CURLOPT_URL, "https://192.168.0.106:8443/ejbca/adminweb/ra/editendentity.jsp?username=lte");
-    requst_data = gen_requst_string(html_data);
+    snprintf(url, sizeof(url), "%s/adminweb/ra/editendentity.jsp?username=%s", EJBCA_SERVER_IP, user);
+    //curl_easy_setopt(curl, CURLOPT_URL, EJBCA_SERVER_IP "/adminweb/ra/editendentity.jsp?username=lte");
+    curl_easy_setopt(curl, CURLOPT_URL, url);
+    requst_data = gen_requst_string();
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, requst_data);
     curl_easy_setopt(curl, CURLOPT_POST, 1); 
     res = curl_easy_perform(curl);
@@ -228,12 +274,15 @@ int change_ca(CURL *curl, const char *ca_name, struct html_data_t *html_data)
     return 0;
 }
 
-int change_end_entiry_status(CURL *curl, struct html_data_t *html_data)
+int change_end_entiry_status(CURL *curl)
 {
     struct html_data_t *p = html_data;
     char *post_data = NULL;
     CURLcode res;
 
+    /**
+     * change edituser event to change end entity status 
+     */
     p = html_data;
     while (p->name != NULL) {
         if (!strcmp(p->name, "buttonedituser")) {
@@ -262,7 +311,10 @@ int change_end_entiry_status(CURL *curl, struct html_data_t *html_data)
         p++;
     }
 
-    post_data = gen_requst_string(html_data);
+    /**
+     * post ca change request
+     */
+    post_data = gen_requst_string();
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post_data);
     curl_easy_setopt(curl, CURLOPT_POST, 1); 
     res = curl_easy_perform(curl);
@@ -275,42 +327,75 @@ int change_end_entiry_status(CURL *curl, struct html_data_t *html_data)
     return 0;
 }
 
-int get_cert(CURL *curl, struct html_data_t *html_data)
+int get_cert(CURL *curl, const char *user, const char *password)
 {
     struct curl_httppost *formpost = NULL;
     struct curl_httppost *lastptr  = NULL;
     struct curl_slist *headerlist  = NULL;
     struct html_data_t *p = html_data;
     const char buf[] = "Expect:";
+    char cmd_buf[512] = {0};
+    char key_path[128] = {0};
+    char req_file_path[128] = {0};
+    char cert_path[128] = {0};
     FILE *fp = NULL;
     CURLcode res;
 
+    /**
+     * open file for getting OPERATOR_CERT
+     */
+    snprintf(cert_path, sizeof(cert_path), "%s_cert.pem", user);
+    if (!access(cert_path, R_OK)) {
+        fprintf(stderr, "cert \"%s\" already exist!\n", cert_path);  
+        goto over;
+    }
+    if ((fp = fopen(cert_path, "w")) == NULL) {  
+        fprintf(stderr, "fopen file error:%s\n", cert_path);  
+        goto over;
+    }  
+    
     /* Fill in the user field */ 
     curl_formadd(&formpost,
             &lastptr,
             CURLFORM_COPYNAME, "user",
-            CURLFORM_COPYCONTENTS, "lte",
+            CURLFORM_COPYCONTENTS, user,
             CURLFORM_END);
 
     /* Fill in the password field */ 
     curl_formadd(&formpost,
             &lastptr,
             CURLFORM_COPYNAME, "password",
-            CURLFORM_COPYCONTENTS, "123456",
+            CURLFORM_COPYCONTENTS, password,
             CURLFORM_END);
+    
+    /**
+     * generate request file
+     */
+    snprintf(key_path, sizeof(key_path), "%s/key", SSL_CERT_KEY_PATH);
+    snprintf(cmd_buf, sizeof(cmd_buf), "ipsec pki --gen --size 2048 --outform pem > %s", key_path);
+    if (WEXITSTATUS(system(cmd_buf)) < 0) {
+        fprintf(stderr, "generate cert key \"key\" failed!\n");
+        return -1;
+    }
+    snprintf(req_file_path, sizeof(req_file_path), "%s/tmp_req.pem", SSL_CERT_KEY_PATH);
+    snprintf(cmd_buf, sizeof(cmd_buf), "ipsec pki --req --in %s --dn \"C=CN, O=Sercomm, CN=%s\" --outform pem > %s", key_path, user, req_file_path);
+    if (WEXITSTATUS(system(cmd_buf)) < 0) {
+        fprintf(stderr, "generate cert request file failed!\n");
+        return -1;
+    }
 
     /* Fill in the file upload field */ 
     curl_formadd(&formpost,
             &lastptr,
             CURLFORM_COPYNAME, "pkcs10file",
-            CURLFORM_FILE, "/home/anton/download/req/lte_req.pem",
+            CURLFORM_FILE, req_file_path,
             CURLFORM_END);
 
     /* Fill in the filename field */ 
     curl_formadd(&formpost,
             &lastptr,
             CURLFORM_COPYNAME, "filename",
-            CURLFORM_COPYCONTENTS, "lte_req.pem",
+            CURLFORM_COPYCONTENTS, "req_file.pem",
             CURLFORM_END);
 
     /* Fill in the password field */ 
@@ -321,19 +406,10 @@ int get_cert(CURL *curl, struct html_data_t *html_data)
             CURLFORM_END);
 
     /**
-     * open file for getting cert
-     */
-    if ((fp = fopen(cert, "w")) == NULL) {  
-        fprintf(stderr,"fopen file error:%s\n", "post_result");  
-        goto over;
-    }  
-    
-    /**
-     * post cert generate request
+     * post OPERATOR_CERT generate request
      */
     headerlist = curl_slist_append(headerlist, buf);
-    curl_easy_setopt(curl, CURLOPT_URL, "https://192.168.0.106:8443/ejbca/certreq");
-    //curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerlist);
+    curl_easy_setopt(curl, CURLOPT_URL, EJBCA_SERVER_IP "/certreq");
     curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data); 
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp); 
@@ -358,7 +434,6 @@ int get_cert(CURL *curl, struct html_data_t *html_data)
         p++;
     }
 
-
 over:
     if (fp) fclose(fp);
     curl_formfree(formpost);
@@ -366,27 +441,64 @@ over:
     return 0;
 }
 
+int get_ca_cert(CURL *curl, const char *ca_name)
+{
+    FILE *fp = NULL;
+    char url[256] = {0};
+    char dn[56] = {0};
+    char *dncode = NULL;
+    CURLcode res;
+
+    fp = fopen(CA_CERT, "w");
+    if (!fp) return -1;
+
+    /**
+     * encode url
+     */
+    snprintf(dn, sizeof(dn), "CN=%s,O=Sercomm,C=CN", ca_name);
+    dncode = curl_easy_escape(curl, dn, strlen(dn));
+    if (!dncode) return -1;
+    snprintf(url, sizeof(url), "%s/publicweb/webdist/certdist?cmd=cacert&issuer=%s&level=0", EJBCA_SERVER_IP, dncode);
+    curl_free(dncode);
+
+    /**
+     * send file download request
+     */
+    curl_easy_setopt(curl, CURLOPT_URL, url);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp); 
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1);   
+    res = curl_easy_perform(curl);
+    if(res != CURLE_OK) {
+        fprintf(stderr, "curl_easy_perform() failed: %s\n",
+                curl_easy_strerror(res));
+        return -1;
+    }
+
+    return 0;
+}
+
 int main(int argc, char *argv[])
 {
+    int ret = -1;
+    char err_msg[256] = {0};
     CURL *curl;
-    struct html_data_t html_data[] = {
-        {"action", HTML_INPUT},
-        {"hiddenprofile", HTML_INPUT},
-        {"username", HTML_INPUT},
-        {"selectchangestatus", HTML_SELECT},
-        {"buttonedituser", HTML_INPUT},
-        {"textfieldpassword", HTML_INPUT},
-        {"textfieldconfirmpassword", HTML_INPUT},
-        {"checkboxcleartextpassword", HTML_INPUT},
-        {"textfieldsubjectdn13", HTML_INPUT},
-        {"textfieldsubjectdn15", HTML_INPUT},
-        {"textfieldsubjectdn19", HTML_INPUT},
-        {"selectcertificateprofile", HTML_SELECT},
-        {"selecttoken", HTML_SELECT},
-        {"selectca", HTML_UNKOWN},
-        {"buttonedituser", HTML_INPUT},
-        {NULL}
-    };
+
+    /**
+     * check ssl cert whether is exist
+     */
+    if (access(SSL_CERT_KEY_PATH "ssl.sa.crt.pem", R_OK)) {
+        fprintf(stderr, "ssl ca cert \"%sssl.sa.crt.pem\" does not exist!\n", SSL_CERT_KEY_PATH);
+        return -1;
+    }
+    if (access(SSL_CERT_KEY_PATH "ssl.cli.crt.pem", R_OK)) {
+        fprintf(stderr, "ssl client cert \"%sssl.cli.crt.pem\" does not exist!\n", SSL_CERT_KEY_PATH);
+        return -1;
+    }
+    if (access(SSL_CERT_KEY_PATH "ssl.cli.key.pem", R_OK)) {
+        fprintf(stderr, "ssl cert key \"%sssl.cli.key.pem\" does not exist!\n", SSL_CERT_KEY_PATH);
+        return -1;
+    }
 
     /**
      * libcurl init
@@ -394,17 +506,17 @@ int main(int argc, char *argv[])
     curl_global_init(CURL_GLOBAL_ALL);
     curl = curl_easy_init();
     if(!curl) {
-        fprintf(stderr, "libcurl init failed\n");
+        snprintf(err_msg, sizeof(err_msg), "libcurl init failed\n");
         return -1;
     }
 
     /**
      * libcurl https SSL init
      */
-    curl_easy_setopt(curl, CURLOPT_CAPATH, "/home/anton/download/req/file.sa.crt.pem");
-    curl_easy_setopt(curl, CURLOPT_CAINFO, "/home/anton/download/req/file.sa.crt.pem");
-    curl_easy_setopt(curl, CURLOPT_SSLCERT, "/home/anton/download/req/file.cli.crt.pem"); 
-    curl_easy_setopt(curl, CURLOPT_SSLKEY, "/home/anton/download/req/file.cli.key.pem"); 
+    curl_easy_setopt(curl, CURLOPT_CAPATH, SSL_CERT_KEY_PATH "ssl.sa.crt.pem");
+    curl_easy_setopt(curl, CURLOPT_CAINFO, SSL_CERT_KEY_PATH "ssl.sa.crt.pem");
+    curl_easy_setopt(curl, CURLOPT_SSLCERT, SSL_CERT_KEY_PATH "ssl.cli.crt.pem"); 
+    curl_easy_setopt(curl, CURLOPT_SSLKEY, SSL_CERT_KEY_PATH "ssl.cli.key.pem"); 
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 0);   
@@ -413,37 +525,59 @@ int main(int argc, char *argv[])
     /**
      * process html returned data
      */
-    if (get_end_entiry_data(curl, html_data) < 0)
+    if (get_end_entiry_data(curl, "anton") < 0) {
+        snprintf(err_msg, sizeof(err_msg), "get end entity data failed\n");
         goto cleanup;
+    }
 
     /**
      * post to change end entity status
      */
-    if (change_end_entiry_status(curl, html_data) < 0) 
+    if (change_end_entiry_status(curl) < 0) {
+        snprintf(err_msg, sizeof(err_msg), "change end entity status failed\n");
         goto cleanup;
+    }
 
     /**
      * change ca to VendorCA
      */
-    if (change_ca(curl, "VendorCA", html_data) < 0)
+    if (change_ca(curl, "VendorCA", "anton") < 0) {
+        snprintf(err_msg, sizeof(err_msg), "change ca to \"VendorCA\" failed\n");
         goto cleanup;
+    }
 
     /**
-     * gen cert
+     * gen OPERATOR_CERT
      */
-    if (get_cert(curl, html_data) < 0)
+    if (get_cert(curl, "anton", "123456") < 0) {
+        snprintf(err_msg, sizeof(err_msg), "get cert failed\n");
         goto cleanup;
+    }
 
     /**
      * change ca to VendorCA
      */
-    change_ca(curl, "OperatorCA", html_data);
+    if (change_ca(curl, "OperatorCA", "anton") < 0) {
+        snprintf(err_msg, sizeof(err_msg), "change ca to \"OperatorCA\" failed\n");
+        goto cleanup;
+    }
+    
+    /**
+     * get ca cert
+     */
+    if (get_ca_cert(curl, "VendorCA")) {
+        snprintf(err_msg, sizeof(err_msg), "get ca cert \"OperatorCA\" failed\n");
+        goto cleanup;
+    }
+    ret = 0;
 
     /**
      * cleanup and free memory
      */
 cleanup:
-    if (!access(edit_endentity_htm, R_OK)) unlink(edit_endentity_htm);
+    if (ret) printf("%s", err_msg);
+    else printf("gen cert succ\n");
+    if (!access(END_ENTITY_HTM_PATH, R_OK)) unlink(END_ENTITY_HTM_PATH);
     curl_easy_cleanup(curl);
     curl_global_cleanup();
 
