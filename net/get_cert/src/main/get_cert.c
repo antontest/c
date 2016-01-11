@@ -7,7 +7,7 @@
 
 #define END_ENTITY_HTM_PATH "edit_end_entity.htm"
 #define CA_CERT "ca_cert.pem"
-#define EJBCA_SERVER_IP "https://172.21.34.121:8443/ejbca"
+#define EJBCA_SERVER_IP "https://172.21.34.86:8443/ejbca"
 #define SSL_CERT_KEY_PATH "/home/anton/download/req/"
 
 size_t write_data(void* buffer,size_t size,size_t nmemb,void *stream)  
@@ -487,7 +487,7 @@ int main(int argc, char *argv[])
     /**
      * check ssl cert whether is exist
      */
-    if (access(SSL_CERT_KEY_PATH "ssl.sa.crt.pem", R_OK)) {
+    if (access(SSL_CERT_KEY_PATH "ssl.ca.crt.pem", R_OK)) {
         fprintf(stderr, "ssl ca cert \"%sssl.sa.crt.pem\" does not exist!\n", SSL_CERT_KEY_PATH);
         return -1;
     }
@@ -513,8 +513,8 @@ int main(int argc, char *argv[])
     /**
      * libcurl https SSL init
      */
-    curl_easy_setopt(curl, CURLOPT_CAPATH, SSL_CERT_KEY_PATH "ssl.sa.crt.pem");
-    curl_easy_setopt(curl, CURLOPT_CAINFO, SSL_CERT_KEY_PATH "ssl.sa.crt.pem");
+    curl_easy_setopt(curl, CURLOPT_CAPATH, SSL_CERT_KEY_PATH "ssl.ca.crt.pem");
+    curl_easy_setopt(curl, CURLOPT_CAINFO, SSL_CERT_KEY_PATH "ssl.ca.crt.pem");
     curl_easy_setopt(curl, CURLOPT_SSLCERT, SSL_CERT_KEY_PATH "ssl.cli.crt.pem"); 
     curl_easy_setopt(curl, CURLOPT_SSLKEY, SSL_CERT_KEY_PATH "ssl.cli.key.pem"); 
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
