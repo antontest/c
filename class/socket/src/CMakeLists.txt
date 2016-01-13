@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8)
 include($ENV{CMAKE_PATH}/func/func.cmake)
 
 # set include and lib path
-INCLUDE_DIRECTORIES($ENV{INCLUDE_PATH} ${PROJECT_SOURCE_DIR}/src/include)
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/include ../../utils/src/include/ ../../thread/src/include/ ../../data/src/include/ ../../fileio/src/include/ ../../proc/src/include/)
 LINK_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/lib)
 
 # set c compile parameters
@@ -88,7 +88,7 @@ TARGET_LINK_LIBRARIES(event         thread linked_list)
 TARGET_LINK_LIBRARIES(event_test    socket_base event linked_list)
 TARGET_LINK_LIBRARIES(property_test property)
 TARGET_LINK_LIBRARIES(cast          socket_base)
-TARGET_LINK_LIBRARIES(cast_test     socket_base cast utils property)
+TARGET_LINK_LIBRARIES(cast_test     socket_base cast property)
 TARGET_LINK_LIBRARIES(local_test    local_socket)
 TARGET_LINK_LIBRARIES(message       local_socket proc mutex bsem thread)
 TARGET_LINK_LIBRARIES(message_test  local_socket proc mutex bsem thread message event)

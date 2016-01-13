@@ -9,13 +9,13 @@
 #include <arpa/inet.h>
 #include <sys/un.h>
 #include <proc.h>
-#include <utils/utils.h>
-#include <data/linked_list.h>
+#include <utils.h>
+#include <linked_list.h>
 #include <local.h>
 #include <event.h>
-#include <thread/thread.h>
-#include <thread/bsem.h>
-#include <thread/mutex.h>
+#include <thread.h>
+#include <bsem.h>
+#include <mutex.h>
 
 #define MAX_MSG_LEN (1024)
 #define COMM_KEY    (0x1111)

@@ -7,8 +7,8 @@
 #include <unistd.h>
 #include <host.h>
 #include <socket.h>
-#include <utils/get_args.h>
-#include <utils/utils.h>
+#include <get_args.h>
+#include <utils.h>
 #include <property.h>
 #include <ftp.h>
 #include <socket_base.h>

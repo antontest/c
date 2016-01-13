@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8)
 include($ENV{CMAKE_PATH}/func/func.cmake)
 
 # set include and lib path
-INCLUDE_DIRECTORIES($ENV{INCLUDE_PATH} ${PROJECT_SOURCE_DIR}/src/include)
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/include ../../utils/src/include/)
 LINK_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/lib)
 
 # set c compile parameters
@@ -25,7 +25,7 @@ SET(POOL_TEST_SRC pool/sample.c)
 
 # lib generation
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/src/lib)
-ADD_LIBRARY(thread_share SHARED ${LIB_SRC})
+ADD_LIBRARY(thread SHARED ${LIB_SRC})
 ADD_LIBRARY(mutex STATIC ${MUTEX_SRC})
 ADD_LIBRARY(cond STATIC ${COND_SRC})
 ADD_LIBRARY(bsem SHARED ${BSEM_SRC})
@@ -39,13 +39,13 @@ ADD_EXECUTABLE(thread_bin ${CSRC})
 ADD_EXECUTABLE(pool_test ${POOL_TEST_SRC})
 
 # link library
-SET_TARGET_PROPERTIES(thread_share PROPERTIES OUTPUT_NAME "thread")
-TARGET_LINK_LIBRARIES(thread_share mutex pthread linked_list thread_value)
+SET_TARGET_PROPERTIES(thread PROPERTIES OUTPUT_NAME "thread")
+TARGET_LINK_LIBRARIES(thread mutex pthread linked_list thread_value)
 TARGET_LINK_LIBRARIES(bsem mutex cond)
-TARGET_LINK_LIBRARIES(thread_rwlock mutex cond thread_share utils)
-TARGET_LINK_LIBRARIES(thread_bin thread_share)
-TARGET_LINK_LIBRARIES(pool thread_share linked_list bsem mutex)
-TARGET_LINK_LIBRARIES(pool_test pool thread_share linked_list bsem mutex)
+TARGET_LINK_LIBRARIES(thread_rwlock mutex cond thread)
+TARGET_LINK_LIBRARIES(thread_bin thread)
+TARGET_LINK_LIBRARIES(pool thread linked_list bsem mutex)
+TARGET_LINK_LIBRARIES(pool_test pool thread linked_list bsem mutex)
 
 # -------------- INSTALL -------------- #
 # install path setting

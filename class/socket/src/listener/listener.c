@@ -6,10 +6,10 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
-#include <utils/utils.h>
-#include <thread/thread.h>
-#include <thread/mutex.h>
-#include <thread/bsem.h>
+#include <utils.h>
+#include <thread.h>
+#include <mutex.h>
+#include <bsem.h>
 
 typedef struct private_listener_t private_listener_t;
 struct private_listener_t {

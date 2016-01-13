@@ -7,7 +7,7 @@
 #include <sys/types.h>
 #include <fcntl.h>
 #include <net/if.h>
-#include <utils/utils.h>
+#include <utils.h>
 
 typedef struct private_iface_t private_iface_t;
 struct private_iface_t {
@@ -29,12 +29,14 @@ struct private_iface_t {
 #define iface_hostif this->hostif 
 #define iface_guestif this->guestif
 
+/*
 METHOD(iface_t, destroy_, void, private_iface_t *this)
 {
     if (iface_hostif) free(iface_hostif);
     if (iface_guestif) free(iface_guestif);
     free(this);
 }
+*/
 
 static char *create_tap(private_iface_t *this)
 {

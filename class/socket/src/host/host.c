@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "host.h"
-#include <utils/utils.h>
+#include <utils.h>
 
 #define IPV4_LEN	 4
 #define IPV6_LEN	16

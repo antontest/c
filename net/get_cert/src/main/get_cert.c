@@ -18,8 +18,9 @@
 size_t write_data(void* buffer, size_t size, size_t nmemb, void *stream)  
 {  
     FILE *fptr = (FILE*)stream;  
-    fwrite(buffer, size, nmemb, fptr);  
-    //fputs(buffer, fptr);
+    if (!fptr) return -1;
+    //fwrite(buffer, size, nmemb, fptr);  
+    fputs(buffer, fptr);
     return size * nmemb;  
 }  
 
@@ -70,7 +71,7 @@ char *gen_requst_string()
         p++;
     }
     requst_data[len - 1] = '\0';
-    printf("%s\n", requst_data);
+    //printf("%s\n", requst_data);
 
     return requst_data;
 }
@@ -285,6 +286,7 @@ int change_ca(CURL *curl, const char *ca_name, const char *user)
                 curl_easy_strerror(res));
         return -1;
     }
+    printf("change ca \"%s\" succ\n", ca_name);
 
     return 0;
 }
@@ -354,7 +356,7 @@ int download_cert(CURL *curl, const char *user, const char *password)
     struct curl_httppost *formpost = NULL;
     struct curl_httppost *lastptr  = NULL;
     struct curl_slist *headerlist  = NULL;
-    struct html_data_t *p = html_data;
+    //struct html_data_t *p = html_data;
     const char buf[] = "Expect:";
     char cmd_buf[512] = {0};
     char key_path[128] = {0};
@@ -377,7 +379,7 @@ int download_cert(CURL *curl, const char *user, const char *password)
     /**
      * change ca to VendorCA
      */
-    if (change_ca(curl, "VendorCA", user) < 0) {
+    if (change_ca(curl, "OperatorCA", user) < 0) {
         goto over;
     }
 
@@ -398,13 +400,13 @@ int download_cert(CURL *curl, const char *user, const char *password)
     /**
      * generate request file
      */
-    snprintf(key_path, sizeof(key_path), "%s/key", SSL_CERT_KEY_PATH);
+    snprintf(key_path, sizeof(key_path), "%s/%s_key.pem", CERT_GEN_DIR, user);
     snprintf(cmd_buf, sizeof(cmd_buf), "ipsec pki --gen --size 2048 --outform pem > %s", key_path);
     if (WEXITSTATUS(system(cmd_buf)) < 0) {
         fprintf(stderr, "generate cert key failed!\n");
         return -1;
     }
-    snprintf(req_file_path, sizeof(req_file_path), "%s/tmp_req.pem", SSL_CERT_KEY_PATH);
+    snprintf(req_file_path, sizeof(req_file_path), "%s/%s_req.pem", CERT_GEN_DIR, user);
     snprintf(cmd_buf, sizeof(cmd_buf), "ipsec pki --req --in %s --dn \"C=CN, O=Sercomm, CN=%s\" --outform pem > %s", key_path, user, req_file_path);
     if (WEXITSTATUS(system(cmd_buf)) < 0) {
         fprintf(stderr, "generate cert request file failed!\n");
@@ -448,10 +450,12 @@ int download_cert(CURL *curl, const char *user, const char *password)
     if(res != CURLE_OK) {
         fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
     }
+    printf("download %s_cert.pem succ\n", user);
 
     /**
      * change user status
      */
+    /*
     p = html_data;
     while (p->name != NULL && p->type != HTML_UNKOWN) {
         if (!strcmp(p->name, "selectchangestatus")) {
@@ -460,6 +464,7 @@ int download_cert(CURL *curl, const char *user, const char *password)
         }
         p++;
     }
+    */
 
 over:
     if (fp) fclose(fp);
@@ -501,16 +506,16 @@ int download_ca_cert(CURL *curl, const char *ca_name)
     /**
      * send file download request
      */
-    curl_easy_setopt(curl, CURLOPT_URL, url);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp); 
-    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1);   
+    curl_easy_setopt(curl, CURLOPT_URL, url);
     res = curl_easy_perform(curl);
     if(res != CURLE_OK) {
         fprintf(stderr, "curl_easy_perform() failed: %s\n",
                 curl_easy_strerror(res));
         return -1;
     }
+    printf("download ca %s.pem succ\n", ca_name);
 
     return 0;
 }
@@ -548,7 +553,7 @@ CURL *curl_init()
     /**
      * libcurl https SSL init
      */
-    //curl_easy_setopt(curl, CURLOPT_CAPATH, SSL_CERT_KEY_PATH);
+    curl_easy_setopt(curl, CURLOPT_CAPATH, SSL_CERT_KEY_PATH);
     curl_easy_setopt(curl, CURLOPT_CAINFO, SSL_CERT_KEY_PATH SSL_CA_CERT);
     curl_easy_setopt(curl, CURLOPT_SSLCERT, SSL_CERT_KEY_PATH SSL_CLI_CERT); 
     curl_easy_setopt(curl, CURLOPT_SSLKEY, SSL_CERT_KEY_PATH SSL_CLI_KEY); 
@@ -624,6 +629,9 @@ int get_cert_from_ejbca(const char *user, const char *password)
         snprintf(err_msg, sizeof(err_msg), "get cert failed\n");
         goto cleanup;
     }
+    curl_easy_cleanup(curl);
+    curl_global_cleanup();
+    curl = curl_init();
 
     /**
      * change ca to VendorCA
@@ -636,7 +644,7 @@ int get_cert_from_ejbca(const char *user, const char *password)
     /**
      * get ca cert
      */
-    if (download_ca_cert(curl, "VendorCA")) {
+    if (download_ca_cert(curl, "OperatorCA")) {
         snprintf(err_msg, sizeof(err_msg), "get ca cert \"OperatorCA\" failed\n");
         goto cleanup;
     }
@@ -647,7 +655,7 @@ int get_cert_from_ejbca(const char *user, const char *password)
      */
 cleanup:
     if (ret) printf("%s", err_msg);
-    else printf("gen cert succ\n");
+    //else printf("gen cert succ\n");
     if (!access(END_ENTITY_HTM_PATH, R_OK)) unlink(END_ENTITY_HTM_PATH);
     curl_easy_cleanup(curl);
     curl_global_cleanup();
@@ -657,8 +665,9 @@ cleanup:
 
 int main(int argc, char *argv[])
 {
-    const char *user = "anton";
-    const char *password = "123456";
-
-    return get_cert_from_ejbca(user, password);
+    if (argc != 3) {
+        printf("Usage: get_cert <user> <password>\n");
+        return -1;
+    }
+    return get_cert_from_ejbca(argv[1], argv[2]);
 }

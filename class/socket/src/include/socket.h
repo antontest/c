@@ -1,6 +1,5 @@
 #ifndef __SOCKET_H__
 #define __SOCKET_H__
-#include <utils/utils.h>
 
 typedef enum socket_state_t socket_state_t;
 enum socket_state_t {
@@ -65,7 +64,7 @@ struct socket_t {
      *						- SUCCESS when packet successfully created
      *						- FAILED when unable to create
      */
-    status_t (*socket)(socket_t *this, int family, int type, int prototype);
+    int (*socket)(socket_t *this, int family, int type, int prototype);
 
     /**
      * @brief listen on a socket for receiving and sending message

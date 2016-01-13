@@ -6,7 +6,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <utils/utils.h>
+#include <utils.h>
 #include <host.h>
 
 typedef struct private_tcp_t private_tcp_t;
@@ -160,7 +160,8 @@ tcp_t *tcp_create(int family)
             .accept  = _accept_,
             .send    = _send_,
             .recv    = _recv_,
-            .destroy = _destroy_,
+            .close   = _close_,
+            .destroy = _destroy_
         },
         .fd   = -1,
         .host = NULL,

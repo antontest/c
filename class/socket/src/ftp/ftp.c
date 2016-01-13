@@ -7,7 +7,7 @@
 #include <arpa/inet.h>
 #include <sys/stat.h>
 #include <ftp.h>
-#include <utils/utils.h>
+#include <utils.h>
 #include <fileio.h>
 #include <socket.h>
 #include <stdarg.h>

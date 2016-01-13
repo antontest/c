@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8)
 include($ENV{CMAKE_PATH}/func/func.cmake)
 
 # set include and lib path
-INCLUDE_DIRECTORIES($ENV{INCLUDE_PATH} ${PROJECT_SOURCE_DIR}/src/include)
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/include ../../utils/src/include/ ../../thread/src/include/)
 LINK_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/lib)
 
 # set c compile parameters
@@ -18,17 +18,16 @@ SET(LIB_SRC timer/timer.c)
 
 # lib generation
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/src/lib)
-ADD_LIBRARY(timer_share SHARED ${LIB_SRC})
+ADD_LIBRARY(timer SHARED ${LIB_SRC})
 
 # generat exec
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR})
-ADD_EXECUTABLE(timer ${CSRC})
+ADD_EXECUTABLE(timer_bin ${CSRC})
 
 # link library
-SET_TARGET_PROPERTIES(timer_share PROPERTIES OUTPUT_NAME "timer")
-ADD_DEPENDENCIES(timer_share pthread mutex enum)
-TARGET_LINK_LIBRARIES(timer_share pthread mutex enum)
-TARGET_LINK_LIBRARIES(timer timer_share pthread)
+SET_TARGET_PROPERTIES(timer_bin PROPERTIES OUTPUT_NAME "timer")
+TARGET_LINK_LIBRARIES(timer pthread mutex enum)
+TARGET_LINK_LIBRARIES(timer_bin timer)
 
 # -------------- INSTALL -------------- #
 # install path setting

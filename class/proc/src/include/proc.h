@@ -1,7 +1,6 @@
 #ifndef __PROC_H__
 #define __PROC_H__
 #include <signal.h>
-#include <utils/enum.h>
 
 typedef enum {
     APP_NOAPP    = -1,

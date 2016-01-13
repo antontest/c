@@ -24,10 +24,11 @@
 #include <socket.h>
 #include <sys/epoll.h>
 #include <signal.h>
-#include <thread/thread.h>
-#include <thread/mutex.h>
+#include <utils.h>
+#include <enum.h>
+#include <thread.h>
+#include <mutex.h>
 #include <host.h>
-#include <utils/enum.h>
 #include <socket_base.h>
 
 /* Maximum size of a packet */

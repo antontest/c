@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <utils/utils.h>
+#include <utils.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <linux/if_ether.h>
@@ -13,7 +13,7 @@
 #include <errno.h>
 #include <sys/select.h>
 #include <time.h>
-#include <thread/thread.h>
+#include <thread.h>
 
 typedef struct private_arp_t private_arp_t;
 struct private_arp_t {

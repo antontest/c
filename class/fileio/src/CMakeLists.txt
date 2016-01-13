@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8)
 include($ENV{CMAKE_PATH}/func/func.cmake)
 
 # set include and lib path
-INCLUDE_DIRECTORIES($ENV{INCLUDE_PATH} ${PROJECT_SOURCE_DIR}/src/include)
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/include ../../utils/src/include/)
 LINK_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/lib)
 
 # set c compile parameters
@@ -18,15 +18,15 @@ SET(LIB_SRC fileio/fileio.c dir/dir.c)
 
 # lib generation
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/src/lib)
-ADD_LIBRARY(fileio_static STATIC ${LIB_SRC})
+ADD_LIBRARY(fileio STATIC ${LIB_SRC})
 
 # generat exec
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR})
 ADD_EXECUTABLE(fileio_bin ${CSRC})
 
 # link library
-SET_TARGET_PROPERTIES(fileio_static PROPERTIES OUTPUT_NAME "fileio")
-TARGET_LINK_LIBRARIES(fileio_bin fileio_static)
+#SET_TARGET_PROPERTIES(fileio_static PROPERTIES OUTPUT_NAME "fileio")
+TARGET_LINK_LIBRARIES(fileio_bin fileio)
 
 # -------------- INSTALL -------------- #
 # install path setting
