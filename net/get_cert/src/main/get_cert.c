@@ -23,48 +23,50 @@ size_t write_data(void* buffer, size_t size, size_t nmemb, void *stream)
     return size * nmemb;  
 }  
 
-enum html_input_type_t {
+typedef enum html_input_type_t {
     HTML_UNKOWN = -1,
     HTML_INPUT = 0,
     HTML_SELECT
-};
-struct html_data_t {
+} html_input_type_t;
+
+typedef struct html_data_t {
     const char *name;
-    enum html_input_type_t type;
+    html_input_type_t type;
     char value[56];
-};
+} html_data_t;
 
 static struct html_data_t html_data[] = {
-    {"action", HTML_INPUT},
-    {"hiddenprofile", HTML_INPUT},
-    {"username", HTML_INPUT},
-    {"selectchangestatus", HTML_SELECT},
-    {"buttonedituser", HTML_INPUT},
-    {"textfieldpassword", HTML_INPUT},
-    {"textfieldconfirmpassword", HTML_INPUT},
+    {"action",                    HTML_INPUT},
+    {"hiddenprofile",             HTML_INPUT},
+    {"username",                  HTML_INPUT},
+    {"selectchangestatus",        HTML_SELECT},
+    {"buttonedituser",            HTML_INPUT},
+    {"textfieldpassword",         HTML_INPUT},
+    {"textfieldconfirmpassword",  HTML_INPUT},
     {"checkboxcleartextpassword", HTML_INPUT},
-    {"textfieldsubjectdn13", HTML_INPUT},
-    {"textfieldsubjectdn15", HTML_INPUT},
-    {"textfieldsubjectdn19", HTML_INPUT},
-    {"selectcertificateprofile", HTML_SELECT},
-    {"selecttoken", HTML_SELECT},
-    {"selectca", HTML_UNKOWN},
-    {"buttonedituser", HTML_INPUT},
+    {"textfieldsubjectdn13",      HTML_INPUT},
+    {"textfieldsubjectdn15",      HTML_INPUT},
+    {"textfieldsubjectdn19",      HTML_INPUT},
+    {"selectcertificateprofile",  HTML_SELECT},
+    {"selecttoken",               HTML_SELECT},
+    {"selectca",                  HTML_UNKOWN},
+    {"buttonedituser",            HTML_INPUT},
     {NULL}
 };
 
+/**
+ * @brief generate post request string
+ */
 char *gen_requst_string()
 {
     static char requst_data[1024] = {0};
-    struct html_data_t *p = html_data;
+    html_data_t *p = html_data;
     int len = 0;
 
     while (p->name != NULL) {
-        if (p->type == HTML_UNKOWN) {
-            p++;
-            continue;
+        if (p->type != HTML_UNKOWN) { 
+            len += snprintf(requst_data + len, sizeof(requst_data) - len, "%s=%s&", p->name, p->value);
         }
-        len += snprintf(requst_data + len, sizeof(requst_data) - len, "%s=%s&", p->name, p->value);
         p++;
     }
     requst_data[len - 1] = '\0';
@@ -85,6 +87,9 @@ int get_user_data(CURL *curl, const char *username)
     struct html_data_t *p = html_data;
     CURLcode res;
 
+    /**
+     * open file for saving user information html
+     */
     fp = fopen(END_ENTITY_HTM_PATH, "w");
     if (!fp) return -1;
 
@@ -109,8 +114,10 @@ int get_user_data(CURL *curl, const char *username)
     fp = fopen(END_ENTITY_HTM_PATH, "r");
     if (!fp) return -1;
     while (fgets(buf, sizeof(buf), fp) != NULL && p->name != NULL) {
-        if (p->type == HTML_UNKOWN)
-            goto next;
+        if (p->type == HTML_UNKOWN) {
+            p++;
+            continue;
+        }
         
         snprintf(key, sizeof(key), "name=\"%s\"", p->name);
         pos = strstr(buf, key);
@@ -146,7 +153,6 @@ int get_user_data(CURL *curl, const char *username)
             //printf("%s=%s\n", p->name, p->value);
         }
 
-next:
         p++;
     }
 
@@ -236,6 +242,8 @@ int change_ca(CURL *curl, const char *ca_name, const char *user)
             p++;
         }
         if (!p->name) return -1;
+
+        if (!strcmp(p->value, pos + 2)) return 0;
         p->type = HTML_INPUT;
         strcpy(p->value, pos + 2);
         break;
@@ -366,6 +374,13 @@ int download_cert(CURL *curl, const char *user, const char *password)
         goto over;
     }  
     
+    /**
+     * change ca to VendorCA
+     */
+    if (change_ca(curl, "VendorCA", user) < 0) {
+        goto over;
+    }
+
     /* Fill in the user field */ 
     curl_formadd(&formpost,
             &lastptr,
@@ -386,7 +401,7 @@ int download_cert(CURL *curl, const char *user, const char *password)
     snprintf(key_path, sizeof(key_path), "%s/key", SSL_CERT_KEY_PATH);
     snprintf(cmd_buf, sizeof(cmd_buf), "ipsec pki --gen --size 2048 --outform pem > %s", key_path);
     if (WEXITSTATUS(system(cmd_buf)) < 0) {
-        fprintf(stderr, "generate cert key \"key\" failed!\n");
+        fprintf(stderr, "generate cert key failed!\n");
         return -1;
     }
     snprintf(req_file_path, sizeof(req_file_path), "%s/tmp_req.pem", SSL_CERT_KEY_PATH);
@@ -541,7 +556,7 @@ CURL *curl_init()
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 0);   
     curl_easy_setopt(curl, CURLOPT_HEADER, 0);   
-    curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 3); /*timeout of connect */
+    curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 5); /*timeout of connect */
     curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10); /* timeout of data recv */
 
     return curl;
@@ -595,10 +610,12 @@ int get_cert_from_ejbca(const char *user, const char *password)
     /**
      * change ca to VendorCA
      */
+    /*
     if (change_ca(curl, "VendorCA", user) < 0) {
         snprintf(err_msg, sizeof(err_msg), "change ca to \"VendorCA\" failed\n");
         goto cleanup;
     }
+    */
 
     /**
      * gen OPERATOR_CERT
