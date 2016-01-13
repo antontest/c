@@ -36,7 +36,7 @@ ADD_EXECUTABLE(utils_bin ${CSRC})
 
 # link library
 #SET_TARGET_PROPERTIES(utils_share PROPERTIES OUTPUT_NAME "utils")
-TARGET_LINK_LIBRARIES(utils_bin linked_list enum utils utils_debug log get_args)
+TARGET_LINK_LIBRARIES(utils_bin enum utils utils_debug log get_args)
 
 # -------------- INSTALL -------------- #
 # install path setting
