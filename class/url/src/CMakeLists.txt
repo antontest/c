@@ -27,7 +27,7 @@ ADD_EXECUTABLE(url_bin ${CSRC})
 # link library
 SET_TARGET_PROPERTIES(url_bin PROPERTIES OUTPUT_NAME "url")
 TARGET_LINK_LIBRARIES(url     curl linked_list)
-TARGET_LINK_LIBRARIES(url_bin url)
+TARGET_LINK_LIBRARIES(url_bin url get_args)
 
 # -------------- INSTALL -------------- #
 # install path setting
@@ -41,4 +41,4 @@ install_hfiles(include include)
 install_lib(lib lib)
 
 # install target
-# INSTALL(TARGETS url_bin RUNTIME DESTINATION bin)
+INSTALL(TARGETS url_bin RUNTIME DESTINATION bin)
