@@ -8,7 +8,7 @@
 #include <linux/un.h>
 #include <stdarg.h>
 #include <host.h>
-#include <utils.h>
+#include <utils/utils.h>
 
 #define DFT_SND_BUFF_SIZE (1024)
 #define DFT_RCV_BUFF_SIZE (1024)

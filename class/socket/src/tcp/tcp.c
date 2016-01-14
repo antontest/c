@@ -6,7 +6,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <utils.h>
+#include <utils/utils.h>
 #include <host.h>
 
 typedef struct private_tcp_t private_tcp_t;

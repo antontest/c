@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <utils.h>
+#include <utils/utils.h>
 
 typedef struct private_sqlite_t private_sqlite_t;
 struct private_sqlite_t {

@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "../../../utils/src/include/utils.h"
+#include <utils/utils.h>
 
 typedef struct element_t element_t;
 struct element_t {

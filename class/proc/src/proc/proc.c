@@ -10,8 +10,8 @@
 #include <errno.h>
 #include <stdarg.h>
 #include <fcntl.h>
-#include <utils.h>
-#include <enum.h>
+#include <utils/utils.h>
+#include <utils/enum.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include "proc.h"

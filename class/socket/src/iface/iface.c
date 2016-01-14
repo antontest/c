@@ -7,7 +7,7 @@
 #include <sys/types.h>
 #include <fcntl.h>
 #include <net/if.h>
-#include <utils.h>
+#include <utils/utils.h>
 
 typedef struct private_iface_t private_iface_t;
 struct private_iface_t {

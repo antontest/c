@@ -5,7 +5,7 @@
 #include <string.h>
 #include <time.h>
 #include <errno.h>
-#include <utils.h>
+#include <utils/utils.h>
 #include "mutex.h"
 
 typedef struct private_mutex_t private_mutex_t;

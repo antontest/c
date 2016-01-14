@@ -1,7 +1,7 @@
-#include <thread/thread.h>
+#include <thread/thread/thread.h>
 #include <thread/rwlock.h>
 #include <socket_manager.h>
-#include <data/linked_list.h>
+#include <data/data/linked_list.h>
 
 typedef struct private_socket_manager_t private_socket_manager_t;
 

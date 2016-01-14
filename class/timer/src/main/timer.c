@@ -6,7 +6,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <pthread.h>
-#include <thread.h>
+#include <thread/thread.h>
 #include <timer.h>
 
 /*********************************************************
@@ -25,6 +25,7 @@ int main(int agrc, char *agrv[])
     int rt = 0; /* return value of function main */
     timer *t;
     t = timer_start(hi, NULL, 100);
+    t->start(t);
     printf("timer state1: %s\n", t->get_state_str(t));
     sleep(1);
     t->pause(t);

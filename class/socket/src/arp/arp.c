@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <utils.h>
+#include <utils/utils.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <linux/if_ether.h>
@@ -13,7 +13,7 @@
 #include <errno.h>
 #include <sys/select.h>
 #include <time.h>
-#include <thread.h>
+#include <thread/thread.h>
 
 typedef struct private_arp_t private_arp_t;
 struct private_arp_t {
@@ -393,6 +393,7 @@ int get_remote_ip_by_mac(char *mac, char *ip, int size, int timeout_ms)
     msg_pakcet.mac  = mac;
     msg_pakcet.ip   = ip;
     msg_pakcet.ip_size = size;
+    msg_pakcet.timeout = timeout_ms;
     thread = thread_create((void *)arp_msg_handler, &msg_pakcet);
 
     /**

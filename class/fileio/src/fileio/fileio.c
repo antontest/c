@@ -7,7 +7,7 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <stdarg.h>
-#include <utils.h>
+#include <utils/utils.h>
 #include "fileio.h"
 
 typedef struct private_filelock_t private_filelock_t;
