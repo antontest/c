@@ -832,8 +832,14 @@ int create_state_file_by_name(const char *app_name) {
     pid_t pid = 0;
     FILE *fp = NULL;
     char path[128] = {0};
+    int ret = 0;
 
     if (app_name == NULL) {
+        fprintf(stderr, "app name is null\n");
+        return -1;
+    }
+    if (access(app_state_file_path, R_OK)) {
+        fprintf(stderr, "Path \"%s\" does not exist!\n", app_state_file_path);
         return -1;
     }
 
@@ -843,10 +849,11 @@ int create_state_file_by_name(const char *app_name) {
         fprintf(fp, "pid:%d-uptime:%d-status:%d", pid, read_uptime(), APP_STARTING);
     } else {
         perror("Open app state file failed");
+        ret = -1;
     }
     fclose(fp);
 
-    return 0;
+    return ret;
 }
 
 /**
