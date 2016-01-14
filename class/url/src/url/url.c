@@ -285,7 +285,6 @@ METHOD(url_t, parse_form_data_, int, private_url_t *this)
             //printf("select name: %s, value: %s\n", data->name, data->value);
         }
     }
-    if (feof(fp)) printf("feof\n");
 
     ret = 0;
 over:
