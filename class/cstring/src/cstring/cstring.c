@@ -35,7 +35,7 @@ struct private_cstring {
     char data[0];
 };
 
-METHOD(cstring, set_, const char *, private_cstring *this, const char *fmt, ...)
+METHOD(cstring, set_, char *, private_cstring *this, const char *fmt, ...)
 {
     va_list arg;
 
@@ -46,7 +46,7 @@ METHOD(cstring, set_, const char *, private_cstring *this, const char *fmt, ...)
     return this->data;
 }
 
-METHOD(cstring, add_, const char *, private_cstring *this, const char *fmt, ...)
+METHOD(cstring, add_, char *, private_cstring *this, const char *fmt, ...)
 {    
     va_list arg;
     
@@ -57,7 +57,7 @@ METHOD(cstring, add_, const char *, private_cstring *this, const char *fmt, ...)
     return this->data;
 }
 
-METHOD(cstring, insert_, const char *, private_cstring *this, unsigned int index, const char *fmt, ...)
+METHOD(cstring, insert_, char *, private_cstring *this, unsigned int index, const char *fmt, ...)
 {
     char buf[128] = {0};
     char *a = NULL, *b = NULL;
@@ -92,7 +92,7 @@ METHOD(cstring, insert_, const char *, private_cstring *this, unsigned int index
     return this->data;
 }
 
-METHOD(cstring, delete_, const char *, private_cstring *this, unsigned int index, unsigned int count)
+METHOD(cstring, delete_, char *, private_cstring *this, unsigned int index, unsigned int count)
 {
     char *p = NULL, *r = NULL;
 
@@ -110,12 +110,12 @@ METHOD(cstring, delete_, const char *, private_cstring *this, unsigned int index
     return this->data;
 }
 
-METHOD(cstring, get_, const char *, private_cstring *this)
+METHOD(cstring, get_, char *, private_cstring *this)
 {
     return this->data;
 }
 
-METHOD(cstring, left_, const char *, private_cstring *this, unsigned int count)
+METHOD(cstring, left_, char *, private_cstring *this, unsigned int count)
 {
     if (count >= this->len) return this->data;
     if (this->offsets != NULL) free(this->offsets);
@@ -126,7 +126,7 @@ METHOD(cstring, left_, const char *, private_cstring *this, unsigned int count)
     return this->offsets;
 }
 
-METHOD(cstring, mid_, const char *, private_cstring *this, unsigned int start, unsigned int count)
+METHOD(cstring, mid_, char *, private_cstring *this, unsigned int start, unsigned int count)
 {
     if (start > this->len || (!start && !count)) return NULL;
     if (!count) return this->data + start;
@@ -139,7 +139,7 @@ METHOD(cstring, mid_, const char *, private_cstring *this, unsigned int start, u
     return this->offsets;
 }
 
-METHOD(cstring, right_, const char *, private_cstring *this, unsigned int count)
+METHOD(cstring, right_, char *, private_cstring *this, unsigned int count)
 {
     if (count >= this->len) return this->data;
     if (this->offsets != NULL) free(this->offsets);
@@ -181,7 +181,7 @@ METHOD(cstring, toint_, int, private_cstring *this)
     return strtol(this->data, NULL, 10);
 }
 
-METHOD(cstring, tolower_, const char *, private_cstring *this)
+METHOD(cstring, tolower_, char *, private_cstring *this)
 {
     char *s = this->data;
 
@@ -193,7 +193,7 @@ METHOD(cstring, tolower_, const char *, private_cstring *this)
     return this->data;    
 }
 
-METHOD(cstring, toupper_, const char *, private_cstring *this)
+METHOD(cstring, toupper_, char *, private_cstring *this)
 {
     char *s = this->data;
 
@@ -205,7 +205,7 @@ METHOD(cstring, toupper_, const char *, private_cstring *this)
     return this->data;    
 }
 
-METHOD(cstring, left_trim_, const char *, private_cstring *this)
+METHOD(cstring, left_trim_, char *, private_cstring *this)
 {
     char *p = this->data, *q = this->data;
 
@@ -216,7 +216,7 @@ METHOD(cstring, left_trim_, const char *, private_cstring *this)
     return this->data;
 }
 
-METHOD(cstring, right_trim_, const char *, private_cstring *this)
+METHOD(cstring, right_trim_, char *, private_cstring *this)
 {
     char *p = this->data;
 
@@ -228,7 +228,7 @@ METHOD(cstring, right_trim_, const char *, private_cstring *this)
     return this->data;
 }
 
-METHOD(cstring, mid_trim_, const char *, private_cstring *this)
+METHOD(cstring, mid_trim_, char *, private_cstring *this)
 {
     char *a = this->data, *b = this->data;
 
@@ -246,7 +246,7 @@ METHOD(cstring, mid_trim_, const char *, private_cstring *this)
     return this->data;
 }
 
-METHOD(cstring, all_trim_, const char *, private_cstring *this)
+METHOD(cstring, all_trim_, char *, private_cstring *this)
 {
     char *s = this->data, *b = this->data;
 

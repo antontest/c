@@ -9,7 +9,7 @@ struct cstring {
      * @param s new string
      * @return  pointer to string
      */
-    const char *(*set) (cstring *this, const char *fmt, ...);
+    char *(*set) (cstring *this, const char *fmt, ...);
 
     /**
      * @brief   Add string to current string  
@@ -17,7 +17,7 @@ struct cstring {
      * @param s new string
      * @return  pointer to string
      */
-    const char *(*add) (cstring *this, const char *fmt, ...);
+    char *(*add) (cstring *this, const char *fmt, ...);
 
     /**
      * @brief   Insert string to current string  
@@ -26,7 +26,7 @@ struct cstring {
      * @param fmt new string
      * @return    pointer to string
      */
-    const char *(*insert) (cstring *this, unsigned int index, const char *fmt, ...);
+    char *(*insert) (cstring *this, unsigned int index, const char *fmt, ...);
 
     /**
      * @brief delete string  
@@ -34,31 +34,31 @@ struct cstring {
      * @param index  start deleting number
      * @param count  delete count
      */
-    const char *(*delete) (cstring *this, unsigned int index, unsigned int count);
+    char *(*delete) (cstring *this, unsigned int index, unsigned int count);
 
     /**
      * @brief Get string  
      */
-    const char *(*get) (cstring *this);
+    char *(*get) (cstring *this);
 
     /**
      * @brief Get a piece of string  
      *
      * @param count  left charcter count 
      */
-    const char *(*left) (cstring *this, unsigned int count);
+    char *(*left) (cstring *this, unsigned int count);
 
     /**
      * @brief Get a piece of string  
      */
-    const char *(*mid) (cstring *this, unsigned int start, unsigned int count);
+    char *(*mid) (cstring *this, unsigned int start, unsigned int count);
 
     /**
      * @brief Get a piece of string  
      *
      * @param count  right charcter count 
      */
-    const char *(*right) (cstring *this, unsigned int count);
+    char *(*right) (cstring *this, unsigned int count);
 
     /**
      * @brief length of string
@@ -89,32 +89,32 @@ struct cstring {
     /**
      * @brief transfrom to lower char
      */
-    const char *(*tolower) (cstring *this);
+    char *(*tolower) (cstring *this);
 
     /**
      * @brief transfrom to lower char
      */
-    const char *(*toupper) (cstring *this);
+    char *(*toupper) (cstring *this);
 
     /**
      * @brief trim left blank char   
      */
-    const char *(*left_trim) (cstring *this);
+    char *(*left_trim) (cstring *this);
 
     /**
      * @brief  trim middle blank char   
      */
-    const char *(*mid_trim) (cstring *this);
+    char *(*mid_trim) (cstring *this);
 
     /**
      * @brief trim right blank char   
      */
-    const char *(*right_trim) (cstring *this);
+    char *(*right_trim) (cstring *this);
 
     /**
      * @brief trim all blank char   
      */
-    const char *(*all_trim) (cstring *this);
+    char *(*all_trim) (cstring *this);
 
     /**
      * @brief compare two string
