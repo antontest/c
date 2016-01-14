@@ -249,7 +249,7 @@ METHOD(linked_list_t, remove_, int,
 	return removed;
 }
 
-
+/*
 METHOD(linked_list_t, find_first, status_t,
 	private_linked_list_t *this, linked_list_match_t match,
 	void **item, void *d1, void *d2, void *d3, void *d4, void *d5)
@@ -260,6 +260,29 @@ METHOD(linked_list_t, find_first, status_t,
 	{
 		if ((match && match(current->value, d1, d2, d3, d4, d5)) ||
 			(!match && item && current->value == *item))
+		{
+			if (item != NULL)
+			{
+				*item = current->value;
+			}
+			return SUCCESS;
+		}
+		current = current->next;
+	}
+	return NOT_FOUND;
+}
+*/
+
+METHOD(linked_list_t, find_first, status_t,
+	private_linked_list_t *this, 
+	void **item, void *key, int (*cmp) (void *, void *))
+{
+	element_t *current = this->first;
+    if (!cmp || !key || !item) return NOT_FOUND;
+
+	while (current)
+	{
+		if (cmp && !cmp(current->value, key))
 		{
 			if (item != NULL)
 			{

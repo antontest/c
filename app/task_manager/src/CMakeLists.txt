@@ -33,7 +33,7 @@ ENDIF()
 IF(EXTERNAL_LIBS)
     TARGET_LINK_LIBRARIES(task_manager ${EXTERNAL_LIBS})
 ENDIF()
-TARGET_LINK_LIBRARIES(cmd_test socket utils chunk)
+TARGET_LINK_LIBRARIES(cmd_test socket)
 
 # -------------- INSTALL -------------- #
 # install path setting

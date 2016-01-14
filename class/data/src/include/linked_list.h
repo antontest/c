@@ -136,8 +136,8 @@ struct linked_list_t {
 	 * @param ...			user data to supply to match function (limited to 5 arguments)
 	 * @return				SUCCESS if found, NOT_FOUND otherwise
 	 */
-	status_t (*find_first) (linked_list_t *this, linked_list_match_t match,
-							void **item, ...);
+	//status_t (*find_first) (linked_list_t *this, linked_list_match_t match,
+	status_t (*find_first) (linked_list_t *this, void **item, void *key, int (*cmp) (void *, void *));
 
 	/**
 	 * Invoke a method on all of the contained objects.
