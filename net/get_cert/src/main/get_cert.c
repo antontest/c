@@ -19,8 +19,9 @@ size_t write_data(void* buffer, size_t size, size_t nmemb, void *stream)
 {  
     FILE *fptr = (FILE*)stream;  
     if (!fptr) return -1;
-    //fwrite(buffer, size, nmemb, fptr);  
-    fputs(buffer, fptr);
+    fwrite(buffer, size, nmemb, fptr);  
+    //fputs(buffer, fptr);
+    fflush(fptr);
     return size * nmemb;  
 }  
 
@@ -71,7 +72,7 @@ char *gen_requst_string()
         p++;
     }
     requst_data[len - 1] = '\0';
-    //printf("%s\n", requst_data);
+    printf("%s\n", requst_data);
 
     return requst_data;
 }
