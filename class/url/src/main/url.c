@@ -236,8 +236,8 @@ int download_cert(url_t *url, const char *user, const char *password)
         FORM_TEXT, "filename", "tmp.pem",
         FORM_TEXT, "resulttype", "1"
     );
-    url->save_file(url);
     url->set_url(url, http_url, cert);
+    url->save_file(url);
     return url->form_post(url);
 }
 

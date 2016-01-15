@@ -156,6 +156,7 @@ METHOD(url_t, form_add_, void, private_url_t *this, ...)
             CURLFORM_END
         );
     }
+    va_end(arg);
 }
 
 METHOD(url_t, get_, int, private_url_t *this)
