@@ -10,24 +10,24 @@ typedef struct element_t element_t;
  */
 struct element_t {
 
-	/**
-	 * Value of a list item.
-	 */
-	void *value;
+    /**
+     * Value of a list item.
+     */
+    void *value;
 
-	/**
-	 * Previous list element.
-	 *
-	 * NULL if first element in list.
-	 */
-	element_t *previous;
+    /**
+     * Previous list element.
+     *
+     * NULL if first element in list.
+     */
+    element_t *previous;
 
-	/**
-	 * Next list element.
-	 *
-	 * NULL if last element in list.
-	 */
-	element_t *next;
+    /**
+     * Next list element.
+     *
+     * NULL if last element in list.
+     */
+    element_t *next;
 };
 
 /**
@@ -35,11 +35,11 @@ struct element_t {
  */
 element_t *element_create(void *value)
 {
-	element_t *this;
-	INIT(this,
-		.value = value,
-	);
-	return this;
+    element_t *this;
+    INIT(this,
+            .value = value,
+        );
+    return this;
 }
 
 
@@ -50,294 +50,321 @@ typedef struct private_linked_list_t private_linked_list_t;
  *
  */
 struct private_linked_list_t {
-	/**
-	 * Public part of linked list.
-	 */
-	linked_list_t public;
+    /**
+     * Public part of linked list.
+     */
+    linked_list_t public;
 
-	/**
-	 * Number of items in the list.
-	 */
-	int count;
+    /**
+     * Number of items in the list.
+     */
+    int count;
 
-	/**
-	 * First element in list.
-	 * NULL if no elements in list.
-	 */
-	element_t *first;
+    /**
+     * First element in list.
+     * NULL if no elements in list.
+     */
+    element_t *first;
 
-	/**
-	 * Current element in list.
-	 * NULL if no elements in list.
-	 */
-	element_t *current;
+    /**
+     * Current element in list.
+     * NULL if no elements in list.
+     */
+    element_t *current;
 
-	/**
-	 * Last element in list.
-	 * NULL if no elements in list.
-	 */
-	element_t *last;
+    /**
+     * Last element in list.
+     * NULL if no elements in list.
+     */
+    element_t *last;
 };
 
 
+typedef struct private_enumerator_t private_enumerator_t;
+/**
+ * linked lists enumerator implementation
+ */
+struct private_enumerator_t {
+
+    /**
+     * implements enumerator interface
+     */
+    enumerator_t                 enumerator;
+
+    /**
+     * associated linked list
+     */
+    private_linked_list_t *list;
+
+    /**
+     * current item
+     */
+    element_t *current;
+
+    /**
+     * enumerator has enumerated all items
+     */
+    bool finished;
+};      
+
 METHOD(linked_list_t, get_count, int,
-	private_linked_list_t *this)
+        private_linked_list_t *this)
 {
-	return this->count;
+    return this->count;
 }
 
 METHOD(linked_list_t, insert_first, void,
-	private_linked_list_t *this, void *item)
+        private_linked_list_t *this, void *item)
 {
-	element_t *element;
+    element_t *element;
 
-	element = element_create(item);
-	if (this->count == 0)
-	{
-		/* first entry in list */
-		this->first = element;
-		this->last = element;
-	}
-	else
-	{
-		element->next = this->first;
-		this->first->previous = element;
-		this->first = element;
-	}
-	this->count++;
+    element = element_create(item);
+    if (this->count == 0)
+    {
+        /* first entry in list */
+        this->first = element;
+        this->last = element;
+    }
+    else
+    {
+        element->next = this->first;
+        this->first->previous = element;
+        this->first = element;
+    }
+    this->count++;
 }
 
 /**
  * unlink an element form the list, returns following element
  */
 static element_t* remove_element(private_linked_list_t *this,
-								 element_t *element)
+        element_t *element)
 {
-	element_t *next, *previous;
+    element_t *next, *previous;
 
-	next = element->next;
-	previous = element->previous;
-	free(element);
-	if (next)
-	{
-		next->previous = previous;
-	}
-	else
-	{
-		this->last = previous;
-	}
-	if (previous)
-	{
-		previous->next = next;
-	}
-	else
-	{
-		this->first = next;
-	}
-	if (--this->count == 0)
-	{
-		this->first = NULL;
-		this->last = NULL;
-	}
-	return next;
+    next = element->next;
+    previous = element->previous;
+    free(element);
+    if (next)
+    {
+        next->previous = previous;
+    }
+    else
+    {
+        this->last = previous;
+    }
+    if (previous)
+    {
+        previous->next = next;
+    }
+    else
+    {
+        this->first = next;
+    }
+    if (--this->count == 0)
+    {
+        this->first = NULL;
+        this->last = NULL;
+    }
+    return next;
 }
 
 METHOD(linked_list_t, get_first, status_t,
-	private_linked_list_t *this, void **item)
+        private_linked_list_t *this, void **item)
 {
-	if (this->count == 0)
-	{
-		return NOT_FOUND;
-	}
-	*item = this->first->value;
-	return SUCCESS;
+    if (this->count == 0)
+    {
+        return NOT_FOUND;
+    }
+    *item = this->first->value;
+    return SUCCESS;
 }
 
 METHOD(linked_list_t, reset_current, status_t,
-	private_linked_list_t *this)
+        private_linked_list_t *this)
 {
-	if (this->count == 0)
-		return NOT_FOUND;
-	this->current = this->first;
-	return SUCCESS;
+    if (this->count == 0)
+        return NOT_FOUND;
+    this->current = this->first;
+    return SUCCESS;
 }
 
 METHOD(linked_list_t, get_next, status_t,
-	private_linked_list_t *this, void **item)
+        private_linked_list_t *this, void **item)
 {
-	if (this->count == 0)
-		return NOT_FOUND;
-	if (!this->current) this->current = this->first;
-	*item = this->current->value;
-	this->current = this->current->next;
-	return SUCCESS;
+    if (this->count == 0)
+        return NOT_FOUND;
+    if (!this->current) this->current = this->first;
+    *item = this->current->value;
+    this->current = this->current->next;
+    return SUCCESS;
 }
 
 METHOD(linked_list_t, remove_first, status_t,
-	private_linked_list_t *this, void **item)
+        private_linked_list_t *this, void **item)
 {
-	if (get_first(this, item) == SUCCESS)
-	{
-		remove_element(this, this->first);
-		return SUCCESS;
-	}
-	return NOT_FOUND;
+    if (get_first(this, item) == SUCCESS)
+    {
+        remove_element(this, this->first);
+        return SUCCESS;
+    }
+    return NOT_FOUND;
 }
 
 METHOD(linked_list_t, insert_last, void,
-	private_linked_list_t *this, void *item)
+        private_linked_list_t *this, void *item)
 {
-	element_t *element;
+    element_t *element;
 
-	element = element_create(item);
-	if (this->count == 0)
-	{
-		/* first entry in list */
-		this->first = element;
-		this->last = element;
-	}
-	else
-	{
-		element->previous = this->last;
-		this->last->next = element;
-		this->last = element;
-	}
-	this->count++;
+    element = element_create(item);
+    if (this->count == 0)
+    {
+        /* first entry in list */
+        this->first = element;
+        this->last = element;
+    }
+    else
+    {
+        element->previous = this->last;
+        this->last->next = element;
+        this->last = element;
+    }
+    this->count++;
 }
 
 METHOD(linked_list_t, get_last, status_t,
-	private_linked_list_t *this, void **item)
+        private_linked_list_t *this, void **item)
 {
-	if (this->count == 0)
-	{
-		return NOT_FOUND;
-	}
-	*item = this->last->value;
-	return SUCCESS;
+    if (this->count == 0)
+    {
+        return NOT_FOUND;
+    }
+    *item = this->last->value;
+    return SUCCESS;
 }
 
 METHOD(linked_list_t, remove_last, status_t,
-	private_linked_list_t *this, void **item)
+        private_linked_list_t *this, void **item)
 {
-	if (get_last(this, item) == SUCCESS)
-	{
-		remove_element(this, this->last);
-		return SUCCESS;
-	}
-	return NOT_FOUND;
+    if (get_last(this, item) == SUCCESS)
+    {
+        remove_element(this, this->last);
+        return SUCCESS;
+    }
+    return NOT_FOUND;
 }
 
 METHOD(linked_list_t, remove_, int,
-	private_linked_list_t *this, void *item, bool (*compare)(void*,void*))
+        private_linked_list_t *this, void *item, bool (*compare)(void*,void*))
 {
-	element_t *current = this->first;
-	int removed = 0;
+    element_t *current = this->first;
+    int removed = 0;
 
-	while (current)
-	{
-		if ((compare && compare(current->value, item)) ||
-			(!compare && current->value == item))
-		{
-			removed++;
-			current = remove_element(this, current);
-		}
-		else
-		{
-			current = current->next;
-		}
-	}
-	return removed;
+    while (current)
+    {
+        if ((compare && compare(current->value, item)) ||
+                (!compare && current->value == item))
+        {
+            removed++;
+            current = remove_element(this, current);
+        }
+        else
+        {
+            current = current->next;
+        }
+    }
+    return removed;
 }
 
 /*
-METHOD(linked_list_t, find_first, status_t,
-	private_linked_list_t *this, linked_list_match_t match,
-	void **item, void *d1, void *d2, void *d3, void *d4, void *d5)
-{
-	element_t *current = this->first;
+   METHOD(linked_list_t, find_first, status_t,
+   private_linked_list_t *this, linked_list_match_t match,
+   void **item, void *d1, void *d2, void *d3, void *d4, void *d5)
+   {
+   element_t *current = this->first;
 
-	while (current)
-	{
-		if ((match && match(current->value, d1, d2, d3, d4, d5)) ||
-			(!match && item && current->value == *item))
-		{
-			if (item != NULL)
-			{
-				*item = current->value;
-			}
-			return SUCCESS;
-		}
-		current = current->next;
-	}
-	return NOT_FOUND;
-}
-*/
+   while (current)
+   {
+   if ((match && match(current->value, d1, d2, d3, d4, d5)) ||
+   (!match && item && current->value == *item))
+   {
+   if (item != NULL)
+   {
+ *item = current->value;
+ }
+ return SUCCESS;
+ }
+ current = current->next;
+ }
+ return NOT_FOUND;
+ }
+ */
 
 METHOD(linked_list_t, find_first, status_t,
-	private_linked_list_t *this, 
-	void **item, void *key, int (*cmp) (void *, void *))
+        private_linked_list_t *this, 
+        void **item, void *key, int (*cmp) (void *, void *))
 {
-	element_t *current = this->first;
+    element_t *current = this->first;
     if (!cmp || !key || !item) return NOT_FOUND;
 
-	while (current)
-	{
-		if (cmp && !cmp(current->value, key))
-		{
-			if (item != NULL)
-			{
-				*item = current->value;
-			}
-			return SUCCESS;
-		}
-		current = current->next;
-	}
-	return NOT_FOUND;
+    while (current)
+    {
+        if (cmp && !cmp(current->value, key))
+        {
+            if (item != NULL)
+            {
+                *item = current->value;
+            }
+            return SUCCESS;
+        }
+        current = current->next;
+    }
+    return NOT_FOUND;
 }
 
 METHOD(linked_list_t, invoke_offset, void,
-	private_linked_list_t *this, size_t offset,
-	void *d1, void *d2, void *d3, void *d4, void *d5)
+        private_linked_list_t *this, size_t offset,
+        void *d1, void *d2, void *d3, void *d4, void *d5)
 {
-	element_t *current = this->first;
-	linked_list_invoke_t *method;
+    element_t *current = this->first;
+    linked_list_invoke_t *method;
 
-	while (current)
-	{
-		method = current->value + offset;
-		(*method)(current->value, d1, d2, d3, d4, d5);
-		current = current->next;
-	}
+    while (current)
+    {
+        method = current->value + offset;
+        (*method)(current->value, d1, d2, d3, d4, d5);
+        current = current->next;
+    }
 }
 
 METHOD(linked_list_t, invoke_function, void,
-	private_linked_list_t *this, linked_list_invoke_t fn,
-	void *d1, void *d2, void *d3, void *d4, void *d5)
+        private_linked_list_t *this, linked_list_invoke_t fn,
+        void *d1, void *d2, void *d3, void *d4, void *d5)
 {
-	element_t *current = this->first;
+    element_t *current = this->first;
 
-	while (current)
-	{
-		fn(current->value, d1, d2, d3, d4, d5);
-		current = current->next;
-	}
+    while (current)
+    {
+        fn(current->value, d1, d2, d3, d4, d5);
+        current = current->next;
+    }
 }
 
 METHOD(linked_list_t, clone_offset, linked_list_t*,
-	private_linked_list_t *this, size_t offset)
+        private_linked_list_t *this, size_t offset)
 {
-	element_t *current = this->first;
-	linked_list_t *clone;
+    element_t *current = this->first;
+    linked_list_t *clone;
 
-	clone = linked_list_create();
-	while (current)
-	{
-		void* (**method)(void*) = current->value + offset;
-		clone->insert_last(clone, (*method)(current->value));
-		current = current->next;
-	}
+    clone = linked_list_create();
+    while (current)
+    {
+        void* (**method)(void*) = current->value + offset;
+        clone->insert_last(clone, (*method)(current->value));
+        current = current->next;
+    }
 
-	return clone;
+    return clone;
 }
 
 METHOD(linked_list_t, clear_, void, private_linked_list_t *this)
@@ -353,49 +380,49 @@ METHOD(linked_list_t, clear_, void, private_linked_list_t *this)
 }
 
 METHOD(linked_list_t, destroy, void,
-	private_linked_list_t *this)
+        private_linked_list_t *this)
 {
-	void *value;
+    void *value;
 
-	/* Remove all list items before destroying list */
-	while (remove_first(this, &value) == SUCCESS)
-	{
-		/* values are not destroyed so memory leaks are possible
-		 * if list is not empty when deleting */
-	}
-	clear_(this);
-	free(this);
+    /* Remove all list items before destroying list */
+    while (remove_first(this, &value) == SUCCESS)
+    {
+        /* values are not destroyed so memory leaks are possible
+         * if list is not empty when deleting */
+    }
+    clear_(this);
+    free(this);
 }
 
 METHOD(linked_list_t, destroy_offset, void,
-	private_linked_list_t *this, size_t offset)
+        private_linked_list_t *this, size_t offset)
 {
-	element_t *current = this->first, *next;
+    element_t *current = this->first, *next;
 
-	while (current)
-	{
-		void (**method)(void*) = current->value + offset;
-		(*method)(current->value);
-		next = current->next;
-		free(current);
-		current = next;
-	}
-	free(this);
+    while (current)
+    {
+        void (**method)(void*) = current->value + offset;
+        (*method)(current->value);
+        next = current->next;
+        free(current);
+        current = next;
+    }
+    free(this);
 }
 
 METHOD(linked_list_t, destroy_function, void,
-	private_linked_list_t *this, void (*fn)(void*))
+        private_linked_list_t *this, void (*fn)(void*))
 {
-	element_t *current = this->first, *next;
+    element_t *current = this->first, *next;
 
-	while (current)
-	{
-		fn(current->value);
-		next = current->next;
-		free(current);
-		current = next;
-	}
-	free(this);
+    while (current)
+    {
+        fn(current->value);
+        next = current->next;
+        free(current);
+        current = next;
+    }
+    free(this);
 }
 
 /*
@@ -403,35 +430,35 @@ METHOD(linked_list_t, destroy_function, void,
  */
 linked_list_t *linked_list_create()
 {
-	private_linked_list_t *this;
+    private_linked_list_t *this;
 
-	INIT(this,
-		.public = {
-			.get_count = _get_count,
-			.get_first = _get_first,
-			.get_next  = _get_next,
-			.get_last  = _get_last,
-			.reset_current = _reset_current,
-			.find_first   = (void*)_find_first,
-			.insert_first = _insert_first,
-			.insert_last  = _insert_last,
-			.remove_first = _remove_first,
-			.remove_last  = _remove_last,
-			.remove          = _remove_,
-			.invoke_offset   = (void*)_invoke_offset,
-			.invoke_function = (void*)_invoke_function,
-			.clone_offset     = _clone_offset,
-			.clear            = _clear_,
-			.destroy          = _destroy,
-			.destroy_offset   = _destroy_offset,
-			.destroy_function = _destroy_function,
-		},
-		.first   = NULL,
-		.current = NULL,
-		.last    = NULL,
-	);
+    INIT(this,
+            .public = {
+            .get_count = _get_count,
+            .get_first = _get_first,
+            .get_next  = _get_next,
+            .get_last  = _get_last,
+            .reset_current = _reset_current,
+            .find_first   = (void*)_find_first,
+            .insert_first = _insert_first,
+            .insert_last  = _insert_last,
+            .remove_first = _remove_first,
+            .remove_last  = _remove_last,
+            .remove          = _remove_,
+            .invoke_offset   = (void*)_invoke_offset,
+            .invoke_function = (void*)_invoke_function,
+            .clone_offset     = _clone_offset,
+            .clear            = _clear_,
+            .destroy          = _destroy,
+            .destroy_offset   = _destroy_offset,
+            .destroy_function = _destroy_function,
+            },
+            .first   = NULL,
+            .current = NULL,
+            .last    = NULL,
+            );
 
-	return &this->public;
+    return &this->public;
 }
 
 
@@ -440,20 +467,20 @@ linked_list_t *linked_list_create()
  */
 linked_list_t *linked_list_create_with_items(void *item, ...)
 {
-	linked_list_t *list;
-	va_list args;
+    linked_list_t *list;
+    va_list args;
 
-	list = linked_list_create();
+    list = linked_list_create();
 
-	va_start(args, item);
-	while (item)
-	{
-		list->insert_last(list, item);
-		item = va_arg(args, void*);
-	}
-	va_end(args);
+    va_start(args, item);
+    while (item)
+    {
+        list->insert_last(list, item);
+        item = va_arg(args, void*);
+    }
+    va_end(args);
 
-	return list;
+    return list;
 }
 
 

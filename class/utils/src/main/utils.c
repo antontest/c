@@ -110,9 +110,8 @@ int main(int agrc, char *agrv[])
     list->get_last(list, &p);
     printf("lsst val: %d\n", ((struct ele *)p)->data);
     free(list);
-    */
-
     return 0;
+    */
 
     printf("name: %s\n", enum_to_name(st, ST_2));
     dbg("%d aaa bbb %s", 1, "ccc");
