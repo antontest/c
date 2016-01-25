@@ -17,15 +17,15 @@ SET(LIB_SRC dir/dir.c)
 
 # lib generation
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/src/lib)
-ADD_LIBRARY(dir_static STATIC ${LIB_SRC})
+ADD_LIBRARY(dir STATIC ${LIB_SRC})
 
 # generat exec
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR})
 ADD_EXECUTABLE(dirr ${CSRC})
 
 # link library
-SET_TARGET_PROPERTIES(dir_static PROPERTIES OUTPUT_NAME "dir")
-TARGET_LINK_LIBRARIES(dirr dir_static)
+# SET_TARGET_PROPERTIES(dir_bin PROPERTIES OUTPUT_NAME "dir")
+TARGET_LINK_LIBRARIES(dirr dir)
 
 # -------------- INSTALL -------------- #
 # install path setting
@@ -38,7 +38,7 @@ endif()
 INSTALL(FILES include/dir.h DESTINATION include)
     
 # install library
-INSTALL(TARGETS dir_static ARCHIVE DESTINATION lib)
+INSTALL(TARGETS dir ARCHIVE DESTINATION lib)
 
 # install target
-INSTALL(TARGETS dirr RUNTIME DESTINATION exec)
+INSTALL(TARGETS dirr RUNTIME DESTINATION bin)

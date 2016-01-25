@@ -60,4 +60,4 @@ install_lib(lib lib)
 
 # install target
 #INSTALL(TARGETS linked_list RUNTIME DESTINATION bin)
-build_install(utils)
+build_install(linked_list)

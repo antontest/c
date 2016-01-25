@@ -18,15 +18,15 @@ SET(LIB_SRC cgi/cgi.c linked_list/linked_list.c)
 
 # lib generation
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/src/lib)
-ADD_LIBRARY(cgi_static STATIC ${LIB_SRC})
+ADD_LIBRARY(cgi STATIC ${LIB_SRC})
 
 # generat exec
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR})
-ADD_EXECUTABLE(cgi ${CSRC})
+ADD_EXECUTABLE(cgi_bin ${CSRC})
 
 # link library
-SET_TARGET_PROPERTIES(cgi_static PROPERTIES OUTPUT_NAME "cgi")
-TARGET_LINK_LIBRARIES(cgi cgi_static)
+SET_TARGET_PROPERTIES(cgi_bin PROPERTIES OUTPUT_NAME "cgi")
+TARGET_LINK_LIBRARIES(cgi_bin cgi)
 
 # -------------- INSTALL -------------- #
 # install path setting
@@ -40,4 +40,5 @@ install_hfiles(include include)
 install_lib(lib lib)
 
 # install target
-# INSTALL(TARGETS cgi RUNTIME DESTINATION bin)
+# INSTALL(TARGETS cgi_bin RUNTIME DESTINATION bin)
+build_install(cgi)
