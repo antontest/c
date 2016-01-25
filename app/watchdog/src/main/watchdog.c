@@ -6,8 +6,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
-#include <utils/utils.h>
-#include <data/linked_list.h>
+#include <utils/linked_list.h>
 #include <utils/get_args.h>
 #include <fileio.h>
 #include <signal.h>

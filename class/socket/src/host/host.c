@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "host.h"
-#include <utils/utils.h>
+#include <utils.h>
 
 #define IPV4_LEN	 4
 #define IPV6_LEN	16
@@ -67,11 +67,11 @@ METHOD(host_t, is_anyaddr, int, private_host_t *this)
     {
         case AF_INET:
             {
-                return memeq(zeroes, &(this->address4.sin_addr.s_addr), IPV4_LEN);
+                return !memcmp(zeroes, &(this->address4.sin_addr.s_addr), IPV4_LEN);
             }
         case AF_INET6:
             {
-                return memeq(zeroes, &(this->address6.sin6_addr.s6_addr), IPV6_LEN);
+                return !memcmp(zeroes, &(this->address6.sin6_addr.s6_addr), IPV6_LEN);
             }
         default:
             {
@@ -176,12 +176,12 @@ static int ip_equals(private_host_t *this, private_host_t *other)
     {
         case AF_INET:
             {
-                return memeq(&this->address4.sin_addr, &other->address4.sin_addr,
+                return !memcmp(&this->address4.sin_addr, &other->address4.sin_addr,
                         sizeof(this->address4.sin_addr));
             }
         case AF_INET6:
             {
-                return memeq(&this->address6.sin6_addr, &other->address6.sin6_addr,
+                return !memcmp(&this->address6.sin6_addr, &other->address6.sin6_addr,
                         sizeof(this->address6.sin6_addr));
             }
         default:
@@ -270,20 +270,20 @@ host_t *host_create_from_string_and_family(char *string, int family,
         struct sockaddr_in6 v6;
     } addr;
 
-    if (streq(string, "%any"))
+    if (!strcmp(string, "%any"))
     {
         return host_create_any_port(family ? family : AF_INET, port);
     }
     if (family == AF_UNSPEC || family == AF_INET)
     {
-        if (streq(string, "%any4") || streq(string, "0.0.0.0"))
+        if (!strcmp(string, "%any4") || !strcmp(string, "0.0.0.0"))
         {
             return host_create_any_port(AF_INET, port);
         }
     }
     if (family == AF_UNSPEC || family == AF_INET6)
     {
-        if (streq(string, "%any6") || streq(string, "::"))
+        if (!strcmp(string, "%any6") || !strcmp(string, "::"))
         {
             return host_create_any_port(AF_INET6, port);
         }

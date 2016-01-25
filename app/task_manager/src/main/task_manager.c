@@ -14,8 +14,8 @@
 #include <thread/pool.h>
 #include <utils/utils.h>
 #include <utils/get_args.h>
-#include <data/linked_list.h>
-#include <data/queue.h>
+#include <utils/linked_list.h>
+#include <utils/queue.h>
 #include <socket/socket.h>
 #include <socket/event.h>
 #include <socket/local.h>

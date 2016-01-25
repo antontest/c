@@ -2,9 +2,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <socket.h>
-#include <utils/get_args.h>
+#include <get_args.h>
 #include <ftp.h>
-#include <utils/utils.h>
+#include <utils.h>
 
 #define DFT_FTP_SERVER_PORT (21)
 int main(int argc, char **argv)

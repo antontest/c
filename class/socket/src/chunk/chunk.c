@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdarg.h>
-#include <utils/utils.h>
+#include <utils.h>
 
 chunk_t chunk_empty = {NULL, 0};
 

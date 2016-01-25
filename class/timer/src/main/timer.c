@@ -6,7 +6,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <pthread.h>
-#include <thread/thread.h>
+#include <thread.h>
 #include <timer.h>
 
 /*********************************************************

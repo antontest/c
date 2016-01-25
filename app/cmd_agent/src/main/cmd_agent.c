@@ -15,8 +15,7 @@
 #include <thread/mutex.h>
 #include <thread/thread.h>
 #include <thread/bsem.h>
-#include <utils/utils.h>
-#include <data/linked_list.h>
+#include <utils/linked_list.h>
 #include <socket/event.h>
 #include <utils/get_args.h>
 

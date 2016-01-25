@@ -6,8 +6,6 @@
 #include <string.h>
 #include <unistd.h>
 #include <proc.h>
-#include <utils/utils.h>
-#include <utils/enum.h>
 
 /*********************************************************
  **************    Function Declaration    ***************

@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8)
 include($ENV{CMAKE_PATH}/func/func.cmake)
 
 # set include and lib path
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/include $ENV{C_INCLUDE_PATH})
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/include $ENV{C_INCLUDE_PATH} ../../utils/src/include/)
 LINK_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/lib)
 
 # set c compile parameters
@@ -44,4 +44,4 @@ install_lib(lib lib)
 
 # install target
 INSTALL(TARGETS proc_bin RUNTIME DESTINATION bin)
-pre_install(proc_bin)
+build_install(proc)

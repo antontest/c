@@ -3,7 +3,11 @@ cmake_minimum_required(VERSION 2.8)
 include($ENV{CMAKE_PATH}/func/func.cmake)
 
 # set include and lib path
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/include $ENV{C_INCLUDE_PATH})
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/include $ENV{C_INCLUDE_PATH}
+    ../../utils/src/include/ 
+    ../../thread/src/include/ 
+    ../../fileio/src/include/ 
+    ../../proc/src/include/)
 LINK_DIRECTORIES(${PROJECT_SOURCE_DIR}/src/lib)
 
 # set c compile parameters
@@ -45,7 +49,7 @@ SET(CHUNK_T_SRC  chunk/chunk-test.c)
 
 # lib generation
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/src/lib)
-ADD_LIBRARY(socket_shared SHARED ${LIB_SRC})
+ADD_LIBRARY(socket SHARED ${LIB_SRC})
 ADD_LIBRARY(host          STATIC ${HOST_SRC})
 ADD_LIBRARY(property      STATIC ${PROPERTY_SRC})
 ADD_LIBRARY(ftp           SHARED ${FTP_SRC})
@@ -63,7 +67,7 @@ ADD_LIBRARY(chunk         SHARED ${CHUNK_SRC})
 
 # generat exec
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR})
-ADD_EXECUTABLE(socket        ${CSRC})
+ADD_EXECUTABLE(socket_bin    ${CSRC})
 ADD_EXECUTABLE(ftp_client    ${FTP_MAIN_SRC})
 ADD_EXECUTABLE(event_test    ${EVENT_TEST})
 ADD_EXECUTABLE(property_test ${PTEST_SRC})
@@ -78,12 +82,11 @@ ADD_EXECUTABLE(udp_test      ${UDP_TEST_SRC})
 ADD_EXECUTABLE(chunk_test    ${CHUNK_T_SRC})
 
 # link library
-SET_TARGET_PROPERTIES(socket_shared PROPERTIES OUTPUT_NAME "socket")
-TARGET_LINK_LIBRARIES(socket_shared utils host thread enum mutex socket_base)
-TARGET_LINK_LIBRARIES(socket_base   host utils)
-TARGET_LINK_LIBRARIES(ftp           fileio socket_shared)
-TARGET_LINK_LIBRARIES(socket        socket_shared get_args property ftp socket_base arp)
-TARGET_LINK_LIBRARIES(ftp_client    socket_shared get_args ftp)
+SET_TARGET_PROPERTIES(socket_bin    PROPERTIES OUTPUT_NAME "socket")
+TARGET_LINK_LIBRARIES(socket        host thread enum mutex socket_base)
+TARGET_LINK_LIBRARIES(socket_base   host)
+TARGET_LINK_LIBRARIES(ftp           fileio socket)
+TARGET_LINK_LIBRARIES(ftp_client    socket get_args ftp)
 TARGET_LINK_LIBRARIES(event         thread linked_list)
 TARGET_LINK_LIBRARIES(event_test    socket_base event linked_list)
 TARGET_LINK_LIBRARIES(property_test property)
@@ -102,6 +105,7 @@ TARGET_LINK_LIBRARIES(tcp_test      host tcp)
 TARGET_LINK_LIBRARIES(udp           host utils)
 TARGET_LINK_LIBRARIES(udp_test      host udp)
 TARGET_LINK_LIBRARIES(chunk_test    chunk)
+TARGET_LINK_LIBRARIES(socket_bin    socket get_args property ftp socket_base arp)
 
 # -------------- INSTALL -------------- #
 # install path setting
@@ -115,5 +119,6 @@ install_hfiles(include include/socket)
 install_lib(lib lib)
 
 # install target
-# INSTALL(TARGETS socket RUNTIME DESTINATION bin)
+# INSTALL(TARGETS socket_bin RUNTIME DESTINATION bin)
 INSTALL(TARGETS ftp_client RUNTIME DESTINATION bin)
+build_install(event)
