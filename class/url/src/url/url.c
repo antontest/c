@@ -7,7 +7,7 @@
 #include <stdarg.h>
 #include <curl/curl.h>
 #include <utils/utils.h>
-#include <data/linked_list.h>
+#include <utils/linked_list.h>
 
 typedef struct private_url_t private_url_t;
 struct private_url_t {
@@ -317,6 +317,7 @@ METHOD(url_t, parse_form_data_, int, private_url_t *this)
 
             data = form_data_create(name_start_pos, value_start_pos, type);
             form_data->insert_last(form_data, data);
+            //printf("%s = %s\n", data->name, data->value);
 
         } else if ((pos = strcasestr(buf, "select"))) {
             if (get_html_value(buf, "name", &name_start_pos, &name_end_pos) < 0)
@@ -338,9 +339,11 @@ METHOD(url_t, parse_form_data_, int, private_url_t *this)
             if (value_end_pos) *value_end_pos = '\0';
             if (value_start_pos) data->value = strdup(value_start_pos);
             form_data->insert_last(form_data, data);
+            //printf("%s = %s\n", data->name, data->value);
         }
     }
 
+    //printf("------------------over------------------\n");
     ret = 0;
 over:
     if (fp) fclose(fp);
@@ -380,9 +383,22 @@ METHOD(url_t, set_value_, int, private_url_t *this, char *key, char *value)
     if (form_data->find_first(form_data, (void **)&data, key, (void *)cmp) == NOT_FOUND)
         return -1;
 
-    if (data->value) free(data->value);
-    data->value = NULL;
-    if (value) data->value = strdup(value);
+    if (!value) {
+        if (data->value) free(data->value);
+        data->value = NULL;
+    } else {
+        if (data->value) {
+            if (strcmp(data->value, value)) {
+                if (data->value) free(data->value);
+                data->value = NULL;
+                data->value = strdup(value);
+                if (!data->value) return -1;
+            }
+        } else {
+            data->value = strdup(value);
+            if (!data->value) return -1;
+        }
+    }
     return 0;
 }
 
@@ -398,11 +414,10 @@ METHOD(url_t, gen_post_request_, char *, private_url_t *this)
     if (!this->req_str) this->req_str = (char *)malloc(DFT_POST_REQUEST_SIZE);
     if (!this->req_str) return NULL;
 
-    while (data_cnt-- > 0) {
-        if (form_data->get_next(form_data, (void **)&data) == NOT_FOUND)
-            break;
-        
-        if (!data->value || strlen(data->value) < 1) continue;
+    memset(this->req_str, 0, DFT_POST_REQUEST_SIZE);
+    form_data->reset_enumerator(form_data);
+    while (form_data->enumerate(form_data, (void **)&data)) {
+        if (!data->value) continue;
         //if (data->type == DATA_TYPE_INPUT_RADIO || data->type == DATA_TYPE_INPUT_CHECKBOX || data->type == DATA_TYPE_INPUT_BUTTON) continue;
         if (data->type == DATA_TYPE_INPUT_BUTTON) continue;
         if (strstr(this->req_str, data->name)) continue;

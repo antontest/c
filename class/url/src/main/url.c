@@ -6,8 +6,7 @@
 #include <url.h>
 #include <utils/get_args.h>
 #include <utils/utils.h>
-#include <data/linked_list.h>
-
+#include <utils/linked_list.h>
 
 typedef struct ca_info_t ca_info_t;
 struct ca_info_t {
@@ -20,6 +19,7 @@ struct info_t {
     char selected_ca_id[28];
     char status[10];
 };
+static char *ip = NULL;
 
 /*********************************************************
  **************    Function Declaration    ***************
@@ -169,7 +169,6 @@ int change_user_status(url_t *url, info_t *info)
     url->set_value(url, "selectchangestatus", "10");
     post_request = url->gen_post_request(url);
     if (!post_request) return -1;
-    strcat(post_request, "&buttonedituser=Save");
     return url->post(url, post_request);
 }
 
@@ -204,8 +203,10 @@ int change_ca(url_t *url, info_t *info, const char *ca_name)
     }
     if (!ca) return -1;
 
-    url->set_value(url, "buttonedituser", NULL);
-    url->set_value(url, "selectca", ca->id);
+    if (url->set_value(url, "buttonedituser", NULL) < 0)
+        return -1;
+    if (url->set_value(url, "selectca", ca->id) < 0)
+        return -1;
     post_request = url->gen_post_request(url);
     return url->post(url, post_request);    
 }
@@ -218,7 +219,7 @@ int download_cert(url_t *url, const char *user, const char *password)
     char cmd_buf[256] = {0};
     char req_file_path[128] = {0};
 
-    snprintf(http_url, sizeof(http_url), "https://172.21.34.86:8443/ejbca/certreq");
+    snprintf(http_url, sizeof(http_url), "%s/ejbca/certreq", ip);
     snprintf(cert, sizeof(cert), "%s_cert.pem", user);
 
     if (!access(cert, R_OK)) return 0;
@@ -251,37 +252,39 @@ int main(int agrc, char *agrv[])
     int ejbca_flag = 0;
     int post_flag  = 0;
     int https_flag = 0;
-    char *hurl      = NULL;
     char *ssl_info = NULL;
     char *ssl_cert = NULL;
     char *ssl_key  = NULL;
     char *user     = NULL;
     char *password = NULL;
     char *data     = NULL;
+    char *ca       = NULL;
     char http_url[512] = {0};
     char http_htm[128] = {0};
     struct options opt[] = {
-        {"-r", "--url",      1, RET_STR, ADDR_ADDR(hurl)},
-        {"-i", "--sslinfo",  1, RET_STR, ADDR_ADDR(ssl_info)},
+        {"-i", "--ip",       1, RET_STR, ADDR_ADDR(ip)},
+        {"-f", "--sslinfo",  1, RET_STR, ADDR_ADDR(ssl_info)},
         {"-c", "--sslcert",  1, RET_STR, ADDR_ADDR(ssl_cert)},
         {"-k", "--sslkey",   1, RET_STR, ADDR_ADDR(ssl_key)},
         {"-u", "--user",     1, RET_STR, ADDR_ADDR(user)},
         {"-p", "--password", 1, RET_STR, ADDR_ADDR(password)},
         {"-e", "--ejbca",    0, RET_INT, ADDR_ADDR(ejbca_flag)},
         {"-d", "--data",     1, RET_STR, ADDR_ADDR(data)},
+        {"-a", "--ca",       1, RET_STR, ADDR_ADDR(ca)},
         {NULL, "--post",     0, RET_INT, ADDR_ADDR(post_flag)},
         {"-h", "--help",     0, RET_INT, ADDR_ADDR(help_flag)},
         {NULL},
     };
     struct usage usg[] = {
-        {"-r, --url",      "http or https url"},
-        {"-i, --sslinfo",  "ssl ca cert path"},
+        {"-i, --ip",      "http or https url"},
+        {"-f, --sslinfo",  "ssl ca cert path"},
         {"-c, --sslcert",  "ssl client cert"},
         {"-k, --sslkey",   "ssl client key"},
         {"-u, --user",     "user name"},
         {"-p, --password", "user password"},
         {"-e, --ejbca",    "download cert from ejbca server"},
         {"-d, --data",     "post data"},
+        {"-a, --ca",       "ca"},
         {"-h, --help",     "show usage"},
         {NULL},
     };
@@ -301,21 +304,22 @@ int main(int agrc, char *agrv[])
     }
     if (!url && !ejbca_flag) return -1;
     if (ejbca_flag && !user) return -1;
-    if (!hurl) hurl = "https://172.21.34.86:8443/ejbca/adminweb/ra/editendentity.jsp";
+    if (!ip) ip = "https://172.21.34.13:8443";
     if (!ssl_info) ssl_info = "/home/anton/certs/ejbca/superadmin/ssl.ca.crt.pem";
     if (!ssl_cert) ssl_cert = "/home/anton/certs/ejbca/superadmin/ssl.cli.crt.pem";
     if (!ssl_key)  ssl_key  = "/home/anton/certs/ejbca/superadmin/ssl.cli.key.pem";
+    if (!ca) ca = "VendorCA";
 
     url = url_create();
     if (!url) return -1;
 
-    https_flag = strcasestr(hurl, "https") ? 1: 0;
+    https_flag = strcasestr(ip, "https") ? 1: 0;
     if (https_flag) url->ssl_init(url, ssl_info, ssl_cert, ssl_key);
     if (ejbca_flag) {
-        snprintf(http_url, sizeof(http_url), "%s?username=%s", hurl, user);
+        snprintf(http_url, sizeof(http_url), "%s/ejbca/adminweb/ra/editendentity.jsp?username=%s", ip, user);
         snprintf(http_htm, sizeof(http_htm), "%s.htm", user);
     } else {
-        snprintf(http_url, sizeof(http_url), "%s", hurl);
+        snprintf(http_url, sizeof(http_url), "%s", ip);
         snprintf(http_htm, sizeof(http_htm), "tmp.htm");
     }
     url->set_url(url, http_url, http_htm);
@@ -351,7 +355,7 @@ int main(int agrc, char *agrv[])
         /**
          * change ca to OperatorCA
          */
-        if (change_ca(url, &info, "OperatorCA") < 0)
+        if (change_ca(url, &info, ca) < 0)
             goto over;
 
         /**

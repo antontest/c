@@ -9,7 +9,7 @@
 #include <bsem.h>
 #include <mutex.h>
 #include <utils/utils.h>
-#include <data/linked_list.h>
+#include <utils/linked_list.h>
 
 typedef struct private_pool_t private_pool_t;
 struct private_pool_t {

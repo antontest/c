@@ -11,7 +11,7 @@
 #include <sys/epoll.h>
 #include <thread/thread.h>
 #include <utils/utils.h>
-#include <data/linked_list.h>
+#include <utils/linked_list.h>
 
 #define DFT_EPOLL_EVTS_MAX_SIZE (10)
 typedef struct event_pkg_t event_pkg_t;

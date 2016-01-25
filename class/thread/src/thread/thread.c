@@ -19,7 +19,7 @@ static inline pid_t gettid()
 #endif
 
 #include "utils/utils.h"
-#include "data/linked_list.h"
+#include "utils/linked_list.h"
 #include "mutex.h"
 #include "thread_value.h"
 #include "thread.h"

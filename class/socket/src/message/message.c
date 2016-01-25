@@ -10,7 +10,7 @@
 #include <sys/un.h>
 #include <proc.h>
 #include <utils/utils.h>
-#include <data/linked_list.h>
+#include <utils/linked_list.h>
 #include <local.h>
 #include <event.h>
 #include <thread/thread.h>
