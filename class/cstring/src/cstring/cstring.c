@@ -260,12 +260,12 @@ METHOD(cstring, all_trim_, char *, private_cstring *this)
     return this->data;
 }
 
-METHOD(cstring, compare_, int, private_cstring *this, const char *s)
+METHOD(cstring, compare_, inline int, private_cstring *this, const char *s)
 {
     return s != NULL ? strcmp(this->data, s) : -1;
 }
 
-METHOD(cstring, compare_no_case_, int, private_cstring *this, const char *s)
+METHOD(cstring, compare_no_case_, inline int, private_cstring *this, const char *s)
 {
     return s != NULL ? strcasecmp(this->data, s) : -1;
 }
@@ -290,18 +290,20 @@ cstring *create_cstring(unsigned int size)
             .add      = _add_,
             .insert   = _insert_,
             .delete   = _delete_,
+            .resize   = _resize_,
+            .destroy  = _destory_,
+
             .get      = _get_,
             .left     = _left_,
             .mid      = _mid_,
             .right    = _right_,
+
             .length   = _length_,
-            .resize   = _resize_,
-            .destroy  = _destory_,
             .get_size = _get_size,
 
-            .toint   = _toint_,
-            .tolower = _tolower_,
-            .toupper = _toupper_,
+            .toint    = _toint_,
+            .tolower  = _tolower_,
+            .toupper  = _toupper_,
 
             .left_trim  = _left_trim_,
             .mid_trim   = _mid_trim_,
