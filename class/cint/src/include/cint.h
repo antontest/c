@@ -36,6 +36,11 @@ struct cint_t {
     void (*remove_all) (cint_t *this);
 
     /**
+     * @brief clone a cint array 
+     */
+    cint_t *(*clone) (cint_t *this);
+
+    /**
      * @brief destroy instance and free memory
      */
     void (*destroy) (cint_t *this);
@@ -50,6 +55,16 @@ struct cint_t {
      * @brief get length of int array
      */
     int (*get_length) (cint_t *this);
+
+    /**
+     * @brief get cint buffer size
+     */
+    int (*get_size) (cint_t *this);
+
+    /**
+     * @brief reset_size
+     */
+    int (*reset_size) (cint_t *this, int new_size);
 
     /**
      * @brief print int array

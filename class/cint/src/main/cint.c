@@ -47,7 +47,13 @@ int main(int agrc, char *agrv[])
     while (cint->enumerate(cint, &n)) {
         printf("e: %d\n", n);
     }
+    cint->reset_size(cint, 2);
+    cint->print(cint);
+    
+    cint_t *new = cint->clone(cint);
+    new->print(new);
     cint->destroy(cint);
+    new->destroy(new);
 
     return rt;
 }

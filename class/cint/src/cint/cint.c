@@ -82,6 +82,7 @@ METHOD(cint_t, remove_at_, int, private_cint_t *this, int index)
     memcpy(this->data + index, this->data + index + 1, sizeof(int) * (this->len - index));
     this->pos--;
     this->len--;
+    if (this->cur > this->pos) this->cur = this->pos;
 
     return 0;
 }
@@ -92,6 +93,7 @@ METHOD(cint_t, remove_last_, int, private_cint_t *this)
     *this->pos = -1;
     this->pos--;
     this->len--;
+    if (this->cur > this->pos) this->cur = this->pos;
 
     return 0;
 }
@@ -100,6 +102,42 @@ METHOD(cint_t, remove_all_, void, private_cint_t *this)
 {
     memset(this->data, -1, sizeof(int) * this->size);
     this->len = 0;
+    this->pos = this->data;
+    this->cur = this->data;
+}
+
+METHOD(cint_t, get_size_, int, private_cint_t *this)
+{
+    return this->size;
+}
+
+METHOD(cint_t, reset_size_, int, private_cint_t *this, int new_size)
+{
+    int *pcint    = NULL;
+    int copy_size = 0;
+
+    if (new_size < 0) return -1;
+    if (!new_size) {
+        free(this->data);
+        this->data = NULL;
+        this->pos  = NULL;
+        this->cur  = NULL;
+        this->len  = 0;
+    } else {
+        pcint = (int *)malloc(sizeof(int) * new_size);
+        if (!pcint) return -1;
+    
+        copy_size = this->len < new_size ? this->len : new_size;
+        memcpy(pcint, this->data, sizeof(int) * copy_size);
+        if (this->data) free(this->data);
+        this->data = pcint;
+        this->pos  = this->data + copy_size;
+        this->cur  = this->data;
+        this->len  = copy_size;
+        this->size = new_size;
+    }
+
+    return 0;
 }
 
 METHOD(cint_t, destroy_, void, private_cint_t *this)
@@ -137,6 +175,41 @@ METHOD(cint_t, print_, void, private_cint_t *this)
     printf("\n");
 }
 
+METHOD(cint_t, clone_, cint_t *, private_cint_t *this)
+{
+    private_cint_t *new = NULL;
+
+    INIT(new, 
+        .public = {
+            .add         = _add_,
+            .get_at      = _get_at_,
+            .get_first   = _get_first_,
+            .get_last    = _get_last_,
+            .insert      = _insert_,
+            .remove_at   = _remove_at_,
+            .remove_last = _remove_last_,
+            .remove_all  = _remove_all_,
+            .reset_size  = _reset_size_,
+            .clone       = _clone_,
+            .destroy     = _destroy_,
+
+            .enumerate   = _enumerate_,
+            .get_size    = _get_size_,
+            .get_length  = _get_length_,
+            .print       = _print_,
+            .reset_enumerate = _reset_enumerate_,
+        },
+        .size = this->size,
+        .len  = this->len,
+        .data = (int *)malloc(this->size * sizeof(int)),
+        .pos  = new->data + this->len,
+        .cur  = new->data + (this->cur - this->data),
+    );
+    memcpy(new->data, this->data, sizeof(int) * this->len);
+
+    return &new->public;
+}
+
 cint_t *cint_create(int size)
 {
     private_cint_t *this = NULL;
@@ -153,9 +226,12 @@ cint_t *cint_create(int size)
             .remove_at   = _remove_at_,
             .remove_last = _remove_last_,
             .remove_all  = _remove_all_,
+            .reset_size  = _reset_size_,
+            .clone       = _clone_,
             .destroy     = _destroy_,
 
             .enumerate   = _enumerate_,
+            .get_size    = _get_size_,
             .get_length  = _get_length_,
             .print       = _print_,
             .reset_enumerate = _reset_enumerate_,
