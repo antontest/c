@@ -110,7 +110,7 @@ static int ftp_cmd_send(private_ftp_t *this, const char *code, const char *fmt, 
     else
         snprintf(this->code_buffer, FTP_CODE_BUFF_SIZE, "%s\r\n", code);
 
-    return this->sck->send(this->sck, this->code_buffer, FTP_CODE_BUFF_SIZE);
+    return this->sck->send(this->sck, this->code_buffer, strlen(this->code_buffer));
 }
 
 static int ftp_msg_recv(private_ftp_t *this, socket_t *sock)
@@ -135,6 +135,7 @@ METHOD(ftp_t, login, int, private_ftp_t *this, char *server, unsigned int port, 
         perror("connect()");
         return -1;
     }
+    printf("connect FTP server successfully!\n");
     ftp_msg_recv(this, this->sck);
     if (this->code != 220) return -1;
     

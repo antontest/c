@@ -20,6 +20,7 @@ struct tcp_t {
      * @return     socket fd, if succ; -1, if failed;
      */
     int (*connect) (tcp_t *this, int family, char *ip, int port);
+    int (*connect_tm) (tcp_t *this, int family, char *ip, int port, int timeout_ms);
 
     /**
      * @brief tcp server accept 
@@ -45,6 +46,7 @@ struct tcp_t {
      * @return     count of message recved, if succ; -1, if failed;
      */
     int (*recv) (tcp_t *this, void *buf, int size);
+    int (*recv_tm) (tcp_t *this, void *buf, int size, int timeout_ms);
     
     /**
      * @brief close tcp connection
