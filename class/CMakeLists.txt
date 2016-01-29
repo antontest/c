@@ -9,6 +9,7 @@ SET(PRE_INSTALL "1")
 #其中：src为子目录，bin是执行文件的生成目录
 ADD_SUBDIRECTORY(utils   utils_bin)
 ADD_SUBDIRECTORY(cstring cstring_bin)
+ADD_SUBDIRECTORY(cint    cint_bin)
 #ADD_SUBDIRECTORY(data    data_bin)
 ADD_SUBDIRECTORY(proc    proc_bin)
 ADD_SUBDIRECTORY(fileio  fileio_bin)

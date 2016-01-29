@@ -18,15 +18,15 @@ SET(LIB_SRC cstring/cstring.c)
 
 # lib generation
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/src/lib)
-ADD_LIBRARY(cstring_static STATIC ${LIB_SRC})
+ADD_LIBRARY(cstring STATIC ${LIB_SRC})
 
 # generat exec
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR})
-ADD_EXECUTABLE(cstring ${CSRC})
+ADD_EXECUTABLE(cstring_bin ${CSRC})
 
 # link library
-SET_TARGET_PROPERTIES(cstring_static PROPERTIES OUTPUT_NAME "cstring")
-TARGET_LINK_LIBRARIES(cstring cstring_static)
+SET_TARGET_PROPERTIES(cstring_bin PROPERTIES OUTPUT_NAME "cstring")
+TARGET_LINK_LIBRARIES(cstring_bin cstring)
 
 # -------------- INSTALL -------------- #
 # install path setting
