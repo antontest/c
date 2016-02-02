@@ -38,20 +38,26 @@ int main(int agrc, char *agrv[])
 /*         ini->set_value(ini, "info2", "name", "antonio"); */
 /*         ini->destroy(ini); */
 
-    struct fileio_t *fp = create_fileio("t.txt", "r+");
-    struct filelock_t *lock = create_filelock(fp->get_file_handle(fp));
+    struct fileio_t *fp = fileio_create();
+    if (fp->open(fp, "t.txt", "r+") == NULL) return -1;
+    struct filelock_t *lock = filelock_create(fp->get_file_handle(fp));
     
     printf("pid: %d\n", getpid());
+    lock->lock_register(lock, F_WRLCK);
     int ret = lock->is_write_lockable(lock, 0, SEEK_SET, 0);
     printf("ret: %d\n", ret);
-    if (ret == 0) {
-        printf("no write lock\n");
+    if (ret == 1) {
         if (!lock->write_lock_all(lock)) printf("lock succ\n"); 
     } else {
         printf("write lock by pid %d\n", ret);
     }
-    printf("start sleep\n");    
+    ret = lock->is_write_lockable(lock, 0, SEEK_SET, 0);
+    printf("ret: %d\n", ret);
+    if (lock->is_write_lockable(lock, 1, SEEK_SET, 1)) printf("can write\n");
+    else printf("can not write\n");
+    printf("sleep start\n");    
     sleep(atoi(agrv[1]));
+    printf("sleep end\n");    
     lock->destroy(lock);
     printf("destroy lock succ\n");
     fp->destroy(fp);

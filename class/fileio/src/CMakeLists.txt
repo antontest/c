@@ -15,6 +15,7 @@ AUX_SOURCE_DIRECTORY(main SRC_PATH)
 # set source files and lib source files
 SET(CSRC ${SRC_PATH})
 SET(LIB_SRC fileio/fileio.c dir/dir.c)
+SET(INI_SRC fileio/ini.c)
 
 # lib generation
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/src/lib)
@@ -23,10 +24,12 @@ ADD_LIBRARY(fileio STATIC ${LIB_SRC})
 # generat exec
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR})
 ADD_EXECUTABLE(fileio_bin ${CSRC})
+ADD_EXECUTABLE(ini        ${INI_SRC})
 
 # link library
-#SET_TARGET_PROPERTIES(fileio_static PROPERTIES OUTPUT_NAME "fileio")
+SET_TARGET_PROPERTIES(fileio_bin PROPERTIES OUTPUT_NAME "fileio")
 TARGET_LINK_LIBRARIES(fileio_bin fileio)
+TARGET_LINK_LIBRARIES(ini        fileio get_args)
 
 # -------------- INSTALL -------------- #
 # install path setting

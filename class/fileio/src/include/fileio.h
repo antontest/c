@@ -1,16 +1,18 @@
 #ifndef __CFG_H__
 #define __CFG_H__
+#include <fcntl.h>
 
 typedef struct filelock_t filelock_t;
 struct filelock_t {
     /**
      * @brief used to describe the locking register action taking place 
      *
+     * @param type F_RDLCK | F_RDLCK | F_UNLCK 
      * @param offset  offset from l_whence
      * @param whence  SEEK_SET, SEEK_CUR, SEEK_END 
      * @param len     length, 0 = to EOF  
      */
-    int (*lock_register) (filelock_t *this, int cmd, int type, off_t offset, int whence, off_t len);
+    int (*lock_register) (filelock_t *this, int type);
 
     /**
      * @brief used to describe the read locking action taking place 
@@ -111,8 +113,7 @@ struct filelock_t {
 /**
  * @brief create_filelock instance
  */
-filelock_t *create_filelock(FILE *fp);
-
+filelock_t *filelock_create(FILE *fp);
 
 typedef struct fileio_t fileio_t;
 struct fileio_t {
@@ -301,7 +302,7 @@ struct fileio_t {
  *
  * @param filename     file name
  */
-fileio_t *create_fileio(const char *filename, const char *mode);
+fileio_t *fileio_create();
 
 
 typedef struct cfg_t cfg_t;
@@ -323,7 +324,7 @@ struct cfg_t {
      * @param split     file config with split
      * @param value     value
      */
-    void (*set_value) (cfg_t *this, const char *keyname, const char *value);
+    int (*set_value) (cfg_t *this, const char *keyname, const char *value);
 
     /**
      * @brief  config split
@@ -341,7 +342,7 @@ struct cfg_t {
  *
  * @param filename   config file name
  */
-cfg_t *create_cfg(const char *filename);
+cfg_t *cfg_create(const char *filename);
 
 
 typedef struct ini_t ini_t;
@@ -363,7 +364,7 @@ struct ini_t {
      * @param split     file config with split
      * @param value     value
      */
-    void (*set_value) (ini_t *this, const char *appname, const char *keyname, const char *value);
+    int (*set_value) (ini_t *this, const char *appname, const char *keyname, const char *value);
 
     /**
      * @brief  ini config split
@@ -381,7 +382,7 @@ struct ini_t {
  *
  * @param filename   config file name
  */
-ini_t *create_ini(const char *filename);
+ini_t *ini_create(const char *filename);
 
 
 /**

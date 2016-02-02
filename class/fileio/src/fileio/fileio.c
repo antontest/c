@@ -4,7 +4,6 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <fcntl.h>
 #include <signal.h>
 #include <stdarg.h>
 #include <utils.h>
@@ -26,6 +25,11 @@ struct private_filelock_t {
      * @brief file handle
      */
     int fd;
+
+    /**
+     * @brief flag of file lock register
+     */
+    int is_register;
 };
 
 static int file_lock_register(int fd, int cmd, int type, off_t offset, int whence, int len)
@@ -61,9 +65,9 @@ static pid_t file_lock_test(int fd, int type, off_t offset, int whence, int len)
     return (int)lock.l_pid;
 }
 
-METHOD(filelock_t, lock_register, int, private_filelock_t *this, int cmd, int type, off_t offset, int whence, off_t len)
+METHOD(filelock_t, lock_register, int, private_filelock_t *this, int type)
 {
-    return file_lock_register(this->fd, cmd, type, offset, whence, len);
+    return file_lock_register(this->fd, F_SETLK, type, 0, SEEK_SET, 0);
 }
 
 METHOD(filelock_t, read_lock, int, private_filelock_t *this, off_t offset, int whence, off_t len)
@@ -102,6 +106,7 @@ METHOD(filelock_t, write_lock_all, int, private_filelock_t *this)
     int len = 0;
     int curr_pos = 0;
 
+    if (!this->fp) return -1;
     curr_pos = ftell(this->fp);
     fseek(this->fp, 0, SEEK_END);
     len = ftell(this->fp);
@@ -172,7 +177,7 @@ METHOD(filelock_t, set_file_handle, void, private_filelock_t *this, FILE *fp)
     this->fd = fileno(this->fp);
 }
 
-filelock_t *create_filelock(FILE *fp)
+filelock_t *filelock_create(FILE *fp)
 {
     private_filelock_t *this;
     
@@ -190,15 +195,17 @@ filelock_t *create_filelock(FILE *fp)
             .unlock          = _unlock,
             .destroy         = _file_lock_destroy,
             
-            .set_file_handle = _set_file_handle,
+            .set_file_handle   = _set_file_handle,
 
             .is_read_lockable  = _is_read_lockable,
             .is_write_lockable = _is_write_lockable,
         },
         .fp = NULL,
         .fd = -1,
+        .is_register = 0,
     );
     if (fp != NULL) {
+        printf("------------------- fp ------------------\n");
         this->fp = fp;
         this->fd = fileno(fp);
     }
@@ -248,8 +255,9 @@ struct private_fileio_t {
 
 METHOD(fileio_t, open_, FILE *, private_fileio_t *this, const char *filename, const char *mode)
 {
-    if (this->fp != NULL) return this->fp;
     if (!filename || !mode) return NULL;
+    if (this->fp != NULL) fclose(this->fp);
+    this->fp = NULL;
 
     this->fp = fopen(filename, mode);
     if (this->fp != NULL) {
@@ -359,7 +367,7 @@ METHOD(fileio_t, destroy_, void, private_fileio_t *this)
     if (this->fp           != NULL) fclose(this->fp);
     if (this->read_buffer  != NULL) free(this->read_buffer);
     if (this->write_buffer != NULL) free(this->write_buffer);
-    if (!this->filename) free(this->filename);
+    if (this->filename     != NULL) free(this->filename);
     this->fp           = NULL;
     this->read_buffer  = NULL;
     this->write_buffer = NULL;
@@ -481,10 +489,8 @@ METHOD(fileio_t, set_write_buf_size, char *, private_fileio_t *this, unsigned in
 
 /**
  * @brief create fileio instance
- *
- * @param filename     file name
  */
-fileio_t *create_fileio(const char *filename, const char *mode)
+fileio_t *fileio_create()
 {
     private_fileio_t *this;
 
@@ -527,11 +533,6 @@ fileio_t *create_fileio(const char *filename, const char *mode)
         .read_buf_size  = DEFAULT_FILE_READ_BUFFER_SIZE,
         .write_buf_size = DEFAULT_FILE_WRITE_BUFFER_SIZE,
     );
-
-    if (filename != NULL && mode != NULL) {
-        this->fp = fopen(filename, mode);
-        this->filename = strdup(filename);
-    }
 
     return &this->public;
 }
@@ -586,7 +587,7 @@ METHOD(cfg_t, get_cfg_value, char *, private_cfg_t *this, const char *keyname)
     return ret_ptr;
 }
 
-METHOD(cfg_t, set_cfg_value, void, private_cfg_t *this, const char *keyname, const char *value)
+METHOD(cfg_t, set_cfg_value, int, private_cfg_t *this, const char *keyname, const char *value)
 {
     char *read_ptr  = NULL;
     char *ret_ptr   = NULL;
@@ -596,12 +597,12 @@ METHOD(cfg_t, set_cfg_value, void, private_cfg_t *this, const char *keyname, con
     const char *split = this->split;
     int  write_pos  = 0;
 
-    if (!keyname || !split) return;
-    if (!this->file->ropen(this->file, "r+")) return;
+    if (!keyname || !split) return -1;
+    if (!this->file->ropen(this->file, "r+")) return -1;
 
     this->file->set_write_buf_size(this->file, this->file->get_file_size(this->file) + (value != NULL ? strlen(value) : 0));
     write_ptr = this->file->get_write_buffer(this->file);
-    if (!write_ptr) return;
+    if (!write_ptr) return -1;
     
     this->file->seek(this->file, 0, SEEK_SET);
     while ((read_ptr = this->file->read(this->file)) != NULL) {
@@ -612,9 +613,9 @@ METHOD(cfg_t, set_cfg_value, void, private_cfg_t *this, const char *keyname, con
     }
     
     ret_ptr = strtok_r(NULL, split, &save_ptr);
-    if (!ret_ptr) return;
+    if (!ret_ptr) return -1;
     ret_ptr = strtok_r(ret_ptr, "\n", &save_ptr);
-    if (value != NULL && strlen(ret_ptr) == strlen(value) && !strcmp(ret_ptr, value)) return;
+    if (value != NULL && strlen(ret_ptr) == strlen(value) && !strcmp(ret_ptr, value)) return -1;
 
     write_pos = this->file->get_before_size(this->file) - strlen(write_ptr);
     value_ptr = strstr(write_ptr, ret_ptr);
@@ -631,6 +632,8 @@ METHOD(cfg_t, set_cfg_value, void, private_cfg_t *this, const char *keyname, con
     this->file->truncate(this->file, write_pos);
     this->file->seek(this->file, write_pos, SEEK_SET);
     this->file->write(this->file, write_ptr);
+
+    return 0;
 }
 
 METHOD(cfg_t, set_cfg_split, void, private_cfg_t *this, const char *split)
@@ -650,7 +653,7 @@ METHOD(cfg_t, cfg_destroy, void, private_cfg_t *this)
  *
  * @param filename   config file name
  */
-cfg_t *create_cfg(const char *filename)
+cfg_t *cfg_create(const char *filename)
 {
     private_cfg_t *this;
 
@@ -663,9 +666,10 @@ cfg_t *create_cfg(const char *filename)
             .set_split = _set_cfg_split,
             .destroy = _cfg_destroy,
         },
-        .file = create_fileio(filename, "r"),
+        .file = fileio_create(),
         .split = ":=",
     );
+    this->file->open(this->file, filename, "r");
     if (!this->file || !this->file->get_file_handle(this->file)) {
         if (this->file != NULL) this->file->destroy(this->file);
         free(this);
@@ -746,7 +750,7 @@ METHOD(ini_t, get_ini_value, char *, private_ini_t *this, const char *appname, c
     return ret_ptr;
 }
 
-METHOD(ini_t, set_ini_value, void, private_ini_t *this, const char *appname, const char *keyname, const char *value)
+METHOD(ini_t, set_ini_value, int, private_ini_t *this, const char *appname, const char *keyname, const char *value)
 {
     char *read_ptr  = NULL;
     char *ret_ptr   = NULL;
@@ -757,13 +761,13 @@ METHOD(ini_t, set_ini_value, void, private_ini_t *this, const char *appname, con
     const char *split = this->split;
     int  write_pos  = 0;
 
-    if (!appname) return;
-    if (!this->file->ropen(this->file, "r+")) return;
+    if (!appname) return -1;
+    if (!this->file->ropen(this->file, "r+")) return -1;
     sprintf(ini_app_name, "[%s]", appname);
 
     this->file->set_write_buf_size(this->file, this->file->get_file_size(this->file) + strlen(appname) + 3 + (keyname != NULL ? strlen(keyname) : 0) + 1 + (value != NULL ? strlen(value) : 0) + 1);
     write_ptr = this->file->get_write_buffer(this->file);
-    if (!write_ptr) return;
+    if (!write_ptr) return -1;
     
     this->file->seek(this->file, 0, SEEK_SET);
     while ((read_ptr = this->file->read(this->file)) != NULL) {
@@ -773,14 +777,14 @@ METHOD(ini_t, set_ini_value, void, private_ini_t *this, const char *appname, con
     }
 
     if (this->file->is_endof(this->file)) {
-        if (!value) return;
+        if (!value) return -1;
         sprintf(write_ptr, "[%s]\n%s=%s\n%c", appname, keyname, value, '\0');
         write_pos = this->file->get_before_size(this->file);
         goto rest;
     }
 
     if (!keyname) {
-        if (value != NULL) return;
+        if (value != NULL) return -1;
 
         write_pos = this->file->get_before_size(this->file) - strlen(read_ptr) - 1;
         while ((read_ptr = this->file->read(this->file)) != NULL) {
@@ -811,9 +815,9 @@ METHOD(ini_t, set_ini_value, void, private_ini_t *this, const char *appname, con
     }
     
     ret_ptr = strtok_r(NULL, split, &save_ptr);
-    if (!ret_ptr) return;
+    if (!ret_ptr) return -1;
     ret_ptr = strtok_r(ret_ptr, "\n", &save_ptr);
-    if (value != NULL && strlen(ret_ptr) == strlen(value) && !strcmp(ret_ptr, value)) return;
+    if (value != NULL && strlen(ret_ptr) == strlen(value) && !strcmp(ret_ptr, value)) return -1;
 
     write_pos = this->file->get_before_size(this->file) - strlen(write_ptr);
     value_ptr = strstr(write_ptr, ret_ptr);
@@ -831,6 +835,7 @@ rest:
     this->file->truncate(this->file, write_pos);
     this->file->seek(this->file, write_pos, SEEK_SET);
     this->file->write(this->file, write_ptr);
+    return 0;
 }
 
 METHOD(ini_t, set_ini_split, void, private_ini_t *this, const char *split)
@@ -850,7 +855,7 @@ METHOD(ini_t, ini_destroy, void, private_ini_t *this)
  *
  * @param filename   config file name
  */
-ini_t *create_ini(const char *filename)
+ini_t *ini_create(const char *filename)
 {
     private_ini_t *this;
 
@@ -863,9 +868,10 @@ ini_t *create_ini(const char *filename)
             .set_split = _set_ini_split,
             .destroy = _ini_destroy,
         },
-        .file = create_fileio(filename, "r"),
+        .file = fileio_create(),
         .split = ":=",
     );
+    this->file->open(this->file, filename, "r");
     if (!this->file || !this->file->get_file_handle(this->file)) {
         if (this->file != NULL) this->file->destroy(this->file);
         free(this);
