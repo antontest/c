@@ -458,7 +458,7 @@ ftp_t *create_ftp()
         .msg_buffer = (char *)malloc(FTP_MSG_BUFF_SIZE),
         .logged     = 0,
         .data_port  = -1,
-        .file       = create_fileio(NULL, NULL),
+        .file       = fileio_create(NULL, NULL),
     );
     this->code_buffer = (char *)malloc(FTP_CODE_BUFF_SIZE);
     if (!this->code_buffer) {

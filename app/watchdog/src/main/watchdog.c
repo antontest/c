@@ -129,7 +129,7 @@ int read_config()
     app_pkg_t *app = NULL;
     ini_t *cfg = NULL;
 
-    cfg = create_ini(default_wdg_conf_path);
+    cfg = ini_create(default_wdg_conf_path);
     if (!cfg) return -1;
 
     period = cfg->get_value(cfg, "period", "period");

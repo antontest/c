@@ -136,7 +136,7 @@ struct task_queue_t {
  */
 int read_config()
 {
-    ini_t *ini = create_ini(default_conf_path);
+    ini_t *ini = ini_create(default_conf_path);
     if (!ini) return -1;
 
     conf.task_queue_cnt = atoi(ini->get_value(ini, "queue", "max_cnt"));
@@ -195,7 +195,7 @@ int task_queue_init()
     /**
      * read task queue timeout
      */
-    ini = create_ini(default_conf_path);
+    ini = ini_create(default_conf_path);
     task_queue_timeout = ini->get_value(ini, "queue", "timeout");
     
     /**
