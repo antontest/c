@@ -555,6 +555,38 @@ struct private_cfg_t {
     char split[10];
 };
 
+/**
+ * @brief remove all blank from string
+ *
+ * @param s [in] string
+ */
+static void a_trim(char *s)
+{
+    char *b = s, *p = s;
+    if (p == NULL) return ;
+
+    /* remove all blank from string */
+    while (*p != '\0') {
+        if (*p != ' ') *b++ = *p;
+        p++;
+    }
+    *b = '\0';
+}
+
+static void l_trim(char **s)
+{
+    char *p = *s;
+    while (*p++ == ' ') (*s)++;
+}
+
+static void r_trim(char **s)
+{
+    int len = strlen(*s);
+    char *p = *s + len - 1;
+    while (*p == ' ' && len > 0) p--, len--;
+    if (*(++p) == ' ') *p = '\0';
+}
+
 static int is_file(const char *path)
 {
     struct stat st;
@@ -576,6 +608,7 @@ METHOD(cfg_t, get_cfg_value, char *, private_cfg_t *this, const char *keyname)
     while ((read_ptr = this->file->read(this->file)) != NULL) {
         ret_ptr = strtok_r(read_ptr, split, &save_ptr);
         if (!ret_ptr) continue;
+        a_trim(ret_ptr);
         if (!strcmp(ret_ptr, keyname)) break;
     }
 
@@ -583,6 +616,8 @@ METHOD(cfg_t, get_cfg_value, char *, private_cfg_t *this, const char *keyname)
     ret_ptr = strtok_r(NULL, split, &save_ptr);
     if (!ret_ptr) return NULL;
     ret_ptr = strtok_r(ret_ptr, "\n", &save_ptr);
+    l_trim(&ret_ptr);
+    r_trim(&ret_ptr);
     
     return ret_ptr;
 }
@@ -609,6 +644,8 @@ METHOD(cfg_t, set_cfg_value, int, private_cfg_t *this, const char *keyname, cons
         sprintf(write_ptr, "%s%c", read_ptr, '\0');
         ret_ptr = strtok_r(read_ptr, split, &save_ptr);
         if (!ret_ptr) continue;
+        l_trim(&ret_ptr);
+        r_trim(&ret_ptr);
         if (!strcmp(ret_ptr, keyname)) break;
     }
     
@@ -618,6 +655,7 @@ METHOD(cfg_t, set_cfg_value, int, private_cfg_t *this, const char *keyname, cons
     if (value != NULL && strlen(ret_ptr) == strlen(value) && !strcmp(ret_ptr, value)) return -1;
 
     write_pos = this->file->get_before_size(this->file) - strlen(write_ptr);
+    l_trim(&ret_ptr);
     value_ptr = strstr(write_ptr, ret_ptr);
     if (value != NULL) {
         strcpy(value_ptr, value);
@@ -679,25 +717,6 @@ cfg_t *cfg_create(const char *filename)
     return &this->public;
 }
 
-
-/**
- * @brief remove all blank from string
- *
- * @param s [in] string
- */
-static void a_trim(char *s)
-{
-    char *b = s, *p = s;
-    if (p == NULL) return ;
-
-    /* remove all blank from string */
-    while (*p != '\0') {
-        if (*p != ' ') *b++ = *p;
-        p++;
-    }
-    *b = '\0';
-}
-
 typedef struct private_ini_t private_ini_t;
 struct private_ini_t {
     /**
@@ -739,6 +758,8 @@ METHOD(ini_t, get_ini_value, char *, private_ini_t *this, const char *appname, c
         if (strstr(read_ptr, "[")) return NULL;
         ret_ptr = strtok_r(read_ptr, split, &save_ptr);
         if (!ret_ptr) continue;
+        l_trim(&ret_ptr);
+        r_trim(&ret_ptr);
         if (strlen(ret_ptr) == strlen(keyname) && !strcmp(ret_ptr, keyname)) break;
     }
     if (strlen(ret_ptr) != strlen(keyname) || strcmp(ret_ptr, keyname)) return NULL;
@@ -746,6 +767,8 @@ METHOD(ini_t, get_ini_value, char *, private_ini_t *this, const char *appname, c
     ret_ptr = strtok_r(NULL, split, &save_ptr);
     if (!ret_ptr) return NULL;
     ret_ptr = strtok_r(ret_ptr, "\n", &save_ptr);
+    l_trim(&ret_ptr);
+    r_trim(&ret_ptr);
     
     return ret_ptr;
 }
@@ -761,14 +784,23 @@ METHOD(ini_t, set_ini_value, int, private_ini_t *this, const char *appname, cons
     const char *split = this->split;
     int  write_pos  = 0;
 
+    /**
+     * get appname
+     */
     if (!appname) return -1;
     if (!this->file->ropen(this->file, "r+")) return -1;
     sprintf(ini_app_name, "[%s]", appname);
 
+    /**
+     * alloc memory
+     */
     this->file->set_write_buf_size(this->file, this->file->get_file_size(this->file) + strlen(appname) + 3 + (keyname != NULL ? strlen(keyname) : 0) + 1 + (value != NULL ? strlen(value) : 0) + 1);
     write_ptr = this->file->get_write_buffer(this->file);
     if (!write_ptr) return -1;
     
+    /**
+     * find ini app section
+     */
     this->file->seek(this->file, 0, SEEK_SET);
     while ((read_ptr = this->file->read(this->file)) != NULL) {
         a_trim(read_ptr);
@@ -776,6 +808,9 @@ METHOD(ini_t, set_ini_value, int, private_ini_t *this, const char *appname, cons
         if (!strcmp(read_ptr, ini_app_name)) break;
     }
 
+    /**
+     * if not found app section, add it and add key name key value
+     */
     if (this->file->is_endof(this->file)) {
         if (!value) return -1;
         sprintf(write_ptr, "[%s]\n%s=%s\n%c", appname, keyname, value, '\0');
@@ -783,6 +818,9 @@ METHOD(ini_t, set_ini_value, int, private_ini_t *this, const char *appname, cons
         goto rest;
     }
 
+    /**
+     * found app section, keyname is null, remove the key
+     */
     if (!keyname) {
         if (value != NULL) return -1;
 
@@ -796,6 +834,9 @@ METHOD(ini_t, set_ini_value, int, private_ini_t *this, const char *appname, cons
         if (this->file->is_endof(this->file)) goto rest; 
     }
 
+    /**
+     *
+     */
     while ((read_ptr = this->file->read(this->file)) != NULL) {
         if (strstr(read_ptr, "[")) {
             sprintf(write_ptr, "%s=%s\n%s%c", keyname, value, read_ptr, '\0');
@@ -806,6 +847,7 @@ METHOD(ini_t, set_ini_value, int, private_ini_t *this, const char *appname, cons
         sprintf(write_ptr, "%s%c", read_ptr, '\0');
         ret_ptr = strtok_r(read_ptr, split, &save_ptr);
         if (!ret_ptr) continue;
+        a_trim(ret_ptr);
         if (!strcmp(ret_ptr, keyname)) break;
     }
     if (!read_ptr) {
@@ -817,9 +859,10 @@ METHOD(ini_t, set_ini_value, int, private_ini_t *this, const char *appname, cons
     ret_ptr = strtok_r(NULL, split, &save_ptr);
     if (!ret_ptr) return -1;
     ret_ptr = strtok_r(ret_ptr, "\n", &save_ptr);
-    if (value != NULL && strlen(ret_ptr) == strlen(value) && !strcmp(ret_ptr, value)) return -1;
+    if (value != NULL && strlen(ret_ptr) == strlen(value) && !strcmp(ret_ptr, value)) return 0;
 
     write_pos = this->file->get_before_size(this->file) - strlen(write_ptr);
+    l_trim(&ret_ptr);
     value_ptr = strstr(write_ptr, ret_ptr);
     if (value != NULL) {
         strcpy(value_ptr, value);
