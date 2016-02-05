@@ -334,5 +334,12 @@ inline void memwipe(void *ptr, unsigned int n);
  */
 void memwipe_noinline(void *ptr, unsigned int n);
 
+/**
+ * @brief get netmask ip by netmask
+ *
+ * @param 172.21.34.21/24 -- 172.21.34.0
+ */
+char *ip_netmask(char *ip, int netmask);
+
 #endif
 

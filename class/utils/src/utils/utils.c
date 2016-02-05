@@ -1,5 +1,6 @@
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <sys/time.h>
 #include <time.h>
 #include <arpa/inet.h>
@@ -373,3 +374,21 @@ void memwipe_noinline(void *ptr, unsigned int n)
 	memwipe_inline(ptr, n);
 }
 
+char *ip_netmask(char *ip, int netmask)
+{
+    unsigned long u_ip = 0;
+    int len = sizeof(u_ip) * 8;
+    struct in_addr addr;
+
+    if (!ip || netmask < 0 || netmask > 32) 
+        return NULL;
+
+    u_ip = inet_addr(ip);
+    u_ip = ntohl(u_ip);
+    while (++netmask <= len) {
+        u_ip &= ~(1 << (len - netmask));
+    }
+    u_ip = htonl(u_ip);
+    memcpy(&addr, &u_ip, sizeof(addr));
+    return inet_ntoa(addr);
+}

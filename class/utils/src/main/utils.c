@@ -72,6 +72,7 @@ int main(int agrc, char *agrv[])
         {NULL, NULL}
     };
 
+    printf("172.21.34.211/31 -- %s\n", ip_netmask("172.21.34.211", 31));
     if (0) {
     get_args(agrc, agrv, opts);
     printf("ip: %s\n", ip);
