@@ -190,10 +190,10 @@ thread_pkg_t *create_thread_pkg()
     thread_pkg_t *this;
 
     INIT(this,
-        .id     = -1,
-        .stop   = 0,
-        .wait_job   = NULL,
-        .thread = NULL,
+        .id       = -1,
+        .stop     = 0,
+        .wait_job = NULL,
+        .thread   = NULL,
     );
 
     return this;
@@ -253,13 +253,13 @@ static int thread_pkg_init(private_pool_t *this)
     /**
      * create thread bsem and lock
      */
-    thread->wait_job = bsem_create(1);
+    thread->wait_job = bsem_create(0);
     if (!thread->wait_job) return -1;
     thread->lock = mutex_create();
     if (!thread->lock) return -1;
 
     /**
-     * start thread
+     * start task thread
      */
     thread->thread = thread_create((void *)thread_handler, thread);
     if (!thread->thread) return -1;
@@ -267,9 +267,9 @@ static int thread_pkg_init(private_pool_t *this)
     /**
      * init thread information
      */
-    thread->id = thread->thread->get_id(thread->thread);
+    thread->id    = thread->thread->get_id(thread->thread);
     thread->state = THREAD_IDLE;
-    thread->pool = this;
+    thread->pool  = this;
     gettimeofday(&thread->start_time, NULL);
 
     /**
@@ -416,7 +416,7 @@ static void task_manager_handler(private_pool_t *this)
             thread->lock->lock(thread->lock);
             memcpy(thread->task, task, sizeof(thread_task_t));
             free(task);
-            usleep(3); /* sleep a while for let thread task take effect */
+            usleep(3); /* sleep a while letting thread task take effect */
             thread->lock->unlock(thread->lock);
             thread->wait_job->post(thread->wait_job);
         }
@@ -428,15 +428,15 @@ static void task_manager_handler(private_pool_t *this)
  */
 static void thread_manager_handler(private_pool_t *this)
 {
-    thread_pkg_t *thread = NULL;
-    int thread_cnt = 0;
-    struct timeval cur_time = {0};
-    struct timeval wait_time = {1, 0};
-    unsigned free_time = 3 * 1000000;
+    int thread_cnt              = 0;
+    unsigned free_time          = 3 * 1000000;
     unsigned int idle_stay_time = 0;
+    thread_pkg_t *thread        = NULL;
+    struct timeval cur_time     = {0};
+    struct timeval wait_time    = {1, 0};
 
     while (!this->thread_manager_stop) {   
-        wait_time.tv_sec = 1;
+        wait_time.tv_sec  = 1;
         wait_time.tv_usec = 0;
         select(0, NULL, NULL, NULL, &wait_time);
         if (this->thread_manager_stop) break;
@@ -573,21 +573,21 @@ pool_t *create_pool(int min_size, int max_size, int enable_thread_manager)
             .addjob  = _addjob_,
             .destroy = _destroy_,
         },
-        .created  = 0,
+        .created               = 0,
         .enable_thread_manager = (enable_thread_manager <= 0) ? 0 : 1,
-        .task_manager_stop   = 0,
-        .thread_manager_stop = 0,
-        .min_size = min_size,
-        .cur_size = 0,
-        .max_size = max_size,
-        .task_list_manager   = NULL,
-        .thread_list_manager = NULL,
-        .task_list   = linked_list_create(),
-        .thread_list = linked_list_create(),
-        .thread_list_lock = mutex_create(),
-        .task_list_lock   = mutex_create(),
-        .has_work         = bsem_create(0),
-        .has_idle_thread  = bsem_create(0),
+        .task_manager_stop     = 0,
+        .thread_manager_stop   = 0,
+        .min_size              = min_size,
+        .cur_size              = 0,
+        .max_size              = max_size,
+        .task_list_manager     = NULL,
+        .thread_list_manager   = NULL,
+        .task_list             = linked_list_create(),
+        .thread_list           = linked_list_create(),
+        .thread_list_lock      = mutex_create(),
+        .task_list_lock        = mutex_create(),
+        .has_work              = bsem_create(0),
+        .has_idle_thread       = bsem_create(0),
     );
 
     /**
