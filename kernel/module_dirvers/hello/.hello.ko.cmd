@@ -1,0 +1,1 @@
+cmd_/home/anton/program/c/kernel/module_dirvers/hello/hello.ko := ld -r -m elf_i386 -T ./scripts/module-common.lds --build-id  -o /home/anton/program/c/kernel/module_dirvers/hello/hello.ko /home/anton/program/c/kernel/module_dirvers/hello/hello.o /home/anton/program/c/kernel/module_dirvers/hello/hello.mod.o
