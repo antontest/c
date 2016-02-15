@@ -88,7 +88,7 @@ METHOD(listener_t, listen_, int, private_listener_t *this, int family, int type,
     /**
      * start socket event 
      */
-    net_evt = create_event(EVENT_MODE_EPOLL, 1000);
+    net_evt = event_create(EVENT_MODE_EPOLL, 1000);
     if (!net_evt) return -1;
     net_evt->add(net_evt, fd, EVENT_ON_ACCEPT, (void *)on_accept_handler, this);
 
@@ -114,7 +114,7 @@ METHOD(listener_t, connect_, int, private_listener_t *this, int family, int type
     /**
      * start socket event 
      */
-    net_evt = create_event(EVENT_MODE_EPOLL, 1000);
+    net_evt = event_create(EVENT_MODE_EPOLL, 1000);
     if (!net_evt) return -1;
     net_evt->add(net_evt, fd, EVENT_ON_RECV, (void *)on_recv_handler, this);
     net_evt->add(net_evt, fd, EVENT_ON_CLOSE, (void *)on_close_handler, this);

@@ -181,7 +181,7 @@ static int task_manager_init()
 {
     int fd = 0;
     INIT(task_manager, 
-        .evt       = create_event(EVENT_MODE_EPOLL, 1000),
+        .evt       = event_create(EVENT_MODE_EPOLL, 1000),
         .net       = create_socket(),
         .task_pool = create_pool(5, 10, 1),
         .sig       = create_ipc(),

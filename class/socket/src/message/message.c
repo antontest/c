@@ -221,7 +221,7 @@ msg_mod_t *create_msg_mod()
         .lsck     = create_local_socket(),
         .msg_list = linked_list_create(),
         .shm      = create_ipc(),
-        .evt      = create_event(EVENT_MODE_EPOLL, 1000),
+        .evt      = event_create(EVENT_MODE_EPOLL, 1000),
         .msg_cfg  = malloc(sizeof(mod_cfg_t)),
         .msg_lock = mutex_create(),
         .has_msg  = bsem_create(0),

@@ -458,7 +458,7 @@ static int start_event_capture(private_event_t *this, event_mode_t mode)
     return 0;
 }
 
-event_t *create_event(event_mode_t mode, int timeout)
+event_t *event_create(event_mode_t mode, int timeout)
 {
     private_event_t *this;
 

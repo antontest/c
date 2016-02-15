@@ -452,7 +452,7 @@ int main(int agrc, char *agrv[])
     /**
      * create fifo fd event listening
      */
-    evt = create_event(EVENT_MODE_SELECT, conf.timeout * 1000);
+    evt = event_create(EVENT_MODE_SELECT, conf.timeout * 1000);
     if (!evt) goto deinit;
     evt->exception_handle(evt, EXCEPTION_TIMEOUT, (void *)timeout_handler, task_queue);
     evt->exception_handle(evt, EXCEPTION_ERROR, (void *)error_handler, task_queue);
