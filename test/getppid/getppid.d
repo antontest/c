@@ -1,1 +1,0 @@
-getppid.o: getppid.c
