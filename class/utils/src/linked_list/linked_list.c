@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <utils.h>
+#include <stdio.h>
+#include <unistd.h>
 #include <linked_list.h>
 
 typedef struct element_t element_t;
@@ -147,30 +149,25 @@ static element_t* remove_element(private_linked_list_t *this,
 {
     element_t *next, *previous;
 
-    next = element->next;
+    next     = element->next;
     previous = element->previous;
     free(element);
+
     if (next)
-    {
         next->previous = previous;
-    }
     else
-    {
         this->last = previous;
-    }
+
     if (previous)
-    {
         previous->next = next;
-    }
     else
-    {
         this->first = next;
-    }
-    if (--this->count == 0)
-    {
+
+    if (--this->count == 0) {
         this->first = NULL;
         this->last = NULL;
     }
+
     return next;
 }
 
@@ -181,7 +178,7 @@ METHOD(linked_list_t, get_first, status_t,
     {
         return NOT_FOUND;
     }
-    *item = this->first->value;
+    if (this->first) *item = this->first->value;
     return SUCCESS;
 }
 
@@ -209,8 +206,7 @@ METHOD(linked_list_t, get_next, status_t,
 METHOD(linked_list_t, remove_first, status_t,
         private_linked_list_t *this, void **item)
 {
-    if (get_first(this, item) == SUCCESS)
-    {
+    if (get_first(this, item) == SUCCESS) {
         remove_element(this, this->first);
         return SUCCESS;
     }
@@ -223,14 +219,11 @@ METHOD(linked_list_t, insert_last, void,
     element_t *element;
 
     element = element_create(item);
-    if (this->count == 0)
-    {
+    if (this->count == 0) {
         /* first entry in list */
         this->first = element;
         this->last = element;
-    }
-    else
-    {
+    } else {
         element->previous = this->last;
         this->last->next = element;
         this->last = element;
@@ -391,12 +384,11 @@ METHOD(linked_list_t, destroy, void,
     void *value;
 
     /* Remove all list items before destroying list */
-    while (remove_first(this, &value) == SUCCESS)
+    while (_remove_first(this, &value) == SUCCESS)
     {
         /* values are not destroyed so memory leaks are possible
          * if list is not empty when deleting */
     }
-    clear_(this);
     free(this);
 }
 
@@ -494,6 +486,38 @@ METHOD(linked_list_t, reset_enumerator, void, private_linked_list_t *this, priva
     this->finished = FALSE;
 }
     
+METHOD(linked_list_t, bubble_, bool, private_linked_list_t *this, int (*cmp) (void *, void *))
+{
+    element_t *pc = NULL, *pb = NULL, *pn = NULL, *pe = NULL;
+    if (this->count < 2) return true;
+
+    pc = this->first;
+    while (pc != this->first->next) {
+        pb = NULL;
+        pc = this->first;
+        pn = this->first->next;
+        while (pn != pe) {
+            if (cmp(pc->value, pn->value) > 0) {
+                if (pb) pb->next = pn;
+                pc->next = pn->next;
+                pn->next = pc;
+
+                if (this->first == pc) {
+                    this->first  = pn;
+                    pn->previous = NULL;
+                }
+                pb = pn;
+                if (pc) pn = pc->next;
+            } else {
+                pb = pc;
+                pc = pn;
+                pn = pn->next;
+            }
+        }
+        pe = pc;
+    }
+    return true;
+}
 
 /*
  * Described in header.
@@ -528,6 +552,8 @@ linked_list_t *linked_list_create()
             .enumerate         = _enumerate_,
             .create_enumerator = _create_enumerator,
             .reset_enumerator  = (void*)_reset_enumerator,
+
+            .bubble = _bubble_,
         },
         .first   = NULL,
         .current = NULL,

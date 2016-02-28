@@ -24,6 +24,7 @@ SET(QUEUE_SRC      queue/queue.c)
 SET(QUEUE_TST      queue/sample.c)
 SET(ELE_SRC        element/element.c)
 SET(STACK_SRC      stack/stack.c)
+SET(LIST_T_SRC     linked_list/test.c)
 
 # lib generation
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/src/lib)
@@ -40,10 +41,12 @@ ADD_LIBRARY(log         STATIC ${LOG_SRC})
 # generat exec
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR})
 ADD_EXECUTABLE(utils_bin ${CSRC})
+ADD_EXECUTABLE(list_bin  ${LIST_T_SRC})
 
 # link library
 SET_TARGET_PROPERTIES(utils_bin PROPERTIES OUTPUT_NAME "utils")
 TARGET_LINK_LIBRARIES(utils_bin enum utils utils_debug log get_args)
+TARGET_LINK_LIBRARIES(list_bin  linked_list utils)
 
 # -------------- INSTALL -------------- #
 # install path setting
