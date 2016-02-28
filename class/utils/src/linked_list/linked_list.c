@@ -504,6 +504,7 @@ METHOD(linked_list_t, bubble_, bool, private_linked_list_t *this, int (*cmp) (vo
 
                 if (this->first == pc) {
                     this->first  = pn;
+                    pc->previous = pn;
                     pn->previous = NULL;
                 }
                 pb = pn;
