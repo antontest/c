@@ -22,6 +22,11 @@ int cmp (void *a, void *b)
     return ia > ib ? 1 : 0;
 }
 
+void print(int *el)
+{
+    printf("%d ", *el);
+}
+
 int main(int argc, char **argv)
 {
     linked_list_t *list = NULL;
@@ -29,13 +34,16 @@ int main(int argc, char **argv)
 
     list = linked_list_create();
     if (!list) return -1;
+
     list->insert_last(list, &a);
     list->insert_last(list, &b);
     list->insert_last(list, &c);
     list->insert_last(list, &d);
     print_list(list);
     list->bubble(list, cmp);
-    print_list(list);
+    list->print(list, (void *)print);
+    printf("\n");
+
     list->destroy(list);
 
     return 0;

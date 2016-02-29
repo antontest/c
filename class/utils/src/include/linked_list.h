@@ -225,6 +225,11 @@ struct linked_list_t {
     void (*reset_enumerator) (linked_list_t *this);
 
     /**
+     * @brief print linked_list data
+     */
+    void (*print) (linked_list_t *this, void (*print_cb) (void *));
+
+    /**
      * @brief sort data with bubble sort
      */
     bool (*bubble) (linked_list_t *this, int (*cmp) (void *, void *));

@@ -485,6 +485,16 @@ METHOD(linked_list_t, reset_enumerator, void, private_linked_list_t *this, priva
     this->current = NULL;
     this->finished = FALSE;
 }
+
+METHOD(linked_list_t, print_, void, private_linked_list_t *this, void (*print_cb) (void *))
+{
+    element_t *ps = this->first;
+
+    while (ps != NULL) {
+        print_cb(ps->value);
+        ps = ps->next;
+    }
+}
     
 METHOD(linked_list_t, bubble_, bool, private_linked_list_t *this, int (*cmp) (void *, void *))
 {
@@ -550,6 +560,7 @@ linked_list_t *linked_list_create()
             .destroy_offset   = _destroy_offset,
             .destroy_function = _destroy_function,
 
+            .print             = _print_,
             .enumerate         = _enumerate_,
             .create_enumerator = _create_enumerator,
             .reset_enumerator  = (void*)_reset_enumerator,
