@@ -124,4 +124,5 @@ install_lib(lib lib)
 # install target
 # INSTALL(TARGETS socket_bin RUNTIME DESTINATION bin)
 INSTALL(TARGETS ftp_client RUNTIME DESTINATION bin)
+INSTALL(TARGETS arp_test   RUNTIME DESTINATION bin)
 build_install(event)
