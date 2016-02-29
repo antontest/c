@@ -553,7 +553,7 @@ METHOD(linked_list_t, bubble_, bool, private_linked_list_t *this, int (*cmp) (vo
     return true;
 }
 
-void merge_sort(element_t **elh, int (*cmp) (void *, void *))
+static void merge_sort(element_t **elh, int (*cmp) (void *, void *))
 {
     element_t *pl = NULL, *pr = NULL, *ple = NULL;
     element_t *ps = NULL, *pq = NULL;
