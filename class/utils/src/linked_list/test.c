@@ -30,7 +30,7 @@ void print(int *el)
 int main(int argc, char **argv)
 {
     linked_list_t *list = NULL;
-    int a = 6, b = 2, c = 3, d = 11;
+    int a = 6, b = 2, c = 3, d = 11, e = 4;
 
     list = linked_list_create();
     if (!list) return -1;
@@ -39,10 +39,19 @@ int main(int argc, char **argv)
     list->insert_last(list, &b);
     list->insert_last(list, &c);
     list->insert_last(list, &d);
+    list->insert_last(list, &e);
     print_list(list);
+
     list->bubble(list, cmp);
     list->print(list, (void *)print);
     printf("\n");
+
+    list->merge(list, cmp);
+    printf("merge over\n");
+    print_list(list);
+
+    list->reverse(list);
+    print_list(list);
 
     list->destroy(list);
 

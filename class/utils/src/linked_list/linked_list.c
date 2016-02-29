@@ -486,6 +486,28 @@ METHOD(linked_list_t, reset_enumerator, void, private_linked_list_t *this, priva
     this->finished = FALSE;
 }
 
+METHOD(linked_list_t, reverse_, void, private_linked_list_t *this)
+{
+    element_t *pb = NULL, *pa = NULL, *pn = NULL;
+
+    if (this->count < 2) return;
+    pb = this->first;
+    pa = this->first->next;
+
+    pb->next = NULL;
+    while (pa != NULL) {
+        pb->previous = pa;
+        pn = pa->next;
+        pa->next = pb;
+
+        pb = pa;
+        pa = pn;
+    }
+
+    pb->previous = NULL;
+    this->first = pb;
+}
+
 METHOD(linked_list_t, print_, void, private_linked_list_t *this, void (*print_cb) (void *))
 {
     element_t *ps = this->first;
@@ -499,6 +521,7 @@ METHOD(linked_list_t, print_, void, private_linked_list_t *this, void (*print_cb
 METHOD(linked_list_t, bubble_, bool, private_linked_list_t *this, int (*cmp) (void *, void *))
 {
     element_t *pc = NULL, *pb = NULL, *pn = NULL, *pe = NULL;
+    if (!cmp) return false;
     if (this->count < 2) return true;
 
     pc = this->first;
@@ -527,6 +550,77 @@ METHOD(linked_list_t, bubble_, bool, private_linked_list_t *this, int (*cmp) (vo
         }
         pe = pc;
     }
+    return true;
+}
+
+void merge_sort(element_t **elh, int (*cmp) (void *, void *))
+{
+    element_t *pl = NULL, *pr = NULL, *ple = NULL;
+    element_t *ps = NULL, *pq = NULL;
+    element_t *ph = NULL, *prr = NULL;
+
+    if (!elh || !(*elh)->next) return;
+
+    ple = NULL;
+    ps = *elh;
+    pq = *elh;
+
+    while (pq != NULL && pq->next != NULL) {
+        ple = ps;
+        ps = ps->next;
+        pq = pq->next->next;
+    }
+
+    pl = *elh;
+    pr = ps;
+    ple->next = NULL;
+
+    merge_sort(&pl, cmp);
+    merge_sort(&pr, cmp);
+
+    if (cmp(pl->value, pr->value) <= 0) {
+        ph = prr = pl;
+        pl = pl->next;
+    } else {
+        ph = prr = pr;
+        pr = pr->next;
+    }
+
+    while (pl != NULL && pr != NULL) {
+        if (cmp(pl->value, pr->value) <= 0) {
+            prr->next = pl;
+            pl = pl->next;
+        } else {
+            prr->next = pr;
+            pr = pr->next;
+        }
+        prr = prr->next;
+    }
+    
+    if (!pl) prr->next = pr;
+    else if (!pr) prr->next = pl;
+
+    *elh = ph;
+}
+
+METHOD(linked_list_t, merge_, bool, private_linked_list_t *this, int (*cmp) (void *, void *))
+{
+    element_t *pb = NULL, *pa = NULL;
+
+    if (!cmp) return false;
+    if (this->count < 2) return true;
+
+    merge_sort(&this->first, cmp);
+
+    this->first->previous = NULL;
+    pb = this->first;
+    if (this->first) pa = this->first->next;
+    while (pa != NULL) {
+        pa->previous = pb;
+        pa = pa->next;
+        pb = pb->next;
+    }
+
     return true;
 }
 
@@ -560,12 +654,14 @@ linked_list_t *linked_list_create()
             .destroy_offset   = _destroy_offset,
             .destroy_function = _destroy_function,
 
+            .reverse           = _reverse_,
             .print             = _print_,
             .enumerate         = _enumerate_,
             .create_enumerator = _create_enumerator,
             .reset_enumerator  = (void*)_reset_enumerator,
 
             .bubble = _bubble_,
+            .merge  = _merge_,
         },
         .first   = NULL,
         .current = NULL,
