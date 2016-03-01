@@ -126,18 +126,16 @@ METHOD(linked_list_t, insert_first, void,
     element_t *element;
 
     element = element_create(item);
-    if (this->count == 0)
-    {
+    if (this->count == 0) {
         /* first entry in list */
         this->first = element;
         this->last = element;
-    }
-    else
-    {
+    } else {
         element->next = this->first;
         this->first->previous = element;
         this->first = element;
     }
+
     this->count++;
 }
 
@@ -153,15 +151,11 @@ static element_t* remove_element(private_linked_list_t *this,
     previous = element->previous;
     free(element);
 
-    if (next)
-        next->previous = previous;
-    else
-        this->last = previous;
+    if (next) next->previous = previous;
+    else this->last = previous;
 
-    if (previous)
-        previous->next = next;
-    else
-        this->first = next;
+    if (previous) previous->next = next;
+    else this->first = next;
 
     if (--this->count == 0) {
         this->first = NULL;
@@ -174,10 +168,7 @@ static element_t* remove_element(private_linked_list_t *this,
 METHOD(linked_list_t, get_first, status_t,
         private_linked_list_t *this, void **item)
 {
-    if (this->count == 0)
-    {
-        return NOT_FOUND;
-    }
+    if (this->count == 0) return NOT_FOUND;
     if (this->first) *item = this->first->value;
     return SUCCESS;
 }
@@ -234,10 +225,7 @@ METHOD(linked_list_t, insert_last, void,
 METHOD(linked_list_t, get_last, status_t,
         private_linked_list_t *this, void **item)
 {
-    if (this->count == 0)
-    {
-        return NOT_FOUND;
-    }
+    if (this->count == 0) return NOT_FOUND;
     *item = this->last->value;
     return SUCCESS;
 }
@@ -245,8 +233,7 @@ METHOD(linked_list_t, get_last, status_t,
 METHOD(linked_list_t, remove_last, status_t,
         private_linked_list_t *this, void **item)
 {
-    if (get_last(this, item) == SUCCESS)
-    {
+    if (get_last(this, item) == SUCCESS) {
         remove_element(this, this->last);
         return SUCCESS;
     }
@@ -259,16 +246,12 @@ METHOD(linked_list_t, remove_, int,
     element_t *current = this->first;
     int removed = 0;
 
-    while (current)
-    {
+    while (current) {
         if ((compare && compare(current->value, item)) ||
-                (!compare && current->value == item))
-        {
+                (!compare && current->value == item)) {
             removed++;
             current = remove_element(this, current);
-        }
-        else
-        {
+        } else {
             current = current->next;
         }
     }
@@ -306,14 +289,9 @@ METHOD(linked_list_t, find_first, status_t,
     element_t *current = this->first;
     if (!cmp || !key || !item) return NOT_FOUND;
 
-    while (current)
-    {
-        if (cmp && !cmp(current->value, key))
-        {
-            if (item != NULL)
-            {
-                *item = current->value;
-            }
+    while (current) {
+        if (cmp && !cmp(current->value, key)) {
+            if (item != NULL) *item = current->value;
             return SUCCESS;
         }
         current = current->next;
@@ -328,8 +306,7 @@ METHOD(linked_list_t, invoke_offset, void,
     element_t *current = this->first;
     linked_list_invoke_t *method;
 
-    while (current)
-    {
+    while (current) {
         method = current->value + offset;
         (*method)(current->value, d1, d2, d3, d4, d5);
         current = current->next;
@@ -342,8 +319,7 @@ METHOD(linked_list_t, invoke_function, void,
 {
     element_t *current = this->first;
 
-    while (current)
-    {
+    while (current) {
         fn(current->value, d1, d2, d3, d4, d5);
         current = current->next;
     }
@@ -356,8 +332,7 @@ METHOD(linked_list_t, clone_offset, linked_list_t*,
     linked_list_t *clone;
 
     clone = linked_list_create();
-    while (current)
-    {
+    while (current) {
         void* (**method)(void*) = current->value + offset;
         clone->insert_last(clone, (*method)(current->value));
         current = current->next;
@@ -384,8 +359,7 @@ METHOD(linked_list_t, destroy, void,
     void *value;
 
     /* Remove all list items before destroying list */
-    while (_remove_first(this, &value) == SUCCESS)
-    {
+    while (_remove_first(this, &value) == SUCCESS) {
         /* values are not destroyed so memory leaks are possible
          * if list is not empty when deleting */
     }
@@ -397,8 +371,7 @@ METHOD(linked_list_t, destroy_offset, void,
 {
     element_t *current = this->first, *next;
 
-    while (current)
-    {
+    while (current) {
         void (**method)(void*) = current->value + offset;
         (*method)(current->value);
         next = current->next;
@@ -413,8 +386,7 @@ METHOD(linked_list_t, destroy_function, void,
 {
     element_t *current = this->first, *next;
 
-    while (current)
-    {
+    while (current) {
         fn(current->value);
         next = current->next;
         free(current);
@@ -426,27 +398,16 @@ METHOD(linked_list_t, destroy_function, void,
 METHOD(enumerator_t, enumerate, bool,
         private_enumerator_t *this, void **item)
 {
-    if (this->finished)
-    {
-        return FALSE;
-    }                   
-    if (!this->current)
-    {
-        this->current = this->list->first;
-    }
-    else
-    {
-        this->current = this->current->next;
-    }
-    if (!this->current)
-    {
+    if (this->finished) return FALSE;
+    if (!this->current) this->current = this->list->first;
+    else this->current = this->current->next;
+
+    if (!this->current) {
         this->finished = TRUE;
         return FALSE;
     }
-    if (item)
-    {
-        *item = this->current->value;
-    }
+    
+    if (item) *item = this->current->value;
     return TRUE;
 }       
 
@@ -555,29 +516,38 @@ METHOD(linked_list_t, bubble_, bool, private_linked_list_t *this, int (*cmp) (vo
 
 static void merge_sort(element_t **elh, int (*cmp) (void *, void *))
 {
-    element_t *pl = NULL, *pr = NULL, *ple = NULL;
-    element_t *ps = NULL, *pq = NULL;
+    element_t *pl = NULL, *pr  = NULL, *ple = NULL;
+    element_t *ps = NULL, *pq  = NULL;
     element_t *ph = NULL, *prr = NULL;
 
     if (!elh || !(*elh)->next) return;
 
     ple = NULL;
-    ps = *elh;
-    pq = *elh;
+    ps  = *elh;
+    pq  = *elh;
 
+    /**
+     * find middle element of list
+     */
     while (pq != NULL && pq->next != NULL) {
         ple = ps;
-        ps = ps->next;
-        pq = pq->next->next;
+        ps  = ps->next;
+        pq  = pq->next->next;
     }
 
     pl = *elh;
     pr = ps;
     ple->next = NULL;
 
+    /**
+     * merge sort
+     */
     merge_sort(&pl, cmp);
     merge_sort(&pr, cmp);
 
+    /**
+     * merge
+     */
     if (cmp(pl->value, pr->value) <= 0) {
         ph = prr = pl;
         pl = pl->next;
