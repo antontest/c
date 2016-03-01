@@ -28,6 +28,7 @@ ADD_EXECUTABLE(unit_test_bin ${CSRC})
 SET_TARGET_PROPERTIES(unit_test_bin PROPERTIES OUTPUT_NAME "unit_test")
 TARGET_LINK_LIBRARIES(unit_test     cunit)
 TARGET_LINK_LIBRARIES(unit_test_bin unit_test cunit)
+ADD_SUBDIRECTORY(CUnit-2.0-1 CUnit-2.0-1)
 
 # -------------- INSTALL -------------- #
 # install path setting

@@ -1,0 +1,130 @@
+dnl Process this file with autoconf to produce a configure script.
+AC_INIT(CUnit, 2.0-1)
+AM_INIT_AUTOMAKE(CUnit, 2.0-1)
+
+PACKAGE=CUnit
+VERSION=2.0
+RELEASE=1
+
+TOPDIR=`pwd`
+
+CFLAGS="-DRELEASE=@RELEASE@ -Wall -I${PWD}/CUnit/Headers"
+LDFLAGS="-L${PWD}/CUnit/Sources"
+
+dnl AC_ARG_ENABLE(debug,
+dnl 	[  --enable-debug    enable debugging],
+dnl 	  [
+dnl 			echo "++++++++++ Enabling debug mode compilation.";
+dnl 			CFLAGS="$CFLAGS -D_DEBUG -g3 -Wall"
+dnl 			LDFLAGS="$LDFLAGS -g"
+dnl 		],
+dnl 	  [
+dnl 			echo "---------- Disabling debug mode compilation."
+dnl 	  	])
+
+dnl AM_CONDITIONAL(ENABLE_AUTOMATED, false)
+dnl AC_ARG_ENABLE(automated,
+dnl 	[  --enable-automated    enable automated mode compilation],
+dnl 	  [
+dnl 	  		echo "++++++++++ Enabling automated(XML) mode compilation";
+dnl 			AM_CONDITIONAL(ENABLE_AUTOMATED, true)
+dnl 		],
+dnl 	  [
+dnl 	  		echo "---------- Disabling automated(XML) mode compilation"
+dnl 	  	])
+
+dnl AM_CONDITIONAL(ENABLE_CURSES, false)
+dnl AC_ARG_ENABLE(curses,
+dnl 	[  --enable-curses    enable curses mode compilation],
+dnl 	  [
+dnl 	  		echo "++++++++++ Enabling curses mode compilation";
+dnl 			AM_CONDITIONAL(ENABLE_CURSES, true)
+dnl 		],
+dnl 	  [
+dnl 	  		echo "---------- Disabling curse mode compilation"
+dnl 	  	])
+
+dnl AC_ARG_ENABLE(memtrace,
+dnl 	[  --enable-memtrace    enable memory tracing],
+dnl 	  [
+dnl 	  	echo "++++++++++ Enabling memtrace functionality at compile time.";
+dnl 		CFLAGS="$CFLAGS -DMEMTRACE"
+dnl 	  ],
+dnl 	  [
+dnl 	  	echo "---------- Disabling memtrace functionality at compile time."
+dnl 	  ])
+
+# Check for programs.
+AC_PROG_CC
+AC_PROG_INSTALL
+AC_PROG_RANLIB
+AC_PROG_MAKE_SET
+
+# Check for libraries
+AC_CHECK_LIB(c, main)  dnl Check for -lc
+
+# Check for standard functions
+AC_CHECK_FUNC(malloc, [], [echo malloc not found; exit 1])
+AC_CHECK_FUNC(free, [], [echo free not found; exit 1])
+AC_CHECK_FUNC(calloc, [], [echo calloc not found; exit 1])
+AC_CHECK_FUNC(realloc, [], [echo realloc not found; exit 1])
+
+AC_CHECK_FUNC(strcpy, [], [echo strcpy not found; exit 1])
+AC_CHECK_FUNC(strerror, [], [echo strerror not found; exit 1])
+
+AC_CHECK_FUNC(fopen, [], [echo fopen not found; exit 1])
+AC_CHECK_FUNC(fclose, [], [echo fclose not found; exit 1])
+AC_CHECK_FUNC(fprintf, [], [echo fprintf not found; exit 1])
+AC_CHECK_FUNC(setvbuf, [], [echo setvbuf not found; exit 1])
+
+AC_CHECK_FUNC(time, [], [echo time not found; exit 1])
+AC_CHECK_FUNC(ctime, [], [echo ctime not found; exit 1])
+
+# Check for header files.
+AC_HEADER_STDC
+AC_CHECK_HEADERS(assert.h)
+AC_CHECK_HEADERS(ctype.h)
+AC_CHECK_HEADERS(math.h)
+AC_CHECK_HEADERS(file.h)
+AC_CHECK_HEADERS(stdio.h)
+AC_CHECK_HEADERS(stdlib.h)
+AC_CHECK_HEADERS(string.h)
+
+AM_CONFIG_HEADER(config.h)
+
+# Check for typedefs, structures, and compiler characteristics.
+AC_C_CONST
+
+# Configure Jamrules for user environment
+AC_CONFIG_FILES([Jamrules:Jamrules.in])
+
+# Set environment variables.
+AC_SUBST(PACKAGE)
+AC_SUBST(VERSION)
+AC_SUBST(RELEASE)
+
+# Configure Makefile set.
+AC_CONFIG_FILES( Makefile \
+		CUnit.spec \
+		CUnit/Makefile \
+		CUnit/Headers/Makefile \
+		CUnit/Sources/Makefile \
+		CUnit/Sources/Framework/Makefile \
+		CUnit/Sources/Automated/Makefile \
+		CUnit/Sources/Basic/Makefile \
+		CUnit/Sources/Console/Makefile \
+		CUnit/Sources/Curses/Makefile \
+		CUnit/Sources/Test/Makefile \
+		doc/Makefile \
+		doc/headers/Makefile \
+		Examples/Makefile \
+		Examples/AutomatedTest/Makefile \
+		Examples/BasicTest/Makefile \
+		Examples/ConsoleTest/Makefile \
+		Examples/CursesTest/Makefile \
+		Man/Makefile \
+		Man/man3/Makefile \
+		Share/Makefile )
+
+AC_OUTPUT
+
