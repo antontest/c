@@ -9,8 +9,8 @@ int main(int argc, char **argv)
     int ret = 0;
     char buf[128] = {0};
 
-    //cast_t *cast = create_broadcast("255.255.255.255", 5001);
-    cast_t *cast = create_multicast("225.0.0.88", 5001);
+    cast_t *cast = create_broadcast("255.255.255.255", 5001);
+    //cast_t *cast = create_multicast("225.0.0.88", 5001);
 
     if (argc < 2) {
         ret = cast->send(cast, "hi", sizeof("hi"));

@@ -108,7 +108,7 @@ TARGET_LINK_LIBRARIES(tcp_test      host tcp get_args)
 TARGET_LINK_LIBRARIES(udp           host utils)
 TARGET_LINK_LIBRARIES(udp_test      host udp get_args)
 TARGET_LINK_LIBRARIES(chunk_test    chunk)
-TARGET_LINK_LIBRARIES(socket_bin    socket get_args property ftp socket_base arp)
+TARGET_LINK_LIBRARIES(socket_bin    socket get_args property ftp socket_base arp cast)
 
 # -------------- INSTALL -------------- #
 # install path setting
@@ -122,7 +122,7 @@ install_hfiles(include include/socket)
 install_lib(lib lib)
 
 # install target
-# INSTALL(TARGETS socket_bin RUNTIME DESTINATION bin)
+INSTALL(TARGETS socket_bin RUNTIME DESTINATION bin)
 INSTALL(TARGETS ftp_client RUNTIME DESTINATION bin)
 INSTALL(TARGETS arp_test   RUNTIME DESTINATION bin)
 build_install(event)
