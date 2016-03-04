@@ -38,7 +38,9 @@ int main(int argc, char **argv)
     cfg = cfg_create(file);
     if (!cfg) return -1;
     if (!keyvalue) {
-        keyvalue = cfg->get_value(cfg, keyname);
+        keyvalue = (char *)malloc(256);
+        if (!keyvalue) return -1;
+        keyvalue = cfg->get_value(cfg, keyname, keyvalue, 256);
         if (keyvalue) printf("%s\n", keyvalue);
         else {
             printf("cfg get value failed\n");

@@ -315,7 +315,7 @@ struct cfg_t {
      *
      * @return          key value
      */
-    char *(*get_value) (cfg_t *this, const char *keyname);
+    char *(*get_value) (cfg_t *this, const char *keyname, char *buf, int size);
 
     /**
      * @brief Get value by name from configure file  

@@ -1,6 +1,14 @@
 #ifndef __TCP_H__
 #define __TCP_H__
 
+typedef enum tcp_status_t tcp_status_t;
+enum tcp_status_t {
+    TCP_CLOSED = 0x10, /* not establish and tcp closed */
+    TCP_LISTENING, /* tcp server listening */
+    TCP_CONNECTING, /* tcp client connecing */
+    TCP_CONNECTED, /* tcp connected */
+};
+
 typedef struct tcp_t tcp_t;
 struct tcp_t {
     /**
@@ -57,6 +65,11 @@ struct tcp_t {
      * @brief destroy instance and free memory
      */
     void (*destroy) (tcp_t *this);
+
+    /**
+     * @brief get tcp connection state
+     */
+    tcp_status_t (*get_state) (tcp_t *this);
 };
 
 /**

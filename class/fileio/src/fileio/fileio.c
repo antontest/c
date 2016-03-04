@@ -596,7 +596,7 @@ static int is_file(const char *path)
     return 0;
 }
 
-METHOD(cfg_t, get_cfg_value, char *, private_cfg_t *this, const char *keyname)
+METHOD(cfg_t, get_cfg_value, char *, private_cfg_t *this, const char *keyname, char *buf, int size)
 {
     char *read_ptr = NULL;
     char *ret_ptr  = NULL;
@@ -618,6 +618,8 @@ METHOD(cfg_t, get_cfg_value, char *, private_cfg_t *this, const char *keyname)
     ret_ptr = strtok_r(ret_ptr, "\n", &save_ptr);
     l_trim(&ret_ptr);
     r_trim(&ret_ptr);
+    strncpy(buf, ret_ptr, size);
+    ret_ptr = buf;
     
     return ret_ptr;
 }

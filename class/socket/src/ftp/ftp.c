@@ -11,6 +11,7 @@
 #include <fileio.h>
 #include <socket.h>
 #include <stdarg.h>
+#include <tcp.h>
 
 #define FTP_PORT "21"
 #define FTP_SERV "localhost"
@@ -22,6 +23,11 @@ struct private_ftp_t {
      * @brief public interface
      */
     ftp_t public;
+
+    /**
+     * @brief connect and recv timeout
+     */
+    int timeout_ms;
 
     /**
      * @brief ftp server ip address
@@ -72,12 +78,12 @@ struct private_ftp_t {
     /**
      * @brief ftp socket
      */
-    socket_t *sck;
+    tcp_t *sck;
 
     /**
      * @brief socket used to transport data
      */
-    socket_t *data_sck;
+    tcp_t *data_sck;
 
     /**
      * @brief code buffer
@@ -113,26 +119,27 @@ static int ftp_cmd_send(private_ftp_t *this, const char *code, const char *fmt, 
     return this->sck->send(this->sck, this->code_buffer, strlen(this->code_buffer));
 }
 
-static int ftp_msg_recv(private_ftp_t *this, socket_t *sock)
+static int ftp_msg_recv(private_ftp_t *this, tcp_t *sock)
 {
     if (!this->msg_buffer) return -1;
-    sock->recv(sock, this->msg_buffer, FTP_MSG_BUFF_SIZE, 0);
+    sock->recv(sock, this->msg_buffer, FTP_MSG_BUFF_SIZE);
     sscanf(this->msg_buffer, "%d", &this->code);
     
     return this->code;
 }
 
-METHOD(ftp_t, login, int, private_ftp_t *this, char *server, unsigned int port, const char *user, const char *passwd)
+METHOD(ftp_t, login, int, private_ftp_t *this, char *server, unsigned int port, const char *user, const char *passwd, int timeout_ms)
 {
     if (!user || !passwd || !server || !this->sck) return -1;
     if (this->logged) return 0;
-    this->server = strdup(server);
-    this->user   = strdup(user);
-    this->passwd = strdup(passwd);
-    this->port   = port;
+    this->server     = strdup(server);
+    this->user       = strdup(user);
+    this->passwd     = strdup(passwd);
+    this->port       = port;
+    this->timeout_ms = timeout_ms;
     
-    if (this->sck->connect(this->sck, AF_INET, SOCK_STREAM, IPPROTO_TCP, this->server, this->port) <= 0) {
-        perror("connect()");
+    if (this->sck->connect_tm(this->sck, AF_INET, this->server, this->port, this->timeout_ms) <= 0) {
+//        perror("connect()");
         return -1;
     }
     printf("connect FTP server successfully!\n");
@@ -173,13 +180,14 @@ METHOD(ftp_t, get_data_port, int, private_ftp_t *this)
 
 METHOD(ftp_t, list, void, private_ftp_t *this, const char *path)
 {
-    _get_data_port(this);
+    int ret = 0;
 
-    this->data_sck->connect(this->data_sck, AF_INET, SOCK_STREAM, IPPROTO_TCP, this->server, this->data_port);
-    if (this->data_sck->get_state(this->data_sck) != SOCKET_CONNECTED) return;
+    _get_data_port(this);
+    ret = this->data_sck->connect(this->data_sck, AF_INET, this->server, this->data_port);
+    if (ret < 0) return;
 
     ftp_cmd_send(this, "LIST", path);
-    while (this->data_sck->recv(this->data_sck, this->msg_buffer, FTP_MSG_BUFF_SIZE, 0) > 0) {
+    while (this->data_sck->recv(this->data_sck, this->msg_buffer, FTP_MSG_BUFF_SIZE) > 0) {
         printf("%s", this->msg_buffer);
         memset(this->msg_buffer, 0, FTP_MSG_BUFF_SIZE);
     }
@@ -261,6 +269,7 @@ METHOD(ftp_t, download_, int, private_ftp_t *this, const char *path)
     char *filename    = NULL;
     char *ftp_path    = NULL;
     int  ftp_path_len = 0;
+    int ret           = 0;
 
     /**
      * 1. get file name by path 
@@ -306,14 +315,14 @@ METHOD(ftp_t, download_, int, private_ftp_t *this, const char *path)
      */
     _get_data_port(this);
     ftp_cmd_send(this, "RETR", filename);
-    this->data_sck->connect(this->data_sck, AF_INET, SOCK_STREAM, IPPROTO_TCP, this->server, this->data_port);
-    if (this->data_sck->get_state(this->data_sck) != SOCKET_CONNECTED) return -1;
+    ret = this->data_sck->connect(this->data_sck, AF_INET, this->server, this->data_port);
+    if (ret < 0) return -1;
 
     /**
      * download file
      */
     this->file->open(this->file, filename, "wb");
-    while ((recv_cnt = this->data_sck->recv(this->data_sck, this->msg_buffer, FTP_MSG_BUFF_SIZE, 0)) > 0) {
+    while ((recv_cnt = this->data_sck->recv(this->data_sck, this->msg_buffer, FTP_MSG_BUFF_SIZE)) > 0) {
         download_size += recv_cnt;
         this->file->writen(this->file, this->msg_buffer, recv_cnt);
         printf("\rdownload: %.2f%%", ((float)download_size / (float)size) * 100);
@@ -337,6 +346,7 @@ METHOD(ftp_t, upload_, int, private_ftp_t *this, const char *ftp_path, const cha
     int left_cnt    = 0;
     char *filename  = NULL;
     struct stat st  = {0};
+    int ret         = 0;
 
     if (!file_path) {
         printf("file path can't be null\n");
@@ -379,8 +389,8 @@ METHOD(ftp_t, upload_, int, private_ftp_t *this, const char *ftp_path, const cha
      */
     _get_data_port(this);
     ftp_cmd_send(this, "STOR", filename);
-    this->data_sck->connect(this->data_sck, AF_INET, SOCK_STREAM, IPPROTO_TCP, this->server, this->data_port);
-    if (this->data_sck->get_state(this->data_sck) != SOCKET_CONNECTED) return -1;
+    ret = this->data_sck->connect(this->data_sck, AF_INET, this->server, this->data_port);
+    if (ret < 0) return -1;
 
     /**
      * upload file
@@ -453,8 +463,8 @@ ftp_t *create_ftp()
             .destroy       = _destroy_,
         },
         .fp         = NULL,
-        .sck        = create_socket(),
-        .data_sck   = create_socket(),
+        .sck        = tcp_create(),
+        .data_sck   = tcp_create(),
         .msg_buffer = (char *)malloc(FTP_MSG_BUFF_SIZE),
         .logged     = 0,
         .data_port  = -1,

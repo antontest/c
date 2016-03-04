@@ -32,10 +32,16 @@ struct private_tcp_t {
      * @brief socket host
      */
     host_t *host;
+
+    /**
+     * @brief status of tcp connection
+     */
+    tcp_status_t status;
 };
 #define tcp_fd        this->fd
 #define tcp_host      this->host
 #define tcp_accept_fd this->accept_fd
+#define tcp_state     this->status
  
 static void make_reusable(int fd)
 {
@@ -114,6 +120,7 @@ METHOD(tcp_t, listen_, int, private_tcp_t *this, int family, char *ip, int port)
         return -1;
     }
 
+    tcp_state = TCP_LISTENING;
     return tcp_fd;
 }
 
@@ -148,12 +155,14 @@ METHOD(tcp_t, connect_, int, private_tcp_t *this, int family, char *ip, int port
     /**
      * connect to server
      */
+    tcp_state = TCP_CONNECTING;
     ret = connect(tcp_accept_fd, tcp_host->get_sockaddr(tcp_host), sizeof(struct sockaddr));
     if (ret < 0) {
         perror("connect()");
         return -1;
     }
 
+    tcp_state = TCP_CONNECTED;
     return tcp_accept_fd;
 }
 
@@ -190,6 +199,7 @@ METHOD(tcp_t, connect_tm_, int, private_tcp_t *this, int family, char *ip, int p
     /**
      * connect to server
      */
+    tcp_state = TCP_CONNECTING;
     if (timeout_ms > 0) {
         make_nonblock(tcp_accept_fd);
         while (timeout_ms > 0) {
@@ -209,17 +219,19 @@ METHOD(tcp_t, connect_tm_, int, private_tcp_t *this, int family, char *ip, int p
     }
 
     if (ret < 0) {
-        perror("connect()");
+        perror("connect() failed");
         return -1;
     }
     make_block(tcp_accept_fd);
 
+    tcp_state = TCP_CONNECTED;
     return tcp_accept_fd;
 }
 
 METHOD(tcp_t, accept_, int, private_tcp_t *this)
 {
     tcp_accept_fd = accept(tcp_fd, NULL, 0);
+    if (tcp_accept_fd > 0) tcp_state = TCP_CONNECTED;
     return tcp_accept_fd;
 }
 
@@ -259,6 +271,7 @@ METHOD(tcp_t, recv_tm_, int, private_tcp_t *this, void *buf, int size, int timeo
 
 METHOD(tcp_t, close_, int, private_tcp_t *this)
 {
+    tcp_state = TCP_CLOSED;
     return close(tcp_accept_fd);
 }
 
@@ -268,6 +281,11 @@ METHOD(tcp_t, destroy_, void, private_tcp_t *this)
     if (tcp_accept_fd) close(tcp_accept_fd);
     if (tcp_host) tcp_host->destroy(tcp_host);
     free(this);
+}
+
+METHOD(tcp_t, get_state_, tcp_status_t, private_tcp_t *this)
+{
+    return tcp_state;
 }
 
 tcp_t *tcp_create(int family)
@@ -284,10 +302,12 @@ tcp_t *tcp_create(int family)
             .recv       = _recv_,
             .recv_tm    = _recv_tm_,
             .close      = _close_,
-            .destroy    = _destroy_
+            .destroy    = _destroy_,
+            .get_state  = _get_state_,
         },
-        .fd   = -1,
-        .host = NULL,
+        .fd     = -1,
+        .host   = NULL,
+        .status = TCP_CLOSED,
     );
 
     return &this->public;

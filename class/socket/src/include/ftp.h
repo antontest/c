@@ -14,7 +14,7 @@ struct ftp_t  {
      * @return        0, if login successfully; -1, if failed
      * 
      */
-    int (*login) (ftp_t *this, char *server, unsigned int port, const char *user, const char *passwd);
+    int (*login) (ftp_t *this, char *server, unsigned int port, const char *user, const char *passwd, int timeout_ms);
 
     /**
      * @brief  ftp server file listing 
