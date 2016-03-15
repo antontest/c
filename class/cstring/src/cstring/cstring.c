@@ -309,6 +309,13 @@ METHOD(cstring, casecmp_, inline int, private_cstring *this, const char *s)
     return s != NULL ? strcasecmp(this->data, s) : -1;
 }
 
+METHOD(cstring, empty_, void, private_cstring *this)
+{
+    LOCK(this);
+    memset(this->data, 0, this->size);
+    UNLOCK(this);
+}
+
 METHOD(cstring, is_empty_, int, private_cstring *this)
 {
     return !this->len ? 1: 0;
@@ -352,6 +359,7 @@ cstring *create_cstring(unsigned int size)
             .cmp        = _cmp_,
             .casecmp    = _casecmp_,
 
+            .empty      = _empty_,
             .is_empty   = _is_empty_,
         },
         .size   = size,

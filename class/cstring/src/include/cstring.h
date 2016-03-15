@@ -133,6 +133,11 @@ struct cstring {
     int (*casecmp) (cstring *this, const char *s);
 
     /**
+     * @brief clear string
+     */
+    void (*empty) (cstring *this);
+
+    /**
      * @brief string wether is empty
      */
     int (*is_empty) (cstring *this);
