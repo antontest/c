@@ -27,7 +27,12 @@ struct private_cstring {
     /**
      * @brief save c replaced
      */
-    char *offsets;
+    char *offset;
+
+    /**
+     * @brief lock for write
+     */
+    int lock;
 
     /**
      * @brief string data
@@ -35,13 +40,25 @@ struct private_cstring {
     char data[0];
 };
 
+static inline void LOCK(private_cstring *this) 
+{
+    while (__sync_lock_test_and_set(&(this->lock),1)) {}
+}
+
+static inline void UNLOCK(private_cstring *this) 
+{
+    __sync_lock_release(&(this->lock));
+}
+
 METHOD(cstring, set_, char *, private_cstring *this, const char *fmt, ...)
 {
     va_list arg;
 
+    LOCK(this);
     va_start(arg, fmt);
     this->len = vsnprintf(this->data, this->size, fmt, arg);
     va_end(arg);
+    UNLOCK(this);
 
     return this->data;
 }
@@ -50,9 +67,11 @@ METHOD(cstring, add_, char *, private_cstring *this, const char *fmt, ...)
 {    
     va_list arg;
     
+    LOCK(this);
     va_start(arg, fmt);
     this->len += vsnprintf(this->data + this->len, this->size - this->len, fmt, arg);
     va_end(arg);
+    UNLOCK(this);
     
     return this->data;
 }
@@ -67,6 +86,7 @@ METHOD(cstring, insert_, char *, private_cstring *this, unsigned int index, cons
     
     if (index > this->len) index = this->len;
 
+    LOCK(this);
     va_start(arg, fmt);
     len = vsnprintf(buf, sizeof(buf), fmt, arg);
     va_end(arg);
@@ -88,6 +108,7 @@ METHOD(cstring, insert_, char *, private_cstring *this, unsigned int index, cons
         *b++ = *a++;
     }
     this->len += len_tmp;
+    UNLOCK(this);
 
     return this->data;
 }
@@ -101,11 +122,13 @@ METHOD(cstring, delete_, char *, private_cstring *this, unsigned int index, unsi
     count = (index + count) > this->len ? (this->len - index) : count;
     p = this->data + index + count;
     r = this->data + index;
+    LOCK(this);
     while (*p != '\0') {
         *r++ = *p++;
     }
     *r = '\0';
     this->len -= count;
+    UNLOCK(this);
 
     return this->data;
 }
@@ -118,12 +141,13 @@ METHOD(cstring, get_, char *, private_cstring *this)
 METHOD(cstring, left_, char *, private_cstring *this, unsigned int count)
 {
     if (count >= this->len) return this->data;
-    if (this->offsets != NULL) free(this->offsets);
-    this->offsets = malloc(count + 1);
-    memcpy(this->offsets, this->data, count);
-    strcat(this->offsets, "\0");
 
-    return this->offsets;
+    if (this->offset != NULL) free(this->offset);
+    this->offset = malloc(count + 1);
+    memcpy(this->offset, this->data, count);
+    strcat(this->offset, "\0");
+
+    return this->offset;
 }
 
 METHOD(cstring, mid_, char *, private_cstring *this, unsigned int start, unsigned int count)
@@ -131,43 +155,46 @@ METHOD(cstring, mid_, char *, private_cstring *this, unsigned int start, unsigne
     if (start > this->len || (!start && !count)) return NULL;
     if (!count) return this->data + start;
     
-    if (this->offsets != NULL) free(this->offsets);
-    this->offsets = malloc(count + 1);
-    memcpy(this->offsets, this->data + start, count);
-    strcat(this->offsets, "\0");
+    if (this->offset != NULL) free(this->offset);
+    this->offset = malloc(count + 1);
+    memcpy(this->offset, this->data + start, count);
+    strcat(this->offset, "\0");
 
-    return this->offsets;
+    return this->offset;
 }
 
 METHOD(cstring, right_, char *, private_cstring *this, unsigned int count)
 {
     if (count >= this->len) return this->data;
-    if (this->offsets != NULL) free(this->offsets);
-    this->offsets = malloc(count + 1);
-    memcpy(this->offsets, this->data + this->len - count, count);
-    strcat(this->offsets, "\0");
 
-    return this->offsets;
+    if (this->offset != NULL) free(this->offset);
+    this->offset = malloc(count + 1);
+    memcpy(this->offset, this->data + this->len - count, count);
+    strcat(this->offset, "\0");
+
+    return this->offset;
 }
 
-METHOD(cstring, length_, int, private_cstring *this)
+METHOD(cstring, get_length_, int, private_cstring *this)
 {
     return this->len;
 }
 
 METHOD(cstring, resize_, int, private_cstring *this, unsigned int size)
 {
+    LOCK(this);
     char *p = realloc((void *)this, sizeof(private_cstring) + size);
     if (!p) return -1;
     this = (private_cstring *)p;
     this->size = size;
+    UNLOCK(this);
 
     return 0;
 }
 
 METHOD(cstring, destory_, void, private_cstring *this)
 {
-    if (this->offsets != NULL) free(this->offsets);
+    if (this->offset != NULL) free(this->offset);
     free(this);
 }
 
@@ -185,10 +212,12 @@ METHOD(cstring, tolower_, char *, private_cstring *this)
 {
     char *s = this->data;
 
+    LOCK(this);
     while (*s != '\0') {
         if (isupper(*s)) *s = tolower(*s);
         s++;
     }
+    UNLOCK(this);
     
     return this->data;    
 }
@@ -197,10 +226,12 @@ METHOD(cstring, toupper_, char *, private_cstring *this)
 {
     char *s = this->data;
 
+    LOCK(this);
     while (*s != '\0') {
         if (islower(*s)) *s = toupper(*s);
         s++;
     }
+    UNLOCK(this);
     
     return this->data;    
 }
@@ -209,9 +240,11 @@ METHOD(cstring, left_trim_, char *, private_cstring *this)
 {
     char *p = this->data, *q = this->data;
 
+    LOCK(this);
     while (*p == ' ') p++;
     while ((*q++ = *p++) != '\0') NULL;
     this->len = strlen(this->data);
+    UNLOCK(this);
 
     return this->data;
 }
@@ -220,10 +253,12 @@ METHOD(cstring, right_trim_, char *, private_cstring *this)
 {
     char *p = this->data;
 
+    LOCK(this);
     while (*p != '\0') p++;
     while (--p != this->data && *p == ' ') NULL;
     *(++p) = '\0';
     this->len = strlen(this->data);
+    UNLOCK(this);
 
     return this->data;
 }
@@ -232,6 +267,7 @@ METHOD(cstring, mid_trim_, char *, private_cstring *this)
 {
     char *a = this->data, *b = this->data;
 
+    LOCK(this);
     while (*a != '\0' && *a == ' ') a++;
     *b = *a;
 
@@ -242,6 +278,7 @@ METHOD(cstring, mid_trim_, char *, private_cstring *this)
     if (*b == ' ') *b = '\0';
     else *(++b) = '\0';
     this->len = strlen(this->data);
+    UNLOCK(this);
 
     return this->data;
 }
@@ -250,22 +287,24 @@ METHOD(cstring, all_trim_, char *, private_cstring *this)
 {
     char *s = this->data, *b = this->data;
 
+    LOCK(this);
     while (*s != '\0') {
         if (*s != ' ') *b++ = *s;
         s++;
     }
     *b = '\0';
     this->len = strlen(this->data);
+    UNLOCK(this);
     
     return this->data;
 }
 
-METHOD(cstring, compare_, inline int, private_cstring *this, const char *s)
+METHOD(cstring, cmp_, inline int, private_cstring *this, const char *s)
 {
     return s != NULL ? strcmp(this->data, s) : -1;
 }
 
-METHOD(cstring, compare_no_case_, inline int, private_cstring *this, const char *s)
+METHOD(cstring, casecmp_, inline int, private_cstring *this, const char *s)
 {
     return s != NULL ? strcasecmp(this->data, s) : -1;
 }
@@ -286,37 +325,38 @@ cstring *create_cstring(unsigned int size)
     if (!this) return NULL;
     (*this) = (private_cstring) {
         .public = {
-            .set      = _set_,
-            .add      = _add_,
-            .insert   = _insert_,
-            .delete   = _delete_,
-            .resize   = _resize_,
-            .destroy  = _destory_,
+            .set        = _set_,
+            .add        = _add_,
+            .insert     = _insert_,
+            .delete     = _delete_,
+            .resize     = _resize_,
+            .destroy    = _destory_,
 
-            .get      = _get_,
-            .left     = _left_,
-            .mid      = _mid_,
-            .right    = _right_,
+            .get        = _get_,
+            .left       = _left_,
+            .mid        = _mid_,
+            .right      = _right_,
 
-            .length   = _length_,
-            .get_size = _get_size,
+            .get_length = _get_length_,
+            .get_size   = _get_size,
 
-            .toint    = _toint_,
-            .tolower  = _tolower_,
-            .toupper  = _toupper_,
+            .toint      = _toint_,
+            .tolower    = _tolower_,
+            .toupper    = _toupper_,
 
             .left_trim  = _left_trim_,
             .mid_trim   = _mid_trim_,
             .right_trim = _right_trim_,
             .all_trim   = _all_trim_,
 
-            .compare         = _compare_,
-            .compare_no_case = _compare_no_case_,
+            .cmp        = _cmp_,
+            .casecmp    = _casecmp_,
 
-            .is_empty = _is_empty_,
+            .is_empty   = _is_empty_,
         },
-        .size = size,
-        .len  = 0,
+        .size   = size,
+        .len    = 0,
+        .offset = NULL,
     };
 
     return &this->public;

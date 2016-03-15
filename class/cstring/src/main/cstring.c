@@ -36,15 +36,16 @@ int main(int agrc, char *agrv[])
     printf("%s\n", s->toupper(s));
     printf("%s\n", s->tolower(s));
     s->resize(s, 15);
+    printf("resize: %s\n", s->get(s));
     printf("%s\n", s->set(s, "hi, %s", "world!"));
     printf("%s\n", s->all_trim(s));
-    printf("len: %d\n", s->length(s));
+    printf("len: %d\n", s->get_length(s));
     printf("%s\n", s->mid(s, 4, 0));
     printf("del: %s\n", s->delete(s, 1, 1));
     printf("insert: %s\n", s->insert(s, 1, "%s %d ", "hi", 111));
     printf("right: %s\n", s->right(s, 6));
     printf("left: %s\n", s->left(s, 3));
-    printf("len: %d\n", s->length(s));
+    printf("len: %d\n", s->get_length(s));
     s->set(s, "123s");
     printf("%d\n", s->toint(s));
     s->destroy(s);

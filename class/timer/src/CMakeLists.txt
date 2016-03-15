@@ -16,10 +16,12 @@ AUX_SOURCE_DIRECTORY(main SRC_PATH)
 # set source files and lib source files
 SET(CSRC ${SRC_PATH})
 SET(LIB_SRC timer/timer.c)
+SET(TMR_SRC tmr/tmr.c)
 
 # lib generation
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/src/lib)
 ADD_LIBRARY(timer SHARED ${LIB_SRC})
+ADD_LIBRARY(tmr   SHARED ${TMR_SRC})
 
 # generat exec
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR})
@@ -28,7 +30,8 @@ ADD_EXECUTABLE(timer_bin ${CSRC})
 # link library
 SET_TARGET_PROPERTIES(timer_bin PROPERTIES OUTPUT_NAME "timer")
 TARGET_LINK_LIBRARIES(timer pthread mutex enum)
-TARGET_LINK_LIBRARIES(timer_bin timer)
+TARGET_LINK_LIBRARIES(tmr   pthread mutex enum thread linked_list bsem)
+TARGET_LINK_LIBRARIES(timer_bin timer tmr)
 
 # -------------- INSTALL -------------- #
 # install path setting

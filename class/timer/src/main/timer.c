@@ -8,13 +8,14 @@
 #include <pthread.h>
 #include <thread.h>
 #include <timer.h>
+#include <tmr.h>
 
 /*********************************************************
  **************    Function Declaration    ***************
  *********************************************************/
 void hi(void *arg)
 {
-    printf("hi\n");
+    printf("%s\n", (char *)arg);
 }
 
 /*********************************************************
@@ -23,6 +24,29 @@ void hi(void *arg)
 int main(int agrc, char *agrv[])
 {
     int rt = 0; /* return value of function main */
+
+    tmr_arg_t arg;
+    tmr_arg_t arg1;
+    tmr_t *tmr = NULL;
+    tmr = tmr_create();
+
+    arg.wait = 800;
+    arg.arg = "hi tmr 1";
+    arg.cb = hi;
+    arg.cnt = 10;
+
+    arg1.wait = 2000;
+    arg1.arg = "hi tmr 2";
+    arg1.cb = hi;
+    arg1.cnt = 5;
+
+    tmr->start(tmr, &arg);
+    tmr->start(tmr, &arg1);
+    sleep(10);
+    tmr->destroy(tmr);
+    
+    return 0;
+
     timer *t;
     t = timer_start(hi, NULL, 100);
     t->start(t);

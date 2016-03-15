@@ -63,7 +63,7 @@ struct cstring {
     /**
      * @brief length of string
      */
-    int (*length) (cstring *this);
+    int (*get_length) (cstring *this);
 
     /**
      * @brief Resize string buffer
@@ -117,20 +117,20 @@ struct cstring {
     char *(*all_trim) (cstring *this);
 
     /**
-     * @brief compare two string
+     * @brief cmp two string
      * @return an integer less than, equal to, or
      *         greater than zero if s1 is found, respectively, to be less
      *         than, to match, or be greater than s.
      */
-    int (*compare) (cstring *this, const char *s);
+    int (*cmp) (cstring *this, const char *s);
 
     /**
-     * @brief compare two string
+     * @brief cmp two string
      * @return an integer less than, equal to, or
      *         greater than zero if s1 is found, respectively, to be less
      *         than, to match, or be greater than s.
      */
-    int (*compare_no_case) (cstring *this, const char *s);
+    int (*casecmp) (cstring *this, const char *s);
 
     /**
      * @brief string wether is empty
