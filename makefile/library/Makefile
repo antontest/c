@@ -8,6 +8,8 @@ DIRS+=cint
 DIRS+=cstring
 DIRS+=fileio
 DIRS+=proc
+DIRS+=thread
+DIRS+=socket
 #DIRS+= 
 
 # target
