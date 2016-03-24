@@ -1,11 +1,23 @@
 #/*************************************************************        
 #FileName : makefile   
-#FileFunc : Linux编译链接源程序,生成目标文件,库或者可执行代码      
+#FileFunc : Linux编译链接源程序,生成目标可执行代码      
 #Version  : V0.1        
-#Author   : Sunrier        
-#Date     : 2012-06-14   
+#Author   : Antonio
+#Date     : 2016-03-24   
 #Descp    : Linux下makefile模板       
 #*************************************************************/     
+# target
+TARGET= main_bin 
+
+# include
+INCLUDE_PATH = .
+
+# search the lib which complied by myself
+LIB_PATH = 
+LIB_NAME = 
+# other librarys
+OTH_LIB =
+
 # Make command to use for dependencies
 MAKE = make
 RM = rm
@@ -13,99 +25,35 @@ MKDIR = mkdir
 CC = gcc
 XX = g++
 
-# target
-TARGET=main_bin
-
-# include
-INCLUDE_PATH = .
-INC = $(addprefix -I ,$(INCLUDE_PATH))
-
-# search the lib which complied by myself
-CFG_LIB_PATH =
-# other librarys
-OTH_LIB =
-
 # source of .c and .o
 SRC_PATH = .
 CSRC = $(wildcard $(addsuffix /*.c,$(SRC_PATH)))
 CPPSRC = $(wildcard $(addsuffix /*.cpp,$(SRC_PATH)))
 COBJ = $(CSRC:.c=.o)
 CPPOBJ = $(CPPSRC:.cpp=.o)
+ifneq "$(CPPOBJ)" ""
+CFLAGS += -lstdc++
+endif
 
 # dependent files .d
 CDEF = $(CSRC:.c=.d)
 CPPDEF = $(CPPSRC:.cpp=.d)
 
-# top dir
-TOPDIR:=$(shell \
-	basename $$(dirname $$(pwd)) \
-)
-ifeq "$(TOPDIR)" "lib"
-mode=lib
-endif
-
 # Warning
 WARNING = -Wall#-Wno-unused -Wno-format
-CFLAGS += $(WARNING) -O2 -Werror
-
-#Configuration: Debug or Release
-ifndef CFG
-CFG = debug
-endif
-
-OUTDIR =
-ifeq "$(CFG)" "debug"
-OUTDIR =
-CFLAGS += -g
-else
-OUTDIR =
-endif
-
-ifneq "$(CPPOBJ)" ""
-CFLAGS += -lstdc++
-endif
+CFLAGS += $(WARNING) -O2 -Werror -g
 
 # complie
-COMPILE = $(CFLAGS) $(INC) -c $< -o $@  $(LIB) #$(OUTDIR)/$(*F).o
-
-# exec namae
-ifndef NAME
-NAME =
-endif
-
-ifeq "$(NAME)" ""
-NAME = $(notdir $(shell pwd))
-endif
-
-ifneq "$(TARGET)" ""
-NAME := $(TARGET)
-endif
-
-## complie mode setting
-ifndef mode
-mode = reg
-TARGET = $(NAME)
-CFG_LIB_PATH += .
-LINK = $(CC) $(CFLAGS) -o $@ $(COBJ) $(CPPOBJ) $(LIB) #$(OUTDIR)/*.o
-endif
-# compile library
-ifeq "$(mode)" "lib"
-LINK = ar -rs $@ $(COBJ) $(CPPOBJ)
-TARGET = lib$(NAME).a
-endif
-
-#compile share
-ifeq "$(mode)" "share"
-LINK=$(CC) -shared -fpic $(CFLAGS) -o $@ $(COBJ) $(CPPOBJ) $(LIB)
-TARGET = lib$(NAME).so
-endif
+INC = $(addprefix -I ,$(INCLUDE_PATH))
+COMPILE = $(CFLAGS) $(INC) -c $< -o $@ #$(OUTDIR)/$(*F).o
 
 # Library of compling
-LIB_PATH = $(addprefix -L ,$(CFG_LIB_PATH))
+LIB_PATH += .
+LIBS_PATH = $(addprefix -L ,$(LIB_PATH))
 # set lib
-CFG_LIB = $(wildcard $(addsuffix /*.a,$(CFG_LIB_PATH)))
-CFG_LIB += $(wildcard $(addsuffix /*.so,$(CFG_LIB_PATH)))
-LIB := $(LIB_PATH) $(CFG_LIB) $(OTH_LIB)
+LIB = $(addprefix -l,$(LIB_NAME))
+LIB := $(LIBS_PATH) $(LIB) $(OTH_LIB)
+LINK = $(CC) $(CFLAGS) -o $@ $(COBJ) $(CPPOBJ) $(LIB) #$(OUTDIR)/*.o
 
 # make depend
 MAKEDEPEND = gcc -MM -MT
@@ -149,5 +97,4 @@ cleanall : clean
 
 # Install lib or share
 install:
-	find . -iname lib$(NAME).a -o -iname lib$(NAME).so | xargs -I{} cp {} ~/tools/lib/
-	find . -iname "*.h" | xargs -I{} cp {} ~/tools/include
+	-install -s $(TARGET) -p -D $(USR_BIN_PATH)/$(TARGET)
