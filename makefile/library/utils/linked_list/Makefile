@@ -59,6 +59,14 @@ LIB := $(LIB_PATH) $(CFG_LIB) $(OTH_LIB)
 # make depend
 MAKEDEPEND = gcc -MM -MT
 
+# header and target link 
+CUR_DIR_PATH=$(shell pwd)
+CUR_DIR=$(shell basename `pwd`)
+LN_FROM_INC=$(CUR_DIR_PATH)
+LN_FROM_TARGET=$(CUR_DIR_PATH)/$(TARGET)
+LN_TO_INC=../../../incs/$(CUR_DIR)
+LN_TO_TARGET=../../../libs/$(TARGET)
+
 all:$(TARGET)
 $(CDEF) : %.d : %.c
 	$(MAKEDEPEND) $(<:.c=.o) $< > $@
@@ -79,6 +87,8 @@ $(OUTDIR) :
 	if test -n "$(OUTDIR)" ; then $(MKDIR) -p $(OUTDIR) ; fi
 $(TARGET) : $(OUTDIR) $(COBJ) $(CPPOBJ)
 	$(LINK)
+	-$(shell test ! -L $(LN_TO_INC) && ln -sf $(LN_FROM_INC) $(LN_TO_INC))
+	-$(shell test ! -L $(LN_TO_TARGET) && ln -sf $(LN_FROM_TARGET) $(LN_TO_TARGET))
 include $(CDEF)
 include $(CPPDEF)
 
