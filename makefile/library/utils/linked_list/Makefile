@@ -10,7 +10,7 @@
 TARGET=liblinked_list.a
 
 # include
-INCLUDE_PATH = .
+INCLUDE_PATH = . ../../../incs/
 
 # search the lib which complied by myself
 CFG_LIB_PATH =
@@ -101,6 +101,8 @@ rebuild : cleanall all
 clean :
 	-$(RM) -f $(COBJ) $(CPPOBJ)
 	-$(RM) -f $(TARGET)
+	-$(RM) -f $(LN_TO_INC)
+	-$(RM) -f $(LN_TO_TARGET)
 
 # Clean this project and all dependencies
 cleanall : clean

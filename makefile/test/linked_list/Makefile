@@ -10,10 +10,10 @@
 TARGET= linked_list_test
 
 # include
-INCLUDE_PATH = .
+INCLUDE_PATH = . ../../incs/
 
 # search the lib which complied by myself
-LIB_PATH = ../../library/utils/linked_list
+LIB_PATH = ../../libs/
 LIB_NAME = linked_list
 # other librarys
 OTH_LIB =

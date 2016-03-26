@@ -6,7 +6,7 @@
 #ifndef __THREAD_VALUE_H__
 #define __THREAD_VALUE_H__
 
-#include "thread.h"
+#include <thread/thread.h>
 
 typedef struct thread_value_t thread_value_t;
 

@@ -2,8 +2,8 @@
 SHELL=/bin/bash
 
 # directory
-DIRS=cond 
-DIRS+=mutex 
+DIRS=mutex 
+DIRS+=cond 
 DIRS+=thread_value
 DIRS+=bsem
 DIRS+=thread

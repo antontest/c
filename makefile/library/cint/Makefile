@@ -10,7 +10,7 @@
 TARGET= libcint.a 
 
 # include
-INCLUDE_PATH = .
+INCLUDE_PATH = . ../../incs/
 
 # Make command to use for dependencies
 MAKE = make

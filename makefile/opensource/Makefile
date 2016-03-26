@@ -2,7 +2,7 @@
 SHELL=/bin/bash
 
 # directory
-DIRS=cstring
+#DIRS=cstring
 
 # target
 all install clean cleanall rebuild: $(DIRS)

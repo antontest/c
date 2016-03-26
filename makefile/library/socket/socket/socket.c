@@ -25,11 +25,11 @@
 #include <sys/epoll.h>
 #include <signal.h>
 #include <utils.h>
-#include <enum.h>
-#include <thread.h>
-#include <mutex.h>
-#include <host.h>
-#include <socket_base.h>
+#include <enum/enum.h>
+#include <thread/thread.h>
+#include <mutex/mutex.h>
+#include <host/host.h>
+#include <base/socket_base.h>
 
 /* Maximum size of a packet */
 #define MAX_PACKET 10000

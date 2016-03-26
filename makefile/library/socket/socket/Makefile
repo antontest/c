@@ -10,10 +10,10 @@
 TARGET= libsocket.so
 
 # include
-INCLUDE_PATH = . ../host/ ../base/ ../../utils/enum/ ../../thread/thread/ ../../thread/mutex/
+INCLUDE_PATH = . ../../../incs/
 
 # search the lib which complied by myself
-LIB_PATH = $(INCLUDE_PATH)
+LIB_PATH = ../../../libs/
 LIB_NAME = host base enum thread mutex
 # other librarys
 OTH_LIB =

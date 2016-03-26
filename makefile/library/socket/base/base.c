@@ -7,7 +7,7 @@
 #include <sys/socket.h>
 #include <linux/un.h>
 #include <stdarg.h>
-#include <host.h>
+#include <host/host.h>
 #include <utils.h>
 
 #define DFT_SND_BUFF_SIZE (1024)

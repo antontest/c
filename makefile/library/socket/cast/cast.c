@@ -5,8 +5,8 @@
 #include <unistd.h>
 #include <stdarg.h>
 #include <utils.h>
-#include <socket_base.h>
-#include <property.h>
+#include <base/socket_base.h>
+#include <property/property.h>
 
 #define BROADCAST_IP "255.255.255.255"
 typedef struct private_cast_t private_cast_t;

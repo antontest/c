@@ -5,11 +5,11 @@
 #include <unistd.h>
 #include <signal.h>
 #include <sys/time.h>
-#include <thread.h>
-#include <bsem.h>
-#include <mutex.h>
+#include <thread/thread.h>
+#include <bsem/bsem.h>
+#include <mutex/mutex.h>
 #include <utils.h>
-#include <linked_list.h>
+#include <linked_list/linked_list.h>
 
 typedef struct private_pool_t private_pool_t;
 struct private_pool_t {

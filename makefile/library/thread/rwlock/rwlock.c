@@ -1,12 +1,11 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <utils.h>
-#include "cond.h"
-#include "thread.h"
-#include "mutex.h"
-#include "rwlock.h"
-#include "rwlock_cond.h"
-
+#include <cond/cond.h>
+#include <thread/thread.h>
+#include <mutex/mutex.h>
+#include <rwlock.h>
+#include <rwlock_cond.h>
 
 typedef struct private_rwlock_t private_rwlock_t;
 typedef struct private_rwlock_cond_t private_rwlock_cond_t;

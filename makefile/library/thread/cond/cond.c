@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <time.h>
 #include <errno.h>
-#include "utils.h"
-#include "cond.h"
+#include <utils.h>
+#include <cond.h>
 
 /**
  * Add the given number of milliseconds to the given timeval struct

@@ -1,7 +1,7 @@
-#include "utils.h"
-#include "mutex.h"
-#include "cond.h"
-#include "bsem.h"
+#include <utils.h>
+#include <mutex/mutex.h>
+#include <cond/cond.h>
+#include <bsem.h>
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>

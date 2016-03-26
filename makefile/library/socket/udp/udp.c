@@ -7,7 +7,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <utils.h>
-#include <host.h>
+#include <host/host.h>
 
 typedef struct private_udp_t private_udp_t;
 struct private_udp_t {

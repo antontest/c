@@ -7,7 +7,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <utils.h>
-#include <host.h>
+#include <host/host.h>
 #include <sys/select.h>
 #include <fcntl.h>
 

@@ -10,10 +10,10 @@
 TARGET= libcgi.so
 
 # include
-INCLUDE_PATH = .
+INCLUDE_PATH = . ../../incs/
 
 # search the lib which complied by myself
-LIB_PATH = ../utils/linked_list/
+LIB_PATH = ../../libs/
 LIB_NAME = linked_list
 # other librarys
 OTH_LIB =
@@ -104,6 +104,8 @@ rebuild : cleanall all
 clean :
 	-$(RM) -f $(COBJ) $(CPPOBJ)
 	-$(RM) -f $(TARGET)
+	-$(RM) -f $(LN_TO_INC)
+	-$(RM) -f $(LN_TO_TARGET)
 
 # Clean this project and all dependencies
 cleanall : clean

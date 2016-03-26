@@ -10,10 +10,10 @@
 TARGET= udp 
 
 # include
-INCLUDE_PATH = . ../../library/socket/udp/ ../../library/utils/get_args/
+INCLUDE_PATH = . ../../incs/
 
 # search the lib which complied by myself
-LIB_PATH = $(INCLUDE_PATH)
+LIB_PATH = ../../libs/
 LIB_NAME = udp get_args
 # other librarys
 OTH_LIB =

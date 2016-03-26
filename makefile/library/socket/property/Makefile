@@ -10,7 +10,7 @@
 TARGET= libproperty.a
 
 # include
-INCLUDE_PATH = . ..
+INCLUDE_PATH = . .. ../../../incs/
 
 # Make command to use for dependencies
 MAKE = make
@@ -47,6 +47,14 @@ LINK = ar -rs $@ $(COBJ) $(CPPOBJ)
 # make depend
 MAKEDEPEND = gcc -MM -MT
 
+# header and target LINK
+CUR_DIR_PATH=$(shell pwd)
+CUR_DIR=$(shell basename `pwd`)
+LN_FROM_INC=$(CUR_DIR_PATH)
+LN_FROM_TARGET=$(CUR_DIR_PATH)/$(TARGET)
+LN_TO_INC=../../../incs/$(CUR_DIR)
+LN_TO_TARGET=../../../libs/$(TARGET)
+
 all:$(TARGET)
 $(CDEF) : %.d : %.c
 	$(MAKEDEPEND) $(<:.c=.o) $< > $@
@@ -67,6 +75,8 @@ $(OUTDIR) :
 	if test -n "$(OUTDIR)" ; then $(MKDIR) -p $(OUTDIR) ; fi
 $(TARGET) : $(OUTDIR) $(COBJ) $(CPPOBJ)
 	$(LINK)
+	-$(shell test ! -L $(LN_TO_INC) && ln -sf $(LN_FROM_INC) $(LN_TO_INC))
+	-$(shell test ! -L $(LN_TO_TARGET) && ln -sf $(LN_FROM_TARGET) $(LN_TO_TARGET))
 
 PHONY = rebuild clean cleanall install
 .PHONY : $(PHONY)
@@ -77,6 +87,8 @@ rebuild : cleanall all
 clean :
 	-$(RM) -f $(COBJ) $(CPPOBJ)
 	-$(RM) -f $(TARGET)
+	-$(RM) $(LN_TO_INC)
+	-$(RM) $(LN_TO_TARGET)	
 
 # Clean this project and all dependencies
 cleanall : clean

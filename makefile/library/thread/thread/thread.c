@@ -18,10 +18,10 @@ static inline pid_t gettid()
 }
 #endif
 
-#include "utils.h"
-#include "linked_list.h"
-#include "mutex.h"
-#include "thread_value.h"
+#include <utils.h>
+#include <linked_list/linked_list.h>
+#include <mutex/mutex.h>
+#include <thread_value/thread_value.h>
 #include "thread.h"
 
 typedef struct private_thread_t private_thread_t;

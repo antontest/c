@@ -1,6 +1,6 @@
 #ifndef __COND_H__
 #define __COND_H__
-#include "mutex.h"
+#include <mutex/mutex.h>
 #include <stdbool.h>
 #include <sys/time.h>
 

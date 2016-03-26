@@ -11,10 +11,10 @@
 #include <stdarg.h>
 #include <fcntl.h>
 #include <utils.h>
-#include <enum.h>
+#include <enum/enum.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
-#include "proc.h"
+#include <proc.h>
 
 typedef enum ipc_type_t ipc_type_t;
 enum ipc_type_t {

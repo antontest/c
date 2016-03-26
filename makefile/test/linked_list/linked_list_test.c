@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include <linked_list.h>
+#include <linked_list/linked_list.h>
 
 void print_list(linked_list_t *this)
 {
