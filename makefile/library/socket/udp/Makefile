@@ -91,7 +91,7 @@ $(OUTDIR) :
 $(TARGET) : $(OUTDIR) $(COBJ) $(CPPOBJ)
 	$(LINK)
 	-$(shell test ! -L $(LN_TO_INC) && ln -sf $(LN_FROM_INC) $(LN_TO_INC))
-	-$(shell test ! -L $(LN_TO_TARGET) && ln -sf $(LN_FROM_TARG	ET) $(LN_TO_TARGET))
+	-$(shell test ! -L $(LN_TO_TARGET) && ln -sf $(LN_FROM_TARGET) $(LN_TO_TARGET))
 include $(CDEF)
 include $(CPPDEF)
 
