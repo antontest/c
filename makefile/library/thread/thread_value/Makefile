@@ -10,7 +10,7 @@
 TARGET= libthread_value.a
 
 # include
-INCLUDE_PATH = . ../../../incs/
+INCLUDE_PATH = . ../../../incs/ ..
 
 # Make command to use for dependencies
 MAKE = make

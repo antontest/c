@@ -10,7 +10,7 @@
 TARGET= libthread.so
 
 # include
-INCLUDE_PATH = . ../../../incs/
+INCLUDE_PATH = . ../../../incs/ ..
 
 # search the lib which complied by myself
 LIB_PATH = ../../../libs/
