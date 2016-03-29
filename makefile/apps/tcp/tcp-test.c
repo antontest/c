@@ -5,7 +5,7 @@
 #include <tcp/tcp.h>
 #include <sys/socket.h>
 #include <get_args/get_args.h>
-#include <utils.h>
+#include <utils/utils.h>
 
 int main(int argc, char **argv)
 {

@@ -24,7 +24,7 @@
 #include <socket.h>
 #include <sys/epoll.h>
 #include <signal.h>
-#include <utils.h>
+#include <utils/utils.h>
 #include <enum/enum.h>
 #include <thread/thread.h>
 #include <mutex/mutex.h>

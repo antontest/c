@@ -4,6 +4,8 @@ SHELL=/bin/bash
 # directory
 DIRS=tcp
 DIRS+=udp 
+DIRS+=cmd_agent
+DIRS+=task_manager
 
 # target
 all install clean cleanall rebuild: $(DIRS)

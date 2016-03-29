@@ -3,7 +3,8 @@ SHELL=/bin/bash
 
 # directory
 DIRS=linked_list 
-#DIRS+= 
+DIRS+=timer
+DIRS+=url
 
 # target
 all install clean cleanall rebuild: $(DIRS)

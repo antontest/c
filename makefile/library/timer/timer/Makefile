@@ -7,16 +7,24 @@
 #Descp    : Linux下makefile模板       
 #*************************************************************/     
 # target
-TARGET= libsocket.so
+TARGET= libtimer.so
 
 # include
 INCLUDE_PATH = . ../../../incs/
 
 # search the lib which complied by myself
-LIB_PATH = ../../../libs/
-LIB_NAME = host base enum thread mutex
+LIB_PATH = ../../../libs
+LIB_NAME = pthread mutex enum
 # other librarys
 OTH_LIB =
+
+# header and target LINK 
+CUR_DIR_PATH=$(shell pwd)
+CUR_DIR=$(shell basename `pwd`)
+LN_FROM_INC=$(CUR_DIR_PATH)
+LN_FROM_TARGET=$(CUR_DIR_PATH)/$(TARGET)
+LN_TO_INC=../../../incs/$(CUR_DIR)
+LN_TO_TARGET=../../../libs/$(TARGET)
 
 # Make command to use for dependencies
 MAKE = make
@@ -61,14 +69,6 @@ LIB := $(LIBS_PATH) $(LIB) $(OTH_LIB)
 
 # make depend
 MAKEDEPEND = gcc -MM -MT
-
-# header and target LINK
-CUR_DIR_PATH=$(shell pwd)
-CUR_DIR=$(shell basename `pwd`)
-LN_FROM_INC=$(CUR_DIR_PATH)
-LN_FROM_TARGET=$(CUR_DIR_PATH)/$(TARGET)
-LN_TO_INC=../../../incs/$(CUR_DIR)
-LN_TO_TARGET=../../../libs/$(TARGET)
 
 all:$(TARGET)
 $(CDEF) : %.d : %.c

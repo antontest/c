@@ -10,7 +10,7 @@
 #include <errno.h>
 #include <stdarg.h>
 #include <fcntl.h>
-#include <utils.h>
+#include <utils/utils.h>
 #include <enum/enum.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>

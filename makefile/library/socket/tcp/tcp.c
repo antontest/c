@@ -6,7 +6,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <utils.h>
+#include <utils/utils.h>
 #include <host/host.h>
 #include <sys/select.h>
 #include <fcntl.h>

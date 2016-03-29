@@ -4,7 +4,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/socket.h>
-#include <utils.h>
+#include <utils/utils.h>
 #include <get_args/get_args.h>
 
 int main(int argc, char **argv)

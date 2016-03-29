@@ -10,7 +10,7 @@
 #include <sys/select.h>
 #include <sys/epoll.h>
 #include <thread/thread.h>
-#include <utils.h>
+#include <utils/utils.h>
 #include <linked_list/linked_list.h>
 
 #define DFT_EPOLL_EVTS_MAX_SIZE (10)

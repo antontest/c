@@ -8,7 +8,7 @@
 #include <thread/thread.h>
 #include <bsem/bsem.h>
 #include <mutex/mutex.h>
-#include <utils.h>
+#include <utils/utils.h>
 #include <linked_list/linked_list.h>
 
 typedef struct private_pool_t private_pool_t;

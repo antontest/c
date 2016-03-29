@@ -5,7 +5,7 @@
 #include <stdarg.h>
 #include <ctype.h>
 #include <cstring.h>
-#include <utils.h>
+#include <utils/utils.h>
 
 typedef struct private_cstring private_cstring;
 struct private_cstring {

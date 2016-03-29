@@ -1,20 +1,20 @@
 #/*************************************************************        
 #FileName : makefile   
-#FileFunc : Linux编译链接源程序,生成目标库
+#FileFunc : Linux编译链接源程序,生成目标可执行代码      
 #Version  : V0.1        
-#Author   : Sunrier        
+#Author   : Antonio
 #Date     : 2016-03-24   
 #Descp    : Linux下makefile模板       
 #*************************************************************/     
 # target
-TARGET= libsocket.so
+TARGET= timer
 
 # include
-INCLUDE_PATH = . ../../../incs/
+INCLUDE_PATH = . ../../incs/
 
 # search the lib which complied by myself
-LIB_PATH = ../../../libs/
-LIB_NAME = host base enum thread mutex
+LIB_PATH = ../../libs/
+LIB_NAME = timer tmr
 # other librarys
 OTH_LIB =
 
@@ -35,40 +35,28 @@ ifneq "$(CPPOBJ)" ""
 CFLAGS += -lstdc++
 endif
 
-
 # dependent files .d
 CDEF = $(CSRC:.c=.d)
 CPPDEF = $(CPPSRC:.cpp=.d)
 
 # Warning
 WARNING = -Wall#-Wno-unused -Wno-format
-CFLAGS += $(WARNING) -O2 -Werror
+CFLAGS += $(WARNING) -O2 -Werror -g
 
 # complie
 INC = $(addprefix -I ,$(INCLUDE_PATH))
-COMPILE = $(CFLAGS) $(INC) -c $< -o $@  #$(OUTDIR)/$(*F).o
-
-#compile share
-LIB= $(addprefix -l,$(LIB_NAME))
-LINK=$(CC) -shared -fpic $(CFLAGS) -o $@ $(COBJ) $(CPPOBJ) $(LIB)
+COMPILE = $(CFLAGS) $(INC) -c $< -o $@ #$(OUTDIR)/$(*F).o
 
 # Library of compling
+LIB_PATH += .
 LIBS_PATH = $(addprefix -L ,$(LIB_PATH))
 # set lib
-#CFG_LIB = $(wildcard $(addsuffix /*.a,$(CFG_LIB_PATH)))
-#CFG_LIB += $(wildcard $(addsuffix /*.so,$(CFG_LIB_PATH)))
+LIB = $(addprefix -l,$(LIB_NAME))
 LIB := $(LIBS_PATH) $(LIB) $(OTH_LIB)
+LINK = $(CC) $(CFLAGS) -o $@ $(COBJ) $(CPPOBJ) $(LIB) #$(OUTDIR)/*.o
 
 # make depend
 MAKEDEPEND = gcc -MM -MT
-
-# header and target LINK
-CUR_DIR_PATH=$(shell pwd)
-CUR_DIR=$(shell basename `pwd`)
-LN_FROM_INC=$(CUR_DIR_PATH)
-LN_FROM_TARGET=$(CUR_DIR_PATH)/$(TARGET)
-LN_TO_INC=../../../incs/$(CUR_DIR)
-LN_TO_TARGET=../../../libs/$(TARGET)
 
 all:$(TARGET)
 $(CDEF) : %.d : %.c
@@ -90,8 +78,6 @@ $(OUTDIR) :
 	if test -n "$(OUTDIR)" ; then $(MKDIR) -p $(OUTDIR) ; fi
 $(TARGET) : $(OUTDIR) $(COBJ) $(CPPOBJ)
 	$(LINK)
-	-$(shell test ! -L $(LN_TO_INC) && ln -sf $(LN_FROM_INC) $(LN_TO_INC))
-	-$(shell test ! -L $(LN_TO_TARGET) && ln -sf $(LN_FROM_TARGET) $(LN_TO_TARGET))
 include $(CDEF)
 include $(CPPDEF)
 
@@ -104,8 +90,6 @@ rebuild : cleanall all
 clean :
 	-$(RM) -f $(COBJ) $(CPPOBJ)
 	-$(RM) -f $(TARGET)
-	-$(RM) -f $(LN_TO_INC)
-	-$(RM) -f $(LN_TO_TARGET)	
 
 # Clean this project and all dependencies
 cleanall : clean
@@ -113,4 +97,4 @@ cleanall : clean
 
 # Install lib or share
 install:
-	-install -p -D -m 0555 $(TARGET) $(USR_LIB_PATH)/$(TARGET)
+	-install -s $(TARGET) -p -D $(USR_BIN_PATH)/$(TARGET)

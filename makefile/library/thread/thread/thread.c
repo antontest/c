@@ -18,7 +18,7 @@ static inline pid_t gettid()
 }
 #endif
 
-#include <utils.h>
+#include <utils/utils.h>
 #include <linked_list/linked_list.h>
 #include <mutex/mutex.h>
 #include <thread_value/thread_value.h>

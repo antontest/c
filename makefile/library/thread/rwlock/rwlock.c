@@ -1,6 +1,6 @@
 #include <pthread.h>
 #include <stdio.h>
-#include <utils.h>
+#include <utils/utils.h>
 #include <cond/cond.h>
 #include <thread/thread.h>
 #include <mutex/mutex.h>

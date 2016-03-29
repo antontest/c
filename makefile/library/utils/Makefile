@@ -2,14 +2,11 @@
 SHELL=/bin/bash
 
 # directory
-DIRS= linked_list
+DIRS= utils
+DIRS+= linked_list
 DIRS+= get_args
 DIRS+= enum
 
-CUR_DIR=$(shell pwd)
-LN_FROM_PATH=$(CUR_DIR)/utils.h
-LN_TO_PATH=../../incs/utils.h
-$(shell test ! -f $(LN_TO_PATH) && ln -s $(LN_FROM_PATH) $(LN_TO_PATH))
 # target
 all install clean cleanall rebuild: $(DIRS)
 $(DIRS):
