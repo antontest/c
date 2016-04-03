@@ -14,7 +14,7 @@ INCLUDE_PATH = . ../../incs/
 
 # search the lib which complied by myself
 LIB_PATH = ../../libs/
-LIB_NAME = udp get_args pool thread event socket utils proc
+LIB_NAME = udp get_args pool thread event socket utils proc bsem
 # other librarys
 OTH_LIB =
 

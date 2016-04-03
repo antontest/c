@@ -14,7 +14,7 @@ INCLUDE_PATH = . ../../incs/
 
 # search the lib which complied by myself
 LIB_PATH = ../../libs/
-LIB_NAME = timer tmr
+LIB_NAME = timer tmr thread bsem
 # other librarys
 OTH_LIB =
 

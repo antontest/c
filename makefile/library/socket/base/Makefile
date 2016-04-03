@@ -13,7 +13,7 @@ TARGET= libbase.so
 INCLUDE_PATH = . ../../../incs/
 
 # search the lib which complied by myself
-LIB_PATH = ../../../incs/
+LIB_PATH = ../../../libs/
 LIB_NAME = host
 # other librarys
 OTH_LIB =

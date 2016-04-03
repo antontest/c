@@ -7,8 +7,8 @@
 #include <stdio.h>
 #include <semaphore.h>
 #include <utils/utils.h>
-#include <enum.h>
-#include <mutex.h>
+#include <enum/enum.h>
+#include <mutex/mutex.h>
 #include <timer.h>
 
 ENUM(timer_state_type_name, TIMER_STARTING, TIMER_DESTROYED,

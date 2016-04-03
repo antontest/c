@@ -4,11 +4,11 @@
 #include <unistd.h>
 #include <string.h>
 #include <utils/utils.h>
-#include <linked_list.h>
-#include <thread.h>
-#include <mutex.h>
-#include <cond.h>
-#include <bsem.h>
+#include <linked_list/linked_list.h>
+#include <thread/thread.h>
+#include <mutex/mutex.h>
+#include <cond/cond.h>
+#include <bsem/bsem.h>
 #include <sys/time.h>
 
 typedef struct private_tmr_t private_tmr_t;
