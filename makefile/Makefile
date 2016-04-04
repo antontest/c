@@ -8,6 +8,8 @@ DIRS+=apps
 DIRS+=test
 DIRS+=main 
 
+$(shell test ! -d incs && mkdir incs)
+$(shell test ! -d libs && mkdir libs)
 # target
 all install clean cleanall rebuild: $(DIRS)
 $(DIRS):
