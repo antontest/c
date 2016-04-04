@@ -7,6 +7,7 @@ DIRS+=udp
 DIRS+=cmd_agent
 DIRS+=task_manager
 DIRS+=socket
+DIRS+=arp
 
 # target
 all install clean cleanall rebuild: $(DIRS)
