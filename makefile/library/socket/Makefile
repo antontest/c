@@ -11,6 +11,7 @@ DIRS+=event
 DIRS+=socket
 DIRS+=cast
 DIRS+=ftp
+DIRS+=arp
 
 # target
 all install clean cleanall rebuild: $(DIRS)
