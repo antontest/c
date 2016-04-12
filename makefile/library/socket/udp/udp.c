@@ -4,7 +4,6 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
-#include <sys/socket.h>
 #include <netinet/in.h>
 #include <utils/utils.h>
 #include <host/host.h>
@@ -22,25 +21,21 @@ struct private_udp_t {
     int fd;
 
     /**
+     * socket family
+     */
+    int family;
+
+    /**
      * @brief socket host
      */
     host_t *host;
 };
-#define udp_fd   this->fd
-#define udp_host this->host
+#define udp_fd     this->fd
+#define udp_host   this->host
+#define udp_famliy this->family
 
-METHOD(udp_t, socket_, int, private_udp_t *this, int family, char *ip, int port)
+METHOD(udp_t, socket_, int, private_udp_t *this, int family)
 {
-    /**
-     * create host
-     */
-    if (udp_host) udp_host->destroy(udp_host);
-    udp_host = host_create_from_string_and_family(ip ? ip : "%any", family, port);
-    if (!udp_host) {
-        printf("create host failed\n");
-        return -1;
-    }
-
     /**
      * create socket
      */
@@ -51,12 +46,25 @@ METHOD(udp_t, socket_, int, private_udp_t *this, int family, char *ip, int port)
         return -1;
     }
 
+    udp_famliy = family;
     return udp_fd;
 }
 
-METHOD(udp_t, bind_, int, private_udp_t *this)
+METHOD(udp_t, bind_, int, private_udp_t *this, char *ip, int port)
 {
-    int ret = bind(udp_fd, udp_host->get_sockaddr(udp_host), sizeof(struct sockaddr));
+    int ret = -1;
+
+    /**
+     * create host
+     */
+    if (udp_host) udp_host->destroy(udp_host);
+    udp_host = host_create_from_string_and_family(ip ? ip : "%any", udp_famliy, port);
+    if (!udp_host) {
+        printf("create host failed\n");
+        return -1;
+    }
+
+    ret = bind(udp_fd, udp_host->get_sockaddr(udp_host), sizeof(struct sockaddr));
     if (ret < 0) perror("bind()");
     return ret;
 }
@@ -78,7 +86,7 @@ METHOD(udp_t, sendto_, int, private_udp_t *this, void  *buf, int size, char *dst
      * create destination host
      */
     if (dst_ip && dst_port > 0) {
-        dst_host = host_create_from_string_and_family(dst_ip, udp_host->get_family(udp_host), dst_port);
+        dst_host = host_create_from_string_and_family(dst_ip, udp_famliy, dst_port);
         host = dst_host;
     } else {
         host = udp_host;
@@ -163,8 +171,9 @@ udp_t *udp_create()
         .recvfrom = _recvfrom_,
         .recv     = _recv_,
         },
-        .fd   = -1,
-        .host = NULL,
+        .fd     = -1,
+        .host   = NULL,
+        .family = AF_INET,
     );
 
     return &this->public;

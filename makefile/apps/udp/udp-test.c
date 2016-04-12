@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/socket.h>
 #include <utils/utils.h>
 #include <get_args/get_args.h>
 
@@ -11,6 +10,7 @@ int main(int argc, char **argv)
 {
     int ret = 0;
     char buf[64] = {0};
+    char *remote_ip = NULL;
     char *ip        = NULL;
     char *msg       = NULL;
     int times       = 1;
@@ -21,25 +21,27 @@ int main(int argc, char **argv)
     int client_flag = 0;
     udp_t *udp      = NULL;
     struct options opt[] = {
-        {"-i", "--ip",      1, RET_STR, ADDR_ADDR(ip)},
-        {"-p", "--port",    1, RET_INT, ADDR_ADDR(port)},
-        {"-s", "--server",  0, RET_INT, ADDR_ADDR(server_flag)},
-        {"-c", "--client",  0, RET_INT, ADDR_ADDR(client_flag)},
-        {"-m", "--message", 1, RET_STR, ADDR_ADDR(msg)},
-        {"-t", "--times",   1, RET_INT, ADDR_ADDR(times)},
-        {"-w", "--timeout", 1, RET_INT, ADDR_ADDR(timeout)},
-        {"-h", "--help",    0, RET_INT, ADDR_ADDR(help_flag)},
+        {"-r", "--remote_ip", 1, RET_STR, ADDR_ADDR(remote_ip)},
+        {"-i", "--ip",        1, RET_STR, ADDR_ADDR(ip)},
+        {"-p", "--port",      1, RET_INT, ADDR_ADDR(port)},
+        {"-s", "--server",    0, RET_INT, ADDR_ADDR(server_flag)},
+        {"-c", "--client",    0, RET_INT, ADDR_ADDR(client_flag)},
+        {"-m", "--message",   1, RET_STR, ADDR_ADDR(msg)},
+        {"-t", "--times",     1, RET_INT, ADDR_ADDR(times)},
+        {"-w", "--timeout",   1, RET_INT, ADDR_ADDR(timeout)},
+        {"-h", "--help",      0, RET_INT, ADDR_ADDR(help_flag)},
         {NULL},
     };
     struct usage usg[] = {
-        {"-i, --ip",      "ip address"},
-        {"-p, --port",    "port"},
-        {"-s, --server",  "flag of server"},
-        {"-c, --client",  "flag of client"},
-        {"-m, --message", "message sending to server"},
-        {"-t, --times",   "times of message sending"},
-        {"-w, --timeout", "timeout of connecting and message sending"},
-        {"-h, --help",    "show usage"},
+        {"-r, --remote_ip", "remote ip address"},
+        {"-i, --ip",        "ip address"},
+        {"-p, --port",      "port"},
+        {"-s, --server",    "flag of server"},
+        {"-c, --client",    "flag of client"},
+        {"-m, --message",   "message sending to server"},
+        {"-t, --times",     "times of message sending"},
+        {"-w, --timeout",   "timeout of connecting and message sending"},
+        {"-h, --help",      "show usage"},
         {NULL},
     };
     
@@ -53,7 +55,7 @@ int main(int argc, char **argv)
     if (!port) port = 5001;
 
     udp = udp_create();
-    ret = udp->socket(udp, AF_INET, ip, port);
+    ret = udp->socket(udp, AF_INET);
     if (ret < 0) goto over;
 
     if (client_flag) {
@@ -61,14 +63,14 @@ int main(int argc, char **argv)
            ret = udp->connect(udp);
            if (ret < 0) goto over;
            ret = udp->send(udp, "hi", 2);
-           */
-        ret = udp->sendto(udp, msg, strlen(msg), NULL, 0);
+        */
+        ret = udp->sendto(udp, msg, strlen(msg), ip, port);
         if (ret > 0) printf("send succ: %d\n", ret);
     } else {
-        ret = udp->bind(udp);
+        ret = udp->bind(udp, ip, port);
         if (ret < 0) goto over;
 
-        ret = udp->recvfrom(udp, buf, sizeof(buf), NULL, 0);
+        ret = udp->recvfrom(udp, buf, sizeof(buf), remote_ip, 0);
         if (ret > 0) printf("%s\n", buf);
     }
 

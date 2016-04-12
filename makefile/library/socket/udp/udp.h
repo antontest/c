@@ -1,5 +1,6 @@
 #ifndef __UDP_H__
 #define __UDP_H__
+#include <sys/socket.h>
 
 typedef struct udp_t udp_t;
 struct udp_t {
@@ -11,13 +12,13 @@ struct udp_t {
      * @param port    [in] port
      * @return         socket fd, if succ; -1, if failed
      */
-    int (*socket) (udp_t *this, int family, char *ip, int port);
+    int (*socket) (udp_t *this, int family);
 
     /**
      * @brief server bind
      * @return 0, if succ; -1, if failed;
      */
-    int (*bind) (udp_t *this);
+    int (*bind) (udp_t *this, char *ip, int port);
 
     /**
      * @brief connect to server 
