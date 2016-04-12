@@ -62,6 +62,12 @@ struct tcp_t {
     int (*close) (tcp_t *this);
 
     /**
+     * @brief close tcp connection
+     * @param how [in] SHUT_RD,  SHUT_WR,  SHUT_RDWR
+     */
+    int (*shutdown) (tcp_t *this, int how);
+
+    /**
      * @brief destroy instance and free memory
      */
     void (*destroy) (tcp_t *this);

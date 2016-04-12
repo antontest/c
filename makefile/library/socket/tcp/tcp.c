@@ -275,6 +275,12 @@ METHOD(tcp_t, close_, int, private_tcp_t *this)
     return close(tcp_accept_fd);
 }
 
+METHOD(tcp_t, shutdown_, int, private_tcp_t *this, int how)
+{
+    tcp_state = TCP_CLOSED;
+    return shutdown(tcp_accept_fd, how);
+}
+
 METHOD(tcp_t, destroy_, void, private_tcp_t *this)
 {
     if (tcp_fd) close(tcp_fd);
@@ -302,6 +308,7 @@ tcp_t *tcp_create(int family)
             .recv       = _recv_,
             .recv_tm    = _recv_tm_,
             .close      = _close_,
+            .shutdown   = _shutdown_,
             .destroy    = _destroy_,
             .get_state  = _get_state_,
         },
