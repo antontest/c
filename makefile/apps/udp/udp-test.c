@@ -22,7 +22,7 @@ int main(int argc, char **argv)
     udp_t *udp      = NULL;
     struct options opt[] = {
         {"-i", "--ip",      1, RET_STR, ADDR_ADDR(ip)},
-        {"-p", "--port",    1, RET_STR, ADDR_ADDR(port)},
+        {"-p", "--port",    1, RET_INT, ADDR_ADDR(port)},
         {"-s", "--server",  0, RET_INT, ADDR_ADDR(server_flag)},
         {"-c", "--client",  0, RET_INT, ADDR_ADDR(client_flag)},
         {"-m", "--message", 1, RET_STR, ADDR_ADDR(msg)},
