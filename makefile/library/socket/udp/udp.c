@@ -79,23 +79,19 @@ METHOD(udp_t, connect_, int, private_udp_t *this)
 METHOD(udp_t, sendto_, int, private_udp_t *this, void  *buf, int size, char *dst_ip, int dst_port)
 {
     int ret          = 0;
-    host_t *host     = NULL;
     host_t *dst_host = NULL;
+
+    if (dst_ip == NULL || dst_port < 0) return -1;
 
     /**
      * create destination host
      */
-    if (dst_ip && dst_port > 0) {
-        dst_host = host_create_from_string_and_family(dst_ip, udp_famliy, dst_port);
-        host = dst_host;
-    } else {
-        host = udp_host;
-    }
+    dst_host = host_create_from_string_and_family(dst_ip, udp_famliy, dst_port);
 
     /**
      * sendto message
      */
-    ret = sendto(udp_fd, buf, size, 0, host->get_sockaddr(host), sizeof(struct sockaddr));
+    ret = sendto(udp_fd, buf, size, 0, dst_host->get_sockaddr(dst_host), sizeof(struct sockaddr));
     if (ret < 0) perror("sendto()");
     if (dst_host) dst_host->destroy(dst_host);
 
