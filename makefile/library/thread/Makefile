@@ -11,7 +11,7 @@ DIRS+=rwlock
 DIRS+=pool
 
 # target
-all install clean cleanall rebuild: $(DIRS)
+all install uninstall clean cleanall rebuild: $(DIRS)
 $(DIRS):
 	@echo -e "\e[1;35m library thread: make \e[1;36m$(MAKECMDGOALS) $@\e[1;0m"
 	$(MAKE) -C $@ $(MAKECMDGOALS)

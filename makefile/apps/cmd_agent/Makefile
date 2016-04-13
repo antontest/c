@@ -98,3 +98,5 @@ cleanall : clean
 # Install lib or share
 install:
 	-install -s $(TARGET) -p -D $(USR_BIN_PATH)/$(TARGET)
+uninstall:
+	-$(RM) -f $(USR_BIN_PATH)/$(TARGET)
