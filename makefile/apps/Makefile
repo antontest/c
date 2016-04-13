@@ -9,6 +9,7 @@ DIRS+=task_manager
 DIRS+=socket
 DIRS+=arp
 DIRS+=ftp
+DIRS+=cast
 
 # target
 all install clean cleanall rebuild: $(DIRS)
