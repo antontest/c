@@ -64,8 +64,11 @@ int main(int argc, char **argv)
            if (ret < 0) goto over;
            ret = udp->send(udp, "hi", 2);
         */
-        ret = udp->sendto(udp, msg, strlen(msg), ip, port);
-        if (ret > 0) printf("send succ: %d\n", ret);
+        while (times-- > 0) {
+            ret = udp->sendto(udp, msg, strlen(msg), ip, port);
+            if (ret > 0) printf("send succ: %s\n", msg);
+            if (times > 0 && timeout > 0) usleep(1000 * timeout);
+        }
     } else {
         ret = udp->bind(udp, ip, port);
         if (ret < 0) goto over;
