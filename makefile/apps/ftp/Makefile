@@ -14,7 +14,7 @@ INCLUDE_PATH = . ../../incs/
 
 # search the lib which complied by myself
 LIB_PATH = ../../libs
-LIB_NAME = ftp socket get_args fileio
+LIB_NAME = ftp socket get_args fileio tcp
 # other librarys
 OTH_LIB =
 
