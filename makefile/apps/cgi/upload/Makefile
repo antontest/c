@@ -1,16 +1,25 @@
 #/*************************************************************        
 #FileName : makefile   
-#FileFunc : Linux编译链接源程序,生成库
+#FileFunc : Linux编译链接源程序,生成目标可执行代码      
 #Version  : V0.1        
 #Author   : Antonio
 #Date     : 2016-03-24   
 #Descp    : Linux下makefile模板       
 #*************************************************************/     
 # target
-TARGET= libcgi.a
+TARGET= upload.cgi
 
 # include
-INCLUDE_PATH = . ../../incs/
+INCLUDE_PATH = . ../../../incs/
+
+# search the lib which complied by myself
+LIB_PATH = ../../../libs/
+LIB_NAME = cgi
+# other librarys
+OTH_LIB =
+
+# install path
+INSTALL_PATH = ~/web/html/
 
 # Make command to use for dependencies
 MAKE = make
@@ -34,15 +43,20 @@ CDEF = $(CSRC:.c=.d)
 CPPDEF = $(CPPSRC:.cpp=.d)
 
 # Warning
-WARNING = -Wall -Wno-unused -Wno-format
-CFLAGS += $(WARNING) -O2 -Werror
+WARNING = -Wall#-Wno-unused -Wno-format
+CFLAGS += $(WARNING) -O2 -Werror -g
 
 # complie
 INC = $(addprefix -I ,$(INCLUDE_PATH))
 COMPILE = $(CFLAGS) $(INC) -c $< -o $@ #$(OUTDIR)/$(*F).o
 
-# compile library
-LINK = ar -rs $@ $(COBJ) $(CPPOBJ)
+# Library of compling
+LIB_PATH += .
+LIBS_PATH = $(addprefix -L ,$(LIB_PATH))
+# set lib
+LIB = $(addprefix -l,$(LIB_NAME))
+LIB := $(LIBS_PATH) $(LIB) $(OTH_LIB)
+LINK = $(CC) $(CFLAGS) -o $@ $(COBJ) $(CPPOBJ) $(LIB) #$(OUTDIR)/*.o
 
 # make depend
 MAKEDEPEND = gcc -MM -MT
@@ -67,6 +81,8 @@ $(OUTDIR) :
 	if test -n "$(OUTDIR)" ; then $(MKDIR) -p $(OUTDIR) ; fi
 $(TARGET) : $(OUTDIR) $(COBJ) $(CPPOBJ)
 	$(LINK)
+include $(CDEF)
+include $(CPPDEF)
 
 PHONY = rebuild clean cleanall install
 .PHONY : $(PHONY)
@@ -84,9 +100,6 @@ cleanall : clean
 
 # Install lib or share
 install:
-	-install -p -D -m 0444 $(TARGET) $(USR_LIB_PATH)/$(TARGET)
+	-install -s $(TARGET) -p -D $(INSTALL_PATH)/$(TARGET)
 uninstall:
-	-$(RM) -f $(USR_LIB_PATH)/$(TARGET)
-
-include $(CDEF)
-include $(CPPDEF)
+	-$(RM) -f $(INSTALL_PATH)/$(TARGET)
