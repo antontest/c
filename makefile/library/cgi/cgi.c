@@ -356,7 +356,19 @@ static int parse_form_comm_input(private_cgi_t *this)
         //if (!parser_data_by_name(cgi_form_data, pcomm_entry->name, &cgi_input_buf)) continue;
         value = find_val(this, pcomm_entry->name);
         if (!value) continue;
-        if (!(*pcomm_entry->value)) *pcomm_entry->value = strdup(value);
+        if (!(*pcomm_entry->value)) {
+            if (!strcmp(pcomm_entry->name, "next_path")) {
+                char *p = strstr(value, "//");
+                if (!p) p = value;
+                else {
+                    p = strchr(p + 2, '/');
+                    if (p) p++;
+                }
+                *pcomm_entry->value = strdup(p);
+            }
+            else
+                *pcomm_entry->value = strdup(value);
+        }
     }
 
     /**

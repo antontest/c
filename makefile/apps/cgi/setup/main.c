@@ -31,6 +31,7 @@ int main(int agrc, char *agrv[])
         {"ftp_dir",       KEY_IS_VAR, (void *)get_ftp_dir,       NULL},
         {"ftp_file_name", KEY_IS_VAR, (void *)get_ftp_file_name, NULL},
         {"ftp_file_size", KEY_IS_VAR, (void *)get_ftp_file_size, NULL},
+        {"ftp_file_info", KEY_IS_VAR, (void *)get_ftp_file_info, NULL},
         {NULL,            KEY_IS_UNKOWN,      NULL,              NULL}
     };
 

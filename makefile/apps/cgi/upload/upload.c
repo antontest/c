@@ -10,7 +10,7 @@
 #define DEAL_BUF_LEN 1024  
 #define SIGN_CODE_LEN 100  
 #define FILE_NAME_LEN 64  
-#define FILE_SAVE_DIR "/home/anton/download/"  
+#define FILE_SAVE_DIR "/home/anton/downloads/"  
 static int file_upload(char *input, char *errmsg, cgi_form_entry_t *entry)
 {
     FILE *fp = NULL;
