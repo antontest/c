@@ -10,7 +10,7 @@
 #define FTP_PATH "/home/anton/web/html"
 int get_ftp_dir(char *outbuf, char *errmsg, cgi_form_entry_t *form_entry)
 {
-    if (!form_entry->next_path) strcpy(outbuf, "download");
+    if (!form_entry->next_path) strcpy(outbuf, "downloads");
     if (form_entry->next_path != NULL && strcmp(form_entry->next_path, ".")) {
         while (*form_entry->next_path == '.') form_entry->next_path++;
         while (*form_entry->next_path == '/') form_entry->next_path++;
@@ -26,7 +26,7 @@ int get_ftp_file_name(char *outbuf, char *errmsg, cgi_form_entry_t *form_entry)
     char path[512] = FTP_PATH;
 
     if (!form_entry->next_path) {
-        form_entry->next_path = strdup("download");
+        form_entry->next_path = strdup("downloads");
     }
     snprintf(path, sizeof(path), "%s/%s", FTP_PATH, form_entry->next_path);
 
@@ -95,7 +95,7 @@ int get_ftp_file_info(char *outbuf, char *errmsg, cgi_form_entry_t *form_entry)
     if (form_entry->next_path) { 
         snprintf(path + strlen(path), sizeof(path), "/%s", form_entry->next_path);
     } else {
-        strcat(path, "download/");
+        strcat(path, "downloads/");
     }
 
     path_len = strlen(path);
@@ -104,10 +104,10 @@ int get_ftp_file_info(char *outbuf, char *errmsg, cgi_form_entry_t *form_entry)
         if (!strncmp(entry->d_name, ".", 1))
             continue;
         if (entry->d_type == DT_DIR || entry->d_type == DT_LNK) {
-            len += sprintf(outbuf + len, "\t\t\t<a href=\"%s/%s\" class=\"dir\">%s/</a> 0<br>", form_entry->next_path ? form_entry->next_path : "download", entry->d_name, entry->d_name);
+            len += sprintf(outbuf + len, "\t\t\t<a href=\"%s/%s\" class=\"dir\">%s/</a> 0<br>", form_entry->next_path ? form_entry->next_path : "downloads", entry->d_name, entry->d_name);
         } else if (entry->d_type == DT_REG) {
             snprintf(path + path_len, sizeof(path) - path_len, "/%s", entry->d_name);
-            len += sprintf(outbuf + len, "\t\t\t<a href=\"%s/%s\">%s</a> %ld<br>", form_entry->next_path ? form_entry->next_path : "download", entry->d_name, entry->d_name, file_size(path));
+            len += sprintf(outbuf + len, "\t\t\t<a href=\"%s/%s\">%s</a> %ld<br>", form_entry->next_path ? form_entry->next_path : "downloads", entry->d_name, entry->d_name, file_size(path));
         }
     }
     closedir(dir);

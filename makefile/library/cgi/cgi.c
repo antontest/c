@@ -204,9 +204,6 @@ METHOD(cgi_t, get_form_data_, char *, private_cgi_t *this)
     }
 
     replace_plus_with_blank(cgi_form_data);
-    char buf[1025];
-    snprintf(buf, sizeof(buf), "echo \"%s\" > /home/anton/t.txt", cgi_form_data);
-    if (system(buf)) {}
     return cgi_form_data;
 }
 
@@ -819,16 +816,10 @@ cgi_t *cgi_create()
         .err_msg   = (char *)malloc(DFT_CGI_ERRMSG_BUF_SIZE),
     );
 
-    char buf[256] = {0};
-    snprintf(buf, sizeof(buf), "echo \"cgi start\" >> /home/anton/log.txt");
-    if (system(buf)) {}
     if (!cgi_data_list || !cgi_input_buf || !cgi_output_buf || !cgi_errmsg_buf) {
         _destroy_(this);
         return NULL;
     }
-    snprintf(buf, sizeof(buf), "echo \"cgi check over\" >> /home/anton/log.txt");
-    if (system(buf)) {}
-    //CONTENT_TEXT;
 
     read_cgi_form_info();
     _get_form_data_(this);

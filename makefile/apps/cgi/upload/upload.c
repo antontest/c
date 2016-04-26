@@ -35,7 +35,7 @@ static int todo(char *input, char *errmsg, cgi_form_entry_t *entry)
     char c;
 
     if (!strcmp(input, "download")) {
-        fp = fopen("/home/anton/download/ssl-client.c", "rb");
+        fp = fopen("/home/anton/downloads/ssl-client.c", "rb");
         if (!fp) return -1;
 
         fseek(fp, 0, SEEK_END);
@@ -53,6 +53,8 @@ static int todo(char *input, char *errmsg, cgi_form_entry_t *entry)
             c = getc(fp);
         }
         fflush(fp);
+    } else if (!strcmp(input, "test")) {
+        ALERT("test");
     }
 
 over:
@@ -69,6 +71,7 @@ int main(void)
         {NULL}
     };
 
+    CONTENT_TEXT;
     cgi_t *cgi = cgi_create();
     cgi->parse_form_input(cgi, func_tab);
     cgi->destroy(cgi);
