@@ -200,37 +200,37 @@ enum status_t {
 /**
  * Helper function that compares two strings for equality
  */
-inline bool streq(const char *x, const char *y);
+ bool streq(const char *x, const char *y);
 
 /**
  * Helper function that compares two strings for equality, length limited
  */
-inline bool strneq(const char *x, const char *y, unsigned int len);
+ bool strneq(const char *x, const char *y, unsigned int len);
 
 /**
  * Helper function that checks if a string starts with a given prefix
  */
-inline bool strpfx(const char *x, const char *prefix);
+ bool strpfx(const char *x, const char *prefix);
 
 /**
  * Helper function that compares two strings for equality ignoring case
  */
-inline bool strcaseeq(const char *x, const char *y);
+ bool strcaseeq(const char *x, const char *y);
 
 /**
  * Helper function that compares two strings for equality ignoring case, length limited
  */
-inline bool strncaseeq(const char *x, const char *y, unsigned int len);
+ bool strncaseeq(const char *x, const char *y, unsigned int len);
 
 /**
  * NULL-safe strdup variant
  */
-inline char *strdupnull(const char *s);
+ char *strdupnull(const char *s);
 
 /**
  * Helper function that compares two binary blobs for equality
  */
-inline bool memeq(const void *x, const void *y, unsigned int len);
+ bool memeq(const void *x, const void *y, unsigned int len);
 
 /**
  * Add the given number of milliseconds to the given timeval struct
@@ -238,7 +238,7 @@ inline bool memeq(const void *x, const void *y, unsigned int len);
  * @param tv		timeval struct to modify
  * @param ms		number of milliseconds
  */
-inline void timeval_add_ms(struct timeval *tv, unsigned int ms);
+ void timeval_add_ms(struct timeval *tv, unsigned int ms);
 
 /**
  * Get a timestamp from a monotonic time source.
@@ -250,7 +250,7 @@ inline void timeval_add_ms(struct timeval *tv, unsigned int ms);
  * @param tv		timeval struct receiving monotonic timestamps, or NULL
  * @return			monotonic timestamp in seconds
  */
-inline long time_monotonic(struct timeval *tv);
+ long time_monotonic(struct timeval *tv);
 
 /**
  * Write a 16-bit host order value in network order to an unaligned address.
@@ -258,7 +258,7 @@ inline long time_monotonic(struct timeval *tv);
  * @param host		host order 16-bit value
  * @param network	unaligned address to write network order value to
  */
-inline void htoun16(void *network, unsigned short host);
+ void htoun16(void *network, unsigned short host);
 
 /**
  * Write a 32-bit host order value in network order to an unaligned address.
@@ -266,7 +266,7 @@ inline void htoun16(void *network, unsigned short host);
  * @param host		host order 32-bit value
  * @param network	unaligned address to write network order value to
  */
-inline void htoun32(void *network, unsigned int host);
+ void htoun32(void *network, unsigned int host);
 
 /**
  * Write a 64-bit host order value in network order to an unaligned address.
@@ -274,7 +274,7 @@ inline void htoun32(void *network, unsigned int host);
  * @param host		host order 64-bit value
  * @param network	unaligned address to write network order value to
  */
-inline void htoun64(void *network, unsigned long int  host);
+ void htoun64(void *network, unsigned long int  host);
 
 /**
  * Read a 16-bit value in network order from an unaligned address to host order.
@@ -282,7 +282,7 @@ inline void htoun64(void *network, unsigned long int  host);
  * @param network	unaligned address to read network order value from
  * @return			host order value
  */
-inline unsigned short untoh16(void *network);
+ unsigned short untoh16(void *network);
 
 /**
  * Read a 32-bit value in network order from an unaligned address to host order.
@@ -290,7 +290,7 @@ inline unsigned short untoh16(void *network);
  * @param network	unaligned address to read network order value from
  * @return			host order value
  */
-inline unsigned int untoh32(void *network);
+ unsigned int untoh32(void *network);
 
 /**
  * Read a 64-bit value in network order from an unaligned address to host order.
@@ -298,17 +298,17 @@ inline unsigned int untoh32(void *network);
  * @param network	unaligned address to read network order value from
  * @return			host order value
  */
-inline unsigned long int untoh64(void *network);
+ unsigned long int untoh64(void *network);
 
 /**
  * Round up size to be multiple of alignement
  */
-inline unsigned int round_up(unsigned int size, int alignement);
+ unsigned int round_up(unsigned int size, int alignement);
 
 /**
  * Round down size to be a multiple of alignement
  */
-inline unsigned int round_down(unsigned int size, int alignement);
+ unsigned int round_down(unsigned int size, int alignement);
 
 /**
  * @brief rand in array
@@ -318,7 +318,7 @@ inline unsigned int round_down(unsigned int size, int alignement);
  *
  * @return a number in min ~ max
  */
-inline int rand_num(int min, int max);
+ int rand_num(int min, int max);
 
 /**
  * Same as memcpy, but XORs src into dst instead of copy
@@ -328,17 +328,17 @@ void memxor(unsigned char dest[], unsigned char src[], unsigned int n);
 /**
  * Safely overwrite n bytes of memory at ptr with zero, inlining variant.
  */
-inline void memwipe_inline(void *ptr, unsigned int n);
+ void memwipe_inline(void *ptr, unsigned int n);
 
 /**
  * Safely overwrite n bytes of memory at ptr with zero, auto-inlining variant.
  */
-inline void memwipe(void *ptr, unsigned int n);
+ void memwipe(void *ptr, unsigned int n);
 
 /**
  * Described in header.
  */
-void memwipe_noinline(void *ptr, unsigned int n);
+void memwipe_no(void *ptr, unsigned int n);
 
 /**
  * @brief get netmask ip by netmask

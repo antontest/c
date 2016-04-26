@@ -4,7 +4,7 @@
 #include <socket/socket.h>
 #include <get_args/get_args.h>
 #include <ftp/ftp.h>
-#include <utils.h>
+#include <utils/utils.h>
 #include <fileio/fileio.h>
 
 #define DFT_FTP_SERVER_PORT (21)
