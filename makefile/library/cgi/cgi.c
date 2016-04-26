@@ -222,6 +222,11 @@ static char *find_val(private_cgi_t *this, char *name)
     return NULL;
 }
 
+METHOD(cgi_t, find_val_, char *, private_cgi_t *this, char *name)
+{
+    return find_val(this, name);
+}
+
 /**
  * @brief parser_data_by_name 
  * @param data   form data
@@ -788,6 +793,7 @@ cgi_t *cgi_create()
             .parse_form_input  = _parse_form_input_,
             .write_to_html     = _write_to_html_,
             .parser_and_action = _parser_and_action_,
+            .find_val          = _find_val_,
             .get_file_todo     = _get_file_todo_,
             .get_this_file     = _get_this_file_,
             .get_next_file     = _get_next_file_,

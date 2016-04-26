@@ -115,6 +115,11 @@ struct cgi_t {
     request_method_t (*get_req_method) (cgi_t *this);
 
     /**
+     * @brief  find value by name
+     */
+    char* (*find_val) (cgi_t *this, char *name);
+
+    /**
      * @brief get data from brower  
      * @return data of form
      */
