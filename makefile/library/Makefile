@@ -12,6 +12,7 @@ DIRS+=thread
 DIRS+=socket
 DIRS+=timer 
 DIRS+=url
+DIRS+=xls
 
 # target
 all install uninstall clean cleanall rebuild: $(DIRS)
