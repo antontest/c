@@ -347,5 +347,7 @@ void memwipe_no(void *ptr, unsigned int n);
  */
 char *ip_netmask(char *ip, int netmask);
 
+void memwipe_noinline(void *ptr, unsigned int n);
+
 #endif
 

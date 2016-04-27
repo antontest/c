@@ -2,7 +2,7 @@
 SHELL=/bin/bash
 
 # directory
-#DIRS=cstring
+DIRS=libxls
 
 # target
 all install clean cleanall rebuild: $(DIRS)
