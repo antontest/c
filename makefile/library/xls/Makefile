@@ -14,9 +14,9 @@ INCLUDE_PATH = . ../../incs/
 
 # search the lib which complied by myself
 LIB_PATH = ../../libs/
-LIB_NAME = xls  xlsreader
+LIB_NAME = xlsreader xl
 # other librarys
-OTH_LIB =
+OTH_LIB = 
 
 # Make command to use for dependencies
 MAKE = make
