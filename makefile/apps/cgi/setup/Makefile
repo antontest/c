@@ -14,7 +14,7 @@ INCLUDE_PATH = . ../../../incs/
 
 # search the lib which complied by myself
 LIB_PATH = ../../../libs/
-LIB_NAME = cgi
+LIB_NAME = cgi rwxls xlsreader xl
 # other librarys
 OTH_LIB =
 
