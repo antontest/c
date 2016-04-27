@@ -10,6 +10,7 @@
 #include <cgi/cgi.h>
 #include <ftp.h>
 #include <login.h>
+#include <xls.h>
 
 /*********************************************************
  **************    Function Declaration    ***************
@@ -32,6 +33,8 @@ int main(int agrc, char *agrv[])
         {"ftp_file_name", KEY_IS_VAR, (void *)get_ftp_file_name, NULL},
         {"ftp_file_size", KEY_IS_VAR, (void *)get_ftp_file_size, NULL},
         {"ftp_file_info", KEY_IS_VAR, (void *)get_ftp_file_info, NULL},
+        {"xls",           KEY_IS_FILE, NULL,                     NULL},
+        {"xls_data",      KEY_IS_VAR, (void *)xls_data, NULL},
         {NULL,            KEY_IS_UNKOWN,      NULL,              NULL}
     };
 
