@@ -34,6 +34,12 @@ struct private_xls_t {
      * mode
      */
     mode_t mode;
+
+    /**
+     * col and row count
+     */
+    int row_cnt;
+    int col_cnt;
 };
 
 static int open_for_read(private_xls_t *this, const char *file)
@@ -74,19 +80,10 @@ METHOD(xls_t, open_, int, private_xls_t *this, const char *file, mode_t mode)
             }
             break;
         case O_WRONLY:
-            if (open_for_write(this, file) < 0) {
-                return -1;
-            }
-            break;
         case O_RDWR:
             if (open_for_read(this, file) < 0 || open_for_write(this, file) < 0) {
                 return -1;
             }
-
-            if (open_for_write(this, file) < 0) {
-                return -1;
-            }
-            break;
             break;
         default:
             return -1;
@@ -107,6 +104,8 @@ static int open_sheet_for_read(private_xls_t *this, int sheet_index)
         return -1;
     }
     xls_parseWorkSheet(this->rsheet);
+    this->row_cnt = this->rsheet->rows.lastrow;
+    this->col_cnt = this->rsheet->rows.lastcol;
     return 0;
 }
 
@@ -133,6 +132,12 @@ METHOD(xls_t, open_sheet_, int, private_xls_t *this, int sheet_index)
             }
             break;
         case O_WRONLY:
+            if (open_sheet_for_read(this, sheet_index) < 0) {
+                return -1;
+            }
+            xls_close(this->rbook);
+            this->rbook = NULL;
+
             if (open_sheet_for_write(this, sheet_index) < 0) {
                 return -1;
             }
@@ -266,12 +271,24 @@ METHOD(xls_t, save_, int, private_xls_t *this, const char *file)
 
 METHOD(xls_t, destroy_, void, private_xls_t *this)
 {
+    if (this->rbook) {
+        xls_close(this->rbook);
+    }
     if (this->wbook) {
         xlBookRelease(this->wbook);
     }
     free(this);
 }
 
+METHOD(xls_t, get_row_cnt_, int, private_xls_t *this)
+{
+    return this->row_cnt;
+}
+
+METHOD(xls_t, get_col_cnt_, int, private_xls_t *this)
+{
+    return this->col_cnt;
+}
 
 xls_t* xls_create()
 {
@@ -283,15 +300,21 @@ xls_t* xls_create()
             .open_sheet      = _open_sheet_,
             .read            = _read_,
             .write           = _write_,
+            .save            = _save_,
+            .destroy         = _destroy_,
+
             .insert_row      = _insert_row_,
             .delete_row      = _delete_row_,
             .group_row       = _group_row_,
+
             .insert_col      = _insert_col_,
             .delete_col      = _delete_col_,
-            .save            = _save_,
-            .destroy         = _destroy_,
+
             .enumerate       = _enumerate_,
             .reset_enumerate = _reset_enumerate_,
+
+            .get_row_cnt     = _get_row_cnt_,
+            .get_col_cnt     = _get_col_cnt_,
         },
         .rbook  = NULL,
         .rsheet = NULL,

@@ -55,6 +55,12 @@ struct xls_t {
      * @brief destroy instance and free memory
      */
     void (*destroy) (xls_t *this);
+
+    /**
+     * @brief get xls row and col count
+     */
+    int (*get_row_cnt) (xls_t *this);
+    int (*get_col_cnt) (xls_t *this);
 };
 
 /**
