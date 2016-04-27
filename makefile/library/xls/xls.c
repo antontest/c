@@ -177,6 +177,56 @@ METHOD(xls_t, write_, int, private_xls_t *this, int row, int col, char *data)
     return 0;
 }
 
+METHOD(xls_t, insert_row_, int, private_xls_t *this, int firstrow, int lastrow)
+{
+    if (lastrow < firstrow) {
+        return -1;
+    }
+
+    xlSheetInsertRow(this->wsheet, firstrow, lastrow);
+    return 0;
+}
+
+METHOD(xls_t, delete_row_, int, private_xls_t *this, int firstrow, int lastrow)
+{
+    if (lastrow < 0 || firstrow < 0 || lastrow < firstrow) {
+        return -1;
+    }
+
+    xlSheetRemoveRow(this->wsheet, firstrow, lastrow);
+    return 0;
+}
+
+METHOD(xls_t, group_row_, int, private_xls_t *this, int firstrow, int lastrow)
+{
+    if (lastrow < firstrow) {
+        return -1;
+    }
+
+    xlSheetGroupRows(this->wsheet, firstrow, lastrow, 0);
+    return 0;
+}
+
+METHOD(xls_t, insert_col_, int, private_xls_t *this, int firstcol, int lastcol)
+{
+    if (lastcol < firstcol || lastcol < 0) {
+        return -1;
+    }
+
+    xlSheetInsertCol(this->wsheet, firstcol, lastcol);
+    return 0;
+}
+
+METHOD(xls_t, delete_col_, int, private_xls_t *this, int firstcol, int lastcol)
+{
+    if (lastcol < 0 || firstcol < 0 || lastcol < firstcol) {
+        return -1;
+    }
+
+    xlSheetRemoveCol(this->wsheet, firstcol, lastcol);
+    return 0;
+}
+
 METHOD(xls_t, enumerate_, char *, private_xls_t *this)
 {
     struct st_row_data *row;
@@ -233,6 +283,11 @@ xls_t* xls_create()
             .open_sheet      = _open_sheet_,
             .read            = _read_,
             .write           = _write_,
+            .insert_row      = _insert_row_,
+            .delete_row      = _delete_row_,
+            .group_row       = _group_row_,
+            .insert_col      = _insert_col_,
+            .delete_col      = _delete_col_,
             .save            = _save_,
             .destroy         = _destroy_,
             .enumerate       = _enumerate_,

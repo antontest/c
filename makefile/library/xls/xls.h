@@ -28,6 +28,19 @@ struct xls_t {
     int (*write) (xls_t *this, int row, int col, char *data);
 
     /**
+     * row dealing
+     */
+    int (*insert_row) (xls_t *this, int firstrow, int lastrow);
+    int (*delete_row) (xls_t *this, int firstrow, int lastrow);
+    int (*group_row) (xls_t *this, int firstrow, int lastrow);
+
+    /**
+     * col dealing
+     */
+    int (*insert_col) (xls_t *this, int firstcol, int lastcol);
+    int (*delete_col) (xls_t *this, int firstcol, int lastcol);
+
+    /**
      * @brief save xls file
      */
     int (*save) (xls_t *this, const char *file);
