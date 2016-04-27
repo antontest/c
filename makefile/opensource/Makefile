@@ -3,7 +3,7 @@ SHELL=/bin/bash
 
 # directory
 DIRS=libxls
-DIRS+=xlslib
+# DIRS+=xlslib
 DIRS+=libxl
 
 # target
