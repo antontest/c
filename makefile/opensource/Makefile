@@ -4,6 +4,7 @@ SHELL=/bin/bash
 # directory
 DIRS=libxls
 DIRS+=xlslib
+DIRS+=libxl
 
 # target
 all install clean cleanall rebuild: $(DIRS)
