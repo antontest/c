@@ -13,7 +13,9 @@ int main(int argc, char **argv)
     xls = xls_create();
     xls->open(xls, "tt.xls", O_WRONLY);
     xls->open_sheet(xls, 3);
-    xls->write(xls, 3, 0, "测试1");
+    //xls->write(xls, 3, 0, "测试1");
+    //xls->insert_row(xls, 3, 5);
+    xls->delete_row(xls, 3, 5);
     xls->save(xls, "tt.xls");
 
     /**
