@@ -32,7 +32,7 @@ int xls_data(char *outbuf, char *errbuf, cgi_form_entry_t *entry)
         return -1;
     }
 
-    for (row = 3; row <= xls->get_row_cnt(xls); row++) {
+    for (row = 3; row < xls->get_row_cnt(xls); row++) {
         printf("<tr>");
         for (col = 0; col < xls->get_col_cnt(xls); col++) {
             printf("<td>");
