@@ -130,7 +130,7 @@ static uint32_t sheetOffset;
 
 int xls(int debug)
 {
-	xls_debug = debug;
+	//xls_debug = debug;
     return 1;
 }
 
@@ -509,7 +509,7 @@ struct st_cell_data *xls_addCell(xlsWorkSheet* pWS,BOF* bof,BYTE* buf)
 		if(formula_handler) formula_handler(bof->id, bof->size, buf);
         break;
     case XLS_RECORD_MULRK:
-printf("MULRK: %d\n", bof->size);
+//printf("MULRK: %d\n", bof->size);
         for (i = 0; i < (bof->size - 6)/6; i++)	// 6 == 2 row + 2 col + 2 trailing index
         {
             cell=&row->cells.cell[xlsShortVal(((MULRK*)buf)->col + i)];
@@ -915,15 +915,17 @@ void xls_parseWorkBook(xlsWorkBook* pWB)
 			break;
 		
 		case XLS_RECORD_DEFINEDNAME:
+		    /*
 			printf("DEFINEDNAME: ");
 			for(int i=0; i<bof1.size; ++i) printf("%2.2x ", buf[i]);
 			printf("\n");
+			*/
 			break;
 			
 #ifdef DEBUG_DRAWINGS
 		case XLS_RECORD_MSODRAWINGGROUP:
 		{
-			printf("DRAWING GROUP size=%d\n", bof1.size);
+			//printf("DRAWING GROUP size=%d\n", bof1.size);
 			unsigned int total = bof1.size;
 			unsigned int off = 0;
 
@@ -931,10 +933,12 @@ void xls_parseWorkBook(xlsWorkBook* pWB)
 				struct drawHeader fooper = drawProc(buf, total, &off, 0);
 				(void)fooper;
 			}
+			/*
 			printf("Total=%d off=%d\n", total, off);
 			
 			if(formData) printf("%s\n", formData);
 			if(formFunc) printf("%s\n", formFunc);
+			*/
 			free(formData), formData = NULL;
 			free(formFunc), formFunc = NULL;
 
@@ -1120,9 +1124,9 @@ void xls_parseWorkSheet(xlsWorkSheet* pWS)
         case XLS_RECORD_INDEX:
 			if(xls_debug > 10) {
 				DWORD *foo = (DWORD_UA *)buf;
-                int i;
-				printf("INDEX: size %d\n", tmp.size);
-				for(i=0; i<5; ++i) printf("FOO[%d]=%4.4x %u\n", i, foo[i], foo[i]);
+                //int i;
+				//printf("INDEX: size %d\n", tmp.size);
+				//for(i=0; i<5; ++i) printf("FOO[%d]=%4.4x %u\n", i, foo[i], foo[i]);
 			}
 #if 0
 			0	4 4	4 8	4
@@ -1187,7 +1191,7 @@ void xls_parseWorkSheet(xlsWorkSheet* pWS)
 #endif
 		case XLS_RECORD_MSODRAWING:	// MSDRAWING
 		{
-			printf("DRAWING size=%d\n", tmp.size);
+			//printf("DRAWING size=%d\n", tmp.size);
 			sheetOffset = 100;
 			unsigned int total = tmp.size;
 			unsigned int off = 0;
@@ -1195,11 +1199,11 @@ void xls_parseWorkSheet(xlsWorkSheet* pWS)
 			while(off < total) {
 				struct drawHeader fooper  = drawProc(buf, total, &off, 0);
 				(void)fooper;
-				printf("---------------Total=%d off=%d\n", total, off);
+				//printf("---------------Total=%d off=%d\n", total, off);
 			}
 
-			if(formData) printf("%s\n", formData);
-			if(formFunc) printf("%s\n", formFunc);
+			//if(formData) printf("%s\n", formData);
+			//if(formFunc) printf("%s\n", formFunc);
 			free(formData), formData = NULL;
 			free(formFunc), formFunc = NULL;
 			
@@ -1217,11 +1221,11 @@ void xls_parseWorkSheet(xlsWorkSheet* pWS)
 				uint16_t	reserved2;
 			} foo;
 			memcpy(&foo, buf, 18);
-			printf("TXO: grbit=0x%4.4X rot=0x%4.4X chText=0x%4.4X cbRuns=0x%4.4X ifntEmpty=0x%X reserved2=0x%X\n", foo.grbit, foo.rot, foo.cchText, foo.cbRuns, foo.ifntEmpty, foo.reserved2);
+			//printf("TXO: grbit=0x%4.4X rot=0x%4.4X chText=0x%4.4X cbRuns=0x%4.4X ifntEmpty=0x%X reserved2=0x%X\n", foo.grbit, foo.rot, foo.cchText, foo.cbRuns, foo.ifntEmpty, foo.reserved2);
 			
-			printf("Res1: ");
-			for(int i=0; i<6; ++i) printf("%2.2x ", foo.reserved1[i]);
-			printf("\n");
+			//printf("Res1: ");
+			//for(int i=0; i<6; ++i) printf("%2.2x ", foo.reserved1[i]);
+			//printf("\n");
 			
 			continueRec = 1;
 			goto printBOF;
@@ -1232,10 +1236,10 @@ void xls_parseWorkSheet(xlsWorkSheet* pWS)
 			if(continueRec == 1) {
 				continueRec = 2;
 				
-				printf("TEXT: ");
-				for(int i=0; i<tmp.size; ++i) printf("%2.2x ", buf[i]);
-				printf("\n");
-				printf("\"%.*s\"\n", tmp.size-1, buf+1);
+				//printf("TEXT: ");
+				//for(int i=0; i<tmp.size; ++i) printf("%2.2x ", buf[i]);
+				//printf("\n");
+				//printf("\"%.*s\"\n", tmp.size-1, buf+1);
 			} else
 			if(continueRec == 2) {
 				continueRec = 0;
@@ -1249,7 +1253,7 @@ void xls_parseWorkSheet(xlsWorkSheet* pWS)
 				
 				for(int i=0; i<tmp.size/8; ++i) {
 					memcpy(&foo, buf+off, 8);
-					printf("TXORUN: %d 0x%x\n", foo.ichFirst, foo.ifnt);
+					//printf("TXORUN: %d 0x%x\n", foo.ichFirst, foo.ifnt);
 					off += 8;
 				}
 			}
@@ -1272,9 +1276,9 @@ void xls_parseWorkSheet(xlsWorkSheet* pWS)
 			int len = (int)(tmp.size - sizeof(foo));
 			int off = sizeof(foo);
 			
-			printf("OBJ ft=0x%X cb=0x%X ot=0x%X idx=0x%X flags=0x%X len=%d ", foo.ft, foo.cb, foo.ot, foo.idx, foo.flags, (int)(tmp.size - sizeof(foo)) );
+			//printf("OBJ ft=0x%X cb=0x%X ot=0x%X idx=0x%X flags=0x%X len=%d ", foo.ft, foo.cb, foo.ot, foo.idx, foo.flags, (int)(tmp.size - sizeof(foo)) );
 			//for(int i=0; i<6; ++i) printf(" 0x%02.2x", foo.unused[i]);
-			printf("\n");
+			//printf("\n");
 			
 			if(foo.ot == 0x08) {
 				struct {
@@ -1283,7 +1287,7 @@ void xls_parseWorkSheet(xlsWorkSheet* pWS)
 					uint16_t flags;
 				} ftcf;
 				memcpy(&ftcf, buf+off, sizeof(ftcf));
-				printf(" ft=%x cb=%x flags=%4.4x\n", ftcf.ft, ftcf.cb, ftcf.flags);
+				//printf(" ft=%x cb=%x flags=%4.4x\n", ftcf.ft, ftcf.cb, ftcf.flags);
 				off += sizeof(ftcf);
 
 				struct {
@@ -1292,12 +1296,12 @@ void xls_parseWorkSheet(xlsWorkSheet* pWS)
 					uint16_t flags;
 				} FtPioGrbit;
 				memcpy(&FtPioGrbit, buf+off, sizeof(FtPioGrbit));
-				printf(" ft=%x cb=%x flags=%4.4x\n", FtPioGrbit.ft, FtPioGrbit.cb, FtPioGrbit.flags);
+				//printf(" ft=%x cb=%x flags=%4.4x\n", FtPioGrbit.ft, FtPioGrbit.cb, FtPioGrbit.flags);
 				off += sizeof(FtPioGrbit);
 			} else {
-				printf("Extra: ");
-				for(int i=0; i<len; ++i) printf("%2.2x ", buf[i+off]);
-				printf("\n");
+				//printf("Extra: ");
+				//for(int i=0; i<len; ++i) printf("%2.2x ", buf[i+off]);
+				//printf("\n");
 			}
 
 #if 0
@@ -1332,9 +1336,9 @@ void xls_parseWorkSheet(xlsWorkSheet* pWS)
 				uint8_t		strType;
 			} note;
 			memcpy(&note, buf, sizeof(note));
-			printf("NOTE: row=%d col=%d flags=0x%x idx=%d strLen=%d strType=%d :  ", note.row, note.col, note.flags, note.idx, note.strLen, note.strType);
-			for(int i=0; i<note.strLen; ++i) printf("%2.2x ", buf[i+sizeof(note)]);
-			printf("\n  %.*s now at %ld len=%d\n", note.strLen, buf + sizeof(note), sizeof(note)+note.strLen, tmp.size);
+			//printf("NOTE: row=%d col=%d flags=0x%x idx=%d strLen=%d strType=%d :  ", note.row, note.col, note.flags, note.idx, note.strLen, note.strType);
+			//for(int i=0; i<note.strLen; ++i) printf("%2.2x ", buf[i+sizeof(note)]);
+			//printf("\n  %.*s now at %ld len=%d\n", note.strLen, buf + sizeof(note), sizeof(note)+note.strLen, tmp.size);
 
 			goto printBOF;
 		}	break;
@@ -1709,13 +1713,13 @@ static struct drawHeader drawProc(uint8_t *buf, uint32_t maxLen, uint32_t *off_p
 #endif
 	off += sizeof(head);
 
-	printf("%.*s", level*3, spaces);
-	printf("type=%x rec=%x instance=%x len=%d    ", head.type, head.rec, head.instance, head.len);
+	//printf("%.*s", level*3, spaces);
+	//printf("type=%x rec=%x instance=%x len=%d    ", head.type, head.rec, head.instance, head.len);
 	
 	switch(head.type) {
 	case 0xF000:	// OfficeArtDggContainer - F000 - overall header
 	{
-		printf("OfficeArtDggContainer\n");
+		//printf("OfficeArtDggContainer\n");
 		dumpRec("OfficeArtDggContainer", &head, 0, NULL);
 
 		int startOff = off;
@@ -1724,8 +1728,8 @@ static struct drawHeader drawProc(uint8_t *buf, uint32_t maxLen, uint32_t *off_p
 			(void)fooper2;
 		}
 		
-		printf("%.*s", level*3, spaces);
-		printf("Total=%d off=%d ObjectSize=%d\n", maxLen, off, off-startOff);
+		//printf("%.*s", level*3, spaces);
+		//printf("Total=%d off=%d ObjectSize=%d\n", maxLen, off, off-startOff);
 		
 	}	break;
 
@@ -1743,7 +1747,7 @@ static struct drawHeader drawProc(uint8_t *buf, uint32_t maxLen, uint32_t *off_p
 #endif
 	case 0xF002:
 	{
-		printf("OfficeArtDgContainer\n");
+		//printf("OfficeArtDgContainer\n");
 		dumpRec("OfficeArtDgContainer", &head, 0, NULL);
 
 		int startOff = off;
@@ -1752,14 +1756,14 @@ static struct drawHeader drawProc(uint8_t *buf, uint32_t maxLen, uint32_t *off_p
 			(void)fooper2;
 		}
 		
-		printf("%.*s", level*3, spaces);
-		printf("Total=%d off=%d ObjectSize=%d\n", maxLen, off, off-startOff);
+		//printf("%.*s", level*3, spaces);
+		//printf("Total=%d off=%d ObjectSize=%d\n", maxLen, off, off-startOff);
 
 	}	break;
 
 	case 0xF003:
 	{
-		printf("OfficeArtSpgrContainer\n");
+		//printf("OfficeArtSpgrContainer\n");
 		dumpRec("OfficeArtSpgrContainer", &head, 0, NULL);
 
 		int startOff = off;
@@ -1768,13 +1772,13 @@ static struct drawHeader drawProc(uint8_t *buf, uint32_t maxLen, uint32_t *off_p
 			(void)fooper2;
 		}
 		
-		printf("%.*s", level*3, spaces);
-		printf("Total=%d off=%d ObjectSize=%d  FIXME FIXME FIXME\n", maxLen, off, off-startOff);
+		//printf("%.*s", level*3, spaces);
+		//printf("Total=%d off=%d ObjectSize=%d  FIXME FIXME FIXME\n", maxLen, off, off-startOff);
 	}	break;
 
 	case 0xF001:
 	{
-		printf("OfficeArtBStoreContainer\n");
+		//printf("OfficeArtBStoreContainer\n");
 		dumpRec("OfficeArtBStoreContainer", &head, 0, NULL);
 
 		int startOff = off;
@@ -1783,12 +1787,12 @@ static struct drawHeader drawProc(uint8_t *buf, uint32_t maxLen, uint32_t *off_p
 			(void)fooper2;
 		}
 		
-		printf("%.*s", level*3, spaces);
-		printf("Total=%d off=%d ObjectSize=%d\n", maxLen, off, off-startOff);
+		//printf("%.*s", level*3, spaces);
+		//printf("Total=%d off=%d ObjectSize=%d\n", maxLen, off, off-startOff);
 		}	break;
 	case 0xF004:
 	{
-		printf("OfficeArtSpContainer\n");
+		//printf("OfficeArtSpContainer\n");
 		dumpRec("OfficeArtSpContainer", &head, 0, NULL);
 
 		int startOff = off;
@@ -1797,14 +1801,14 @@ static struct drawHeader drawProc(uint8_t *buf, uint32_t maxLen, uint32_t *off_p
 			(void)fooper2;
 		}
 		
-		printf("%.*s", level*3, spaces);
-		printf("Total=%d off=%d ObjectSize=%d\n", maxLen, off, off-startOff);
+		//printf("%.*s", level*3, spaces);
+		//printf("Total=%d off=%d ObjectSize=%d\n", maxLen, off, off-startOff);
 		}	break;
 	case 0xF006:
 	{
 		// A value that MUST be 0x00000010 + ((head.cidcl - 1) * 0x00000008)
 		unsigned int count =  (head.len - 0x10) / 0x8;
-		printf("OfficeArtFDGGBlock count=%d\n", count);
+		//printf("OfficeArtFDGGBlock count=%d\n", count);
 		dumpRec("OfficeArtFDGGBlock - needs to be set", &head, 0, NULL);
 
 		// OfficeArtFDGG
@@ -1816,8 +1820,8 @@ static struct drawHeader drawProc(uint8_t *buf, uint32_t maxLen, uint32_t *off_p
 		} fog;
 		memcpy(&fog, buf+off, 16); // OfficeArtRecordHeader F001 - specified BLIP - this is the image
 		off += 16;
-		printf("%.*s", level*3, spaces);
-		printf(" spidMax=%d cidcl=%d cspSaved=%d cdgSaved=%d\n", fog.spidMax, fog.cidcl, fog.cspSaved, fog.cdgSaved);
+		//printf("%.*s", level*3, spaces);
+		//printf(" spidMax=%d cidcl=%d cspSaved=%d cdgSaved=%d\n", fog.spidMax, fog.cidcl, fog.cspSaved, fog.cdgSaved);
 #if 0
 		spidMax (4 bytes): An MSOSPID structure, as defined in section 2.1.2, specifying the current maximum shape identifier that is used in any drawing. This value MUST be less than 0x03FFD7FF.
 		cidcl (4 bytes): An unsigned integer that specifies the number of OfficeArtIDCL records, as defined in section 2.2.46, + 1. This value MUST be less than 0x0FFFFFFF.
@@ -1837,8 +1841,8 @@ static struct drawHeader drawProc(uint8_t *buf, uint32_t maxLen, uint32_t *off_p
 			memcpy(&foo1, buf+off, 8); // OfficeArtIDCL
 			off += 8;
 			
-			printf("%.*s", level*3, spaces);
-			printf("  dgid=%d cspid=%d\n", foo1.dgid, foo1.cspidCur);
+			//printf("%.*s", level*3, spaces);
+			//printf("  dgid=%d cspid=%d\n", foo1.dgid, foo1.cspidCur);
 		}
 		//for(int i=0; i<16; ++i) printf(" %2.2x", *(BYTE *)(buf+off+i));
 		//printf("\n");
@@ -1846,7 +1850,7 @@ static struct drawHeader drawProc(uint8_t *buf, uint32_t maxLen, uint32_t *off_p
 
 	case 0xF007:
 	{
-		printf("OfficeArtFBSE\n");
+		//printf("OfficeArtFBSE\n");
 		//dumpRec("OfficeArtFBSE", &head, 0, NULL);
 		struct {
 			uint8_t		btWin32;
@@ -1863,23 +1867,23 @@ static struct drawHeader drawProc(uint8_t *buf, uint32_t maxLen, uint32_t *off_p
 		} fooper1;
 		memcpy(&fooper1, buf+off, sizeof(fooper1));
 		off += sizeof(fooper1);
-		printf("%.*s", level*3, spaces);
-		printf(" rgbUid: ");
+		//printf("%.*s", level*3, spaces);
+		//printf(" rgbUid: ");
 		for(int i=0; i<16; ++i) {
-			printf(" %2.2x", fooper1.rgbUid[i]);
+			//printf(" %2.2x", fooper1.rgbUid[i]);
 		}
-		printf("\n");
+		//printf("\n");
 		
-		printf("%.*s", level*3, spaces);
-		printf(" w=%d mac=%d tag=0x%x size=%d cRef=%d foDelay=%x cbName=%x", fooper1.btWin32, fooper1.btMacOS, fooper1.tag , fooper1.size , fooper1.cRef , fooper1.foDelay, fooper1.cbName);
-		if(fooper1.cbName) printf("name:");
+		//printf("%.*s", level*3, spaces);
+		//printf(" w=%d mac=%d tag=0x%x size=%d cRef=%d foDelay=%x cbName=%x", fooper1.btWin32, fooper1.btMacOS, fooper1.tag , fooper1.size , fooper1.cRef , fooper1.foDelay, fooper1.cbName);
+		//if(fooper1.cbName) printf("name:");
 		for(int i=0; i<fooper1.cbName; ++i) {
-			printf(" %2.2x", *(BYTE *)(buf+off+i));
+			//printf(" %2.2x", *(BYTE *)(buf+off+i));
 		}
-		printf("\n");
+		//printf("\n");
 		off += fooper1.cbName;
 		
-		printf(" dataLen=%ld\n", head.len - sizeof(fooper1) - fooper1.cbName);
+		//printf(" dataLen=%ld\n", head.len - sizeof(fooper1) - fooper1.cbName);
 		drawProc(buf, maxLen, &off, level+1);
 
 		
@@ -1902,7 +1906,7 @@ static struct drawHeader drawProc(uint8_t *buf, uint32_t maxLen, uint32_t *off_p
 
 	case 0xF008:
 	{
-		printf("OfficeArtFDG\n");
+		//printf("OfficeArtFDG\n");
 		dumpRec("OfficeArtFDG - spidCur needs to be set", &head, 0, NULL);
 		struct {
 			uint32_t	csp;
@@ -1910,8 +1914,8 @@ static struct drawHeader drawProc(uint8_t *buf, uint32_t maxLen, uint32_t *off_p
 		} fooper1;
 		memcpy(&fooper1, buf+off, 8);
 		off += 8;
-		printf("%.*s", level*3, spaces);
-		printf(" csp=%d spidCur=%d\n", fooper1.csp, fooper1.spidCur);
+		//printf("%.*s", level*3, spaces);
+		//printf(" csp=%d spidCur=%d\n", fooper1.csp, fooper1.spidCur);
 		
 #if 0
 		csp (4 bytes): An unsigned integer that specifies the number of shapes in this drawing.
@@ -1923,7 +1927,7 @@ static struct drawHeader drawProc(uint8_t *buf, uint32_t maxLen, uint32_t *off_p
 
 	case 0xF009:
 	{
-		printf("OfficeArtFSPGR\n");
+		//printf("OfficeArtFSPGR\n");
 		dumpRec("OfficeArtFSPGR", &head, head.len, buf+off);
 		struct {
 			int32_t	xLeft;
@@ -1933,13 +1937,13 @@ static struct drawHeader drawProc(uint8_t *buf, uint32_t maxLen, uint32_t *off_p
 		} foo;
 		memcpy(&foo, buf+off, 16);
 		off += 16;
-		printf("%.*s", level*3, spaces);
-		printf(" l=%d t=%d r=%d b=%d\n", foo.xLeft, foo.yTop, foo.xRight, foo.yBottom);
+		//printf("%.*s", level*3, spaces);
+		//printf(" l=%d t=%d r=%d b=%d\n", foo.xLeft, foo.yTop, foo.xRight, foo.yBottom);
 	}	break;
 
 	case 0xF00A:	// OfficeArtFSP
 	{
-		printf("OfficeArtFSP\n");
+		//printf("OfficeArtFSP\n");
 		dumpRec("OfficeArtFSP", &head, 0, NULL);
 		struct {
 			uint32_t	spid;
@@ -1947,13 +1951,13 @@ static struct drawHeader drawProc(uint8_t *buf, uint32_t maxLen, uint32_t *off_p
 		} foo;
 		memcpy(&foo, buf+off, 8);
 		off += 8;
-		printf("%.*s", level*3, spaces);
-		printf(" SPID=%d flags=0x%x\n", foo.spid, foo.flags);
+		//printf("%.*s", level*3, spaces);
+		//printf(" SPID=%d flags=0x%x\n", foo.spid, foo.flags);
 	}	break;
 
 	case 0xF00B:
 	{
-		printf("OfficeArtFOPT\n");
+		//printf("OfficeArtFOPT\n");
 		dumpRec("OfficeArtFOPT", &head, head.len, buf+off);
 		struct {
 			//uint16_t blip : 1;
@@ -1966,8 +1970,8 @@ static struct drawHeader drawProc(uint8_t *buf, uint32_t maxLen, uint32_t *off_p
 		for(int i=0; i<head.instance; ++i) {
 			memcpy(&foo, buf+off, 6);
 			off += 6;
-			printf("%.*s", level*3, spaces);
-			printf(" opid=0x%4.4X(%.5d) op=%8.8X\n", foo.opid, foo.opid, foo.op); // blip=%d complex=%d , foo.blip, foo.complex
+			//printf("%.*s", level*3, spaces);
+			//printf(" opid=0x%4.4X(%.5d) op=%8.8X\n", foo.opid, foo.opid, foo.op); // blip=%d complex=%d , foo.blip, foo.complex
 			//printf("drawDataOPID(data, 0x%4.4X, 0x%8.8X);\n", foo.opid, foo.op);
 		}
 #if 0
@@ -1981,24 +1985,24 @@ static struct drawHeader drawProc(uint8_t *buf, uint32_t maxLen, uint32_t *off_p
 #endif
 		int complex = head.len - head.instance * 6;
 		if(complex) {
-			printf("%.*s", level*3, spaces);
-			printf(" complex:");
+			//printf("%.*s", level*3, spaces);
+			//printf(" complex:");
 		
 			for(int i=0; i<complex; ++i) {
-				printf(" %2.2x", *(BYTE *)(buf+off+i));
+				//printf(" %2.2x", *(BYTE *)(buf+off+i));
 			}
-			printf("\n");
+			//printf("\n");
 		}
 		off += complex;
 	}	break;
 
 	case 0xF00D:
-		printf("msofbtClientTextbox\n");
+		//printf("msofbtClientTextbox\n");
 		dumpRec("msofbtClientTextbox", &head, head.len, buf+off);
 		break;
 
 	case 0xF010:
-		printf("msofbtClientAnchor: ");
+		//printf("msofbtClientAnchor: ");
 		dumpRec("msofbtClientAnchor", &head, head.len, buf+off);
 		// https://code.google.com/p/excellibrary/source/browse/trunk/src/ExcelLibrary/Office/Excel/EscherRecords/MsofbtClientAnchor.cs?spec=svn18&r=18
 		struct {
@@ -2013,18 +2017,18 @@ static struct drawHeader drawProc(uint8_t *buf, uint32_t maxLen, uint32_t *off_p
 			uint16_t	DY2;
 		} foo;
 		memcpy(&foo, buf+off, 18);
-		printf(" Flag=0x%2.2x Col1=0x%2.2x DX1=0x%2.2x Row1=0x%2.2x DY1=0x%2.2x Col2=0x%2.2x DX2=0x%2.2x Row2=0x%2.2x DY2=0x%2.2x \n",
-			foo.Flag, foo.Col1, foo.DX1, foo.Row1, foo.DY1, foo.Col2, foo.DX2, foo.Row2, foo.DY2);
+		//printf(" Flag=0x%2.2x Col1=0x%2.2x DX1=0x%2.2x Row1=0x%2.2x DY1=0x%2.2x Col2=0x%2.2x DX2=0x%2.2x Row2=0x%2.2x DY2=0x%2.2x \n",
+			//foo.Flag, foo.Col1, foo.DX1, foo.Row1, foo.DY1, foo.Col2, foo.DX2, foo.Row2, foo.DY2);
 		off += head.len;
 		break;
 	case 0xF011:
-		printf("msofbtClientData\n");
+		//printf("msofbtClientData\n");
 		dumpRec("msofbtClientData", &head, head.len, buf+off);
 		off += head.len;
 		break;
 
 	case 0xF01E:
-	{	printf("OfficeArtBlipPNG\n");
+	{	//printf("OfficeArtBlipPNG\n");
 		dumpRec("OfficeArtBlipPNG", &head, head.len, buf+off);
 		struct {
 			uint8_t		rgbUid1[16];
@@ -2033,23 +2037,23 @@ static struct drawHeader drawProc(uint8_t *buf, uint32_t maxLen, uint32_t *off_p
 		memcpy(&foo, buf+off, sizeof(foo));
 		
 		//off += sizeof(foo);
-		printf("%.*s", level*3, spaces);
-		printf(" rgbUid1: ");
+		//printf("%.*s", level*3, spaces);
+		//printf(" rgbUid1: ");
 		for(int i=0; i<16; ++i) {
-			printf(" %2.2x", foo.rgbUid1[i]);
+		//	printf(" %2.2x", foo.rgbUid1[i]);
 		}
-		printf("\n");
+		//printf("\n");
 		off += head.len;
 	}	break;
 
 	case 0xF11E:
-		printf("OfficeArtSplitMenuColorContainer: Array of colors\n");
+		//printf("OfficeArtSplitMenuColorContainer: Array of colors\n");
 		dumpRec("OfficeArtSplitMenuColorContainer", &head, head.len, buf+off);
 		off += head.len;
 		break;
 
 	case 0xF122:
-	{	printf("OfficeArtTertiaryFOPT\n");
+	{	//printf("OfficeArtTertiaryFOPT\n");
 		struct {
 			//uint16_t blip : 1;
 			//uint16_t complex : 1;
@@ -2058,21 +2062,21 @@ static struct drawHeader drawProc(uint8_t *buf, uint32_t maxLen, uint32_t *off_p
 			uint16_t op2;
 		} foo;
 		int count = head.len/6;
-		printf("OfficeArtFOPT count=%d\n", count);
+		//printf("OfficeArtFOPT count=%d\n", count);
 		dumpRec("OfficeArtTertiaryFOPT", &head, head.len, buf+off);
 
 		// OfficeArtFOPTE + complex
 		for(int i=0; i<head.instance; ++i) {
 			memcpy(&foo, buf+off, 6);
 			off += 6;
-			printf("%.*s", level*3, spaces);
-			printf(" opid=0x%4.4X(%.5d) op1=%4.4X op1=%4.4X\n", foo.opid, foo.opid, foo.op1, foo.op2); // blip=%d complex=%d , foo.blip, foo.complex
+			//printf("%.*s", level*3, spaces);
+			//printf(" opid=0x%4.4X(%.5d) op1=%4.4X op1=%4.4X\n", foo.opid, foo.opid, foo.op1, foo.op2); // blip=%d complex=%d , foo.blip, foo.complex
 		}
 		//off += head.len;
 	}	break;
 
 	default:
-		printf("WTF ?!?!?!\n");
+		//printf("WTF ?!?!?!\n");
 		//assert(!"Not Possible");
 		off += head.len;
 		break;

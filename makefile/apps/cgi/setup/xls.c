@@ -6,7 +6,7 @@
 
 int xls_data(char *outbuf, char *errbuf, cgi_form_entry_t *entry)
 {
-    char *xls_file = NULL;
+    char *xls_file = "t.xls";
     xls_t *xls     = NULL;
     int col, row;
     char *str;
@@ -22,9 +22,19 @@ int xls_data(char *outbuf, char *errbuf, cgi_form_entry_t *entry)
         return -1;
     }
 
-    for (row = 3; row < xls->get_row_cnt(xls); row++) {
+    if (xls->open_sheet(xls, 3)) {
+        ALERT("xls文档解析失败!");
+        return -1;
+    }
+
+    if (xls->get_row_cnt(xls) < 1 || xls->get_col_cnt(xls) < 1) {
+        ALERT("xls文档为空!");
+        return -1;
+    }
+
+    for (row = 3; row <= xls->get_row_cnt(xls); row++) {
         printf("<tr>");
-        for (col = 0; col < 15; col++) {
+        for (col = 0; col < xls->get_col_cnt(xls); col++) {
             printf("<td>");
             str = xls->read(xls, row, col);
             if (str) {
@@ -32,10 +42,10 @@ int xls_data(char *outbuf, char *errbuf, cgi_form_entry_t *entry)
             } else {
                 printf(" ");
             }
-            printf("<\td>");
+            printf("</td>");
 
         }
-        printf("<\tr>");
+        printf("</tr>");
     }
 
     xls->destroy(xls);
