@@ -3,11 +3,14 @@ SHELL=/bin/bash
 
 # directory
 DIRS=libxls
+CURR_DIR=$(shell pwd)
 
 # target
 all: ${DIRS}
 	@echo "cd ${DIRS}"
 	-cd ${DIRS} && make
+	-ln -sf ${CURR_DIR}/libxls/src/.libs/libxlsreader.so.1.4.0 ../../libs/libxlsreader.so
+	-ln -sf ${CURR_DIR}/libxls/include/libxls ../../incs/
 
 # target
 install clean cleanall rebuild: $(DIRS)
