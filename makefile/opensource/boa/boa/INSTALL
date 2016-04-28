@@ -1,0 +1,29 @@
+编译问题
+hyx@debian-hyx:~/BOA/boa-0.94.13/src$ make
+yacc  -d boa_grammar.y
+make: yacc：命令未找到
+make: *** [y.tab.c] 错误 127
+产生原因：Debian里没有安装yacc程序
+解决办法：网上有说apt-get install bison或者下载源码编译安装，我的方法是下载byacc最新版本byacc-1.9.tar.gz，编译生成yacc，将yacc拷贝到 /usr/local/bin/下。
+
+hyx@debian-hyx:~/BOA/boa-0.94.13/src$ make
+lex  boa_lexer.l
+make: lex：命令未找到
+make: *** [lex.yy.c] 错误 127
+产生原因：Debian里没有安装lex程序
+解决办法：网上有说apt-get install flex或者下载源码编译安装，我的方法是下载flex最新版本flex-2.5.37.tar.gz，编译生成flex，然后改名为lex，将lex拷贝到 /usr/local/bin/下。
+
+hyx@debian-hyx:~/BOA/boa-0.94.13/src$ make
+gcc  -g -O2 -pipe -Wall -I.   -c -o util.o util.c
+util.c:100:1: error: pasting "t" and "->" does not give a valid preprocessing token
+make: *** [util.o] 错误 1
+产生原因：Debian里没有暗转lex程序
+解决办法：编辑src下的compat.h文件，将126行的
+#define TIMEZONE_OFFSET(foo) foo##->tm_gmtoff
+改为
+#define TIMEZONE_OFFSET(foo) foo->tm_gmtoff
+
+然后make就可成功编译出boa程序了，不过编译有警告。
+hyx@debian-hyx:~/BOA/boa-0.94.13/src$ make
+
+apt-get install bison flex

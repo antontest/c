@@ -5,12 +5,12 @@
 #include <cgi/cgi.h>
 #include <xls/xls.h>
 
-#define XLS_FILE "~/web/html/xls/t.xls"
+#define XLS_FILE "/home/anton/web/html/xls/t.xls"
 int xls_file(char *outbuf, char *errbuf, cgi_form_entry_t *entry)
 {
     if (access(XLS_FILE, R_OK)) {
         ALERT("Execl文档不存在，请先上传!");
-        HTML_GOTO("setup.cgi?next_file=xls_upload.html");
+        HTML_GOTO("setup.cgi?next_file=xls_upload.htm");
         return -1;
     }
 
