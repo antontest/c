@@ -6,6 +6,7 @@ DIRS=libxls
 # DIRS+=xlslib
 DIRS+=libxl
 DIRS+=boa
+DIRS+=lighttpd
 
 # target
 all install clean cleanall rebuild: $(DIRS)
