@@ -1,0 +1,6 @@
+#! /bin/bash
+# Name : rc_lighttpd
+# Func : 
+# Time : 2016-04-29 20:19:39
+
+sudo $HOME/www/lighttpd -c $HOME/www/lighttpd.conf -m $HOME/www/modules

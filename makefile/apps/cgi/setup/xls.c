@@ -14,14 +14,12 @@ int xls_file(char *outbuf, char *errbuf, cgi_form_entry_t *entry)
         return -1;
     }
 
-    HTML_GOTO("setup.cgi?next_file=xls.html");
-
     return 0;
 }
 
 int xls_data(char *outbuf, char *errbuf, cgi_form_entry_t *entry)
 {
-    char *xls_file = "t.xls";
+    char *xls_file = "xls/t.xls";
     xls_t *xls     = NULL;
     int col, row;
     char *str;

@@ -683,7 +683,7 @@ METHOD(cgi_t, write_to_html_, int, private_cgi_t *this, cgi_func_tab_t *func_tab
         return -1;
 
     if (!(fp = fopen(cgi_next_file, "rb+"))) {
-        HTML_GOTO("not_found.htm");
+        HTML_GOTO("not_found.html");
         return -1;
     }
 
@@ -703,7 +703,7 @@ METHOD(cgi_t, write_to_html_, int, private_cgi_t *this, cgi_func_tab_t *func_tab
         name = value_start_pos + 1;
         *value_end_pos='\0';
         for (pfunc_tab = func_tab; pfunc_tab != NULL && pfunc_tab->name != NULL; pfunc_tab++) {
-            if(!strcasestr(name, pfunc_tab->name)) continue;
+            if(strcmp(name, pfunc_tab->name)) continue;
             if (!pfunc_tab->get_func_cb) continue;
             ret = pfunc_tab->get_func_cb(cgi_output_buf, cgi_errmsg_buf, &cgi_form_entry);
             type = pfunc_tab->type;

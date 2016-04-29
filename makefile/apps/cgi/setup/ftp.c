@@ -88,7 +88,6 @@ int get_ftp_file_info(char *outbuf, char *errmsg, cgi_form_entry_t *form_entry)
     DIR *dir = NULL;
     struct dirent *entry = NULL;
     char path[512] = DOWNLOAD_PATH;
-    int len = 0;
     int path_len = 0;
 
     if (!form_entry) return 0;
@@ -104,10 +103,10 @@ int get_ftp_file_info(char *outbuf, char *errmsg, cgi_form_entry_t *form_entry)
         if (!strncmp(entry->d_name, ".", 1))
             continue;
         if (entry->d_type == DT_DIR || entry->d_type == DT_LNK) {
-            len += sprintf(outbuf + len, "\t\t\t<a href=\"%s/%s\" class=\"dir\">%s/</a> 0<br>", form_entry->next_path ? form_entry->next_path : "downloads", entry->d_name, entry->d_name);
+            printf("\t\t\t<a href=\"%s/%s\" class=\"dir\">%s/</a> 0<br>", form_entry->next_path ? form_entry->next_path : "downloads", entry->d_name, entry->d_name);
         } else if (entry->d_type == DT_REG) {
             snprintf(path + path_len, sizeof(path) - path_len, "/%s", entry->d_name);
-            len += sprintf(outbuf + len, "\t\t\t<a href=\"%s/%s\">%s</a> %ld<br>", form_entry->next_path ? form_entry->next_path : "downloads", entry->d_name, entry->d_name, file_size(path));
+            printf("\t\t\t<a href=\"%s/%s\">%s</a> %ld<br>", form_entry->next_path ? form_entry->next_path : "downloads", entry->d_name, entry->d_name, file_size(path));
         }
     }
     closedir(dir);

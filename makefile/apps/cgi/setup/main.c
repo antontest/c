@@ -42,6 +42,7 @@ int main(int agrc, char *agrv[])
     cgi->parse_form_input(cgi, data);
     cgi->write_to_html(cgi, data);
     cgi->destroy(cgi);
+    return 0;
 
     return rt;
 }

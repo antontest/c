@@ -10,8 +10,8 @@ yacc=$(shell type yacc)
 lex=$(shell type lex)
 
 # install 
-install_path=$(USR_TOOLS_PATH)/web
-target_path=$(shell pwd)
+install_path=$(HOME)/www
+target_path=$(shell pwd)/${DIRS}
 
 .PHONY: all install clean cleanall rebuild $(DIRS)
 # target
@@ -28,5 +28,8 @@ rebuild: clean all
 	@echo -e "\e[1;35m opensource: make \e[1;36m$(MAKECMDGOALS) $@\e[1;0m"
 install:
 	-install -p -D -m 0555 ${target_path}/src/lighttpd $(install_path)/lighttpd
-	#-install -p -D -m 0444 ${target_path}/conf/boa.conf $(install_path)/boa.conf
+	-install -p -D -m 0444 ${target_path}/doc/lighttpd.conf $(install_path)/lighttpd.conf
+	-install -p -D -m 0444 ${target_path}/doc/modules.conf $(install_path)/modules.conf
+	-install -d ${target_path}/doc/config/conf.d $(install_path)/conf.d && install -p -D -m 0666 ${target_path}/doc/config/conf.d/* $(install_path)/conf.d/
+	-install -d ${target_path}/src/.libs $(install_path)/modules && install -p -D -m 0555 ${target_path}/src/.libs/* $(install_path)/modules/
 	
