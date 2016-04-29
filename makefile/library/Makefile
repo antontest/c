@@ -13,6 +13,7 @@ DIRS+=socket
 DIRS+=timer 
 DIRS+=url
 DIRS+=xls
+DIRS+=sql3
 
 # target
 all install uninstall clean cleanall rebuild: $(DIRS)
