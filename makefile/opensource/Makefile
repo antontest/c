@@ -8,6 +8,7 @@ DIRS+=libxl
 DIRS+=boa
 DIRS+=lighttpd
 DIRS+=mini_httpd
+DIRS+=libsqlite3
 
 # target
 all install clean cleanall rebuild: $(DIRS)
