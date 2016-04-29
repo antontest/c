@@ -387,6 +387,7 @@ static int parse_form_comm_input(private_cgi_t *this)
     this->form_data.this_file_name = (char *)malloc(name_end_pos - cgi_this_file + 1);
     if (!this->form_data.this_file_name) return -1;
     memcpy(this->form_data.this_file_name, cgi_this_file, name_end_pos - cgi_this_file);
+    this->form_data.this_file_name[name_end_pos - cgi_this_file] = '\0';
 
     return 0;
 }

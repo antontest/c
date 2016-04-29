@@ -69,6 +69,16 @@ METHOD(sqlite_t, get_data_, int, private_sqlite_t *this, char *sql, sql_cb_t cal
     return 0;
 }
 
+METHOD(sqlite_t, get_table_, int, private_sqlite_t *this, char *sql, int *row, int *col, char **result)
+{
+    int ret = 0;
+    if (!sql) return 0;
+
+    ret = sqlite3_get_table(sqlite_db, sql, &result, row, col, &sqlite_err);
+    if (ret) print_err_msg();
+    return 0;
+}
+
 METHOD(sqlite_t, close_, int, private_sqlite_t *this)
 {
     if (sqlite_db) return sqlite3_close(sqlite_db);
@@ -77,8 +87,8 @@ METHOD(sqlite_t, close_, int, private_sqlite_t *this)
 
 METHOD(sqlite_t, destroy_, void, private_sqlite_t *this)
 {
-    _close_(this);
     if (sqlite_err) sqlite3_free(sqlite_err);
+    _close_(this);
 
     free(this);
 }
@@ -92,11 +102,12 @@ sqlite_t *sqlite_create()
 
     INIT(this, 
         .public = {
-            .open     = _open_,
-            .exec     = _exec_,
-            .get_data = _get_data_,
-            .close    = _close_,
-            .destroy  = _destroy_,
+            .open      = _open_,
+            .exec      = _exec_,
+            .get_data  = _get_data_,
+            .get_table = _get_table_,
+            .close     = _close_,
+            .destroy   = _destroy_,
         },
         .status = SQLITE_CLOSED,
     );
