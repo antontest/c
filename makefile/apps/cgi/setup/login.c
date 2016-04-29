@@ -23,7 +23,7 @@ int set_username(char *input, char *errmsg)
 {
     if (strcmp(input, "admin")) {
         ALERT("Username Error!");
-        HTML_GOTO("index.htm");
+        HTML_GOTO("index.html");
         return -1;
     }
     return 0;
@@ -31,6 +31,7 @@ int set_username(char *input, char *errmsg)
 
 int get_username(char *input, char *errmsg)
 {
+    ALERT("%s", input);
     return 0;
 }
 
@@ -38,7 +39,7 @@ int set_password(char *input, char *errmsg)
 {
     if (strcmp(input, "admin")) {
         ALERT("Password Error!");
-        HTML_GOTO("index.htm");
+        HTML_GOTO("index.html");
         return -1;
     }
     return 0;

@@ -1,5 +1,6 @@
 #define _GNU_SOURCE
 #include <cgi.h>
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -192,10 +193,8 @@ METHOD(cgi_t, get_form_data_, char *, private_cgi_t *this)
             if (!content_len) break;
             cgi_form_data = (char *)malloc(content_len + 1);
 
-            if (!cgi_form_data || content_len < 1) return "\n"; 
             if (fread(cgi_form_data, sizeof(char), content_len, stdin) == content_len) cgi_form_data[content_len] = '\0';
             else fprintf(stderr, "data read error\n");
-
             cgi_form_data_len = content_len + 1;
             break;
         default:
@@ -550,9 +549,12 @@ static int parse_from_multipart_input(private_cgi_t *this)
         /**
          * goto file start position
          */
-        while (strncmp(pend, "\r\n", 2)) pend++;
-        pend += 2;
-        while (!strncmp(pend, "\r\n", 2)) pend += 2;
+        if (strstr(pend, "Content-Type")) {
+            pend += strlen("Content-Type");
+        } else {
+        }
+        while (strncmp(pend, "\r\n\r\n", 4)) pend++;
+        pend += 4;
 
         /**
          * save name and value
@@ -564,23 +566,13 @@ static int parse_from_multipart_input(private_cgi_t *this)
          * form data value
          */
         value_start = pend;
-        cgi_data_left_len = cgi_form_data + cgi_form_data_len - pend; 
-        while (cgi_data_left_len-- > 0) {
-            if (*pend == '\r') {
-                if (!strncmp(pend + 2, cgi_sign_code, cgi_sign_code_len)) {
-                    break;
-                } else {
-                    cgi_data_left_len--;
-                }
-            }
-            pend++;
-        }
-        *pend = '\0';
+        cgi_data_left_len = cgi_form_data + cgi_form_data_len - pend - cgi_sign_code_len - 6 - 1; 
+        *(pend + cgi_data_left_len) = '\0';
         value_end = pend;
         pstart = pend = pend + 2 + cgi_sign_code_len;
 
-        if (cgi_file_size < 1 && file_flag) {
-            cgi_file_size = value_end - value_start;
+        if (file_flag) {
+            cgi_file_size = cgi_data_left_len;
         }
         file_flag = 0;
     }
@@ -622,6 +614,18 @@ METHOD(cgi_t, parse_form_input_, int, private_cgi_t *this, cgi_func_tab_t *func_
              */
             else if (!strncasecmp(cgi_form_info.content_type, "multipart/form-data", sizeof("multipart/form-data") - 1)) {
                 parse_from_multipart_input(this);
+                cgi_func_tab_t *pfunc = func_tab;
+                while (pfunc && pfunc->name != NULL && pfunc->type == KEY_IS_VAR) {
+                    if (!strcmp(pfunc->name, "filename")) {
+                        if (pfunc->get_func_cb) {
+                            char *upload_data = find_val(this, "filename");
+                            if (upload_data && *upload_data != '\0' && cgi_form_entry.file_name && cgi_form_entry.file_size > 0)
+                                pfunc->get_func_cb(upload_data, cgi_errmsg_buf, &cgi_form_entry);
+                            break;
+                        }
+                    }
+                    pfunc++;
+                }
             } else {
                 return -1;
             }
@@ -785,6 +789,7 @@ METHOD(cgi_t, error_print_, void, private_cgi_t *this, char *msg)
 cgi_t *cgi_create()
 {
     private_cgi_t *this;
+    char *p = NULL;
 
     INIT(this,
         .public = {

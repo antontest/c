@@ -20,11 +20,7 @@ static int file_upload(char *input, char *errmsg, cgi_form_entry_t *entry)
     char file_path[128] = {0};
     int writed_size = 0;
 
-    if (!entry->file_name) return -1;
-    if (entry->file_size < 1) return 0;
-
-    ALERT("1 todo: %s", entry->todo);
-    if (!strcmp(entry->todo, "upload_xls")) {
+    if (!strcmp(entry->form_name, "upload_xls")) {
 #define XLS_FILE_DIR "/home/anton/web/html/xls"
 #define XLS_FILE_NAME "t.xls"
         if (access(XLS_FILE_DIR, W_OK)) {
@@ -34,16 +30,18 @@ static int file_upload(char *input, char *errmsg, cgi_form_entry_t *entry)
             }
         }
         snprintf(file_path, sizeof(file_path), "%s/%s", XLS_FILE_DIR, XLS_FILE_NAME);
-        ALERT("todo: %s", entry->todo);
     } else {
         snprintf(file_path, sizeof(file_path), "%s/%s", FILE_SAVE_DIR, entry->file_name);
     }
     if ((fp = fopen(file_path, "w")) == NULL) return -1;
-    //writed_size = fwrite(input, sizeof(char), entry->file_size, fp);
+    writed_size = fwrite(input, sizeof(char), entry->file_size, fp);
     fclose(fp);
     if (writed_size == entry->file_size) {
         ALERT("upload %s succ!", entry->file_name);
-        HTML_GOTO("setup.cgi?next_file=xls.htm");
+
+        if (!strcmp(entry->form_name, "upload_xls")) {
+            HTML_GOTO("setup.cgi?next_file=xls.html");
+        }
     } else {
         ALERT("%s upload failed!", entry->file_name);
     }
@@ -88,8 +86,7 @@ over:
 int main(void)  
 {  
     cgi_func_tab_t func_tab[] = {
-        {"upload",   KEY_IS_FILE, NULL, NULL},
-        {"filename", KEY_IS_VAR,  NULL, (void *)file_upload},
+        {"filename", KEY_IS_VAR,  (void *)file_upload, (void *)file_upload},
         {"todo",     KEY_IS_VAR,  NULL, (void *)todo},
         {"xls_upload",   KEY_IS_FILE, NULL, NULL},
         {"filename", KEY_IS_VAR,  NULL, (void *)file_upload},

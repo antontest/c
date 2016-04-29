@@ -10,7 +10,7 @@ int xls_file(char *outbuf, char *errbuf, cgi_form_entry_t *entry)
 {
     if (access(XLS_FILE, R_OK)) {
         ALERT("Execl文档不存在，请先上传!");
-        HTML_GOTO("setup.cgi?next_file=xls_upload.htm");
+        HTML_GOTO("setup.cgi?next_file=xls_upload.html");
         return -1;
     }
 
