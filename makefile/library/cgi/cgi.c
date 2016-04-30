@@ -49,6 +49,14 @@ struct private_cgi_t {
      * @brief err_msg buffer 
      */
     char *err_msg;
+
+    /**
+     * bundary for multipart form
+     */
+    char boundary[512];
+    int boundary_len; 
+    /*first boundary len: 27 '-' + numers + \r\n*/
+    /*last boundary len: \r\n + 29 '-' + numers + 2 '-' + \r\n*/
 };
 
 typedef struct cgi_data_t cgi_data_t;
@@ -136,8 +144,11 @@ void cgi_header_content_length(int len)
 /**
  * @brief read_cgi_form_info 
  */
-static int read_cgi_form_info()
+static int read_cgi_form_info(private_cgi_t *this)
 {
+    char *boundary = NULL;
+    char *multipart = NULL;
+
     cgi_get_env("SERVER_SOFTWARE", &cgi_form_info.server_software);
     cgi_get_env("SERVER_NAME", &cgi_form_info.server_name);
     cgi_get_env("SERVER_PROTOCOL", &cgi_form_info.server_protocol);
@@ -155,6 +166,17 @@ static int read_cgi_form_info()
     cgi_get_env("AUTH_TYPE", &cgi_form_info.auth_type);
     cgi_get_env("CONTENT_TYPE", &cgi_form_info.content_type);
     cgi_get_env("CONTENT_LENGTH", &cgi_form_info.content_length);
+    
+    multipart = strstr(cgi_form_info.content_type, "multipart/form-data");
+    if (multipart) {
+        multipart += strlen("multipart/form-data");
+        boundary = strstr(multipart, "boundary=");
+        if (boundary) {
+            boundary += strlen("boundary=");
+            snprintf(this->boundary, sizeof(this->boundary), "%s", boundary);
+            this->boundary_len = strlen(boundary) + 2 + 2;
+        }
+    }
 
     return 0;
 }
@@ -461,122 +483,116 @@ static int parse_from_plain_text_input(private_cgi_t *this)
 
 static int parse_from_multipart_input(private_cgi_t *this)
 {
-    char *pstart = NULL, *pend = NULL;
-    char *value_start = NULL, *value_end = NULL;
-    char end_char = 0;
-    int file_flag = 0;
-    int cgi_data_left_len = cgi_form_data_len;
-    cgi_data_t *cgi_data = NULL;
+    char *pos = cgi_form_data;
+    char *name = NULL, *value = NULL;
+    char *filename = NULL, *file_start_pos = NULL;
+    cgi_data_t *data;
 
-    /**
-     * get upload file sign code
-     */
-    pend = pstart = cgi_form_data;
-    while (strncmp(pend, "\r\n", 2) && *pend != '\0') pend++;
-    cgi_sign_code_len = pend - pstart;
-    cgi_sign_code = (char *)malloc(cgi_sign_code_len + 1);
-    if (!cgi_sign_code) return -1;
-    memcpy(cgi_sign_code, pstart, cgi_sign_code_len);
-    cgi_sign_code[cgi_sign_code_len] = '\0';
-    
-    while (*pend != '\0') {
+    pos += this->boundary_len;
+    while (*pos != '\0') {
         /**
-         * cgi formname
+         * parse name
          */
-        pstart = strstr(pend, "name");
-        if (!pstart) break;
-        while (*pstart != '\r' && *pstart != '=') pstart++;
-        pstart++;
-        while (*pstart != '\r' && *pstart == '\"') pstart++;
-        pend = pstart + 1;
-
-        /**
-         * cgi formname value
-         */
-        while (*pend != '\"' && *pend != '\r') pend++;
-        *pend = '\0';
-
-        /**
-         * check whether has filename
-         */
-        while (*pend != ';' && *pend != '\r') pend++;
-        end_char = *pend;
-        *pend = '\0';
-
-        /**
-         * parse upload file content
-         */
-        if (end_char == ';') {
-            /**
-             * cgi form name
-             */
-            *pend++ = '\0';
-            if (!cgi_form_name) cgi_form_name = strdup(pstart);
-
-            /**
-             * upload filename
-             */
-            value_start = pstart = strstr(pend, "filename");
-            if (!pstart) break;
-            while (*pstart != '\r' && *pstart != '=') pstart++;
-            *pstart = '\0';
-            pstart++;
-            while (*pstart != '\r' && *pstart == '\"') pstart++;
-            pend = pstart + 1;
-
-            /**
-             * upload filename value
-             */
-            while (*pend != '\"') pend++;
-            value_end = pend;
-            *pend = '\0';
-            while (*pend != '\r') pend++;
-
-            /**
-             * save filename value
-             */
-            cgi_file_name = strdup(pstart);
-            pstart = value_start;
-
-            /**
-             * goto file content start position
-             */
-            while (strncmp(pend, "\r\n", 2)) pend++;
-            pend += 2;
-
-            file_flag = 1;
-        }
-
-        /**
-         * goto file start position
-         */
-        if (strstr(pend, "Content-Type")) {
-            pend += strlen("Content-Type");
+        pos = strstr(pos, "name");
+        if (pos) {
+            name = pos = pos + strlen("name=\"");
         } else {
+            break;
         }
-        while (strncmp(pend, "\r\n\r\n", 4)) pend++;
-        pend += 4;
+        while (*pos != '\"') {
+            pos++;
+        }
+        *pos++ = '\0';
 
         /**
-         * save name and value
+         * parse value
          */
-        cgi_data = cgi_data_create(pstart, pend);
-        cgi_data_list->insert_last(cgi_data_list, cgi_data);
+        filename = strstr(pos, "filename");
+        if (filename) {
+            /**
+             * save form name
+             */
+            cgi_form_name = strdup(name);
+
+            /**
+             * save filename
+             */
+            name = filename;
+            pos = filename += strlen("filename=\"");
+            *(name + strlen("filename")) = '\0';
+            while (*pos != '\"') {
+                pos++;
+            }
+            *pos = '\0';
+            pos += 2;
+
+            /**
+             * insert name and value into list
+             */
+            /*
+            data = cgi_data_create(name, name);
+            cgi_data_list->insert_last(cgi_data_list, data);
+            */
+            if (!cgi_file_name) {
+                cgi_file_name = strdup(filename);
+            }
+
+            pos = strstr(pos, "Content-Type");
+            if (!pos) {
+                break;
+            }
+        }
+
+        pos = strstr(pos, "\r\n\r\n");
+        if (pos) {
+            value = pos + 4;
+            pos = value;
+        } else {
+            break;
+        }
+        
+        if (filename) {
+
+            file_start_pos = pos;
+            while ((pos = strstr(pos, "\r\n"))) {
+                if (!strncmp(pos + 4, this->boundary, this->boundary_len - 4)) {
+                    cgi_file_size = pos - file_start_pos;
+                    break;
+                }
+                pos += 2;
+            }
+            filename = NULL;
+        } else {
+            pos = strstr(pos, "\r\n");   
+        }
 
         /**
-         * form data value
+         * check value
          */
-        value_start = pend;
-        cgi_data_left_len = cgi_form_data + cgi_form_data_len - pend - cgi_sign_code_len - 6 - 1; 
-        *(pend + cgi_data_left_len) = '\0';
-        value_end = pend;
-        pstart = pend = pend + 2 + cgi_sign_code_len;
-
-        if (file_flag) {
-            cgi_file_size = cgi_data_left_len;
+        if (pos) {
+            *pos = '\0';
+            pos += 2;
+        } else {
+            break;
         }
-        file_flag = 0;
+
+        /**
+         * inser name and value into list
+         */
+        /*
+        if (strcmp(name, "filename")) {
+            ALERT("name: %s, value: %s", name, value);
+        }
+        */
+        data = cgi_data_create(name, value);
+        cgi_data_list->insert_last(cgi_data_list, data);
+
+        /**
+         * next boundary
+         */
+        pos += this->boundary_len;
     }
+    ALERT("filename: %s, filesize: %d", cgi_file_name, cgi_file_size);
 
     return 0;
 }
@@ -613,20 +629,23 @@ METHOD(cgi_t, parse_form_input_, int, private_cgi_t *this, cgi_func_tab_t *func_
             /**
              * multipart type
              */
-            else if (!strncasecmp(cgi_form_info.content_type, "multipart/form-data", sizeof("multipart/form-data") - 1)) {
+            else if (!strncasecmp(cgi_form_info.content_type, "multipart/form-data", strlen("multipart/form-data"))) {
                 parse_from_multipart_input(this);
+
+                /*
                 cgi_func_tab_t *pfunc = func_tab;
                 while (pfunc && pfunc->name != NULL && pfunc->type == KEY_IS_VAR) {
                     if (!strcmp(pfunc->name, "filename")) {
                         if (pfunc->get_func_cb) {
                             char *upload_data = find_val(this, "filename");
-                            if (upload_data && *upload_data != '\0' && cgi_form_entry.file_name && cgi_form_entry.file_size > 0)
+                            if (upload_data && *upload_data != '\0' && cgi_file_name && cgi_file_size > 0)
                                 pfunc->get_func_cb(upload_data, cgi_errmsg_buf, &cgi_form_entry);
                             break;
                         }
                     }
                     pfunc++;
                 }
+                */
             } else {
                 return -1;
             }
@@ -826,6 +845,7 @@ cgi_t *cgi_create()
         .input     = (char *)malloc(DFT_CGI_INPUT_BUF_SIZE),
         .output    = (char *)malloc(DFT_CGI_OUTPUT_BUF_SIZE),
         .err_msg   = (char *)malloc(DFT_CGI_ERRMSG_BUF_SIZE),
+        .boundary  = {0},
     );
 
     if (!cgi_data_list || !cgi_input_buf || !cgi_output_buf || !cgi_errmsg_buf) {
@@ -833,7 +853,7 @@ cgi_t *cgi_create()
         return NULL;
     }
 
-    read_cgi_form_info();
+    read_cgi_form_info(this);
     _get_form_data_(this);
     return &this->public;
 }

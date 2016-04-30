@@ -86,6 +86,7 @@ over:
 int main(void)  
 {  
     cgi_func_tab_t func_tab[] = {
+        {"upload",   KEY_IS_FILE, NULL               , NULL},
         {"filename", KEY_IS_VAR,  (void *)file_upload, (void *)file_upload},
         {"todo",     KEY_IS_VAR,  NULL, (void *)todo},
         {"xls_upload",   KEY_IS_FILE, NULL, NULL},

@@ -63,6 +63,7 @@ struct cgi_form_info_t {
     char *auth_type;
     char *content_type;
     char *content_length;
+    char *multipart_content_type;
 } cgi_form_info;
 
 typedef struct cgi_form_entry_t cgi_form_entry_t;
