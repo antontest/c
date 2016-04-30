@@ -40,6 +40,11 @@ struct sqlite_t {
      * @brief destroy instance
      */
     void (*destroy) (sqlite_t *this);
+
+    /**
+     * @brief create table
+     */
+    int (*create_table) (sqlite_t *this, const char *table, const char *column);
 };
 
 /**

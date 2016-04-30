@@ -17,12 +17,19 @@ int xls_file(char *outbuf, char *errbuf, cgi_form_entry_t *entry)
     return 0;
 }
 
+enum XLS_COLUMN_NAME{
+    OPENING_DATE    = 7,
+    SETTLEMENT_DATE = 13,
+    SUBMITTAL_DATE  = 15,
+};
+
 int xls_data(char *outbuf, char *errbuf, cgi_form_entry_t *entry)
 {
     char *xls_file = "xls/t.xls";
     xls_t *xls     = NULL;
     int col, row;
     char *str;
+    int start_row = 3;
 
     xls = xls_create();
     if (!xls) {
@@ -45,23 +52,43 @@ int xls_data(char *outbuf, char *errbuf, cgi_form_entry_t *entry)
         return -1;
     }
 
-    for (row = 3; row < xls->get_row_cnt(xls); row++) {
-        printf("<tr>");
+    for (row = start_row; row < xls->get_row_cnt(xls); row++) {
+        printf("<tr>\n");
+        printf("<td><input type=\"checkbox\" name=\"checkbox%d\" value=\"checkbox\" /></td>\n", row);
         for (col = 0; col < xls->get_col_cnt(xls); col++) {
-            printf("<td>");
+            switch (col) {
+                case OPENING_DATE:
+                case SETTLEMENT_DATE:
+                case SUBMITTAL_DATE:
+                    printf("<td EditType=\"Date\">");
+                    break;
+                default:
+                    printf("<td EditType=\"TextBox\">");
+                    break;
+            }
+
             str = xls->read(xls, row, col);
             if (str) {
                 printf("%s", str);
             } else {
                 printf(" ");
             }
-            printf("</td>");
+            printf("</td>\n");
 
         }
-        printf("</tr>");
+        printf("</tr>\n");
     }
 
     xls->destroy(xls);
     
+    return 0;
+}
+
+int xls_change_data(char *outbuf, char *errbuf, cgi_form_entry_t *entry)
+{
+    char buf[100]  = {0};
+    snprintf(buf, sizeof(buf), "echo \"%s\" > /home/anton/cgi.log", outbuf);
+    if (system(buf)) {}
+    ALERT("%s", outbuf);
     return 0;
 }

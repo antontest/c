@@ -93,6 +93,19 @@ METHOD(sqlite_t, destroy_, void, private_sqlite_t *this)
     free(this);
 }
 
+METHOD(sqlite_t, create_table_, int, private_sqlite_t *this, const char *table, const char *column)
+{
+    char sql[1024] = {0};
+
+    if (!table || !column) {
+        return -1;
+    }
+
+    snprintf(sql, sizeof(sql), "create table %s (%s);", table, column);
+    return _exec_(this, sql);
+}
+
+
 /**
  * @brief create sqlite_t instance
  */
@@ -108,6 +121,8 @@ sqlite_t *sqlite_create()
             .get_table = _get_table_,
             .close     = _close_,
             .destroy   = _destroy_,
+
+            .create_table = _create_table_,
         },
         .status = SQLITE_CLOSED,
     );
