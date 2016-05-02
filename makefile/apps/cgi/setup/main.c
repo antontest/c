@@ -41,8 +41,8 @@ int main(int agrc, char *agrv[])
 
     cgi_header_content_type("text/html");
     cgi = cgi_create();
-    cgi->parse_form_input(cgi, data);
-    cgi->write_to_html(cgi, data);
+    cgi->parse_input(cgi, data);
+    cgi->handle_request(cgi, data);
     cgi->destroy(cgi);
     return 0;
 

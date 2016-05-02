@@ -111,50 +111,19 @@ struct cgi_func_tab_t {
 typedef struct cgi_t cgi_t;
 struct cgi_t {
     /**
-     * @brief request method 
-     */
-    request_method_t (*get_req_method) (cgi_t *this);
-
-    /**
      * @brief  find value by name
      */
     char* (*find_val) (cgi_t *this, char *name);
 
     /**
-     * @brief get data from brower  
-     * @return data of form
+     * @brief parser data 
      */
-    char* (*get_form_data) (cgi_t *this);
-
-    /**
-     * @brief file todo
-     */
-    char* (*get_file_todo) (cgi_t *this);
-
-    /**
-     * @brief this_file
-     */
-    char* (*get_this_file) (cgi_t *this);
-
-    /**
-     * @brief next_file  
-     */
-    char* (*get_next_file) (cgi_t *this);
+    int (*parse_input) (cgi_t *this, cgi_func_tab_t *data);
 
     /**
      * @brief parser data 
      */
-    int (*parse_form_input) (cgi_t *this, cgi_func_tab_t *data);
-
-    /**
-     * @brief parser data 
-     */
-    int (*write_to_html) (cgi_t *this, cgi_func_tab_t *func_tab);
-
-    /**
-     * @brief parser form data and action get_func_cb and set_func_cb
-     */
-    int (*parser_and_action) (cgi_t *this, cgi_func_tab_t *func_tab);
+    int (*handle_request) (cgi_t *this, cgi_func_tab_t *func_tab);
 
     /**
      * @brief print error information

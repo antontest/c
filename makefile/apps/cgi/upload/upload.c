@@ -34,6 +34,7 @@ static int file_upload(char *input, char *errmsg, cgi_form_entry_t *entry)
         snprintf(file_path, sizeof(file_path), "%s/%s", FILE_SAVE_DIR, entry->file_name);
     }
     if ((fp = fopen(file_path, "w")) == NULL) return -1;
+    ALERT("file_size: %d", entry->file_size);
     writed_size = fwrite(input, sizeof(char), entry->file_size, fp);
     fclose(fp);
     if (writed_size == entry->file_size) {
@@ -97,7 +98,7 @@ int main(void)
 
     CONTENT_TEXT;
     cgi_t *cgi = cgi_create();
-    cgi->parse_form_input(cgi, func_tab);
+    cgi->parse_input(cgi, func_tab);
     cgi->destroy(cgi);
 
     return 0;

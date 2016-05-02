@@ -9,6 +9,7 @@
 #include <fcntl.h>
 #include <utils/utils.h>
 #include <linked_list.h>
+#include <ctype.h>
 
 char *content_type_s[] = {
     "application/x-www-form-urlencoded",
@@ -70,8 +71,8 @@ cgi_data_t *cgi_data_create(char *name, char *value)
     cgi_data_t *this; 
 
     INIT(this, 
-        .name  = name,
-        .value = value,
+        .name     = name,
+        .value    = value,
     );
 
     return this;
@@ -95,6 +96,230 @@ cgi_data_t *cgi_data_create(char *name, char *value)
 #define cgi_file_size     this->form_data.file_size
 #define cgi_sign_code     this->form_data.sign_code
 #define cgi_sign_code_len this->form_data.sign_code_len
+
+typedef enum cgi_state_t cgi_state_t;
+enum cgi_state_t {
+    s_init = 0,
+    s_first_boundary_start,
+    s_first_boundary_end,
+    s_head_filed_start,
+    s_name_field_start,
+    s_name_field,
+    s_name,
+    s_name_end,
+    s_filename_start,
+    s_filename,
+    s_filename_end,
+    s_value_field_start,
+    s_value_field,
+    s_value_field_end,
+    s_content_type_start,
+    s_content_type,
+    s_content_type_end,
+    s_applicate_data_start,
+    s_applicate_data,
+    s_applicate_data_end,
+    s_data_boundary_start,
+    s_data_boundary,
+    s_data_boundary_end,
+    s_last_boundary,
+    s_uninit
+};
+
+int multipart_parse_execute(private_cgi_t *this)
+{
+    char *pos          = NULL;
+    char *name         = NULL;
+    char *value        = NULL;
+    char *filename     = NULL;
+    char *content_type = NULL;
+    int filesize       = -1;
+    cgi_data_t *data   = NULL;
+    cgi_state_t state  = s_init;
+
+    pos = cgi_form_data;
+    while (*pos != '\0') {
+        switch (state) {
+            case s_init:
+                if (*pos == '-') {
+                    state = s_first_boundary_start;
+                } else {
+                    break;
+                }
+            case s_first_boundary_start:
+                if (*pos == '\r') {
+                    state = s_first_boundary_end;
+                }
+                break;
+            case s_first_boundary_end:
+                if (*pos != '\n') {
+                    return pos - cgi_form_data;
+                }
+                state = s_name_field_start;
+                break;
+            case s_head_filed_start:
+                if (*pos == ';') {
+                    state = s_name_field_start;
+                }
+                break;
+            case s_name_field_start:
+                if (*pos == '=') {
+                    state = s_name_field;
+                }
+                break;
+            case s_name_field:
+                if (*pos != '\"') {
+                    return pos - cgi_form_data;
+                }
+                name = ++pos;
+                state = s_name;
+            case s_name:
+                if (*pos == '\"') {
+                    state = s_name_end;
+                    *pos = '\0';
+                }
+                break;
+            case s_name_end:
+                if (*pos == '\r') {
+                    state = s_value_field_start;
+                    *pos = '\0';
+                } else if (*pos == ';') {
+                    cgi_form_name = strdup(name);
+                    pos++;
+                    while (*pos == ' ') {
+                        pos++;
+                    }
+                    name = pos;
+                    state = s_filename_start;
+                }
+                break;
+            case s_filename_start:
+                if (*pos == '=') {
+                    *pos = '\0';
+                    state = s_filename;
+                }
+                break;
+            case s_filename:
+                if (*pos != '\"') {
+                    return pos - cgi_form_data;
+                }
+                if (*pos == ' ') {
+                    pos++;
+                }
+                filename = pos + 1;
+                state = s_filename_end;
+                break;
+            case s_filename_end:
+                if (*pos == '\"') {
+                    *pos++ = '\0';
+                    cgi_file_name = strdup(filename);
+                    state = s_content_type_start;
+                    filename = NULL;
+                }
+                break;
+            case s_content_type_start:
+                if (*pos == ':') {
+                    if (*pos == ' ') {
+                        pos++;
+                    }
+                    content_type = pos;
+                    state = s_content_type;
+                }
+                break;
+            case s_content_type:
+                if (*pos == '\r') {
+                    *pos = '\0';
+                    cgi_form_info.multipart_content_type = strdup(content_type);
+                    state = s_content_type_end;
+                    //ALERT("content_type: %s", content_type);
+                }else {
+                    break;
+                }
+            case s_content_type_end:
+                if (!cgi_form_info.multipart_content_type || 
+                    (cgi_form_info.multipart_content_type && 
+                    strstr(cgi_form_info.multipart_content_type, "text"))) {
+                    state = s_value_field_start;
+                } else {
+                    state = s_applicate_data_start;
+                }
+                break;
+            case s_applicate_data_start:
+                pos += 2;
+                if (*pos != '\n') {
+                    return pos - cgi_form_data;
+                }
+                state = s_applicate_data;
+                break;
+            case s_applicate_data:
+                value = pos;
+                cgi_file_size = cgi_form_data + cgi_form_data_len - pos - this->boundary_len - 4;
+                ALERT("filesize: %d, filename: %s", cgi_file_size, cgi_file_name);
+                ALERT("path_info: %s", cgi_form_info.path_info);
+                state = s_applicate_data_end;
+                *(pos + filesize + 1) = '\0';
+                break;
+            case s_applicate_data_end:
+                data = cgi_data_create(name, value);
+                cgi_data_list->insert_last(cgi_data_list, data);
+                state = s_uninit;
+                break;
+            case s_value_field_start:
+                pos += 2;
+                if (*pos != '\n') {
+                    return pos - cgi_form_data;
+                }
+                state = s_value_field;
+                break;
+            case s_value_field:
+                value = pos;
+                state = s_value_field_end;
+                break;
+            case s_value_field_end:
+                if (*pos == '\r') {
+                    state = s_data_boundary_start;
+                }
+                break;
+            case s_data_boundary_start:
+                if (*pos == '\n') {
+                    state = s_data_boundary;
+                }
+                break;
+            case s_data_boundary:
+                if (*pos == '-') {
+                    *(pos - 2) = '\0';
+                    
+                    data = cgi_data_create(name, value);
+                    cgi_data_list->insert_last(cgi_data_list, data);
+                    if (strcmp(name, "filename")) {
+                        //ALERT("name: %s, value: %s", name, value);
+                    } else {
+                        cgi_file_size = pos - 2 -value;
+                        ALERT("filesize: %d", cgi_file_size);
+                    }
+                    name = NULL;
+                    value = NULL;
+
+                    state = s_data_boundary_end;
+                } else {
+                    state = s_value_field_end;
+                }
+                break;
+            case s_data_boundary_end:
+                if (*pos == '\r') {
+                    state = s_head_filed_start;
+                }
+                break;
+            case s_uninit:
+            default:
+                break;
+
+        }
+        pos++;
+    }
+
+    return 0;
+}
 
 void html_alert(char *msg)
 {
@@ -144,7 +369,7 @@ void cgi_header_content_length(int len)
 /**
  * @brief read_cgi_form_info 
  */
-static int read_cgi_form_info(private_cgi_t *this)
+static int get_cgi_env_info(private_cgi_t *this)
 {
     char *boundary = NULL;
     char *multipart = NULL;
@@ -191,43 +416,6 @@ static void replace_plus_with_blank(char *s)
     }
 }
 
-METHOD(cgi_t, get_req_method_, request_method_t, private_cgi_t *this)
-{
-    if (!strcasecmp(cgi_form_info.request_method, "POST")) cgi_req_method = REQUEST_METHOD_POST;
-    else cgi_req_method = REQUEST_METHOD_GET;
-
-    return cgi_req_method;
-}
-
-METHOD(cgi_t, get_form_data_, char *, private_cgi_t *this)
-{
-    int content_len = 0;
-
-    switch (_get_req_method_(this)) {
-        case REQUEST_METHOD_GET:
-            if (cgi_form_info.query_string) {
-                cgi_form_data = strdup(cgi_form_info.query_string);
-                cgi_form_data_len = content_len = strlen(cgi_form_data);
-            }
-            break;
-        case REQUEST_METHOD_POST:
-            cgi_form_data_len = content_len = !cgi_form_info.content_length ? 0 : atoi(cgi_form_info.content_length);
-            if (!content_len) break;
-            cgi_form_data = (char *)malloc(content_len + 1);
-
-            if (fread(cgi_form_data, sizeof(char), content_len, stdin) == content_len) cgi_form_data[content_len] = '\0';
-            else fprintf(stderr, "data read error\n");
-            cgi_form_data_len = content_len + 1;
-            break;
-        default:
-            return "\n";
-            break;
-    }
-
-    replace_plus_with_blank(cgi_form_data);
-    return cgi_form_data;
-}
-
 static char *find_val(private_cgi_t *this, char *name)
 {
     int data_list_len = 0;
@@ -246,6 +434,42 @@ static char *find_val(private_cgi_t *this, char *name)
 METHOD(cgi_t, find_val_, char *, private_cgi_t *this, char *name)
 {
     return find_val(this, name);
+}
+
+METHOD(cgi_t, get_req_method_, request_method_t, private_cgi_t *this)
+{
+    if (!strcasecmp(cgi_form_info.request_method, "POST")) cgi_req_method = REQUEST_METHOD_POST;
+    else cgi_req_method = REQUEST_METHOD_GET;
+
+    return cgi_req_method;
+}
+
+METHOD(cgi_t, get_data_, char *, private_cgi_t *this)
+{
+    int content_len = 0;
+
+    switch (_get_req_method_(this)) {
+        case REQUEST_METHOD_GET:
+            if (cgi_form_info.query_string) {
+                cgi_form_data = strdup(cgi_form_info.query_string);
+                cgi_form_data_len = content_len = strlen(cgi_form_data);
+            }
+            break;
+        case REQUEST_METHOD_POST:
+            cgi_form_data_len = content_len = !cgi_form_info.content_length ? 0 : atoi(cgi_form_info.content_length);
+            if (!content_len) break;
+            cgi_form_data = (char *)malloc(content_len + 1);
+
+            if (fread(cgi_form_data, sizeof(char), content_len, stdin) == content_len) cgi_form_data[content_len] = '\0';
+            else fprintf(stderr, "data read error\n");
+            break;
+        default:
+            return "\n";
+            break;
+    }
+
+    replace_plus_with_blank(cgi_form_data);
+    return cgi_form_data;
 }
 
 /**
@@ -358,7 +582,7 @@ int parse_post_multipart_input_old(private_cgi_t *this)
     return 0;
 }
 
-static int parse_form_comm_input(private_cgi_t *this) 
+static int parse_comm_data(private_cgi_t *this) 
 {
     char *name_end_pos = NULL;
     char *value = NULL;
@@ -414,12 +638,37 @@ static int parse_form_comm_input(private_cgi_t *this)
     return 0;
 }
 
-static int parse_form_input_data(private_cgi_t *this, cgi_func_tab_t *func_tab)
+static int handle_parse_data(private_cgi_t *this, cgi_func_tab_t *func_tab)
 {
     char *value = NULL;
     cgi_func_tab_t *pfunc_tab  = func_tab;
+
     if (!func_tab) return 0;
-    if (parse_form_comm_input(this) < 0 && cgi_req_method == REQUEST_METHOD_POST) return -1;
+
+    if (!cgi_form_info.multipart_content_type || 
+        (cgi_form_info.multipart_content_type && 
+        !strstr(cgi_form_info.multipart_content_type, "text"))) {
+        cgi_func_tab_t *pfunc = func_tab;
+
+        char *file = find_val(this, "filename");
+        if (file) {
+            while (pfunc && pfunc->name) {
+                if (!strcmp(pfunc->name, "filename")) {
+                    if (pfunc->get_func_cb) {
+                        pfunc->get_func_cb(file, cgi_errmsg_buf, &cgi_form_entry);
+                        break;
+                    }
+                }
+                pfunc++;
+            }
+        }
+        
+        return 0;
+    }
+
+    if (parse_comm_data(this) < 0 && cgi_req_method == REQUEST_METHOD_POST) {
+        return -1;
+    }
 
     /**
      * find this file action function callback
@@ -427,6 +676,7 @@ static int parse_form_input_data(private_cgi_t *this, cgi_func_tab_t *func_tab)
     for (pfunc_tab = func_tab; pfunc_tab->name != NULL; pfunc_tab++) {
         if (pfunc_tab->type != KEY_IS_FILE) continue;
         if (strcmp(this->form_data.this_file_name, pfunc_tab->name)) continue;
+        pfunc_tab->get_func_cb(cgi_this_file, cgi_errmsg_buf, &cgi_form_entry);
         break;
     }
 
@@ -457,7 +707,7 @@ static int parse_form_input_data(private_cgi_t *this, cgi_func_tab_t *func_tab)
     return 0;
 }
 
-static int parse_from_plain_text_input(private_cgi_t *this)
+static int parse_plain_text(private_cgi_t *this)
 {
     char *pstart = NULL, *pend = NULL;
     cgi_data_t *cgi_data = NULL;
@@ -554,12 +804,15 @@ static int parse_from_multipart_input(private_cgi_t *this)
         if (filename) {
 
             file_start_pos = pos;
-            while ((pos = strstr(pos, "\r\n"))) {
+            //while ((pos = strstr(pos, "\r"))) {
+            while (*pos != '\0') {
+                if (*pos == '\r') {
                 if (!strncmp(pos + 4, this->boundary, this->boundary_len - 4)) {
                     cgi_file_size = pos - file_start_pos;
                     break;
                 }
-                pos += 2;
+                }
+                pos += 1;
             }
             filename = NULL;
         } else {
@@ -592,12 +845,12 @@ static int parse_from_multipart_input(private_cgi_t *this)
          */
         pos += this->boundary_len;
     }
-    ALERT("filename: %s, filesize: %d", cgi_file_name, cgi_file_size);
+    //ALERT("filename: %s, filesize: %d", cgi_file_name, cgi_file_size);
 
     return 0;
 }
 
-METHOD(cgi_t, parse_form_input_, int, private_cgi_t *this, cgi_func_tab_t *func_tab)
+METHOD(cgi_t, parse_input_, int, private_cgi_t *this, cgi_func_tab_t *func_tab)
 {
     if (!cgi_form_data || cgi_form_data_len < 1) return 0;
 
@@ -623,29 +876,15 @@ METHOD(cgi_t, parse_form_input_, int, private_cgi_t *this, cgi_func_tab_t *func_
              * normal plain text type
              */
             if (!strncasecmp(cgi_form_info.content_type, "application/x-www-form-urlencoded", sizeof("application/x-www-form-urlencoded") - 1)) {
-                parse_from_plain_text_input(this);
+                parse_plain_text(this);
             } 
 
             /**
              * multipart type
              */
             else if (!strncasecmp(cgi_form_info.content_type, "multipart/form-data", strlen("multipart/form-data"))) {
-                parse_from_multipart_input(this);
-
-                /*
-                cgi_func_tab_t *pfunc = func_tab;
-                while (pfunc && pfunc->name != NULL && pfunc->type == KEY_IS_VAR) {
-                    if (!strcmp(pfunc->name, "filename")) {
-                        if (pfunc->get_func_cb) {
-                            char *upload_data = find_val(this, "filename");
-                            if (upload_data && *upload_data != '\0' && cgi_file_name && cgi_file_size > 0)
-                                pfunc->get_func_cb(upload_data, cgi_errmsg_buf, &cgi_form_entry);
-                            break;
-                        }
-                    }
-                    pfunc++;
-                }
-                */
+                //parse_from_multipart_input(this);
+                multipart_parse_execute(this);
             } else {
                 return -1;
             }
@@ -655,40 +894,19 @@ METHOD(cgi_t, parse_form_input_, int, private_cgi_t *this, cgi_func_tab_t *func_
          * request method: get
          */
         case REQUEST_METHOD_GET:
-            parse_from_plain_text_input(this);
+            parse_plain_text(this);
             break;
         default:
             return -1;
             break;
     }
 
-    parse_form_input_data(this, func_tab);
+    handle_parse_data(this, func_tab);
 
     return 0;
 }
 
-METHOD(cgi_t, get_file_todo_, char *, private_cgi_t *this)
-{
-    if (cgi_form_data_len < 1)
-        _get_form_data_(this);
-    return cgi_file_todo;
-}
-
-METHOD(cgi_t, get_this_file_, char *, private_cgi_t *this)
-{
-    if (cgi_form_data_len < 1)
-        _get_form_data_(this);
-    return cgi_this_file;
-}
-
-METHOD(cgi_t, get_next_file_, char *, private_cgi_t *this)
-{
-    if (cgi_form_data_len < 1)
-        _get_form_data_(this);
-    return cgi_next_file;
-}
-
-METHOD(cgi_t, write_to_html_, int, private_cgi_t *this, cgi_func_tab_t *func_tab)
+METHOD(cgi_t, handle_request_, int, private_cgi_t *this, cgi_func_tab_t *func_tab)
 {
     int  ret       = 0;
     FILE *fp       = NULL;
@@ -748,13 +966,6 @@ METHOD(cgi_t, write_to_html_, int, private_cgi_t *this, cgi_func_tab_t *func_tab
     return 0;
 }
 
-METHOD(cgi_t, parser_and_action_, int, private_cgi_t *this, cgi_func_tab_t *func_tab)
-{
-    _parser_and_action_(this, func_tab);
-    _write_to_html_(this, func_tab);
-    return 0;
-}
-
 METHOD(cgi_t, alert_, void, private_cgi_t *this, const char *fmt, ...)
 {
     char msg[256] = {0};
@@ -784,6 +995,9 @@ METHOD(cgi_t, destroy_, void, private_cgi_t *this)
     if (cgi_output_buf) free(cgi_output_buf);
     if (cgi_errmsg_buf) free(cgi_errmsg_buf);
     if (cgi_data_list) cgi_data_list->destroy(cgi_data_list);
+    if (cgi_form_info.multipart_content_type) {
+        free(cgi_form_info.multipart_content_type);
+    }
     free_cgi_form_entry(&this->form_data);
 
     free(this);
@@ -813,18 +1027,12 @@ cgi_t *cgi_create()
 
     INIT(this,
         .public = {
-            .get_req_method    = _get_req_method_,
-            .get_form_data     = _get_form_data_,
-            .parse_form_input  = _parse_form_input_,
-            .write_to_html     = _write_to_html_,
-            .parser_and_action = _parser_and_action_,
-            .find_val          = _find_val_,
-            .get_file_todo     = _get_file_todo_,
-            .get_this_file     = _get_this_file_,
-            .get_next_file     = _get_next_file_,
-            .error_print       = _error_print_,
-            .alert             = _alert_,
-            .destroy           = _destroy_,
+            .parse_input    = _parse_input_,
+            .handle_request = _handle_request_,
+            .find_val       = _find_val_,
+            .error_print    = _error_print_,
+            .alert          = _alert_,
+            .destroy        = _destroy_,
         },
         .form_data = {
             .todo            = NULL,
@@ -853,7 +1061,7 @@ cgi_t *cgi_create()
         return NULL;
     }
 
-    read_cgi_form_info(this);
-    _get_form_data_(this);
+    get_cgi_env_info(this);
+    _get_data_(this);
     return &this->public;
 }
