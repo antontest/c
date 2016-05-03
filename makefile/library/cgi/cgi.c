@@ -1011,11 +1011,9 @@ METHOD(cgi_t, handle_request_, int, private_cgi_t *this, cgi_func_tab_t *func_ta
     key_type_t type           = KEY_IS_UNKOWN;
     cgi_func_tab_t *pfunc_tab = func_tab;
 
-    ALERT("handle_request");
     if (!cgi_next_file || strlen(cgi_next_file) < 1) 
         return -1;
 
-    ALERT("open file: %s", cgi_next_file);
     if (!(fp = fopen(cgi_next_file, "rb+"))) {
         HTML_GOTO("not_found.html");
         return -1;
