@@ -254,10 +254,10 @@ int multipart_parse_execute(private_cgi_t *this)
             case s_applicate_data:
                 value = pos;
                 cgi_file_size = cgi_form_data + cgi_form_data_len - pos - this->boundary_len - 4;
-                ALERT("filesize: %d, filename: %s", cgi_file_size, cgi_file_name);
-                ALERT("path_info: %s", cgi_form_info.path_info);
+                *(pos + filesize) = '\0';
+                //ALERT("filesize: %d, filename: %s", cgi_file_size, cgi_file_name);
+
                 state = s_applicate_data_end;
-                *(pos + filesize + 1) = '\0';
                 break;
             case s_applicate_data_end:
                 data = cgi_data_create(name, value);
@@ -295,7 +295,7 @@ int multipart_parse_execute(private_cgi_t *this)
                         //ALERT("name: %s, value: %s", name, value);
                     } else {
                         cgi_file_size = pos - 2 -value;
-                        ALERT("filesize: %d", cgi_file_size);
+                        //ALERT("filesize: %d", cgi_file_size);
                     }
                     name = NULL;
                     value = NULL;
@@ -653,7 +653,6 @@ static int handle_parse_data(private_cgi_t *this, cgi_func_tab_t *func_tab)
         !strstr(cgi_form_info.multipart_content_type, "text"))) {
         cgi_func_tab_t *pfunc = func_tab;
 
-        ALERT("text");
         char *file = find_val(this, "filename");
         if (file) {
             while (pfunc && pfunc->name) {
@@ -1013,7 +1012,7 @@ METHOD(cgi_t, handle_request_, int, private_cgi_t *this, cgi_func_tab_t *func_ta
 
     if (!cgi_next_file || strlen(cgi_next_file) < 1) 
         return -1;
-
+    
     if (!(fp = fopen(cgi_next_file, "rb+"))) {
         HTML_GOTO("not_found.html");
         return -1;

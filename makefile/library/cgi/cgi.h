@@ -21,8 +21,9 @@
         fprintf(stdout, ##__VA_ARGS__); \
         printf("\')</script>"); \
     } while(0)
-#define HTML_GOTO(url) printf("<script>location.href=\"%s\";</script>", url)
+#define HTML_GOTO(url) printf("<script>window.location.href=\"%s\";</script>", url)
 #define HTTP_REFERER   getenv("HTTP_REFERER")
+#define HTML_BACK() printf("<script>window.history.back(-1);</script>")
 
 typedef enum content_type_t content_type_t;
 enum content_type_t {
