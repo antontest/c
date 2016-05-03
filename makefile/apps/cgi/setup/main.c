@@ -44,7 +44,6 @@ int main(int agrc, char *agrv[])
     cgi->parse_input(cgi, data);
     cgi->handle_request(cgi, data);
     cgi->destroy(cgi);
-    return 0;
 
     return rt;
 }

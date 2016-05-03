@@ -35,6 +35,7 @@ int set_username(char *input, char *errmsg)
 
     if (access(DATABASE_PATH, R_OK) || sql->open(sql, DATABASE_PATH) < 0) {
         ALERT("数据库文件丢失!");
+        HTML_GOTO("index.html");
         return -1;
     }
 
