@@ -645,11 +645,15 @@ static int handle_parse_data(private_cgi_t *this, cgi_func_tab_t *func_tab)
 
     if (!func_tab) return 0;
 
-    if (!cgi_form_info.multipart_content_type || 
+    /**
+     * if upload binary files
+     */
+    if (strstr(cgi_form_info.content_type, "multipart") &&  
         (cgi_form_info.multipart_content_type && 
         !strstr(cgi_form_info.multipart_content_type, "text"))) {
         cgi_func_tab_t *pfunc = func_tab;
 
+        ALERT("text");
         char *file = find_val(this, "filename");
         if (file) {
             while (pfunc && pfunc->name) {
@@ -666,6 +670,9 @@ static int handle_parse_data(private_cgi_t *this, cgi_func_tab_t *func_tab)
         return 0;
     }
 
+    /**
+     * upload other type files not binary files
+     */
     if (parse_comm_data(this) < 0 && cgi_req_method == REQUEST_METHOD_POST) {
         return -1;
     }
@@ -676,7 +683,9 @@ static int handle_parse_data(private_cgi_t *this, cgi_func_tab_t *func_tab)
     for (pfunc_tab = func_tab; pfunc_tab->name != NULL; pfunc_tab++) {
         if (pfunc_tab->type != KEY_IS_FILE) continue;
         if (strcmp(this->form_data.this_file_name, pfunc_tab->name)) continue;
-        pfunc_tab->get_func_cb(cgi_this_file, cgi_errmsg_buf, &cgi_form_entry);
+        if (pfunc_tab->get_func_cb) {
+            pfunc_tab->get_func_cb(cgi_this_file, cgi_errmsg_buf, &cgi_form_entry);
+        }
         break;
     }
 
@@ -707,12 +716,14 @@ static int handle_parse_data(private_cgi_t *this, cgi_func_tab_t *func_tab)
     return 0;
 }
 
+/*
 static int parse_plain_text(private_cgi_t *this)
 {
     char *pstart = NULL, *pend = NULL;
     cgi_data_t *cgi_data = NULL;
     pstart = pend = cgi_form_data;
 
+    ALERT("cgi_form_data: %s", cgi_form_data);
     while (*pend != '\0') {
         while (*pend != '\0' && *pend != '=') pend++;
         if (*pend == '\0') break;
@@ -721,11 +732,94 @@ static int parse_plain_text(private_cgi_t *this)
         cgi_data = cgi_data_create(pstart, pend);
         cgi_data_list->insert_last(cgi_data_list, cgi_data);
 
+        ALERT("name: %s, value: %s", pstart, pend);
         while (*pend != '\0' && *pend != '&') pend++;
         if (*pend == '\0') break;
         *pend++ = '\0';
         while (*pend != '\0' && *pend == '&') pend++;
         pstart = pend;
+    }
+
+    return 0;
+}
+*/
+
+typedef enum plain_text_state_t plain_text_state_t;
+enum plain_text_state_t  {
+    s_plain_name_start = 0x100,
+    s_plain_name,
+    s_plain_name_end,
+    s_plain_value_start,
+    s_plain_value, 
+    s_plain_value_end
+};
+
+static int parse_plain_text(private_cgi_t *this)
+{
+    char *name = NULL, *value = NULL;
+    char *pos = cgi_form_data;
+    cgi_data_t *data = NULL;
+    plain_text_state_t state = s_plain_name_start;
+
+    /**
+     * check data form brower whether is null
+     */
+    if (!pos || *pos == '\0') {
+        ALERT("There is no data.");
+        return -1;
+    }
+
+    /**
+     * parse plain text
+     */
+    while (*pos != '\0') {
+        switch (state) {
+            case s_plain_name_start:
+                name = pos;
+                state = s_plain_name;
+            case s_plain_name:
+                if (*pos == '=') {
+                    *pos = '\0';
+                    state = s_plain_name_end;
+                } else {
+                    break;
+                }
+            case s_plain_name_end:
+                state = s_plain_value_start;
+                break;
+            case s_plain_value_start:
+                value = pos;
+                state = s_plain_value;
+                break;
+            case s_plain_value:
+                if (*pos == '&') {
+                    *pos = '\0';
+                    state = s_plain_value_end;
+                } else {
+                    break;
+                }
+            case s_plain_value_end:
+                data = cgi_data_create(name, value);
+                cgi_data_list->insert_last(cgi_data_list, data);
+
+                //ALERT("name: %s, value: %s", name, value);
+                name = NULL;
+                value = NULL;
+                state = s_plain_name_start;
+                break;
+            default:
+                break;
+        }
+        pos++;
+    }
+
+    /**
+     * last parameter
+     */
+    if (name != NULL && value != NULL) {
+        data = cgi_data_create(name, value);
+        cgi_data_list->insert_last(cgi_data_list, data);
+        //ALERT("name: %s, value: %s", name, value);
     }
 
     return 0;
@@ -917,9 +1011,11 @@ METHOD(cgi_t, handle_request_, int, private_cgi_t *this, cgi_func_tab_t *func_ta
     key_type_t type           = KEY_IS_UNKOWN;
     cgi_func_tab_t *pfunc_tab = func_tab;
 
+    ALERT("handle_request");
     if (!cgi_next_file || strlen(cgi_next_file) < 1) 
         return -1;
 
+    ALERT("open file: %s", cgi_next_file);
     if (!(fp = fopen(cgi_next_file, "rb+"))) {
         HTML_GOTO("not_found.html");
         return -1;
