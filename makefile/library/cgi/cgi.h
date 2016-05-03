@@ -33,9 +33,9 @@ enum content_type_t {
 
 typedef enum request_method_t request_method_t;
 enum request_method_t {
-    REQUEST_METHOD_GET    = 0,
+    REQUEST_METHOD_UNKOWN = 0,
+    REQUEST_METHOD_GET,
     REQUEST_METHOD_POST ,
-    REQUEST_METHOD_UNKOWN = -1,
 };
 
 typedef enum key_type_t key_type_t;
@@ -70,30 +70,18 @@ struct cgi_form_info_t {
 typedef struct cgi_form_entry_t cgi_form_entry_t;
 struct cgi_form_entry_t {
     /**
-     * cgi form sign code
-     */
-    char *content_disposition;
-    char *sign_code;
-    int   sign_code_len;
-
-    /**
      * multipart
      */
     char *form_name;
     char *file_name;
     int  file_size;
 
-    char *content_type;
-    char *data;
-    int  data_len;
-    request_method_t req_method_type;
-
     /**
      * html common parameter
      */
     char *todo;
-    char *this_file;
-    char *this_file_name;
+    char *this_file; /* index.html */
+    char *this_file_name; /* index */
     char *next_file;
     char *next_path;
 };
