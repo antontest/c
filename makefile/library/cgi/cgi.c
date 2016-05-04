@@ -150,7 +150,7 @@ void cgi_header_content_type(char *mime_type)
 
 void cgi_header_content_length(int len)
 {
-    fprintf(stdout, "Content-Length: %d\r\n", len);
+    fprintf(stdout, "Content-Length: %d\r\n\r\n", len);
 }
 
 /**
@@ -925,4 +925,46 @@ cgi_t *cgi_create()
     get_cgi_env_info(this);
     _get_data_(this);
     return &this->public;
+}
+
+int send_file_to_brower(char *file)
+{
+    char c;
+    int filesize = 0;
+    FILE *fp = NULL;
+    char *filename = NULL;
+
+    if (!file || !(fp = fopen(file, "rb+"))) {
+        return -1;
+    }
+
+    fseek(fp, 0, SEEK_END);
+    filesize = ftell(fp);
+    if (filesize < 1) {
+        return 0;
+    }
+    fseek(fp, 0, SEEK_SET);
+
+    //ALERT("filesize: %d", filesize);
+    filename = strrchr(file, '/');
+    if (!filename) {
+        filename = file;
+    } else {
+        filename++;
+    }
+    //ALERT("filename: %s", filename);
+
+    fprintf(stdout, "Content-Disposition:attachment;filename=%s\r\n", filename);
+    cgi_header_content_length(filesize);
+    cgi_header_content_type("application/octet-stream");
+    
+    while (!feof(fp)) {
+        c = getc(fp);
+        putc(c, stdout);
+    }
+    fflush(fp);
+
+    fclose(fp);
+
+    return 0;
 }

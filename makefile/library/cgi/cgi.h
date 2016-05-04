@@ -151,4 +151,9 @@ void cgi_header_content_length(int len);
  */
 cgi_t *cgi_create();
 
+/**
+ * download file to brower 
+ */
+int send_file_to_brower(char *file);
+
 #endif /* __CGI_H__ */
