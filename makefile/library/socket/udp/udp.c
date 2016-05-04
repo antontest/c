@@ -86,7 +86,7 @@ METHOD(udp_t, sendto_, int, private_udp_t *this, void  *buf, int size, char *dst
     /**
      * create destination host
      */
-    dst_host = host_create_from_string_and_family(dst_ip, udp_famliy, dst_port);
+    dst_host = host_create_from_string_and_family(dst_ip ? dst_ip : "%any", udp_famliy, dst_port);
 
     /**
      * sendto message
