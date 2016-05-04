@@ -20,6 +20,7 @@ static int file_upload(char *input, char *errmsg, cgi_form_entry_t *entry)
     char file_path[128] = {0};
     int writed_size = 0;
 
+    CONTENT_TEXT;
     if (!strcmp(entry->form_name, "upload_xls")) {
 #define XLS_FILE_DIR "/home/anton/web/html/xls"
 #define XLS_FILE_NAME "t.xls"
@@ -52,53 +53,30 @@ static int file_upload(char *input, char *errmsg, cgi_form_entry_t *entry)
 
 static int todo(char *input, char *errmsg, cgi_form_entry_t *entry)
 {
-    FILE *fp = NULL;
-    int len = 0;
-    char c;
-
     if (!strcmp(input, "download")) {
-        fp = fopen("/home/anton/downloads/ssl-client.c", "rb");
-        if (!fp) return -1;
-
-        fseek(fp, 0, SEEK_END);
-        len = ftell(fp);
-        if (len < 1) goto over;
-        fseek(fp, 0, SEEK_SET);
-
-        fprintf(stdout, "Content-Disposition:attachment;filename=%s\r\n", "test");
-        cgi_header_content_length(len);
-        cgi_header_content_type("application/octet-stream");
-
-        c = getc(fp);
-        while (!feof(fp)) {
-            putc(c, stdout);
-            c = getc(fp);
-        }
-        fflush(fp);
-    } else if (!strcmp(input, "test")) {
-        ALERT("test");
+        send_file_to_brower("/home/anton/下载/rofi-0.15.12.tar.gz");
     }
 
-over:
-    if (fp) fclose(fp);
     return 0;
 }
 
 int main(void)  
 {  
     cgi_func_tab_t func_tab[] = {
-        {"upload",   KEY_IS_FILE, NULL               , NULL},
-        {"filename", KEY_IS_VAR,  (void *)file_upload, (void *)file_upload},
-        {"todo",     KEY_IS_VAR,  NULL, (void *)todo},
-        {"xls_upload",   KEY_IS_FILE, NULL, NULL},
-        {"filename", KEY_IS_VAR,  NULL, (void *)file_upload},
-        {"todo",     KEY_IS_VAR,  NULL, (void *)todo},
+        {"upload",     KEY_IS_FILE, NULL               , NULL},
+        {"filename",   KEY_IS_VAR,  (void *)file_upload, (void *)file_upload},
+        {"todo",       KEY_IS_VAR,  NULL, (void *)todo},
+        {"download",   KEY_IS_FILE, NULL               , NULL},
+        {"todo",       KEY_IS_VAR,  NULL, (void *)todo},
+        {"xls_upload", KEY_IS_FILE, NULL, NULL},
+        {"filename",   KEY_IS_VAR,  NULL, (void *)file_upload},
+        {"todo",       KEY_IS_VAR,  NULL, (void *)todo},
         {NULL}
     };
 
-    CONTENT_TEXT;
     cgi_t *cgi = cgi_create();
-    cgi->parse_input(cgi, func_tab);
+    cgi->parse_input(cgi);
+    cgi->handle_entry(cgi, func_tab);
     cgi->destroy(cgi);
 
     return 0;
