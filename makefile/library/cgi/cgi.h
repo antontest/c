@@ -1,5 +1,7 @@
 #ifndef __CGI_H__
 #define __CGI_H__
+#include <stdio.h>
+#include <linked_list/linked_list.h>
 
 #define QUERY_STRING   getenv("QUERY_STRING")
 #define REQUEST_METHOD getenv("REQUEST_METHOD")
@@ -24,6 +26,7 @@
 #define HTML_GOTO(url) printf("<script>window.location.href=\"%s\";</script>", url)
 #define HTTP_REFERER   getenv("HTTP_REFERER")
 #define HTML_BACK() printf("<script>window.history.back(-1);</script>")
+#define HTML_UTF8() printf("<META  http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">")
 
 typedef enum content_type_t content_type_t;
 enum content_type_t {
@@ -84,6 +87,12 @@ struct cgi_form_entry_t {
     char *this_file_name; /* index */
     char *next_file;
     char *next_path;
+
+    /**
+     * @brief list of form data parsed
+     */
+    linked_list_t *data_list;
+
 };
 
 typedef struct cgi_func_tab_t cgi_func_tab_t;
@@ -107,7 +116,12 @@ struct cgi_t {
     /**
      * @brief parser data 
      */
-    int (*parse_input) (cgi_t *this, cgi_func_tab_t *data);
+    int (*parse_input) (cgi_t *this);
+
+    /**
+     * @brief int 
+     */
+    int (*handle_entry) (cgi_t *this, cgi_func_tab_t *data);
 
     /**
      * @brief parser data 
@@ -155,5 +169,10 @@ cgi_t *cgi_create();
  * download file to brower 
  */
 int send_file_to_brower(char *file);
+
+/**
+ * @brief find_val 
+ */
+char *find_value(const char *name);
 
 #endif /* __CGI_H__ */

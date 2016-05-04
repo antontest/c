@@ -16,6 +16,12 @@ char *content_type_s[] = {
     "multipart/form-data",
 };
 
+typedef enum data_type_t data_type_t;
+enum data_type_t {
+    PLAIN_DATA = 0,
+    MULTIPATY_DATA,
+};
+
 #define DFT_CGI_INPUT_BUF_SIZE  (1024)
 #define DFT_CGI_OUTPUT_BUF_SIZE (4096)
 #define DFT_CGI_ERRMSG_BUF_SIZE (256)
@@ -51,11 +57,6 @@ struct private_cgi_t {
     cgi_form_entry_t form_entry;
 
     /**
-     * @brief list of form data parsed
-     */
-    linked_list_t *data_list;
-
-    /**
      * @brief output to brower
      */
     char *input;
@@ -69,7 +70,13 @@ struct private_cgi_t {
      * @brief err_msg buffer 
      */
     char *err_msg;
+
+    /**
+     * @brief data type
+     */
+    data_type_t data_type;
 };
+static private_cgi_t *private_data = NULL;
 
 typedef struct cgi_data_t cgi_data_t;
 struct cgi_data_t {
@@ -92,7 +99,7 @@ cgi_data_t *cgi_data_create(char *name, char *value)
 #define cgi_form_data      this->data
 #define cgi_form_data_len  this->data_len
 #define cgi_req_method     this->type
-#define cgi_data_list      this->data_list
+#define cgi_data_list      this->form_entry.data_list
 
 #define cgi_input_buf      this->input
 #define cgi_output_buf     this->output
@@ -150,7 +157,7 @@ void cgi_header_content_type(char *mime_type)
 
 void cgi_header_content_length(int len)
 {
-    fprintf(stdout, "Content-Length: %d\r\n\r\n", len);
+    fprintf(stdout, "Content-Length: %d\r\n", len);
 }
 
 /**
@@ -686,7 +693,7 @@ static void free_cgi_form_entry(cgi_form_entry_t *entry)
 
 METHOD(cgi_t, find_val_, char *, private_cgi_t *this, char *name)
 {
-    return find_val(this, name);
+    return find_val_(this, name);
 }
 
 METHOD(cgi_t, get_req_method_, request_method_t, private_cgi_t *this)
@@ -728,7 +735,7 @@ METHOD(cgi_t, get_data_, char *, private_cgi_t *this)
     return cgi_form_data;
 }
 
-METHOD(cgi_t, parse_input_, int, private_cgi_t *this, cgi_func_tab_t *func_tab)
+METHOD(cgi_t, parse_input_, int, private_cgi_t *this)
 {
     if (!cgi_form_data || cgi_form_data_len < 1) return 0;
 
@@ -754,16 +761,18 @@ METHOD(cgi_t, parse_input_, int, private_cgi_t *this, cgi_func_tab_t *func_tab)
              * normal plain text type
              */
             if (!strncasecmp(cgi_form_info.content_type, "application/x-www-form-urlencoded", sizeof("application/x-www-form-urlencoded") - 1)) {
+                this->data_type = PLAIN_DATA;
                 parse_plain_text(this);
-                handle_plain_data(this, func_tab);
+                //handle_plain_data(this, func_tab);
             } 
 
             /**
              * multipart type
              */
             else if (!strncasecmp(cgi_form_info.content_type, "multipart/form-data", strlen("multipart/form-data"))) {
+                this->data_type = MULTIPATY_DATA;
                 parse_multipart_data(this);
-                handle_multipart_data(this, func_tab);
+                //handle_multipart_data(this, func_tab);
             } else {
                 return -1;
             }
@@ -773,14 +782,30 @@ METHOD(cgi_t, parse_input_, int, private_cgi_t *this, cgi_func_tab_t *func_tab)
          * request method: get
          */
         case REQUEST_METHOD_GET:
+            this->data_type = PLAIN_DATA;
             parse_plain_text(this);
-            handle_plain_data(this, func_tab);
+            //handle_plain_data(this, func_tab);
             break;
         default:
             return -1;
             break;
     }
 
+    return 0;
+}
+
+METHOD(cgi_t, handle_entry_, int, private_cgi_t *this, cgi_func_tab_t *func_tab)
+{
+    switch (this->data_type) {
+        case PLAIN_DATA:
+            handle_plain_data(this, func_tab);
+            break;
+        case MULTIPATY_DATA:
+            handle_multipart_data(this, func_tab);
+            break;
+        default:
+            break;
+    }
     return 0;
 }
 
@@ -894,6 +919,7 @@ cgi_t *cgi_create()
     INIT(this,
         .public = {
             .parse_input    = _parse_input_,
+            .handle_entry   = _handle_entry_,
             .handle_request = _handle_request_,
             .find_val       = _find_val_,
             .error_print    = _error_print_,
@@ -909,8 +935,8 @@ cgi_t *cgi_create()
             .form_name       = NULL,
             .file_name       = NULL,
             .file_size       = -1,
+            .data_list       = linked_list_create(),
         },
-        .data_list = linked_list_create(),
         .input     = (char *)malloc(DFT_CGI_INPUT_BUF_SIZE),
         .output    = (char *)malloc(DFT_CGI_OUTPUT_BUF_SIZE),
         .err_msg   = (char *)malloc(DFT_CGI_ERRMSG_BUF_SIZE),
@@ -924,6 +950,7 @@ cgi_t *cgi_create()
 
     get_cgi_env_info(this);
     _get_data_(this);
+    private_data = this;
     return &this->public;
 }
 
@@ -945,14 +972,12 @@ int send_file_to_brower(char *file)
     }
     fseek(fp, 0, SEEK_SET);
 
-    //ALERT("filesize: %d", filesize);
     filename = strrchr(file, '/');
     if (!filename) {
         filename = file;
     } else {
         filename++;
     }
-    //ALERT("filename: %s", filename);
 
     fprintf(stdout, "Content-Disposition:attachment;filename=%s\r\n", filename);
     cgi_header_content_length(filesize);
@@ -962,9 +987,14 @@ int send_file_to_brower(char *file)
         c = getc(fp);
         putc(c, stdout);
     }
-    fflush(fp);
+    fflush(stdout);
 
     fclose(fp);
 
     return 0;
+}
+
+char *find_value(const char *name)
+{
+    return find_val(private_data, (char *)name);
 }
