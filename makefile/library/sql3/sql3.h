@@ -29,7 +29,7 @@ struct sqlite_t {
      * @brief gain sql result
      */
     int (*get_data) (sqlite_t *this, char *sql, sql_cb_t callback);
-    int (*get_table) (sqlite_t *this, char *sql, int *row, int *col, char **result);
+    int (*get_table) (sqlite_t *this, char *sql, int *row, int *col, char ***result);
         
     /**
      * @brief close database

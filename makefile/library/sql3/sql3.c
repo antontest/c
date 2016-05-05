@@ -69,12 +69,12 @@ METHOD(sqlite_t, get_data_, int, private_sqlite_t *this, char *sql, sql_cb_t cal
     return 0;
 }
 
-METHOD(sqlite_t, get_table_, int, private_sqlite_t *this, char *sql, int *row, int *col, char **result)
+METHOD(sqlite_t, get_table_, int, private_sqlite_t *this, char *sql, int *row, int *col, char ***result)
 {
     int ret = 0;
     if (!sql) return 0;
 
-    ret = sqlite3_get_table(sqlite_db, sql, &result, row, col, &sqlite_err);
+    ret = sqlite3_get_table(sqlite_db, sql, result, row, col, &sqlite_err);
     if (ret) print_err_msg();
     return 0;
 }
