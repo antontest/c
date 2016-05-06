@@ -5,10 +5,6 @@
 #include <cgi/cgi.h>
 #include <sql3/sql3.h>
 
-//#define cell_div_style(top, left, width, height) "position:absolute;top:" top "px;left:" left "px;width:" width "px;height:" height "font-family:\'Arial Negreta\', \'Arial\';font-weight:700;font-style:normal;text-align:center;"
-//#define cell_img_style(width, height) "position:absolute;top:0px;left:0px;width:" width "px;height:" height "px;"
-//#define cell_text_style(width) "position:absolute;top:2px;left:7px;width:" width "px;word-wrap:break-word;"
-
 #define head_div_style "position:absolute;top:%dpx;left:%dpx;width:%dpx;height:%dpx;font-family:\'Arial Negreta\', \'Arial\';font-weight:700;font-style:normal;text-align:center;"
 #define head_img_style "position:absolute;top:0px;left:0px;width:%dpx;height:%dpx;"
 #define head_text_style "position:absolute;top:7px;left:2px;width:%dpx;word-wrap:break-word;"
@@ -17,12 +13,12 @@
 #define cell_img_style "position:absolute;top:0px;left:0px;width:%dpx;height:%dpx;"
 #define cell_text_style "position:absolute;top:10px;left:2px;width:%dpx;word-wrap:break-word;"
 
-#define table_cell(id, pic_id, content, top, left, width, height) \
+#define table_cell(id, pic_id, content, top, left, width, height, class) \
     do { \
         printf("<div id=\"u%d\" class=\"ax_table_cell\" style=\"" cell_div_style "\">\n", id, top, left, width, height); \
         printf("<img id=\"u%d_img\" class=\"img \" src=\"images/user_admin_page/u%d.png\" style=\"" cell_img_style "\"/>\n", id, pic_id, width, height); \
         printf("<div id=\"u%d\" class=\"text\" style=\"" cell_text_style "\">\n", id + 1, width - 4); \
-        printf("<p><span>%s</span></p>", content); \
+        printf("<p><span class=\"%s\">%s</span></p>", class, content); \
         printf("</div>\n"); \
         printf("</div>\n"); \
     } while (0)
@@ -37,6 +33,15 @@
         printf("</div>\n"); \
     } while (0)
 
+static void user_admin_add_btn(int top)
+{
+    printf("<div id=\"add_button\" class=\"ax_shape\" title=\"点击新增用户。在上表的用户名（例如super_man）中点击可以修改或删除该用户信息\" style=\"" cell_div_style "\" >\n", top, 626, 80, 30);
+    printf("<img id=\"user_admin_add_btn_img\" class=\"img \" src=\"images/user_admin_page/u54.png\" style=\"" cell_img_style"\"/>\n", 80, 30);
+    printf("<div id=\"user_admin_add_btn_text\" class=\"text\" style=\"" head_text_style "\">\n", 80 - 4);
+    printf("<span>新增</span>\n");
+    printf("</div>\n");
+    printf("</div>\n");
+}
 static int user_info_cb(int cnt, char **value)
 {
     int i          = 0;
@@ -48,6 +53,8 @@ static int user_info_cb(int cnt, char **value)
     int width[]    = {122, 117, 111, 68, 168};
     int picid      = 1;
     char *colum[]  = {"用户名", "角色", "姓名", "状态", "创建时间"};
+    char *class[]  = {"ax_table_name_span", ""};
+    char *class_name = NULL;
 
     printf("<div id=\"u0\" class=\"ax_table\">\n");
 
@@ -62,6 +69,7 @@ static int user_info_cb(int cnt, char **value)
     if (num < 1) {
         goto add_button;
     }
+
     value  += col;
     top    += height;
     picid   = 21;
@@ -69,11 +77,13 @@ static int user_info_cb(int cnt, char **value)
     for (i = 0; i < num; i++) {
         if (i % col == 0) {
             left = 120;
+            class_name = class[0];
+            if (i != 0) top += height;
         } else {
             left += width[i % col - 1];
-            top += (i / col) * height;
+            class_name = class[1];
         }
-        table_cell(i * 2 + 1 + 10, (i * 2) % 10 + picid, *value++, top, left, width[i % col], height);
+        table_cell(i * 2 + 1 + 10, (i * 2) % 10 + picid, *value++, top, left, width[i % col], height, class_name);
     }
 
     num   = i;
@@ -81,11 +91,17 @@ static int user_info_cb(int cnt, char **value)
     left  = 120;
     top   += height;
     for (i = num; i < col + num; i++) {
-        table_cell(i * 2 + 1 + 10, (i * 2) % 10 + picid, *value++, top, left, width[i % col], height);
+        if (i % col == 0) {
+            class_name = class[0];
+        } else {
+            class_name = class[1];
+        }
+        table_cell(i * 2 + 1 + 10, (i * 2) % 10 + picid, *value++, top, left, width[i % col], height, class_name);
         left += width[i % col];
     }
 
 add_button:
+    user_admin_add_btn(top + height + 10);
     printf("</div>");
     return 0;
 }
