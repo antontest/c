@@ -812,9 +812,11 @@ METHOD(cgi_t, handle_entry_, int, private_cgi_t *this, cgi_func_tab_t *func_tab)
 METHOD(cgi_t, handle_request_, int, private_cgi_t *this, cgi_func_tab_t *func_tab)
 {
     int  ret       = 0;
+    int key_len    = NULL;
     FILE *fp       = NULL;
     char *name     = NULL;
     char buf[1024] = {0};
+    char *p        = NULL;
     char *value_start_pos     = NULL;
     char *value_end_pos       = NULL;
     key_type_t type           = KEY_IS_UNKOWN;
@@ -823,6 +825,31 @@ METHOD(cgi_t, handle_request_, int, private_cgi_t *this, cgi_func_tab_t *func_ta
     if (!cgi_next_file || strlen(cgi_next_file) < 1) 
         return -1;
     
+    for (pfunc_tab = func_tab; pfunc_tab != NULL && pfunc_tab->name != NULL; pfunc_tab++) {
+        if (pfunc_tab->type == KEY_IS_FILE) {
+            if (!strcmp(pfunc_tab->name, cgi_this_file_name)) {
+                if (pfunc_tab->get_func_cb) {
+                    ret = pfunc_tab->get_func_cb(cgi_output_buf, cgi_errmsg_buf, &cgi_form_entry);
+                    if (ret < 0) {
+                        
+                    } else {
+                        if (strlen(cgi_output_buf)) {
+                            printf("%s", cgi_output_buf);
+                        }
+                    }
+                    break;
+                    
+                }
+                break;
+            }
+        }
+    }
+
+    if (!pfunc_tab) {
+        ALERT("Can't precess this file!");
+        return -1;
+    }
+
     if (!(fp = fopen(cgi_next_file, "rb+"))) {
         HTML_GOTO("not_found.html");
         return -1;
@@ -842,6 +869,40 @@ METHOD(cgi_t, handle_request_, int, private_cgi_t *this, cgi_func_tab_t *func_ta
         }
 
         name = value_start_pos + 1;
+        p = buf;
+
+        while (*p != '@') {
+            putc(*p, stdout);
+            p++;
+        }
+        while (*p != '#') {
+            p++;
+        }
+        p++;
+
+        key_len = value_end_pos - value_start_pos - 1;
+        for (pfunc_tab = func_tab; pfunc_tab != NULL && pfunc_tab->name != NULL; pfunc_tab++) {
+            if (pfunc_tab->type == KEY_IS_FILE) {
+                continue;
+            }
+            if (strlen(pfunc_tab->name) != key_len) {
+                continue;
+            }
+            if(strncmp(name, pfunc_tab->name, key_len)) continue;
+            if (!pfunc_tab->get_func_cb) continue;
+            ret = pfunc_tab->get_func_cb(cgi_output_buf, cgi_errmsg_buf, &cgi_form_entry);
+            if (strlen(cgi_output_buf)) {
+                printf("%s", cgi_output_buf);
+            }
+            break;
+        }
+
+        while (*p != '\0') {
+            putc(*p, stdout);
+            p++;
+        }
+
+        /*
         *value_end_pos='\0';
         for (pfunc_tab = func_tab; pfunc_tab != NULL && pfunc_tab->name != NULL; pfunc_tab++) {
             if(strcmp(name, pfunc_tab->name)) continue;
@@ -862,6 +923,7 @@ METHOD(cgi_t, handle_request_, int, private_cgi_t *this, cgi_func_tab_t *func_ta
         if (type != KEY_IS_FILE) {
             printf("%s", value_end_pos + 1);
         }
+        */
 
         bzero(cgi_output_buf, DFT_CGI_OUTPUT_BUF_SIZE);
     }
