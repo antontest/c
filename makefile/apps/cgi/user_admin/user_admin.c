@@ -52,15 +52,17 @@ static int user_info_cb(int cnt, char **value)
     printf("<div id=\"u0\" class=\"ax_table\">\n");
 
     col = sizeof(width) / sizeof(width[0]);
-    value += col;
-
     picid = 1;
     for (i = 0; i < col; i++) {
         table_head(i * 2 + 1, i * 2 + picid, colum[i], top, left, width[i], height);
         left += width[i];
     }
 
-    num     = cnt - col;
+    num = cnt - col;
+    if (num < 1) {
+        goto add_button;
+    }
+    value  += col;
     top    += height;
     picid   = 21;
     height  = 36;
@@ -83,6 +85,7 @@ static int user_info_cb(int cnt, char **value)
         left += width[i % col];
     }
 
+add_button:
     printf("</div>");
     return 0;
 }
@@ -106,7 +109,7 @@ static int user_info(char *outbuf, char *errbuf, cgi_form_entry_t *entry)
     }
 
     //sql3->get_data(sql3, "select user_name,role_id,nick_name,user_status,create_time from user;", user_info_cb);
-    sql3->get_table(sql3, "select user.user_name,role.role_name,user.nick_name,user.user_status,user.create_time from user join role on user.role_id = role.role_id;", &row, &col, &value);
+    sql3->get_table(sql3, "select user.user_name,role.role_name,user.nick_name,user_status.status_name,user.create_time from user join role,user_status on user.role_id = role.role_id and user.user_status = user_status.status_id;", &row, &col, &value);
     user_info_cb(row * col, value);
     sql3->destroy(sql3);
     return 0;
