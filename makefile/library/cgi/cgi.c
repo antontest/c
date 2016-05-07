@@ -812,7 +812,7 @@ METHOD(cgi_t, handle_entry_, int, private_cgi_t *this, cgi_func_tab_t *func_tab)
 METHOD(cgi_t, handle_request_, int, private_cgi_t *this, cgi_func_tab_t *func_tab)
 {
     int  ret       = 0;
-    int key_len    = NULL;
+    int key_len    = 0;
     FILE *fp       = NULL;
     char *name     = NULL;
     char buf[1024] = {0};
@@ -829,6 +829,7 @@ METHOD(cgi_t, handle_request_, int, private_cgi_t *this, cgi_func_tab_t *func_ta
         if (pfunc_tab->type == KEY_IS_FILE) {
             if (!strcmp(pfunc_tab->name, cgi_this_file_name)) {
                 if (pfunc_tab->get_func_cb) {
+                    /*
                     ret = pfunc_tab->get_func_cb(cgi_output_buf, cgi_errmsg_buf, &cgi_form_entry);
                     if (ret < 0) {
                         
@@ -837,8 +838,7 @@ METHOD(cgi_t, handle_request_, int, private_cgi_t *this, cgi_func_tab_t *func_ta
                             printf("%s", cgi_output_buf);
                         }
                     }
-                    break;
-                    
+                    */
                 }
                 break;
             }

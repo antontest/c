@@ -9,18 +9,36 @@
 #define DATABASE_PATH "/home/anton/web/html/db/user.db"
 static int role_name_opt(char *outbuf, char *errbuf, cgi_form_entry_t *entry)
 {
-    sqlite_t *sql3 = NULL;
-    int row = 0, col = 0;
-    char **value;
-    int num = 0;
+    int row            = 0;
+    int col            = 0;
+    int num            = 0;
+    char **value       = NULL;
+    char *user_name    = NULL;
+    char strsql[256]   = {0};
+    char role_name[56] = {0};
+    sqlite_t *sql3     = NULL;
+
+    user_name = find_value("user_name");
+    if (!user_name) {
+        return -1;
+    }
 
     sql3 = sqlite_create();
     if (!sql3 || sql3->open(sql3, DATABASE_PATH) < 0) {
         return -1;
     }
 
-    sql3->get_table(sql3, "select role_name from role order by role_id desc;", &row, &col, &value);
-    if (row > 1 && col > 0 && value) {
+    snprintf(strsql, sizeof(strsql), "select role_name from role where role_id=(select role_id from user where user_name=\"%s\");", user_name);
+    sql3->get_table(sql3, strsql, &row, &col, &value);
+    if (row > 0 && col > 0 && value) {
+        value += col;
+        strncpy(role_name, *value, sizeof(role_name));
+        printf("<option value=\"%s\">%s</option>\n", *value, *value);
+    }
+
+    snprintf(strsql, sizeof(strsql), "select role_name from role  where role_name != \"%s\" order by role_name desc;", role_name);
+    sql3->get_table(sql3, strsql, &row, &col, &value);
+    if (row > 0 && col > 0 && value) {
         value += col;
         num = row * col;
         while (num-- > 0) {
@@ -36,18 +54,36 @@ static int role_name_opt(char *outbuf, char *errbuf, cgi_form_entry_t *entry)
 
 static int user_status_opt(char *outbuf, char *errbuf, cgi_form_entry_t *entry)
 {
-    sqlite_t *sql3 = NULL;
-    int row = 0, col = 0;
-    char **value;
-    int num = 0;
+    int row              = 0;
+    int col              = 0;
+    int num              = 0;
+    char *user_name      = NULL;
+    char **value         = NULL;
+    char strsql[256]     = {0};
+    char user_status[56] = {0};
+    sqlite_t *sql3       = NULL;
+
+    user_name = find_value("user_name");
+    if (!user_name) {
+        return -1;
+    }
 
     sql3 = sqlite_create();
     if (!sql3 || sql3->open(sql3, DATABASE_PATH) < 0) {
         return -1;
     }
 
-    sql3->get_table(sql3, "select status_name from user_status;", &row, &col, &value);
-    if (row > 1 && col > 0 && value) {
+    snprintf(strsql, sizeof(strsql), "select status_name from user_status where status_id=(select user_status from user where user_name=\"%s\");", user_name);
+    sql3->get_table(sql3, strsql, &row, &col, &value);
+    if (row > 0 && col > 0 && value) {
+        value += col;
+        strncpy(user_status, *value, sizeof(user_status) - 1);
+        printf("<option value=\"%s\">%s</option>\n", *value, *value);
+    }
+
+    snprintf(strsql, sizeof(strsql), "select status_name from user_status where status_name!=\"%s\";", user_status);
+    sql3->get_table(sql3, strsql, &row, &col, &value);
+    if (row > 0 && col > 0 && value) {
         value += col;
         num = row * col;
         while (num-- > 0) {

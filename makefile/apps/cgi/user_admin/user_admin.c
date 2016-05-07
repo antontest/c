@@ -56,8 +56,6 @@ static int user_info_cb(int cnt, char **value)
     char *class[]  = {"ax_table_name_span", ""};
     char *class_name = NULL;
 
-    printf("<div id=\"u0\" class=\"ax_table\">\n");
-
     col = sizeof(width) / sizeof(width[0]);
     picid = 1;
     for (i = 0; i < col; i++) {
@@ -102,7 +100,6 @@ static int user_info_cb(int cnt, char **value)
 
 add_button:
     user_admin_add_btn(top + height + 10);
-    printf("</div>");
     return 0;
 }
 

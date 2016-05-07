@@ -9,10 +9,11 @@
 #define DATABASE_PATH "/home/anton/web/html/db/user.db"
 static int role_name_opt(char *outbuf, char *errbuf, cgi_form_entry_t *entry)
 {
+    int row        = 0;
+    int col        = 0;
+    int num        = 0;
+    char **value   = NULL;
     sqlite_t *sql3 = NULL;
-    int row = 0, col = 0;
-    char **value;
-    int num = 0;
 
     sql3 = sqlite_create();
     if (!sql3 || sql3->open(sql3, DATABASE_PATH) < 0) {
@@ -43,10 +44,11 @@ static int role_name_opt(char *outbuf, char *errbuf, cgi_form_entry_t *entry)
 
 static int user_status_opt(char *outbuf, char *errbuf, cgi_form_entry_t *entry)
 {
+    int row        = 0;
+    int col        = 0;
+    int num        = 0;
+    char **value   = NULL;
     sqlite_t *sql3 = NULL;
-    int row = 0, col = 0;
-    char **value;
-    int num = 0;
 
     sql3 = sqlite_create();
     if (!sql3 || sql3->open(sql3, DATABASE_PATH) < 0) {
@@ -90,11 +92,14 @@ static int add_user_to_db(char *outbuf, char *errbuf, cgi_form_entry_t *entry)
         {NULL}
     };
     struct user_info *p = NULL;
-    sqlite_t *sql3 = NULL;
     char str[1024] = {0};
     char stime[56] = {0};
+    char **value   = NULL;
+    int row = 0;
+    int col = 0;
     time_t t;
     struct tm *tmp;
+    sqlite_t *sql3 = NULL;
 
     for (p = data; p && p->name; p++) {
         p->value = find_value(p->name);
@@ -107,6 +112,14 @@ static int add_user_to_db(char *outbuf, char *errbuf, cgi_form_entry_t *entry)
 
     sql3 = sqlite_create();
     if (!sql3 || sql3->open(sql3, DATABASE_PATH) < 0) {
+        return -1;
+    }
+    
+    snprintf(str, sizeof(str), "select 1 from user where user_name=\"%s\";", data[USER_NAME].value);
+    sql3->get_table(sql3, str, &row, &col, &value);
+    if (row > 0 && col > 0 && value) {
+        ALERT("用户名已经存在!");
+        HTML_GOTO("user_add.cgi?next_file=user_add.html");
         return -1;
     }
 
@@ -123,7 +136,7 @@ static int add_user_to_db(char *outbuf, char *errbuf, cgi_form_entry_t *entry)
             data[USER_STATUS].value,
             data[EMAIL].value,
             stime);
-    ALERT("%s", str);
+    //ALERT("%s", str);
     sql3->exec(sql3, str);
     sql3->destroy(sql3);
 

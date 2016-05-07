@@ -6,15 +6,21 @@
 #include <sql3/sql3.h>
 
 #define DATABASE_PATH "/home/anton/web/html/db/user.db"
-static int user_permission = -1;
+static int role_id     = -1;
+static int user_status = -1;
 static int user_login(void *arg, int cnt, char **value, char **name)
 {
-    if (!strcmp(value[0], "0")) {
+    role_id = atoi(value[0]);
+    user_status = atoi(value[1]);
+    if (!user_status) {
         ALERT("你已被管理员禁止访问，请联系管理员!");
         HTML_GOTO("index.html");
         return -1;
+    } else if (user_status == 1) {
+        ALERT("账号异常，请联系管理员!");
+        HTML_GOTO("index.html");
+        return -1;
     }
-    user_permission = atoi(value[0]);
 
     return 0;
 }
@@ -38,14 +44,14 @@ void handle_login()
         return;
     }
 
-    snprintf(sqlstr, sizeof(sqlstr), "select permission from user where name=\"%s\" and passwd=\"%s\";", uid, pwd);
-    if (sql->get_data(sql, sqlstr, user_login) < 0 || user_permission < 0) {
+    snprintf(sqlstr, sizeof(sqlstr), "select role_id,user_status from user where user_name=\"%s\" and user_pwd=\"%s\";", uid, pwd);
+    if (sql->get_data(sql, sqlstr, user_login) < 0 || role_id < 0) {
         ALERT("用户名或者密码错误!");
         HTML_GOTO("index.htm");
         return;
     }
     
-    if (user_permission == 3) {
+    if (role_id == 0) {
         HTML_GOTO("admin_page.html");
     } else {
         HTML_GOTO("ftp.html");
