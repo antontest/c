@@ -4,6 +4,12 @@ SHELL=/bin/bash
 # directory
 DIRS= setup
 DIRS+= upload
+DIRS+= login
+DIRS+= user_admin
+DIRS+= user_add
+DIRS+= user_detail
+DIRS+= user_delete
+DIRS+= user_update
 
 # target
 all install uninstall clean cleanall rebuild: $(DIRS)
