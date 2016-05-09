@@ -251,13 +251,13 @@ static int email(char *outbuf, char *errbuf, cgi_form_entry_t *entry)
 int main(int argc, char **argv)
 {
     cgi_func_tab_t func[] = {
-        {"user_detail", KEY_IS_FILE, NULL, NULL},
-        {"role_name_opt", KEY_IS_VAR, (void *)role_name_opt, NULL},
-        {"user_status_opt", KEY_IS_VAR, (void *)user_status_opt, NULL},
-        {"user_name", KEY_IS_VAR, (void *)user_name, NULL},
-        {"user_pwd", KEY_IS_VAR, (void *)user_pwd, NULL},
-        {"nick_name", KEY_IS_VAR, (void *)nick_name, NULL},
-        {"email", KEY_IS_VAR, (void *)email, NULL},
+        {"user_detail",     KEY_IS_FILE, NULL,  NULL},
+        {"role_name_opt",   KEY_IS_VAR,  NULL, (void *)role_name_opt},
+        {"user_status_opt", KEY_IS_VAR,  NULL, (void *)user_status_opt},
+        {"user_name",       KEY_IS_VAR,  NULL, (void *)user_name},
+        {"user_pwd",        KEY_IS_VAR,  NULL, (void *)user_pwd},
+        {"nick_name",       KEY_IS_VAR,  NULL, (void *)nick_name},
+        {"email",           KEY_IS_VAR,  NULL, (void *)email},
         {NULL}
     };
     cgi_t *cgi = NULL;
@@ -270,7 +270,6 @@ int main(int argc, char **argv)
     CONTENT_TEXT;
     HTML_UTF8();
     cgi->parse_input(cgi);
-    cgi->handle_entry(cgi, func);
     cgi->handle_request(cgi, func);
     cgi->destroy(cgi);
     return 0;

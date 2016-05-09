@@ -141,17 +141,16 @@ static int add_user_to_db(char *outbuf, char *errbuf, cgi_form_entry_t *entry)
     sql3->destroy(sql3);
 
     HTML_GOTO("user_admin.cgi?next_file=user_admin_page.html");
-
     return 0;
 }
 
 int main(int argc, char **argv)
 {
     cgi_func_tab_t func[] = {
-        {"user_add", KEY_IS_FILE, NULL, NULL},
-        {"role_name_opt", KEY_IS_VAR, (void *)role_name_opt, NULL},
-        {"user_status_opt", KEY_IS_VAR, (void *)user_status_opt, NULL},
-        {"user_name", KEY_IS_VAR, NULL, (void *)add_user_to_db},
+        {"user_add",        KEY_IS_FILE, NULL,                   NULL},
+        {"role_name_opt",   KEY_IS_VAR,  NULL,                   (void *)role_name_opt},
+        {"user_status_opt", KEY_IS_VAR,  NULL,                   (void *)user_status_opt},
+        {"user_name",       KEY_IS_VAR,  (void *)add_user_to_db, NULL},
         {NULL}
     };
     cgi_t *cgi = NULL;

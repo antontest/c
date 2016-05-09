@@ -131,9 +131,9 @@ static int user_info(char *outbuf, char *errbuf, cgi_form_entry_t *entry)
 int main(int argc, char **argv)
 {
     cgi_func_tab_t func[] = {
-        {"user_admin_page", KEY_IS_FILE,   NULL,              NULL},
-        {"user_info",      KEY_IS_VAR,    (void *)user_info, (void *)user_info},
-        {NULL,              KEY_IS_UNKOWN, NULL,              NULL}
+        {"user_admin_page", KEY_IS_FILE,   NULL, NULL},
+        {"user_info",       KEY_IS_VAR,    NULL, (void *)user_info},
+        {NULL,              KEY_IS_UNKOWN, NULL, NULL}
     };
     cgi_t *cgi = NULL;
 
