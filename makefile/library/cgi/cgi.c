@@ -603,9 +603,11 @@ static int handle_plain_data(private_cgi_t *this, cgi_func_tab_t *func_tab)
     /**
      * upload other type files not binary files
      */
+    /*
     if (parse_comm_data(this) < 0 && cgi_req_method == REQUEST_METHOD_POST) {
         return -1;
     }
+    */
 
     /**
      * find this file action function callback
@@ -628,14 +630,14 @@ static int handle_plain_data(private_cgi_t *this, cgi_func_tab_t *func_tab)
      * parser data
      */
     for (; pfunc_tab->name != NULL && pfunc_tab->type != KEY_IS_FILE; pfunc_tab++) {
-        if (!pfunc_tab->set_func_cb) continue;
+        if (!pfunc_tab->get_func_cb) continue;
         bzero(cgi_input_buf, DFT_CGI_INPUT_BUF_SIZE);
         bzero(cgi_errmsg_buf, DFT_CGI_ERRMSG_BUF_SIZE);
 
         value = find_val(this, pfunc_tab->name);
         if (!value) continue;
 
-        if (pfunc_tab->set_func_cb(value, cgi_errmsg_buf, &cgi_form_entry) < 0 && 
+        if (pfunc_tab->get_func_cb(value, cgi_errmsg_buf, &cgi_form_entry) < 0 && 
             strlen(cgi_errmsg_buf) > 0) {
             ALERT("%s", cgi_errmsg_buf);
             if (pfunc_tab->err_func_cb) pfunc_tab->err_func_cb(cgi_input_buf, cgi_errmsg_buf, &cgi_form_entry); 
@@ -791,6 +793,10 @@ METHOD(cgi_t, parse_input_, int, private_cgi_t *this)
             break;
     }
 
+    /**
+     * parse data for cgi_this_file, cgi_next_file, cgi_file_name and so on
+     */
+    parse_comm_data(this);
     return 0;
 }
 
@@ -889,8 +895,8 @@ METHOD(cgi_t, handle_request_, int, private_cgi_t *this, cgi_func_tab_t *func_ta
                 continue;
             }
             if(strncmp(name, pfunc_tab->name, key_len)) continue;
-            if (!pfunc_tab->get_func_cb) continue;
-            ret = pfunc_tab->get_func_cb(cgi_output_buf, cgi_errmsg_buf, &cgi_form_entry);
+            if (!pfunc_tab->set_func_cb) continue;
+            ret = pfunc_tab->set_func_cb(cgi_output_buf, cgi_errmsg_buf, &cgi_form_entry);
             if (strlen(cgi_output_buf)) {
                 printf("%s", cgi_output_buf);
             }
@@ -906,8 +912,8 @@ METHOD(cgi_t, handle_request_, int, private_cgi_t *this, cgi_func_tab_t *func_ta
         *value_end_pos='\0';
         for (pfunc_tab = func_tab; pfunc_tab != NULL && pfunc_tab->name != NULL; pfunc_tab++) {
             if(strcmp(name, pfunc_tab->name)) continue;
-            if (!pfunc_tab->get_func_cb) continue;
-            ret = pfunc_tab->get_func_cb(cgi_output_buf, cgi_errmsg_buf, &cgi_form_entry);
+            if (!pfunc_tab->set_func_cb) continue;
+            ret = pfunc_tab->set_func_cb(cgi_output_buf, cgi_errmsg_buf, &cgi_form_entry);
             type = pfunc_tab->type;
             break;
         }
@@ -1050,7 +1056,6 @@ int send_file_to_brower(char *file)
         putc(c, stdout);
     }
     fflush(stdout);
-
     fclose(fp);
 
     return 0;

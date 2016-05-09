@@ -97,11 +97,34 @@ struct cgi_form_entry_t {
 
 typedef struct cgi_func_tab_t cgi_func_tab_t;
 struct cgi_func_tab_t {
+    /**
+     * key name 
+     */
     char *name;
+
+    /**
+     * key type: KEY_IS_FILE or KEY_IS_VAR
+     */
     key_type_t type;
+
+    /**
+     * when parsed from html request 
+     */
     int (*get_func_cb) (char *input, char *err_msg, cgi_form_entry_t *entry);
+
+    /**
+     * when set in html page
+     */
     int (*set_func_cb) (char *output, char *err_msg, cgi_form_entry_t *entry);
+
+    /**
+     * when errors happened
+     */
     int (*err_func_cb) (char *output, char *err_msg, cgi_form_entry_t *entry);
+
+    /**
+     * readable and writeable
+     */
     int readable;
     int writeable;
 };
