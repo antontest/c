@@ -4,9 +4,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sql3/sql3.h>
-#include <../cgi.h>
+#include "../cgi_common.h"
 
-#define USER_DATA_DB_PATH "/home/anton/web/html/db/user.db"
 static int role_id     = -1;
 static int user_status = -1;
 static int user_login(void *arg, int cnt, char **value, char **name)
