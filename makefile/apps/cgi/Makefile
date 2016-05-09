@@ -10,6 +10,7 @@ DIRS+= user_add
 DIRS+= user_detail
 DIRS+= user_delete
 DIRS+= user_update
+DIRS+= proc_show
 
 # target
 all install uninstall clean cleanall rebuild: $(DIRS)
