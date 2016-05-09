@@ -5,8 +5,8 @@
 #include <sql3/sql3.h>
 #include <cgi/cgi.h>
 #include <time.h>
+#include "../cgi_common.h"
 
-#define DATABASE_PATH "/home/anton/web/html/db/user.db"
 static int role_name_opt(char *outbuf, char *errbuf, cgi_form_entry_t *entry)
 {
     int row        = 0;
@@ -16,7 +16,7 @@ static int role_name_opt(char *outbuf, char *errbuf, cgi_form_entry_t *entry)
     sqlite_t *sql3 = NULL;
 
     sql3 = sqlite_create();
-    if (!sql3 || sql3->open(sql3, DATABASE_PATH) < 0) {
+    if (!sql3 || sql3->open(sql3, USER_DATA_DB_PATH) < 0) {
         return -1;
     }
 
@@ -51,7 +51,7 @@ static int user_status_opt(char *outbuf, char *errbuf, cgi_form_entry_t *entry)
     sqlite_t *sql3 = NULL;
 
     sql3 = sqlite_create();
-    if (!sql3 || sql3->open(sql3, DATABASE_PATH) < 0) {
+    if (!sql3 || sql3->open(sql3, USER_DATA_DB_PATH) < 0) {
         return -1;
     }
 
@@ -111,7 +111,7 @@ static int add_user_to_db(char *outbuf, char *errbuf, cgi_form_entry_t *entry)
     }
 
     sql3 = sqlite_create();
-    if (!sql3 || sql3->open(sql3, DATABASE_PATH) < 0) {
+    if (!sql3 || sql3->open(sql3, USER_DATA_DB_PATH) < 0) {
         return -1;
     }
     

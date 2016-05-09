@@ -4,8 +4,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sql3/sql3.h>
+#include <../cgi.h>
 
-#define DATABASE_PATH "/home/anton/web/html/db/user.db"
+#define USER_DATA_DB_PATH "/home/anton/web/html/db/user.db"
 static int role_id     = -1;
 static int user_status = -1;
 static int user_login(void *arg, int cnt, char **value, char **name)
@@ -38,7 +39,7 @@ void handle_login()
     }
 
     sql = sqlite_create();
-    if (access(DATABASE_PATH, R_OK) || sql->open(sql, DATABASE_PATH) < 0) {
+    if (access(USER_DATA_DB_PATH, R_OK) || sql->open(sql, USER_DATA_DB_PATH) < 0) {
         ALERT("数据库文件丢失!");
         HTML_GOTO("index.htm");
         return;

@@ -5,8 +5,8 @@
 #include <sql3/sql3.h>
 #include <cgi/cgi.h>
 #include <time.h>
+#include "../cgi_common.h"
 
-#define DATABASE_PATH "/home/anton/web/html/db/user.db"
 static int user_delete()
 {
     char *user_name   = NULL;
@@ -22,7 +22,7 @@ static int user_delete()
     }
 
     sql3 = sqlite_create();
-    if (!sql3 || sql3->open(sql3, DATABASE_PATH) < 0) {
+    if (!sql3 || sql3->open(sql3, USER_DATA_DB_PATH) < 0) {
         return -1;
     }
 

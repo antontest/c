@@ -4,6 +4,7 @@
 #include <string.h>
 #include <cgi/cgi.h>
 #include <sql3/sql3.h>
+#include "../cgi_common.h"
 
 #define head_div_style "position:absolute;top:%dpx;left:%dpx;width:%dpx;height:%dpx;font-family:\'Arial Negreta\', \'Arial\';font-weight:700;font-style:normal;text-align:center;"
 #define head_img_style "position:absolute;top:0px;left:0px;width:%dpx;height:%dpx;"
@@ -103,7 +104,6 @@ add_button:
     return 0;
 }
 
-#define DATABASE_PAtd  "/home/anton/web/html/db/user.db"
 static int user_info(char *outbuf, char *errbuf, cgi_form_entry_t *entry)
 {
     sqlite_t *sql3 = NULL;
@@ -116,7 +116,7 @@ static int user_info(char *outbuf, char *errbuf, cgi_form_entry_t *entry)
         return -1;
     }
 
-    if (sql3->open(sql3, DATABASE_PAtd) < 0) {
+    if (sql3->open(sql3, USER_DATA_DB_PATH) < 0) {
         ALERT("连接数据库失败");
         return -1;
     }
