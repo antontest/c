@@ -5,10 +5,11 @@ SHELL=/bin/bash
 DIRS=libxls
 # DIRS+=xlslib
 DIRS+=libxl
-DIRS+=boa
+# DIRS+=boa
 DIRS+=lighttpd
-DIRS+=mini_httpd
+# DIRS+=mini_httpd
 DIRS+=libsqlite3
+DIRS+=libxlsxwriter
 
 # target
 all install clean cleanall rebuild: $(DIRS)

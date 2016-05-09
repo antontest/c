@@ -21,13 +21,13 @@ USR_XL=/usr/lib/libxl.so
 test ! -L $USR_XL && sudo ln -sf $LOCAL_XL $USR_XL 
 
 # link libsqlite3 shared library 
-LOCAL_SQL=libsqlite3/sqlite3/.libs/libsqlite3.so.0.8.6
+LOCAL_SQL=`pwd`/libsqlite3/sqlite3/.libs/libsqlite3.so.0.8.6
 USR_SQL=/usr/lib/libsqlite3.so
 USR_SQL0=/usr/lib/libsqlite3.so.0
 test ! -L $USR_SQL0 && sudo ln -sf $LOCAL_SQL $USR_SQL0
 test ! -L $USR_SQL && sudo ln -sf $LOCAL_SQL $USR_SQL
 
 # link libsqlite3 static library 
-LOCAL_SQL=libsqlite3/sqlite3/.libs/libsqlite3.a
+LOCAL_SQL=`pwd`/libsqlite3/sqlite3/.libs/libsqlite3.a
 USR_SQL=/usr/lib/libsqlite3.la
 test ! -L $USR_SQL && sudo ln -sf $LOCAL_SQL $USR_SQL
