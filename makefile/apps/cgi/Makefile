@@ -11,6 +11,7 @@ DIRS+= user_detail
 DIRS+= user_delete
 DIRS+= user_update
 DIRS+= proc_show
+DIRS+= xls_upload
 
 # target
 all install uninstall clean cleanall rebuild: $(DIRS)
