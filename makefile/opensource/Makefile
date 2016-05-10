@@ -3,13 +3,13 @@ SHELL=/bin/bash
 
 # directory
 DIRS=libxls
-# DIRS+=xlslib
 DIRS+=libxl
-# DIRS+=boa
 DIRS+=lighttpd
-# DIRS+=mini_httpd
 DIRS+=libsqlite3
-DIRS+=libxlsxwriter
+# DIRS+=xlslib
+# DIRS+=boa
+# DIRS+=mini_httpd
+# DIRS+=libxlsxwriter
 
 # target
 all install clean cleanall rebuild: $(DIRS)

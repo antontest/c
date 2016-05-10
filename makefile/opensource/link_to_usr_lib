@@ -31,3 +31,13 @@ test ! -L $USR_SQL && sudo ln -sf $LOCAL_SQL $USR_SQL
 LOCAL_SQL=`pwd`/libsqlite3/sqlite3/.libs/libsqlite3.a
 USR_SQL=/usr/lib/libsqlite3.la
 test ! -L $USR_SQL && sudo ln -sf $LOCAL_SQL $USR_SQL
+
+# link libsql3 static library 
+LOCAL_SQL=`pwd`/../library/sql3/libsql3.so
+USR_SQL=/usr/lib/libsqle3.so
+test ! -L $USR_SQL && sudo ln -sf $LOCAL_SQL $USR_SQL
+
+# link librwxls static library 
+LOCAL_SQL=`pwd`/../library/xls/librwxls.so
+USR_SQL=/usr/lib/librwxls.so
+test ! -L $USR_SQL && sudo ln -sf $LOCAL_SQL $USR_SQL
