@@ -10,7 +10,7 @@ DIRS+= user_add
 DIRS+= user_detail
 DIRS+= user_delete
 DIRS+= user_update
-DIRS+= proc_show
+DIRS+= proc_maintain
 DIRS+= xls_upload
 
 # target
