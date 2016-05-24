@@ -1063,5 +1063,9 @@ int send_file_to_brower(char *file)
 
 char *find_value(const char *name)
 {
+    if (!private_data) {
+        return NULL;
+    }
+
     return find_val(private_data, (char *)name);
 }
