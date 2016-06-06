@@ -6,6 +6,7 @@ DIRS=libxls
 DIRS+=libxl
 DIRS+=lighttpd
 DIRS+=libsqlite3
+DIRS+=libxml2
 # DIRS+=xlslib
 # DIRS+=boa
 # DIRS+=mini_httpd
