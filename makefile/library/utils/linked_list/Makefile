@@ -85,10 +85,11 @@ $(CPPOBJ) : %.o : %.cpp
 	$(XX) $(COMPILE)
 $(OUTDIR) :  
 	if test -n "$(OUTDIR)" ; then $(MKDIR) -p $(OUTDIR) ; fi
-$(TARGET) : $(OUTDIR) $(COBJ) $(CPPOBJ)
+LINK:
+	-test ! -L $(LN_TO_INC) && ln -sf $(LN_FROM_INC) $(LN_TO_INC)
+	-test ! -L $(LN_TO_TARGET) && ln -sf $(LN_FROM_TARGET) $(LN_TO_TARGET)
+$(TARGET) : $(OUTDIR) LINK $(COBJ) $(CPPOBJ)
 	$(LINK)
-	-$(shell test ! -L $(LN_TO_INC) && ln -sf $(LN_FROM_INC) $(LN_TO_INC))
-	-$(shell test ! -L $(LN_TO_TARGET) && ln -sf $(LN_FROM_TARGET) $(LN_TO_TARGET))
 include $(CDEF)
 include $(CPPDEF)
 

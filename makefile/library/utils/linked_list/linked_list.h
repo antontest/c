@@ -5,7 +5,7 @@
 
 #ifndef __LINKED_LIST_H_
 #define __LINKED_LIST_H_
-#include "enumerator.h"
+#include <linked_list/enumerator.h>
 #include <utils/utils.h>
 
 typedef struct linked_list_t linked_list_t;
