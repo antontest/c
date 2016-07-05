@@ -9,7 +9,7 @@ CURR_DIR=$(shell pwd)
 # target
 all: ${DIRS}
 	@echo "cd ${DIRS}"
-	-test ! -f ${DIRS} && cd ${DIRS} && ./bootstrap && ./configure
+	-test ! -f ${DIRS}/Makefile && cd ${DIRS} && ./bootstrap && ./configure
 	-cd ${DIRS} && make
 	-$(shell test ! -f ../../libs/libxlsreader.so && ln -sf ${CURR_DIR}/libxls/src/.libs/libxlsreader.so.1.4.0 ../../libs/libxlsreader.so)
 	-$(shell test ! -f ../../incs/libxls/ && ln -sf ${CURR_DIR}/libxls/include/libxls ../../incs/)
