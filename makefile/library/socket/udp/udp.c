@@ -37,16 +37,26 @@ struct private_udp_t {
 METHOD(udp_t, socket_, int, private_udp_t *this, int family)
 {
     /**
-     * create socket
+     * close socket if created
      */
     if (udp_fd > 0) close(udp_fd);
-    udp_fd = socket(family, SOCK_DGRAM, 0);
+
+    /**
+     * save family
+     */
+    if (family >= 0) {
+        udp_famliy = family;
+    }
+
+    /**
+     * create udp socket instance
+     */
+    udp_fd = socket(udp_famliy, SOCK_DGRAM, 0);
     if (udp_fd < 0) {
         perror("socket()");
         return -1;
     }
 
-    udp_famliy = family;
     return udp_fd;
 }
 
