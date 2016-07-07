@@ -73,8 +73,13 @@ int main(int argc, char **argv)
         ret = udp->bind(udp, ip, port);
         if (ret < 0) goto over;
 
-        ret = udp->recvfrom(udp, buf, sizeof(buf), remote_ip, 0);
-        if (ret > 0) printf("%s\n", buf);
+        if (times <= 0) {
+            times = 0x9999;   
+        }
+        while (times-- > 0) {
+            ret = udp->recvfrom(udp, buf, sizeof(buf), remote_ip, 0);
+            if (ret > 0) printf("%s\n", buf);
+        }
     }
 
 
