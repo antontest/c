@@ -99,7 +99,7 @@ static int xls_change_data(char *outbuf, char *errbuf, cgi_form_entry_t *entry)
 int main(int argc, char **argv)
 {
     cgi_func_tab_t func[] = {
-        {"proc_maintain",             KEY_IS_FILE, (void *)xls_file,        NULL},
+        {"proc_maintain",   KEY_IS_FILE, (void *)xls_file,        NULL},
         {"xls_data",        KEY_IS_VAR,  NULL,                    (void *)xls_data},
         {"xls_change_data", KEY_IS_VAR,  (void *)xls_change_data, NULL},
         {NULL}
