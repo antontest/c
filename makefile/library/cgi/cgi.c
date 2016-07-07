@@ -168,23 +168,23 @@ static int get_cgi_env_info(private_cgi_t *this)
     char *boundary = NULL;
     char *multipart = NULL;
 
-    cgi_get_env("SERVER_SOFTWARE", &cgi_form_info.server_software);
-    cgi_get_env("SERVER_NAME", &cgi_form_info.server_name);
-    cgi_get_env("SERVER_PROTOCOL", &cgi_form_info.server_protocol);
-    cgi_get_env("SERVER_PORT", &cgi_form_info.server_port);
+    cgi_get_env("SERVER_SOFTWARE",   &cgi_form_info.server_software);
+    cgi_get_env("SERVER_NAME",       &cgi_form_info.server_name);
+    cgi_get_env("SERVER_PROTOCOL",   &cgi_form_info.server_protocol);
+    cgi_get_env("SERVER_PORT",       &cgi_form_info.server_port);
     cgi_get_env("GATEWAY_INTERFACE", &cgi_form_info.gateway_interface);
-    cgi_get_env("REQUEST_METHOD", &cgi_form_info.request_method);
-    cgi_get_env("PATH_INFO", &cgi_form_info.path_info);
-    cgi_get_env("PATH_TRANSLATED", &cgi_form_info.path_translated);
-    cgi_get_env("SCRIPT_NAME", &cgi_form_info.script_name);
-    cgi_get_env("QUERY_STRING", &cgi_form_info.query_string);
-    cgi_get_env("REMOTE_HOST", &cgi_form_info.remote_host);
-    cgi_get_env("REMOTE_ADDR", &cgi_form_info.remote_addr);
-    cgi_get_env("REMOTE_USER", &cgi_form_info.remote_user);
-    cgi_get_env("REMOTE_IDENT", &cgi_form_info.remote_ident);
-    cgi_get_env("AUTH_TYPE", &cgi_form_info.auth_type);
-    cgi_get_env("CONTENT_TYPE", &cgi_form_info.content_type);
-    cgi_get_env("CONTENT_LENGTH", &cgi_form_info.content_length);
+    cgi_get_env("REQUEST_METHOD",    &cgi_form_info.request_method);
+    cgi_get_env("PATH_INFO",         &cgi_form_info.path_info);
+    cgi_get_env("PATH_TRANSLATED",   &cgi_form_info.path_translated);
+    cgi_get_env("SCRIPT_NAME",       &cgi_form_info.script_name);
+    cgi_get_env("QUERY_STRING",      &cgi_form_info.query_string);
+    cgi_get_env("REMOTE_HOST",       &cgi_form_info.remote_host);
+    cgi_get_env("REMOTE_ADDR",       &cgi_form_info.remote_addr);
+    cgi_get_env("REMOTE_USER",       &cgi_form_info.remote_user);
+    cgi_get_env("REMOTE_IDENT",      &cgi_form_info.remote_ident);
+    cgi_get_env("AUTH_TYPE",         &cgi_form_info.auth_type);
+    cgi_get_env("CONTENT_TYPE",      &cgi_form_info.content_type);
+    cgi_get_env("CONTENT_LENGTH",    &cgi_form_info.content_length);
     
     multipart = strstr(cgi_form_info.content_type, "multipart/form-data");
     if (multipart) {
@@ -702,8 +702,10 @@ METHOD(cgi_t, get_req_method_, request_method_t, private_cgi_t *this)
 {
     if (!strcasecmp(cgi_form_info.request_method, "POST")) {
         cgi_req_method = REQUEST_METHOD_POST;
-    } else {
+    } else if (!strcasecmp(cgi_form_info.request_method, "GET")) {
         cgi_req_method = REQUEST_METHOD_GET;
+    } else {
+        cgi_req_method = REQUEST_METHOD_UNKOWN;
     }
 
     return cgi_req_method;
