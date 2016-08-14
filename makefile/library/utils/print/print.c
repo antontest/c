@@ -180,8 +180,11 @@ METHOD(menu_t, get_choice, int, private_menu_t *this, int choices[], int *size)
         *size = 0;
         return 1;
     }
-    result = strtok(buf, " ");
 
+    /**
+     * parser input choice
+     */
+    result = strtok(buf, " ");
     while (result) {
         input_choice = atoi(result);
         if (input_choice >= this->start_index && input_choice < this->start_index + this->choice_count) {
@@ -192,7 +195,7 @@ METHOD(menu_t, get_choice, int, private_menu_t *this, int choices[], int *size)
                 choices[input_index++] = input_choice;
             }
         } else {
-            printf("No such choice!\n");
+            // printf("No such choice!\n");
             return 1;
         }
 
