@@ -6,6 +6,7 @@
 
 int main(int argc, char **argv)
 {
+#if 0
     menu_t *menu = NULL;
     int choice[5] = {0};
     int size = sizeof(choice);
@@ -21,8 +22,24 @@ int main(int argc, char **argv)
         printf("%d | ", choice[size]);
     }
     printf("\n");
-
     menu->destroy(menu);
+#endif
+
+    table_t *table = NULL;
+
+    table = table_create();
+    table->init_table(table, "Digest Test",
+        "Name", "%s", 10,
+        "age", "%d", 4,
+        "info", "%s", 7,
+        NULL);
+    table->show_row(table, 
+        "anton", 23, "6.05",
+        NULL);
+    table->show_row(table, 
+        "antonio", 25, "3336.05",
+        NULL);
+    table->destroy(table);
 
     return 0;
 }

@@ -24,7 +24,7 @@ struct menu_t  {
      *
      * @param ... [in] menu
      */
-    void (*show_menu) (menu_t *this, ...);
+   void (*show_menu) (menu_t *this, ...);
     
     /**
      * @brief get choices from stdin
@@ -48,5 +48,33 @@ struct menu_t  {
  * @brief create menu instance
  */
 menu_t *menu_create();
+
+typedef struct table_t table_t;
+struct table_t {
+    /**
+     * @brief init table
+     *
+     * @param header [in] header of table
+     * @param ... [in] colum infor
+     */
+    int (*init_table) (table_t *this, char *header, ...);    
+
+    /**
+     * @brief show one line
+     *
+     * @param ... [in] line info
+     */
+    void (*show_row) (table_t *this, ...);
+
+    /**
+     * @brief destroy instance and free memory
+     */
+    void (*destroy) (table_t *this);
+};
+
+/**
+ * @brief create table instance
+ */
+table_t *table_create();
 
 #endif /* __PRINT_H__ */
