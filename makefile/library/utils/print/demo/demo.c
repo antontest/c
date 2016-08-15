@@ -25,7 +25,7 @@ int main(int argc, char **argv)
     menu->destroy(menu);
 #endif
 
-#if 1
+#if 0
     table_t *table = NULL;
 
     table = table_create();
@@ -51,16 +51,18 @@ int main(int argc, char **argv)
     table->destroy(table);
 #endif
 
-#if 0
+#if 1
     printf("\033[31m\033[1maaa\033[33maa\033[0m\n");
-    cprintf("[r]red[y]yellow[g]green[n][b]%s[n]\n", "blue");
+    cprintf("[r]red[y]yellow[g]green[n][b]%s[n][c]cyan[p]pink[n]\n", "blue");
 
-
+#if 0
     printf("%-10s", "SM1_EBC");
     fflush(stdout);
     sleep(4);
     printf("%-8s\n", "OK");
     fflush(stdout);
+#endif
+
 #endif
 
     return 0;

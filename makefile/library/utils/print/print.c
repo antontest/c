@@ -489,7 +489,7 @@ enum color_id_t {
     COLOR_ID_YELLOW ,
     COLOR_ID_BLUE   ,
     COLOR_ID_PINK   ,
-    COLOR_ID_QING   ,
+    COLOR_ID_CYAN   ,
     COLOR_ID_WHITE  ,
     COLOR_ID_NORMAL 
 };
@@ -502,7 +502,7 @@ enum color_key_t {
     COLOR_KEY_YELLOW = 'y',
     COLOR_KEY_BLUE   = 'b',
     COLOR_KEY_PINK   = 'p',
-    COLOR_KEY_QING   = 'q',
+    COLOR_KEY_CYAN   = 'c',
     COLOR_KEY_WHITE  = 'w',
     COLOR_KEY_NORMAL = 'n'
 };
@@ -514,7 +514,7 @@ static color_info_t clr_info[] = {
     {COLOR_ID_YELLOW, COLOR_KEY_YELLOW, "\033[33m"},
     {COLOR_ID_BLUE,   COLOR_KEY_BLUE,   "\033[34m"},
     {COLOR_ID_PINK,   COLOR_KEY_PINK,   "\033[35m"},
-    {COLOR_ID_QING,   COLOR_KEY_QING,   "\033[36m"},
+    {COLOR_ID_CYAN,   COLOR_KEY_CYAN,   "\033[36m"},
     {COLOR_ID_WHITE,  COLOR_KEY_WHITE,  "\033[37m"},
     {COLOR_ID_NORMAL, COLOR_KEY_NORMAL, "\033[0m" },
 };
@@ -527,6 +527,7 @@ static char *parser_format(char *fmt)
     int  status   = COLOR_STATUS_STAERT;
     int  clr_cnt  = 0;
     int  len      = 0;
+    int  color_id = 0;
 
     while (*p != '\0') {
         len++;
@@ -544,7 +545,7 @@ static char *parser_format(char *fmt)
                     case COLOR_KEY_YELLOW:
                     case COLOR_KEY_BLUE:
                     case COLOR_KEY_PINK:
-                    case COLOR_KEY_QING:
+                    case COLOR_KEY_CYAN:
                     case COLOR_KEY_WHITE:
                     case COLOR_KEY_NORMAL:
                         status = COLOR_STATUS_END;
@@ -590,56 +591,40 @@ static char *parser_format(char *fmt)
             case COLOR_STATUS_PASER:
                 switch (*p) {
                     case COLOR_KEY_BLACK:
-                        len = sprintf(presult - 1, "%s", clr_info[COLOR_ID_BLACK].value);
-                        presult += len - 1;
-                        status = COLOR_STATUS_END;
+                        color_id = COLOR_ID_BLACK;
                         break;
                     case COLOR_KEY_RED:
-                        printf("value: %s\n", clr_info[COLOR_ID_RED].value);
-                        len = sprintf(presult - 1, "%s", clr_info[COLOR_ID_RED].value);
-                        presult += len - 1;
-                        status = COLOR_STATUS_END;
+                        color_id = COLOR_ID_RED;
                         break;
                     case COLOR_KEY_GREEN:
-                        len = sprintf(presult - 1, "%s", clr_info[COLOR_ID_GREEN].value);
-                        presult += len - 1;
-                        status = COLOR_STATUS_END;
+                        color_id = COLOR_ID_GREEN;
                         break;
                     case COLOR_KEY_YELLOW:
-                        len = sprintf(presult - 1, "%s", clr_info[COLOR_ID_YELLOW].value);
-                        presult += len - 1;
-                        status = COLOR_STATUS_END;
+                        color_id = COLOR_ID_YELLOW;
                         break;
                     case COLOR_KEY_BLUE:
-                        len = sprintf(presult - 1, "%s", clr_info[COLOR_ID_BLUE].value);
-                        presult += len - 1;
-                        status = COLOR_STATUS_END;
+                        color_id = COLOR_ID_BLUE;
                         break;
                     case COLOR_KEY_PINK:
-                        len = sprintf(presult - 1, "%s", clr_info[COLOR_ID_PINK].value);
-                        presult += len - 1;
-                        status = COLOR_STATUS_END;
+                        color_id = COLOR_ID_PINK;
                         break;
-                    case COLOR_KEY_QING:
-                        len = sprintf(presult - 1, "%s", clr_info[COLOR_ID_QING].value);
-                        presult += len - 1;
-                        status = COLOR_STATUS_END;
+                    case COLOR_KEY_CYAN:
+                        color_id = COLOR_ID_CYAN;
                         break;
                     case COLOR_KEY_WHITE:
-                        len = sprintf(presult - 1, "%s", clr_info[COLOR_ID_WHITE].value);
-                        presult += len - 1;
-                        status = COLOR_STATUS_END;
+                        color_id = COLOR_ID_WHITE;
                         break;
                     case COLOR_KEY_NORMAL:
-                        len = sprintf(presult - 1, "%s", clr_info[COLOR_ID_NORMAL].value);
-                        presult += len - 1;
-                        status = COLOR_STATUS_END;
+                        color_id = COLOR_ID_NORMAL;
                         break;
                     default:
                         *presult++ = *p;
-                        status = COLOR_STATUS_STAERT;
                         break;
                 }
+
+                len = sprintf(presult - 1, "%s", clr_info[color_id].value);
+                presult += len - 1;
+                status = COLOR_STATUS_END;
                 break;
             case COLOR_STATUS_END:
                 status = COLOR_STATUS_STAERT;
