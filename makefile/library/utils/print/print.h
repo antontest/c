@@ -17,7 +17,7 @@ struct menu_t  {
      * @param start_index [in] start index for menu 
      * @param is_support_multi_selected [in] is_support_multi_selected
      */
-    void (*init_menu) (menu_t *this, char *header, unsigned int start_index, unsigned int is_support_multi_selected);
+    void (*init_menu) (menu_t *this, unsigned int menu_width, char *header, unsigned int start_index, unsigned int is_support_multi_selected);
 
     /**
      * @brief show menu
@@ -67,6 +67,13 @@ struct table_t {
     void (*show_row) (table_t *this, ...);
 
     /**
+     * @brief show one colum
+     *
+     * @param ...
+     */
+    void (*show_column) (table_t *this, ...);
+
+    /**
      * @brief destroy instance and free memory
      */
     void (*destroy) (table_t *this);
@@ -77,4 +84,11 @@ struct table_t {
  */
 table_t *table_create();
 
+/**
+ * @brief color print
+ *
+ * @param fmt [in] printf format
+ * @param ... [in]
+ */
+void cprintf(char *fmt, ...);
 #endif /* __PRINT_H__ */

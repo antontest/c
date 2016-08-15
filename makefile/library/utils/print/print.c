@@ -52,7 +52,7 @@ struct private_menu_t {
     unsigned int is_support_multi_selected;
 };
 
-METHOD(menu_t, init_menu_, void, private_menu_t *this, char *header, unsigned int start_index, unsigned int is_support_multi_selected)
+METHOD(menu_t, init_menu_, void, private_menu_t *this, unsigned int menu_width, char *header, unsigned int start_index, unsigned int is_support_multi_selected)
 {
     if (header) {
         this->header = header;
@@ -64,6 +64,8 @@ METHOD(menu_t, init_menu_, void, private_menu_t *this, char *header, unsigned in
     if (is_support_multi_selected >= 1) {
         this->is_support_multi_selected = 1;
     }
+
+    this->menu_width = menu_width;
 }
 
 static void print_separator(char separator, int width)
@@ -180,11 +182,9 @@ METHOD(menu_t, get_choice, int, private_menu_t *this, int choices[], int *size)
         *size = 0;
         return 1;
     }
-
-    /**
-     * parser input choice
-     */
     result = strtok(buf, " ");
+
+    memset(choices, -1, sizeof(int) * *size);
     while (result) {
         input_choice = atoi(result);
         if (input_choice >= this->start_index && input_choice < this->start_index + this->choice_count) {
@@ -270,7 +270,12 @@ struct private_table_t {
     /**
      * @brief fmt length
      */
-    int fmt_len;
+    int len;
+    
+    /**
+     * @brief ponter to fmt
+     */
+    char *cur;
 };
 
 static int number_len(int n)
@@ -290,7 +295,6 @@ METHOD(table_t, init_table_, int, private_table_t *this, char *header, ...)
     char    *col        = NULL, *type = NULL;
     int     width       = 0;
     int     total_width = 0;
-    int     col_index   = 0;
     int     len         = 0;
     char    last_ch     = '0';
     char    *pfmt       = NULL;
@@ -314,7 +318,7 @@ METHOD(table_t, init_table_, int, private_table_t *this, char *header, ...)
         }
 
         width = va_arg(list, int);
-        this->fmt_len += strlen(type) + number_len(width) + 2;
+        this->len += strlen(type) + number_len(width) + 2;
 
         total_width += width + 1;
         this->col_cnt++;
@@ -329,13 +333,13 @@ METHOD(table_t, init_table_, int, private_table_t *this, char *header, ...)
     if (!this->col_width) {
         return 1;
     }
-    this->fmt = (char *)malloc(this->fmt_len);
+    this->fmt = (char *)malloc(this->len);
     if (!this->fmt) {
         return 1;
     }
     memset(this->col_width, 0, this->col_cnt * sizeof(int));
     memset(this->fmt,       0, this->col_cnt);
-    pfmt = this->fmt;
+    pfmt = this->cur = this->fmt;
 
     /**
      * print table header
@@ -344,7 +348,7 @@ METHOD(table_t, init_table_, int, private_table_t *this, char *header, ...)
     if (total_width < len) {
         total_width = len;
     }
-    printf("\033[1m%*s\n", len + (total_width - len) / 2, header);
+    printf("\033[1;39m%*s\n", len + (total_width - len) / 2, header);
 
     /**
      * print separator
@@ -402,6 +406,38 @@ METHOD(table_t, show_row_, void, private_table_t *this, ...)
     printf("\n");
 }
 
+METHOD(table_t, show_column_, void, private_table_t *this, ...)
+{
+    va_list list = NULL;
+    char *fmt_start = NULL;
+    char ch         = '\0';
+
+    if (*this->cur == '\0' || !this->cur) {
+        this->cur = this->fmt;
+    }
+
+    fmt_start = this->cur;
+    if (*this->cur == '%') {
+        this->cur++;
+    }
+
+    while ((ch = *this->cur++) != '\0') {
+        if (ch == '%') {
+            break;
+        }
+    }
+
+    *(--this->cur) = '\0';
+    va_start(list, this);
+    vprintf(fmt_start, list);
+    va_end(list);
+
+    *this->cur = ch;
+    if (ch == '\0') {
+        printf("\n");
+    }
+}
+
 METHOD(table_t, table_destroy_, void, private_table_t *this)
 {
     if (this->col_width) {
@@ -419,9 +455,10 @@ table_t *table_create()
 
     INIT(this,
         .public = {
-            .init_table = _init_table_,
-            .show_row   = _show_row_,
-            .destroy    = _table_destroy_,
+            .init_table  = _init_table_,
+            .show_row    = _show_row_,
+            .show_column = _show_column_,
+            .destroy     = _table_destroy_,
         },
         .col_cnt   = 0,
         .col_width = NULL,
@@ -429,4 +466,208 @@ table_t *table_create()
     );
 
     return &this->public;
+}
+
+typedef enum color_status_t color_status_t;
+enum color_status_t {
+    COLOR_STATUS_STAERT = 1,
+    COLOR_STATUS_PASER,
+    COLOR_STATUS_END
+};
+
+typedef struct color_info_t color_info_t;
+struct color_info_t {
+    int id;
+    char key;
+    char *value;
+};
+typedef enum color_id_t color_id_t;
+enum color_id_t {
+    COLOR_ID_BLACK  = 0,
+    COLOR_ID_RED    ,
+    COLOR_ID_GREEN  ,
+    COLOR_ID_YELLOW ,
+    COLOR_ID_BLUE   ,
+    COLOR_ID_PINK   ,
+    COLOR_ID_QING   ,
+    COLOR_ID_WHITE  ,
+    COLOR_ID_NORMAL 
+};
+
+typedef enum color_key_t color_key_t;
+enum color_key_t {
+    COLOR_KEY_BLACK  = 'h',
+    COLOR_KEY_RED    = 'r',
+    COLOR_KEY_GREEN  = 'g',
+    COLOR_KEY_YELLOW = 'y',
+    COLOR_KEY_BLUE   = 'b',
+    COLOR_KEY_PINK   = 'p',
+    COLOR_KEY_QING   = 'q',
+    COLOR_KEY_WHITE  = 'w',
+    COLOR_KEY_NORMAL = 'n'
+};
+
+static color_info_t clr_info[] = {
+    {COLOR_ID_BLACK,  COLOR_KEY_BLACK,  "\033[30m"},
+    {COLOR_ID_RED,    COLOR_KEY_RED,    "\033[31m"},
+    {COLOR_ID_GREEN,  COLOR_KEY_GREEN,  "\033[32m"},
+    {COLOR_ID_YELLOW, COLOR_KEY_YELLOW, "\033[33m"},
+    {COLOR_ID_BLUE,   COLOR_KEY_BLUE,   "\033[34m"},
+    {COLOR_ID_PINK,   COLOR_KEY_PINK,   "\033[35m"},
+    {COLOR_ID_QING,   COLOR_KEY_QING,   "\033[36m"},
+    {COLOR_ID_WHITE,  COLOR_KEY_WHITE,  "\033[37m"},
+    {COLOR_ID_NORMAL, COLOR_KEY_NORMAL, "\033[0m" },
+};
+
+static char *parser_format(char *fmt)
+{
+    char *p       = fmt;
+    char *result  = NULL;
+    char *presult = NULL;
+    int  status   = COLOR_STATUS_STAERT;
+    int  clr_cnt  = 0;
+    int  len      = 0;
+
+    while (*p != '\0') {
+        len++;
+        switch (status) {
+            case COLOR_STATUS_STAERT:
+                if (*p == '[') {
+                    status = COLOR_STATUS_PASER;
+                }
+                break;
+            case COLOR_STATUS_PASER:
+                switch (*p) {
+                    case COLOR_KEY_BLACK:
+                    case COLOR_KEY_RED:
+                    case COLOR_KEY_GREEN:
+                    case COLOR_KEY_YELLOW:
+                    case COLOR_KEY_BLUE:
+                    case COLOR_KEY_PINK:
+                    case COLOR_KEY_QING:
+                    case COLOR_KEY_WHITE:
+                    case COLOR_KEY_NORMAL:
+                        status = COLOR_STATUS_END;
+                        break;
+                    default:
+                        status = COLOR_STATUS_STAERT;
+                        break;
+                }
+                break;
+            case COLOR_STATUS_END:
+                clr_cnt++;
+                status = COLOR_STATUS_STAERT;
+                break;
+            default:
+                break;
+        }
+        p++;
+    }
+
+    /**
+     * malloc memory for format
+     */
+    len = clr_cnt * 8 + len - clr_cnt * 3 + 1;
+    result = (char *)malloc(len);
+    if (!result) {
+        return NULL;
+    }
+    memset(result, 0, len);
+    presult = result;
+
+    /**
+     * parser format
+     */
+    p = fmt;
+    while (*p != '\0') {
+        switch (status) {
+            case COLOR_STATUS_STAERT:
+                if (*p == '[') {
+                    status = COLOR_STATUS_PASER;
+                }
+                *presult++ = *p;
+                break;
+            case COLOR_STATUS_PASER:
+                switch (*p) {
+                    case COLOR_KEY_BLACK:
+                        len = sprintf(presult - 1, "%s", clr_info[COLOR_ID_BLACK].value);
+                        presult += len - 1;
+                        status = COLOR_STATUS_END;
+                        break;
+                    case COLOR_KEY_RED:
+                        printf("value: %s\n", clr_info[COLOR_ID_RED].value);
+                        len = sprintf(presult - 1, "%s", clr_info[COLOR_ID_RED].value);
+                        presult += len - 1;
+                        status = COLOR_STATUS_END;
+                        break;
+                    case COLOR_KEY_GREEN:
+                        len = sprintf(presult - 1, "%s", clr_info[COLOR_ID_GREEN].value);
+                        presult += len - 1;
+                        status = COLOR_STATUS_END;
+                        break;
+                    case COLOR_KEY_YELLOW:
+                        len = sprintf(presult - 1, "%s", clr_info[COLOR_ID_YELLOW].value);
+                        presult += len - 1;
+                        status = COLOR_STATUS_END;
+                        break;
+                    case COLOR_KEY_BLUE:
+                        len = sprintf(presult - 1, "%s", clr_info[COLOR_ID_BLUE].value);
+                        presult += len - 1;
+                        status = COLOR_STATUS_END;
+                        break;
+                    case COLOR_KEY_PINK:
+                        len = sprintf(presult - 1, "%s", clr_info[COLOR_ID_PINK].value);
+                        presult += len - 1;
+                        status = COLOR_STATUS_END;
+                        break;
+                    case COLOR_KEY_QING:
+                        len = sprintf(presult - 1, "%s", clr_info[COLOR_ID_QING].value);
+                        presult += len - 1;
+                        status = COLOR_STATUS_END;
+                        break;
+                    case COLOR_KEY_WHITE:
+                        len = sprintf(presult - 1, "%s", clr_info[COLOR_ID_WHITE].value);
+                        presult += len - 1;
+                        status = COLOR_STATUS_END;
+                        break;
+                    case COLOR_KEY_NORMAL:
+                        len = sprintf(presult - 1, "%s", clr_info[COLOR_ID_NORMAL].value);
+                        presult += len - 1;
+                        status = COLOR_STATUS_END;
+                        break;
+                    default:
+                        *presult++ = *p;
+                        status = COLOR_STATUS_STAERT;
+                        break;
+                }
+                break;
+            case COLOR_STATUS_END:
+                status = COLOR_STATUS_STAERT;
+                break;
+            default:
+                break;
+        }
+        p++;
+    }
+    
+    return result;
+}
+
+/**
+ * @brief color print
+ *
+ * @param fmt [in] printf format
+ * @param ... [in]
+ */
+void cprintf(char *fmt, ...)
+{
+    va_list list  = NULL;
+    char *new_fmt = NULL;
+    new_fmt = parser_format(fmt);
+
+    va_start(list, fmt);
+    vprintf(new_fmt, list);
+    va_end(list);
+
+    free(new_fmt);
 }
