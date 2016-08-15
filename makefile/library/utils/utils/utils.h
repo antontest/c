@@ -328,7 +328,7 @@ void memxor(unsigned char dest[], unsigned char src[], unsigned int n);
 /**
  * Safely overwrite n bytes of memory at ptr with zero, inlining variant.
  */
- void memwipe_inline(void *ptr, unsigned int n);
+ void memwipe_(void *ptr, unsigned int n);
 
 /**
  * Safely overwrite n bytes of memory at ptr with zero, auto-inlining variant.
@@ -347,7 +347,7 @@ void memwipe_no(void *ptr, unsigned int n);
  */
 char *ip_netmask(char *ip, int netmask);
 
-void memwipe_noinline(void *ptr, unsigned int n);
+void memwipe_no(void *ptr, unsigned int n);
 
 #endif
 

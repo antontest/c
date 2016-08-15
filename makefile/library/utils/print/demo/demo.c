@@ -25,7 +25,7 @@ int main(int argc, char **argv)
     menu->destroy(menu);
 #endif
 
-#if 0
+#if 1
     table_t *table = NULL;
 
     table = table_create();
@@ -51,7 +51,7 @@ int main(int argc, char **argv)
     table->destroy(table);
 #endif
 
-#if 1
+#if 0
     printf("\033[31m\033[1maaa\033[33maa\033[0m\n");
     cprintf("[r]red[y]yellow[g]green[n][b]%s[n][c]cyan[p]pink[n]\n", "blue");
 

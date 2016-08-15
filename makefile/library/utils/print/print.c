@@ -348,7 +348,11 @@ METHOD(table_t, init_table_, int, private_table_t *this, char *header, ...)
     if (total_width < len) {
         total_width = len;
     }
+#ifndef _WIN32
     printf("\033[1;39m%*s\n", len + (total_width - len) / 2, header);
+#else 
+    printf("%*s\n", len + (total_width - len) / 2, header);
+#endif
 
     /**
      * print separator
@@ -391,7 +395,12 @@ METHOD(table_t, init_table_, int, private_table_t *this, char *header, ...)
         printf("%*s ", width, col);
     }
     va_end(list);
+
+#ifndef _WIN32
     printf("\033[0m\n");
+#else 
+    printf("\n");
+#endif
 
     return 0;
 }

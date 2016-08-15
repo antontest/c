@@ -9,7 +9,7 @@
 /**
  * Helper function that compares two strings for equality
  */
-inline bool streq(const char *x, const char *y)
+ bool streq(const char *x, const char *y)
 {
     return strcmp(x, y) == 0;
 }
@@ -17,7 +17,7 @@ inline bool streq(const char *x, const char *y)
 /**
  * Helper function that compares two strings for equality, length limited
  */
-inline bool strneq(const char *x, const char *y, unsigned int len)
+ bool strneq(const char *x, const char *y, unsigned int len)
 {
     return strncmp(x, y, len) == 0;
 }
@@ -25,7 +25,7 @@ inline bool strneq(const char *x, const char *y, unsigned int len)
 /**
  * Helper function that checks if a string starts with a given prefix
  */
-inline bool strpfx(const char *x, const char *prefix)
+ bool strpfx(const char *x, const char *prefix)
 {
     return strneq(x, prefix, strlen(prefix));
 }
@@ -33,7 +33,7 @@ inline bool strpfx(const char *x, const char *prefix)
 /**
  * Helper function that compares two strings for equality ignoring case
  */
-inline bool strcaseeq(const char *x, const char *y)
+ bool strcaseeq(const char *x, const char *y)
 {
     return strcasecmp(x, y) == 0;
 }
@@ -41,7 +41,7 @@ inline bool strcaseeq(const char *x, const char *y)
 /**
  * Helper function that compares two strings for equality ignoring case, length limited
  */
-inline bool strncaseeq(const char *x, const char *y, unsigned int len)
+ bool strncaseeq(const char *x, const char *y, unsigned int len)
 {
     return strncasecmp(x, y, len) == 0;
 }
@@ -49,7 +49,7 @@ inline bool strncaseeq(const char *x, const char *y, unsigned int len)
 /**
  * NULL-safe strdup variant
  */
-inline char *strdupnull(const char *s)
+ char *strdupnull(const char *s)
 {
     return s ? strdup(s) : NULL;
 }
@@ -57,7 +57,7 @@ inline char *strdupnull(const char *s)
 /**
  * Helper function that compares two binary blobs for equality
  */
-inline bool memeq(const void *x, const void *y, unsigned int len)
+ bool memeq(const void *x, const void *y, unsigned int len)
 {
     return memcmp(x, y, len) == 0;
 }
@@ -68,7 +68,7 @@ inline bool memeq(const void *x, const void *y, unsigned int len)
  * @param tv		timeval struct to modify
  * @param ms		number of milliseconds
  */
-inline void timeval_add_ms(struct timeval *tv, u_int ms)
+ void timeval_add_ms(struct timeval *tv, u_int ms)
 {
     tv->tv_usec += ms * 1000;
     while (tv->tv_usec >= 1000000 /* 1s */)
@@ -88,7 +88,7 @@ inline void timeval_add_ms(struct timeval *tv, u_int ms)
  * @param tv		timeval struct receiving monotonic timestamps, or NULL
  * @return			monotonic timestamp in seconds
  */
-inline long time_monotonic(struct timeval *tv)
+ long time_monotonic(struct timeval *tv)
 {
 #if defined(HAVE_CLOCK_GETTIME) && \
     (defined(HAVE_CONDATTR_CLOCK_MONOTONIC) || \
@@ -130,7 +130,7 @@ inline long time_monotonic(struct timeval *tv)
  * @param host		host order 16-bit value
  * @param network	unaligned address to write network order value to
  */
-inline void htoun16(void *network, unsigned short host)
+ void htoun16(void *network, unsigned short host)
 {
     char *unaligned = (char*)network;
 
@@ -144,7 +144,7 @@ inline void htoun16(void *network, unsigned short host)
  * @param host		host order 32-bit value
  * @param network	unaligned address to write network order value to
  */
-inline void htoun32(void *network, unsigned int host)
+ void htoun32(void *network, unsigned int host)
 {
     char *unaligned = (char*)network;
 
@@ -158,7 +158,7 @@ inline void htoun32(void *network, unsigned int host)
  * @param host		host order 64-bit value
  * @param network	unaligned address to write network order value to
  */
-inline void htoun64(void *network, unsigned long int host)
+ void htoun64(void *network, unsigned long int host)
 {
     char *unaligned = (char*)network;
 
@@ -185,7 +185,7 @@ inline void htoun64(void *network, unsigned long int host)
  * @param network	unaligned address to read network order value from
  * @return			host order value
  */
-inline unsigned short untoh16(void *network)
+ unsigned short untoh16(void *network)
 {
     char *unaligned = (char*)network;
     unsigned short tmp;
@@ -200,7 +200,7 @@ inline unsigned short untoh16(void *network)
  * @param network	unaligned address to read network order value from
  * @return			host order value
  */
-inline unsigned int untoh32(void *network)
+ unsigned int untoh32(void *network)
 {
     char *unaligned = (char*)network;
     unsigned int tmp;
@@ -215,7 +215,7 @@ inline unsigned int untoh32(void *network)
  * @param network	unaligned address to read network order value from
  * @return			host order value
  */
-inline unsigned long int untoh64(void *network)
+ unsigned long int untoh64(void *network)
 {
     char *unaligned = (char*)network;
 
@@ -241,7 +241,7 @@ inline unsigned long int untoh64(void *network)
 /**
  * Round up size to be multiple of alignement
  */
-inline unsigned int round_up(size_t size, int alignement)
+ unsigned int round_up(size_t size, int alignement)
 {
     int remainder;
 
@@ -256,7 +256,7 @@ inline unsigned int round_up(size_t size, int alignement)
 /**
  * Round down size to be a multiple of alignement
  */
-inline unsigned int round_down(size_t size, int alignement)
+ unsigned int round_down(size_t size, int alignement)
 {
     return size - (size % alignement);
 }
@@ -269,7 +269,7 @@ inline unsigned int round_down(size_t size, int alignement)
  *
  * @return 
  */
-inline int rand_num(int min, int max)
+ int rand_num(int min, int max)
 {
     if (min <0 || min >= max) return -1;
     srandom ((unsigned int)time(NULL));
@@ -279,7 +279,7 @@ inline int rand_num(int min, int max)
 /**
  * Safely overwrite n bytes of memory at ptr with zero, auto-inlining variant.
  */
-inline void memwipe(void *ptr, unsigned int n)
+ void memwipe(void *ptr, unsigned int n)
 {
     if (!ptr)
     {
@@ -287,18 +287,18 @@ inline void memwipe(void *ptr, unsigned int n)
     }
     if (__builtin_constant_p(n))
     {
-        memwipe_inline(ptr, n);
+        memwipe_(ptr, n);
     }
     else
     {
-        memwipe_noinline(ptr, n);
+        memwipe_no(ptr, n);
     }
 }
 
 /**
  * Safely overwrite n bytes of memory at ptr with zero, inlining variant.
  */
-inline void memwipe_inline(void *ptr, unsigned int n)
+ void memwipe_(void *ptr, unsigned int n)
 {
     volatile char *c = (volatile char*)ptr;
     unsigned int m, i;
@@ -369,9 +369,9 @@ void memxor(unsigned char dst[], unsigned char  src[], unsigned int n)
 /**
  * Described in header.
  */
-void memwipe_noinline(void *ptr, unsigned int n)
+void memwipe_no(void *ptr, unsigned int n)
 {
-	memwipe_inline(ptr, n);
+	memwipe_(ptr, n);
 }
 
 char *ip_netmask(char *ip, int netmask)
