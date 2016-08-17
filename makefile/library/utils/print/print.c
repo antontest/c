@@ -83,7 +83,7 @@ METHOD(menu_t, show_menu_, void, private_menu_t *this, ...)
     int     menu_len   = 0;
     int     header_len = 0;
     int     menu_index = this->start_index;
-    va_list menu_list  = NULL;
+    va_list menu_list;
     
 
     va_start(menu_list, this);
@@ -291,7 +291,7 @@ static int number_len(int n)
 
 METHOD(table_t, init_table_, int, private_table_t *this, char *header, ...)
 {
-    va_list list        = NULL;
+    va_list list;
     char    *col        = NULL, *type = NULL;
     int     width       = 0;
     int     total_width = 0;
@@ -324,6 +324,7 @@ METHOD(table_t, init_table_, int, private_table_t *this, char *header, ...)
         this->col_cnt++;
     }
     va_end(list);
+    this->len += this->col_cnt + 1;
     total_width--;
 
     /**
@@ -338,7 +339,7 @@ METHOD(table_t, init_table_, int, private_table_t *this, char *header, ...)
         return 1;
     }
     memset(this->col_width, 0, this->col_cnt * sizeof(int));
-    memset(this->fmt,       0, this->col_cnt);
+    memset(this->fmt,       0, this->len);
     pfmt = this->cur = this->fmt;
 
     /**
@@ -407,7 +408,7 @@ METHOD(table_t, init_table_, int, private_table_t *this, char *header, ...)
 
 METHOD(table_t, show_row_, void, private_table_t *this, ...)
 {
-    va_list list    = NULL;
+    va_list list;
 
     va_start(list, this);
     vprintf(this->fmt, list);
@@ -417,7 +418,7 @@ METHOD(table_t, show_row_, void, private_table_t *this, ...)
 
 METHOD(table_t, show_column_, void, private_table_t *this, ...)
 {
-    va_list list = NULL;
+    va_list list;
     char *fmt_start = NULL;
     char ch         = '\0';
 
@@ -655,7 +656,7 @@ static char *parser_format(char *fmt)
  */
 void cprintf(char *fmt, ...)
 {
-    va_list list  = NULL;
+    va_list list;
     char *new_fmt = NULL;
     new_fmt = parser_format(fmt);
 

@@ -81,8 +81,8 @@ $(TARGET) : $(OUTDIR) $(COBJ) $(CPPOBJ)
 	-$(shell test ! -L $(LN_TO_TARGET) && ln -sf $(LN_FROM_TARGET) $(LN_TO_TARGET))
 $(DEMO) : $(TARGET) demo/demo.o
 	-$(CC) $(CFLAGS) -o $@  demo/demo.c -L . -I . -lprint 
-include $(CDEF)
-include $(CPPDEF)
+-include $(CDEF)
+-include $(CPPDEF)
 
 PHONY = rebuild clean cleanall install
 .PHONY : $(PHONY)
