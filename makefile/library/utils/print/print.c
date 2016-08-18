@@ -493,6 +493,9 @@ struct color_info_t {
 };
 typedef enum color_id_t color_id_t;
 enum color_id_t {
+    /**
+     * color
+     */
     COLOR_ID_BLACK  = 0,
     COLOR_ID_RED    ,
     COLOR_ID_GREEN  ,
@@ -501,11 +504,23 @@ enum color_id_t {
     COLOR_ID_PINK   ,
     COLOR_ID_CYAN   ,
     COLOR_ID_WHITE  ,
-    COLOR_ID_NORMAL 
+
+    /**
+     * show
+     */
+    COLOR_ID_BOLD   ,
+    COLOR_ID_UNDERLINE,
+    COLOR_ID_SHINE,
+    COLOR_ID_INVET,
+
+    COLOR_ID_NORMAL ,
 };
 
 typedef enum color_key_t color_key_t;
 enum color_key_t {
+    /**
+     * color
+     */
     COLOR_KEY_BLACK  = 'h',
     COLOR_KEY_RED    = 'r',
     COLOR_KEY_GREEN  = 'g',
@@ -514,20 +529,38 @@ enum color_key_t {
     COLOR_KEY_PINK   = 'p',
     COLOR_KEY_CYAN   = 'c',
     COLOR_KEY_WHITE  = 'w',
-    COLOR_KEY_NORMAL = 'n'
+
+    /**
+     * show
+     */
+    COLOR_KEY_BOLD      = 'B',
+    COLOR_KEY_UNDERLINE = 'U',
+    COLOR_KEY_SHINE     = 'S',
+    COLOR_KEY_INVET     = 'I',
+
+    COLOR_KEY_NORMAL = 'n',
 };
 
 static color_info_t clr_info[] = {
-    {COLOR_ID_BLACK,  COLOR_KEY_BLACK,  "\033[30m"},
-    {COLOR_ID_RED,    COLOR_KEY_RED,    "\033[31m"},
-    {COLOR_ID_GREEN,  COLOR_KEY_GREEN,  "\033[32m"},
-    {COLOR_ID_YELLOW, COLOR_KEY_YELLOW, "\033[33m"},
-    {COLOR_ID_BLUE,   COLOR_KEY_BLUE,   "\033[34m"},
-    {COLOR_ID_PINK,   COLOR_KEY_PINK,   "\033[35m"},
-    {COLOR_ID_CYAN,   COLOR_KEY_CYAN,   "\033[36m"},
-    {COLOR_ID_WHITE,  COLOR_KEY_WHITE,  "\033[37m"},
-    {COLOR_ID_NORMAL, COLOR_KEY_NORMAL, "\033[0m" },
+    {COLOR_ID_BLACK,     COLOR_KEY_BLACK,     "\033[30m"},
+    {COLOR_ID_RED,       COLOR_KEY_RED,       "\033[31m"},
+    {COLOR_ID_GREEN,     COLOR_KEY_GREEN,     "\033[32m"},
+    {COLOR_ID_YELLOW,    COLOR_KEY_YELLOW,    "\033[33m"},
+    {COLOR_ID_BLUE,      COLOR_KEY_BLUE,      "\033[34m"},
+    {COLOR_ID_PINK,      COLOR_KEY_PINK,      "\033[35m"},
+    {COLOR_ID_CYAN,      COLOR_KEY_CYAN,      "\033[36m"},
+    {COLOR_ID_WHITE,     COLOR_KEY_WHITE,     "\033[37m"},
+    {COLOR_ID_BOLD,      COLOR_KEY_BOLD,      "\033[1m"},
+    {COLOR_ID_UNDERLINE, COLOR_KEY_UNDERLINE, "\033[4m"},
+    {COLOR_ID_SHINE,     COLOR_KEY_SHINE,     "\033[5m"},
+    {COLOR_ID_INVET,     COLOR_KEY_INVET,     "\033[7m"},
+    {COLOR_ID_NORMAL,    COLOR_KEY_NORMAL,    "\033[0m" },
 };
+
+#define SWITCH_OPT(key) \
+    case COLOR_KEY_##key: \
+        color_id = COLOR_ID_##key; \
+        break
 
 static char *parser_format(char *fmt)
 {
@@ -557,6 +590,10 @@ static char *parser_format(char *fmt)
                     case COLOR_KEY_PINK:
                     case COLOR_KEY_CYAN:
                     case COLOR_KEY_WHITE:
+                    case COLOR_KEY_BOLD:
+                    case COLOR_KEY_UNDERLINE:
+                    case COLOR_KEY_SHINE:
+                    case COLOR_KEY_INVET:
                     case COLOR_KEY_NORMAL:
                         status = COLOR_STATUS_END;
                         break;
@@ -600,33 +637,20 @@ static char *parser_format(char *fmt)
                 break;
             case COLOR_STATUS_PASER:
                 switch (*p) {
-                    case COLOR_KEY_BLACK:
-                        color_id = COLOR_ID_BLACK;
-                        break;
-                    case COLOR_KEY_RED:
-                        color_id = COLOR_ID_RED;
-                        break;
-                    case COLOR_KEY_GREEN:
-                        color_id = COLOR_ID_GREEN;
-                        break;
-                    case COLOR_KEY_YELLOW:
-                        color_id = COLOR_ID_YELLOW;
-                        break;
-                    case COLOR_KEY_BLUE:
-                        color_id = COLOR_ID_BLUE;
-                        break;
-                    case COLOR_KEY_PINK:
-                        color_id = COLOR_ID_PINK;
-                        break;
-                    case COLOR_KEY_CYAN:
-                        color_id = COLOR_ID_CYAN;
-                        break;
-                    case COLOR_KEY_WHITE:
-                        color_id = COLOR_ID_WHITE;
-                        break;
-                    case COLOR_KEY_NORMAL:
-                        color_id = COLOR_ID_NORMAL;
-                        break;
+                    SWITCH_OPT(BLACK);
+                    SWITCH_OPT(RED);
+                    SWITCH_OPT(GREEN);
+                    SWITCH_OPT(YELLOW);
+                    SWITCH_OPT(BLUE);
+                    SWITCH_OPT(PINK);
+                    SWITCH_OPT(CYAN);
+                    SWITCH_OPT(WHITE);
+
+                    SWITCH_OPT(BOLD);
+                    SWITCH_OPT(UNDERLINE);
+                    SWITCH_OPT(SHINE);
+                    SWITCH_OPT(INVET);
+                    SWITCH_OPT(NORMAL);
                     default:
                         *presult++ = *p;
                         break;
