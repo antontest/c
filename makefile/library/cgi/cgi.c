@@ -442,8 +442,9 @@ static int parse_multipart_data(private_cgi_t *this)
                 if (*pos != '\"') {
                     return pos - cgi_form_data;
                 }
-                name = ++pos;
+                name = pos + 1;
                 state = s_name;
+                break;
             case s_name:
                 if (*pos == '\"') {
                     state = s_name_end;
@@ -544,6 +545,12 @@ static int parse_multipart_data(private_cgi_t *this)
                 state = s_value_field;
                 break;
             case s_value_field:
+                if (*pos == '\r') {
+                    value = NULL;
+                    state = s_data_boundary_start;
+                    break;
+                }
+
                 value = pos;
                 state = s_value_field_end;
                 break;
@@ -559,8 +566,12 @@ static int parse_multipart_data(private_cgi_t *this)
                 break;
             case s_data_boundary:
                 if (*pos == '-') {
+                    if (!value) {
+                        state = s_data_boundary_end;
+                        break;
+                    }
+
                     *(pos - 2) = '\0';
-                    
                     data = cgi_data_create(name, value);
                     cgi_data_list->insert_last(cgi_data_list, data);
                     if (strcmp(name, "filename")) {
