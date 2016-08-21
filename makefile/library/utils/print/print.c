@@ -5,6 +5,57 @@
 #include <print.h>
 #include <utils/utils.h>
 
+/**
+ *
+ *  左上 = ┌
+ *  上   =  ┬
+ *  右上 =  ┐
+ *  左   =  ├
+ *  中心 =  ┼
+ *  右   =  ┤
+ *  左下 =  └
+ *  下   =  ┴
+ *  右下 =  ┘
+ *  垂直 =  │
+ *  水平 =   ─
+ *
+ */
+
+typedef enum direct_id_t direct_id_t;
+enum direct_id_t {
+    DIRECT_UPLEFT = 0,
+    DIRECT_UP,
+    DIRECT_UPRIGHT,
+    DIRECT_LEFT,
+    DIRECT_CENTER,
+    DIRECT_RIGHT,
+    DIRECT_DOWNLEFT,
+    DIRECT_DOWN,
+    DIRECT_DOWNRIGHT,
+    DIRECT_VERTICAL,
+    DIRECT_HORIZONTAL
+};
+
+typedef struct direct_info_t direct_info_t;
+struct direct_info_t {
+    direct_id_t id;
+    char *key;
+};
+
+static direct_info_t direct_info[] = {
+    {DIRECT_UPLEFT,     "┌"},
+    {DIRECT_UP,         "┬"},
+    {DIRECT_UPRIGHT,    "┐"},
+    {DIRECT_LEFT,       "├"},
+    {DIRECT_CENTER,     "┼"},
+    {DIRECT_RIGHT,      "┤"},
+    {DIRECT_DOWNLEFT,   "└"},
+    {DIRECT_DOWN,       "┴"},
+    {DIRECT_DOWNRIGHT,  "┘"},
+    {DIRECT_VERTICAL,   "│"},
+    {DIRECT_HORIZONTAL, "─"},
+};
+
 typedef enum input_type_t input_type_t;
 enum input_type_t {
     INPUT_TYPE_CHAR = 0, 
@@ -12,6 +63,28 @@ enum input_type_t {
     INPUT_TYPE_INT,
     INPUT_TYPE_LONG,
     INPUT_TYPE_FLOAT,
+};
+
+typedef enum menu_state_t menu_state_t;
+enum menu_state_t {
+    MENU_INIT = 0,
+    MENU_INIT_SEPARATOR,
+    MENU_INIT_END,
+    MENU_HEAD_START,
+    MENU_HEAD,
+    MENU_HEAD_END,
+    MENU_LINE_START,
+    MENU_LINE,
+    MENU_LINE_END,
+    MENU_CONTENT_START,
+    MENU_PREFIX_BLANK,
+    MENU_CONTENT_NUM, 
+    MENU_CONTENT, 
+    MENU_SUFFIX_BLANK,
+    MENU_CONTENT_END,
+    MENU_END_START,
+    MENU_END_SEPARATOR,
+    MENU_END
 };
 
 typedef struct private_menu_t private_menu_t;
@@ -52,7 +125,23 @@ struct private_menu_t {
     unsigned int is_support_multi_selected;
 };
 
-METHOD(menu_t, init_menu_, void, private_menu_t *this, unsigned int menu_width, char *header, unsigned int start_index, unsigned int is_support_multi_selected)
+static int number_len(int n)
+{
+    int len = 0;
+
+    if (!n) {
+        return 1;
+    }
+
+    while (n) {
+        len++;
+        n /= 10;
+    }
+
+    return len;
+}
+
+METHOD(menu_t, init_menu_, void, private_menu_t *this, char *header, unsigned int start_index, unsigned int is_support_multi_selected)
 {
     if (header) {
         this->header = header;
@@ -64,11 +153,9 @@ METHOD(menu_t, init_menu_, void, private_menu_t *this, unsigned int menu_width, 
     if (is_support_multi_selected >= 1) {
         this->is_support_multi_selected = 1;
     }
-
-    this->menu_width = menu_width;
 }
 
-static void print_separator(char separator, int width)
+void print_separator(char separator, int width)
 {
     while (width-- > 0) {
         printf("%c", separator);
@@ -78,20 +165,28 @@ static void print_separator(char separator, int width)
 
 METHOD(menu_t, show_menu_, void, private_menu_t *this, ...)
 {
-    char    *menu      = NULL;
-    int     max_len    = 0;
-    int     menu_len   = 0;
-    int     header_len = 0;
-    int     menu_index = this->start_index;
     va_list menu_list;
+    char    *menu       = NULL;
+    int     len         = 0;
+    int     max_len     = 0;
+    int     menu_len    = 0;
+    int     header_len  = 0;
+    int     end_flag    = 1;
+    int     line_pos    = 0;
+    int     menu_index  = this->start_index;
+    menu_state_t status = MENU_INIT;
     
 
+    /**
+     * get max length
+     */
     va_start(menu_list, this);
     while (1) {
         menu = va_arg(menu_list, char *);
         if (!menu) {
             break;
         }
+
         menu_len = strlen(menu);
         if (menu_len > max_len) {
             max_len = menu_len;
@@ -100,16 +195,25 @@ METHOD(menu_t, show_menu_, void, private_menu_t *this, ...)
     }
     va_end(menu_list);
 
-    menu_len += 2;
+    /**
+     * set max length
+     */
+    header_len  = strlen(this->header);
+    max_len    += number_len(this->choice_count);
+    if (max_len < header_len) {
+        max_len = header_len;
+    }
     if (max_len < DFT_MENU_WIDTH) {
         max_len = DFT_MENU_WIDTH;
     }
 
+#if 0
     /**
      * print header
      */
+    print_separator(this->separator, max_len);
     header_len = strlen(this->header);
-    printf("%*s\n", header_len + (max_len - header_len) / 2, this->header);
+    printf("|%*s%s%*s|\n", (max_len - header_len) / 2 - 1, " ", this->header, (max_len - header_len) / 2 - 1, " ");
 
     /**
      * print separator
@@ -133,7 +237,117 @@ METHOD(menu_t, show_menu_, void, private_menu_t *this, ...)
      * print separator
      */
     print_separator(this->separator, max_len);
-    printf("  Please input your choice (%d - %d): \n", this->start_index, menu_index - 1);
+#endif
+
+    /**
+     * print menu
+     */
+    va_start(menu_list, this);
+    while (end_flag) {
+        switch (status) {
+            case MENU_INIT:
+                printf("%s", direct_info[DIRECT_UPLEFT].key);
+                status = MENU_INIT_SEPARATOR;
+            case MENU_INIT_SEPARATOR:
+                if (line_pos < (max_len + 2 * DFT_MENU_BLANK_WIDTH + 1)) {
+                    printf("%s", direct_info[DIRECT_HORIZONTAL].key);
+                } else {
+                    status = MENU_INIT_END;
+                }
+                break;
+            case MENU_INIT_END:
+                printf("%s\n", direct_info[DIRECT_UPRIGHT].key);
+                status = MENU_HEAD_START;
+            case MENU_HEAD_START:
+                line_pos = 0;
+                printf("%s", direct_info[DIRECT_VERTICAL].key);
+                status = MENU_HEAD;
+            case MENU_HEAD:
+                line_pos = header_len + (max_len + 2 * DFT_MENU_BLANK_WIDTH - header_len) / 2 + 1;
+                printf("%*s", line_pos, this->header);
+                status = MENU_HEAD_END;
+            case MENU_HEAD_END:
+                if (line_pos < (max_len + 2 * DFT_MENU_BLANK_WIDTH + 1)) {
+                    printf(" ");
+                    break;
+                } else {
+                    printf("%s\n", direct_info[DIRECT_VERTICAL].key);
+                    status = MENU_LINE_START;
+                    line_pos = 0;
+                }
+            case MENU_LINE_START:
+                line_pos = 0;
+                printf("%s", direct_info[DIRECT_LEFT].key);
+                status = MENU_LINE;
+            case MENU_LINE:
+                if (line_pos < (max_len + 2 * DFT_MENU_BLANK_WIDTH + 1)) {
+                    printf("%s", direct_info[DIRECT_HORIZONTAL].key);
+                    break;
+                } else {
+                    status = MENU_LINE_END;
+                }
+            case MENU_LINE_END:
+                printf("%s\n", direct_info[DIRECT_RIGHT].key);
+                status = MENU_CONTENT_START;
+            case MENU_CONTENT_START:
+                line_pos = 0;
+                printf("%s", direct_info[DIRECT_VERTICAL].key);
+                menu = va_arg(menu_list, char *);
+                if (!menu) {
+                    status = MENU_END_START;
+                    break;
+                } else {
+                    status = MENU_PREFIX_BLANK;
+                }
+            case MENU_PREFIX_BLANK:
+                if (line_pos < DFT_MENU_BLANK_WIDTH) {
+                    printf(" ");
+                    break;
+                } else {
+                    status = MENU_CONTENT_NUM;
+                }
+            case MENU_CONTENT_NUM:
+                line_pos += number_len(menu_index) + 2;
+                printf("%d. ", menu_index++);
+                status = MENU_CONTENT;
+            case MENU_CONTENT:
+                printf("%s", menu);
+                line_pos += strlen(menu);
+                status = MENU_SUFFIX_BLANK;
+            case MENU_SUFFIX_BLANK:
+                if (line_pos < ( 2 * DFT_MENU_BLANK_WIDTH + max_len + 1)) {
+                    printf(" ");
+                    break;
+                } else {
+                    status = MENU_CONTENT_END;
+                }
+            case MENU_CONTENT_END:
+                printf("%s\n", direct_info[DIRECT_VERTICAL].key);
+                status = MENU_CONTENT_START;
+                line_pos = 0;
+                break;
+            case MENU_END_START:
+                printf("\b%s", direct_info[DIRECT_DOWNLEFT].key);
+                status = MENU_END_SEPARATOR;
+            case MENU_END_SEPARATOR:
+                if (line_pos < (2 * DFT_MENU_BLANK_WIDTH + max_len + 2)) {
+                    printf("%s", direct_info[DIRECT_HORIZONTAL].key);
+                } else {
+                    status = MENU_END;
+                }
+                break;
+            case MENU_END:
+                printf("%s\n", direct_info[DIRECT_DOWNRIGHT].key);
+                end_flag = 0;
+                break;
+            default:
+                end_flag = 0;
+                break;
+        }
+        line_pos++;
+    }
+    va_end(menu_list);
+    printf("  Please input your choice (%d - %d): ", this->start_index, menu_index - 1);
 }
 
 static int check_alpha(char *string)
@@ -191,7 +405,7 @@ METHOD(menu_t, get_choice, int, private_menu_t *this, int choices[], int *size)
             if (check_choice(this, choices, input_choice)) {
                 goto sep;
             }
-            if (choices && input_index < *size) {
+            if (choices && size && input_index < *size) {
                 choices[input_index++] = input_choice;
             }
         } else {
@@ -210,7 +424,9 @@ sep:
     /**
      * copy choices
      */
-    *size = input_index;
+    if (size) {
+        *size = input_index;
+    }
 
     return 0;
 }
@@ -277,17 +493,6 @@ struct private_table_t {
      */
     char *cur;
 };
-
-static int number_len(int n)
-{
-    int len = 0;
-    while (n) {
-        len++;
-        n /= 10;
-    }
-
-    return len;
-}
 
 METHOD(table_t, init_table_, int, private_table_t *this, char *header, ...)
 {
@@ -674,6 +879,21 @@ static char *parser_format(char *fmt)
 
 /**
  * @brief color print
+ *
+ * [h] -- black 
+ * [r] -- red 
+ * [g] -- green 
+ * [y] -- yellow 
+ * [b] -- blue 
+ * [p] -- pink 
+ * [c] -- cyan 
+ * [w] -- white 
+ * [B] -- bold 
+ * [U] -- underline 
+ * [I] -- invet 
+ * [n] -- normal
+ *
+ * @usage cprintf("[r]red[b][B]blue[n]");
  *
  * @param fmt [in] printf format
  * @param ... [in]

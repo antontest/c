@@ -1,12 +1,13 @@
 #ifndef __PRINT_H__
 #define __PRINT_H__
 
-#define DFT_MENU_WIDTH             50
+#define DFT_MENU_BLANK_WIDTH       4
+#define DFT_MENU_WIDTH             32
 #define DFT_MENU_MULTI_SELECTED    0
 #define DFT_MENU_START_INDEX       0U
 #define DFT_MAX_MENU_SELECTED_ITEM 20
 #define DFT_MENU_HEADER            "Menu"
-#define DFT_MENU_SEPARATOR         '='
+#define DFT_MENU_SEPARATOR         '-'
 
 typedef struct menu_t menu_t;
 struct menu_t  {
@@ -17,7 +18,7 @@ struct menu_t  {
      * @param start_index [in] start index for menu 
      * @param is_support_multi_selected [in] is_support_multi_selected
      */
-    void (*init_menu) (menu_t *this, unsigned int menu_width, char *header, unsigned int start_index, unsigned int is_support_multi_selected);
+    void (*init_menu) (menu_t *this, char *header, unsigned int start_index, unsigned int is_support_multi_selected);
 
     /**
      * @brief show menu

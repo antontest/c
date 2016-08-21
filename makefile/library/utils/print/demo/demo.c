@@ -6,14 +6,14 @@
 
 int main(int argc, char **argv)
 {
-#if 0
+#if 1
     menu_t *menu = NULL;
     int choice[5] = {0};
-    int size = sizeof(choice);
+    int size = sizeof(choice) / sizeof(choice[0]);
 
     menu = menu_create();
-    menu->init_menu(menu, "Menu", 0, 1);
-    menu->show_menu(menu, "Test1", "Test2", "Test3", NULL);
+    menu->init_menu(menu, "Perform Test Menu", 1, 1);
+    menu->show_menu(menu, "Test Enc Only", "Test Dec Only", "Test Digest Only", NULL);
     menu->get_choice(menu, (int *)choice, &size);
     printf("size: %d\n", size);
 
@@ -23,6 +23,7 @@ int main(int argc, char **argv)
     }
     printf("\n");
     menu->destroy(menu);
+    return 0;
 #endif
 
 #if 0
@@ -51,7 +52,7 @@ int main(int argc, char **argv)
     table->destroy(table);
 #endif
 
-#if 1
+#if 0
     printf("\033[31m\033[1maaa\033[33maa\033[0m\n");
     cprintf("[r]red[y]yellow[g][U][S]green[n][b][I]%s[n][c][B]cyan[p]pink[n]\n", "blue");
     printf("╔═════════════════════════╗\n"); 
