@@ -18,14 +18,14 @@ struct menu_t  {
      * @param start_index [in] start index for menu 
      * @param is_support_multi_selected [in] is_support_multi_selected
      */
-    void (*init_menu) (menu_t *this, char *header, unsigned int start_index, unsigned int is_support_multi_selected);
+    void (*init) (menu_t *this, char *header, unsigned int start_index, unsigned int is_support_multi_selected);
 
     /**
      * @brief show menu
      *
      * @param ... [in] menu
      */
-   void (*show_menu) (menu_t *this, ...);
+   void (*show) (menu_t *this, ...);
     
     /**
      * @brief get choices from stdin
@@ -58,7 +58,7 @@ struct table_t {
      * @param header [in] header of table
      * @param ... [in] colum infor
      */
-    int (*init_table) (table_t *this, char *header, ...);    
+    int (*init) (table_t *this, char *header, ...);    
 
     /**
      * @brief show one line
@@ -92,4 +92,33 @@ table_t *table_create();
  * @param ... [in]
  */
 void cprintf(char *fmt, ...);
+
+typedef struct progress_t progress_t;
+struct progress_t {
+    /**
+     * @brief init progress bar
+     *
+     * @param title [in] progress bar title
+     * @param max   [in] max length of progress bar
+     */
+    void (*init) (progress_t *this, char *title, int max);
+
+    /**
+     * @brief show progress bar
+     *
+     * @param bit [in] progress
+     */
+    void (*show) (progress_t *this, int bit);
+
+    /**
+     * @brief destroy instance and free memory
+     */
+    void (*destroy) (progress_t *this);
+};
+
+/**
+ * @brief create progress instance
+ */
+progress_t *progress_create();
+
 #endif /* __PRINT_H__ */

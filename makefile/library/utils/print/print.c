@@ -264,7 +264,7 @@ METHOD(menu_t, show_menu_, void, private_menu_t *this, ...)
                 status = MENU_HEAD;
             case MENU_HEAD:
                 line_pos = header_len + (max_len + 2 * DFT_MENU_BLANK_WIDTH - header_len) / 2 + 1;
-                printf("%*s", line_pos, this->header);
+                printf("\033[1m%*s\033[0m", line_pos, this->header);
                 status = MENU_HEAD_END;
             case MENU_HEAD_END:
                 if (line_pos < (max_len + 2 * DFT_MENU_BLANK_WIDTH + 1)) {
@@ -445,8 +445,8 @@ menu_t *menu_create()
 
     INIT(this, 
         .public = {
-            .init_menu  = _init_menu_,
-            .show_menu  = _show_menu_,
+            .init       = _init_menu_,
+            .show       = _show_menu_,
             .get_choice = _get_choice,
             .destroy    = _menu_destroy_,
         },
@@ -670,7 +670,7 @@ table_t *table_create()
 
     INIT(this,
         .public = {
-            .init_table  = _init_table_,
+            .init        = _init_table_,
             .show_row    = _show_row_,
             .show_column = _show_column_,
             .destroy     = _table_destroy_,
@@ -909,4 +909,69 @@ void cprintf(char *fmt, ...)
     va_end(list);
 
     free(new_fmt);
+}
+
+
+typedef struct private_progress_t private_progress_t;
+struct private_progress_t {
+    /**
+     * @brief public interface
+     */
+    progress_t public;
+
+    /**
+     * @brief max value of progress
+     */
+    int max;
+
+    /**
+     * @brief progress offset
+     */
+    int offset;
+
+    /**
+     * @brief title of progress
+     */
+    char *title;
+
+    /**
+     * @brief style of progress
+     */
+    char *style;
+};
+
+METHOD(progress_t, init_progress_, void, private_progress_t *this, char *title, int max)
+{
+    this->title = title;
+    this->max   = max;
+}
+
+METHOD(progress_t, progress_show_, void, private_progress_t *this, int bit)
+{
+    if (bit > this->max) {
+        bit = this->max;
+    }
+
+    printf("\033[?25l\033[42m\033[1m%*s\033[?25h\033[0m %d%%\r", bit, " ", 100 * bit / this->max);
+    fflush(stdout);
+}
+
+METHOD(progress_t, progress_destory_, void, private_progress_t *this)
+{
+    free(this);
+}
+
+progress_t *progress_create()
+{
+    private_progress_t *this = NULL;
+
+    INIT(this,
+        .public = {
+            .init    = _init_progress_,
+            .show    = _progress_show_,
+            .destroy = _progress_destory_,
+        },
+    );
+
+    return &this->public;
 }

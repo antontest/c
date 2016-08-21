@@ -6,14 +6,14 @@
 
 int main(int argc, char **argv)
 {
-#if 1
+#if 0
     menu_t *menu = NULL;
     int choice[5] = {0};
     int size = sizeof(choice) / sizeof(choice[0]);
 
     menu = menu_create();
-    menu->init_menu(menu, "Perform Test Menu", 1, 1);
-    menu->show_menu(menu, "Test Enc Only", "Test Dec Only", "Test Digest Only", NULL);
+    menu->init(menu, "Perform Test Menu", 1, 1);
+    menu->show(menu, "Test Enc Only", "Test Dec Only", "Test Digest Only", NULL);
     menu->get_choice(menu, (int *)choice, &size);
     printf("size: %d\n", size);
 
@@ -66,6 +66,18 @@ int main(int argc, char **argv)
 #endif
 
 #endif
+
+    int bit = 0;
+    progress_t *progress = NULL;
+
+    progress = progress_create();
+    progress->init(progress, "test", 50);
+
+    for (bit = 1; bit <= 50; bit += 2) {
+        progress->show(progress, bit);
+        sleep(1);
+    }
+    progress->destroy(progress);
 
     return 0;
 }
