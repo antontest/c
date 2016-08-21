@@ -73,9 +73,9 @@ int main(int argc, char **argv)
     progress = progress_create();
     progress->init(progress, "test", 50);
 
-    for (bit = 1; bit <= 50; bit += 2) {
+    for (bit = 0; bit <= 50; bit += 2) {
         progress->show(progress, bit);
-        sleep(1);
+        usleep(100000);
     }
     progress->destroy(progress);
 

@@ -942,7 +942,11 @@ struct private_progress_t {
 
 METHOD(progress_t, init_progress_, void, private_progress_t *this, char *title, int max)
 {
-    this->title = title;
+    if (title) {
+        this->title = title;
+    } else {
+        this->title = "";
+    }
     this->max   = max;
 }
 
@@ -952,7 +956,12 @@ METHOD(progress_t, progress_show_, void, private_progress_t *this, int bit)
         bit = this->max;
     }
 
-    printf("\033[?25l\033[42m\033[1m%*s\033[?25h\033[0m %d%%\r", bit, " ", 100 * bit / this->max);
+    printf("%s \033[?25l\033[42m\033[1m%*s\033[0m %d%%\033[?25h", this->title, bit, " ", 100 * bit / this->max);
+    if (bit >= this->max) {
+        printf("\n");
+    } else {
+        printf("\r");
+    }
     fflush(stdout);
 }
 
