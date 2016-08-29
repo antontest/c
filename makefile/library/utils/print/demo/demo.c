@@ -26,11 +26,11 @@ int main(int argc, char **argv)
     return 0;
 #endif
 
-#if 0
+#if 1
     table_t *table = NULL;
 
     table = table_create();
-    table->init_table(table, "Digest Test",
+    table->init(table, "Digest Test",
         "Name", "%s", 10,
         "age", "%d", 4,
         "info", "%s", 7,
@@ -67,6 +67,7 @@ int main(int argc, char **argv)
 
 #endif
 
+#if 0
     int bit = 0;
     progress_t *progress = NULL;
 
@@ -78,6 +79,7 @@ int main(int argc, char **argv)
         usleep(100000);
     }
     progress->destroy(progress);
+#endif
 
     return 0;
 }

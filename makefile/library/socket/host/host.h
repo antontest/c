@@ -8,11 +8,17 @@
 
 typedef struct host_t host_t;
 
+#include <utils/utils.h>
+#ifndef _WIN32
 #include <stdint.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#else
+typedef unsigned int socklen_t;
+#include <WinSock2.h>
+#endif
 
 /**
  * Representates a Host
@@ -36,7 +42,7 @@ struct host_t {
 	 *
 	 * @return		pointer to the internal sockaddr structure
 	 */
-	struct sockaddr  *(*get_sockaddr) (host_t *this);
+	SOCKADDR *(*get_sockaddr) (host_t *this);
 
 	/**
 	 * Get the length of the sockaddr struct.

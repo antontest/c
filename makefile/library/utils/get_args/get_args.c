@@ -2,8 +2,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 #include <ctype.h>
+#ifndef _WIN32
+#include <unistd.h>
+#else 
+#include <windows.h>
+#endif
 
 /**
  * @brief parser agruement from  command line
@@ -37,7 +41,21 @@ void get_args(int agrc, char *agrv[], struct options *opt)
                 continue;
             }
              
-            if ((opts->short_name != NULL && strlen(agrv[i]) == strlen(opts->short_name) && !strncasecmp(opts->short_name, agrv[i], strlen(opts->short_name))) || (opts->long_name != NULL && strlen(agrv[i]) == strlen(opts->long_name) && !strncasecmp(opts->long_name, agrv[i], strlen(opts->long_name)))) {
+#ifndef _WIN32
+            if ((opts->short_name != NULL && 
+                    strlen(agrv[i]) == strlen(opts->short_name) && 
+                    !strncasecmp(opts->short_name, agrv[i], strlen(opts->short_name))) || 
+                (opts->long_name != NULL && 
+                    strlen(agrv[i]) == strlen(opts->long_name) && 
+                    !strncasecmp(opts->long_name, agrv[i], strlen(opts->long_name)))) {
+#else
+            if ((opts->short_name != NULL && 
+                    strlen(agrv[i]) == strlen(opts->short_name) && 
+                    !strncmp(opts->short_name, agrv[i], strlen(opts->short_name))) || 
+                (opts->long_name != NULL && 
+                    strlen(agrv[i]) == strlen(opts->long_name) && 
+                    !strncmp(opts->long_name, agrv[i], strlen(opts->long_name)))) {
+#endif
     
                 if (opts->value == NULL) continue;
                 switch (opts->has_args) {
@@ -130,8 +148,13 @@ static char *get_proc_name()
     char *proc = NULL;
     int name_len = 0;
 
+#ifndef _WIN32
     if ((name_len = readlink(proc_path, proc_name, sizeof(proc_name))) < 0) return NULL;
     if ((proc = strrchr(proc_name, '/')) == NULL) return NULL;
+#else
+    GetModuleFileName(NULL, proc_name, sizeof(proc_name));
+    if ((proc = strrchr(proc_name, '\\')) == NULL) return NULL;
+#endif
     return proc + 1;
 }
 

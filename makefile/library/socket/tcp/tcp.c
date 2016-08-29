@@ -1,15 +1,21 @@
-#include <tcp.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <utils/utils.h>
+#include <host/host.h>
+#include <tcp.h>
+#include <time.h>
+
+#ifndef _WIN32
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <utils/utils.h>
-#include <host/host.h>
 #include <sys/select.h>
 #include <fcntl.h>
+#else 
+#include <WinSock2.h>
+#endif
 
 typedef struct private_tcp_t private_tcp_t;
 struct private_tcp_t {
@@ -21,12 +27,12 @@ struct private_tcp_t {
     /**
      * @brief socket handler fd
      */
-    int fd;
+    SOCKET fd;
 
     /**
      * @brief tcp server accept fd
      */
-    int accept_fd;
+    SOCKET accept_fd;
 
     /**
      * @brief socket host
@@ -49,6 +55,7 @@ static void make_reusable(int fd)
     setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (void *)&on, sizeof(on));
 }
 
+#ifndef _WIN32
 static void make_nonblock(int fd)
 {
     int flag = 0;
@@ -66,6 +73,7 @@ static void make_block(int fd)
     if (flag < 0) return;
     fcntl(fd, F_SETFL, flag & ~O_NONBLOCK);
 }
+#endif
 
 /*
 static int get_sock_err(int fd)
@@ -80,6 +88,17 @@ static int get_sock_err(int fd)
 METHOD(tcp_t, listen_, int, private_tcp_t *this, int family, char *ip, int port)
 {
     int ret = 0;
+#ifdef _WIN32
+	WORD wVersionRequested;
+	WSADATA wsaData;
+	int err;
+
+	wVersionRequested = MAKEWORD(1,1);
+	err = WSAStartup(wVersionRequested,&wsaData);
+	if (err) {
+		return 0;
+	}
+#endif
 
     /**
      * create socket
@@ -156,7 +175,7 @@ METHOD(tcp_t, connect_, int, private_tcp_t *this, int family, char *ip, int port
      * connect to server
      */
     tcp_state = TCP_CONNECTING;
-    ret = connect(tcp_accept_fd, tcp_host->get_sockaddr(tcp_host), sizeof(struct sockaddr));
+    ret = connect(tcp_accept_fd, (SOCKADDR *)tcp_host->get_sockaddr(tcp_host), sizeof(SOCKADDR));
     if (ret < 0) {
         perror("connect()");
         return -1;
@@ -169,7 +188,11 @@ METHOD(tcp_t, connect_, int, private_tcp_t *this, int family, char *ip, int port
 METHOD(tcp_t, connect_tm_, int, private_tcp_t *this, int family, char *ip, int port, int timeout_ms)
 {
     int ret            = 0;
+#ifndef _WIN32
     struct timeval tm  = {0};
+#else
+    clock_t tm;
+#endif
     fd_set fds;
 
     /**
@@ -201,12 +224,16 @@ METHOD(tcp_t, connect_tm_, int, private_tcp_t *this, int family, char *ip, int p
      */
     tcp_state = TCP_CONNECTING;
     if (timeout_ms > 0) {
+#ifndef _WIN32
         make_nonblock(tcp_accept_fd);
+#endif
         while (timeout_ms > 0) {
             FD_ZERO(&fds);
             FD_SET(tcp_accept_fd, &fds);
+#ifndef _WIN32
             tm.tv_sec  = 0;
             tm.tv_usec = 100 * 1000;
+#endif
             select(0, NULL, NULL, NULL, &tm);
             ret = connect(tcp_accept_fd, tcp_host->get_sockaddr(tcp_host), sizeof(struct sockaddr));
             if (!ret) break;
@@ -214,7 +241,9 @@ METHOD(tcp_t, connect_tm_, int, private_tcp_t *this, int family, char *ip, int p
             timeout_ms -= 100;
         }
     } else {
+#ifndef _WIN32
         make_block(tcp_accept_fd);
+#endif
         ret = connect(tcp_accept_fd, tcp_host->get_sockaddr(tcp_host), sizeof(struct sockaddr));
     }
 
@@ -222,7 +251,9 @@ METHOD(tcp_t, connect_tm_, int, private_tcp_t *this, int family, char *ip, int p
         perror("connect() failed");
         return -1;
     }
+#ifndef _WIN32
     make_block(tcp_accept_fd);
+#endif
 
     tcp_state = TCP_CONNECTED;
     return tcp_accept_fd;
@@ -230,8 +261,16 @@ METHOD(tcp_t, connect_tm_, int, private_tcp_t *this, int family, char *ip, int p
 
 METHOD(tcp_t, accept_, int, private_tcp_t *this)
 {
+#ifndef _WIN32
     tcp_accept_fd = accept(tcp_fd, NULL, 0);
     if (tcp_accept_fd > 0) tcp_state = TCP_CONNECTED;
+#else
+	SOCKADDR_IN addr_client;
+	int addr_len = sizeof(SOCKADDR);
+
+    tcp_accept_fd = accept(tcp_fd, (SOCKADDR *)&addr_client, &addr_len);
+    if (tcp_accept_fd > 0) tcp_state = TCP_CONNECTED;
+#endif
     return tcp_accept_fd;
 }
 
@@ -248,13 +287,19 @@ METHOD(tcp_t, recv_, int, private_tcp_t *this, void *buf, int size)
 METHOD(tcp_t, recv_tm_, int, private_tcp_t *this, void *buf, int size, int timeout_ms)
 {
     fd_set fds;
+#ifndef _WIN32
     struct timeval tm = {0};
+#else
+    clock_t tm;
+#endif
     
     if (timeout_ms <= 0) 
         return recv(tcp_accept_fd, buf, size, 0);
 
+#ifndef _WIN32
     tm.tv_sec = timeout_ms / 1000;
     tm.tv_usec = timeout_ms % 1000 * 1000;
+#endif
     FD_ZERO(&fds);
     FD_SET(tcp_accept_fd, &fds);
     switch (select(tcp_accept_fd + 1, &fds, NULL, NULL, &tm)) {
@@ -283,8 +328,13 @@ METHOD(tcp_t, shutdown_, int, private_tcp_t *this, int how)
 
 METHOD(tcp_t, destroy_, void, private_tcp_t *this)
 {
+#ifndef _WIN32
     if (tcp_fd) close(tcp_fd);
     if (tcp_accept_fd) close(tcp_accept_fd);
+#else
+    if (tcp_fd) closesocket(tcp_fd);
+    if (tcp_accept_fd) closesocket(tcp_accept_fd);
+#endif
     if (tcp_host) tcp_host->destroy(tcp_host);
     free(this);
 }
@@ -298,6 +348,7 @@ tcp_t *tcp_create(int family)
 {
     private_tcp_t *this;
 
+#ifndef _WIN32
     INIT(this, 
         .public = {
             .listen     = _listen_,
@@ -316,6 +367,27 @@ tcp_t *tcp_create(int family)
         .host   = NULL,
         .status = TCP_CLOSED,
     );
+#else 
+    INIT(this, private_tcp_t, 
+        {
+           listen_, 
+           connect_,
+		   connect_tm_,
+           accept_,
+           send_,
+           recv_,
+           recv_tm_,
+           close_,
+           shutdown_,
+           destroy_,
+           get_state_,
+        },
+        0, 
+        0, 
+        NULL, 
+        TCP_CLOSED,
+    );
+#endif
 
     return &this->public;
 }
