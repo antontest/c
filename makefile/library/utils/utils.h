@@ -1,6 +1,8 @@
 #ifndef __UTILS_H__
 #define __UTILS_H__
+#ifndef _Win32
 #include <sys/time.h>
+#endif
 
 /**
  * General purpose boolean type.

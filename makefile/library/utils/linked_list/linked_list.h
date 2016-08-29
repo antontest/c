@@ -1,15 +1,14 @@
-/**
- * @defgroup linked_list linked_list
- * @{ @ingroup collections
- */
-
 #ifndef __LINKED_LIST_H_
 #define __LINKED_LIST_H_
-#include <linked_list/enumerator.h>
+
+#include "enumerator.h"
+#ifndef _WIN32
 #include <utils/utils.h>
+#else
+#include "utils.h"
+#endif
 
 typedef struct linked_list_t linked_list_t;
-
 
 /**
  * Method to match elements in a linked list (used in find_* functions)
@@ -141,6 +140,7 @@ struct linked_list_t {
     //status_t (*find_first) (linked_list_t *this, linked_list_match_t match,
     status_t (*find_first) (linked_list_t *this, void **item, void *key, int (*cmp) (void *, void *));
 
+#ifndef _WIN32
     /**
      * Invoke a method on all of the contained objects.
      *
@@ -174,6 +174,7 @@ struct linked_list_t {
      * @return			cloned list
      */
     linked_list_t *(*clone_offset) (linked_list_t *this, size_t offset);
+#endif
 
     /**
      * @brief clear linked_list
@@ -195,7 +196,9 @@ struct linked_list_t {
      *
      * @param offset	offset of the objects destructor
      */
+#ifndef _WIN32
     void (*destroy_offset) (linked_list_t *this, size_t offset);
+#endif
 
     /**
      * Destroys a list and its contents using a a cleanup function.

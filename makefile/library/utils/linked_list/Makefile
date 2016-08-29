@@ -88,7 +88,7 @@ $(OUTDIR) :
 LINK:
 	-test ! -L $(LN_TO_INC) && ln -sf $(LN_FROM_INC) $(LN_TO_INC)
 	-test ! -L $(LN_TO_TARGET) && ln -sf $(LN_FROM_TARGET) $(LN_TO_TARGET)
-$(TARGET) : $(OUTDIR) LINK $(COBJ) $(CPPOBJ)
+$(TARGET) : $(OUTDIR) $(COBJ) $(CPPOBJ)
 	$(LINK)
 include $(CDEF)
 include $(CPPDEF)

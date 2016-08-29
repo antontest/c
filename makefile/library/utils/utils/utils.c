@@ -277,53 +277,6 @@
 }
 
 /**
- * Safely overwrite n bytes of memory at ptr with zero, auto-inlining variant.
- */
- void memwipe(void *ptr, unsigned int n)
-{
-    if (!ptr)
-    {
-        return;
-    }
-    if (__builtin_constant_p(n))
-    {
-        memwipe_(ptr, n);
-    }
-    else
-    {
-        memwipe_no(ptr, n);
-    }
-}
-
-/**
- * Safely overwrite n bytes of memory at ptr with zero, inlining variant.
- */
- void memwipe_(void *ptr, unsigned int n)
-{
-    volatile char *c = (volatile char*)ptr;
-    unsigned int m, i;
-
-    /* byte wise until long aligned */
-    for (i = 0; (uintptr_t)&c[i] % sizeof(long) && i < n; i++)
-    {
-        c[i] = 0;
-    }
-    /* word wise */
-    if (n >= sizeof(long))
-    {
-        for (m = n - sizeof(long); i <= m; i += sizeof(long))
-        {
-            *(volatile long*)&c[i] = 0;
-        }
-    }
-    /* byte wise of the rest */
-    for (; i < n; i++)
-    {
-        c[i] = 0;
-    }
-}
-
-/**
  * Described in header.
  */
 void memxor(unsigned char dst[], unsigned char  src[], unsigned int n)
@@ -364,14 +317,6 @@ void memxor(unsigned char dst[], unsigned char  src[], unsigned int n)
     {
         dst[i] ^= src[i];
     }
-}
-
-/**
- * Described in header.
- */
-void memwipe_no(void *ptr, unsigned int n)
-{
-	memwipe_(ptr, n);
 }
 
 char *ip_netmask(char *ip, int netmask)

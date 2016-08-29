@@ -1,9 +1,14 @@
 #include <stdlib.h>
 #include <stdarg.h>
-#include <utils/utils.h>
 #include <stdio.h>
+#include "linked_list.h"
+#ifndef _WIN32
 #include <unistd.h>
-#include <linked_list.h>
+#include <utils/utils.h>
+#else
+#include "utils.h"
+#endif
+
 
 typedef struct element_t element_t;
 
@@ -38,9 +43,20 @@ struct element_t {
 element_t *element_create(void *value)
 {
     element_t *this;
+
+#ifndef _WIN32
     INIT(this,
-            .value = value,
-        );
+        .value = value,
+        .previous = NULL, 
+        .next = NULL,
+    );
+#else
+    INIT(this, element_t, 
+        value,
+        NULL, 
+        NULL,
+    );
+#endif
     return this;
 }
 
@@ -114,14 +130,12 @@ struct private_enumerator_t {
     bool finished;
 };      
 
-METHOD(linked_list_t, get_count, int,
-        private_linked_list_t *this)
+METHOD(linked_list_t, get_count, int, private_linked_list_t *this)
 {
     return this->count;
 }
 
-METHOD(linked_list_t, insert_first, void,
-        private_linked_list_t *this, void *item)
+METHOD(linked_list_t, insert_first, void, private_linked_list_t *this, void *item)
 {
     element_t *element;
 
@@ -165,16 +179,14 @@ static element_t* remove_element(private_linked_list_t *this,
     return next;
 }
 
-METHOD(linked_list_t, get_first, status_t,
-        private_linked_list_t *this, void **item)
+METHOD(linked_list_t, get_first, status_t, private_linked_list_t *this, void **item)
 {
     if (this->count == 0) return NOT_FOUND;
     if (this->first) *item = this->first->value;
     return SUCCESS;
 }
 
-METHOD(linked_list_t, reset_current, status_t,
-        private_linked_list_t *this)
+METHOD(linked_list_t, reset_current, status_t, private_linked_list_t *this)
 {
     if (this->count == 0) return NOT_FOUND;
     this->current  = this->first;
@@ -222,8 +234,7 @@ METHOD(linked_list_t, insert_last, void,
     this->count++;
 }
 
-METHOD(linked_list_t, get_last, status_t,
-        private_linked_list_t *this, void **item)
+METHOD(linked_list_t, get_last, status_t, private_linked_list_t *this, void **item)
 {
     if (this->count == 0) return NOT_FOUND;
     *item = this->last->value;
@@ -299,6 +310,7 @@ METHOD(linked_list_t, find_first, status_t,
     return NOT_FOUND;
 }
 
+#ifndef _WIN32
 METHOD(linked_list_t, invoke_offset, void,
         private_linked_list_t *this, size_t offset,
         void *d1, void *d2, void *d3, void *d4, void *d5)
@@ -340,6 +352,7 @@ METHOD(linked_list_t, clone_offset, linked_list_t*,
 
     return clone;
 }
+#endif
 
 METHOD(linked_list_t, clear_, void, private_linked_list_t *this)
 {
@@ -347,7 +360,11 @@ METHOD(linked_list_t, clear_, void, private_linked_list_t *this)
     int cnt = this->count;
 
     while (cnt-- > 0) {
+#ifndef _WIN32
         _remove_first(this, &element);
+#else 
+        remove_first(this, &element);
+#endif
         if (element) free(element);
         element = NULL;
     }
@@ -359,13 +376,18 @@ METHOD(linked_list_t, destroy, void,
     void *value;
 
     /* Remove all list items before destroying list */
+#ifndef _WIN32
     while (_remove_first(this, &value) == SUCCESS) {
+#else
+    while (remove_first(this, &value) == SUCCESS) {
+#endif
         /* values are not destroyed so memory leaks are possible
          * if list is not empty when deleting */
     }
     free(this);
 }
 
+#ifndef _WIN32
 METHOD(linked_list_t, destroy_offset, void,
         private_linked_list_t *this, size_t offset)
 {
@@ -380,6 +402,7 @@ METHOD(linked_list_t, destroy_offset, void,
     }
     free(this);
 }
+#endif
 
 METHOD(linked_list_t, destroy_function, void,
         private_linked_list_t *this, void (*fn)(void*))
@@ -415,6 +438,7 @@ METHOD(linked_list_t, create_enumerator, enumerator_t*, private_linked_list_t *t
 {
     private_enumerator_t *enumerator;
 
+#ifndef _WIN32
     INIT(enumerator,
         .enumerator = {
             .enumerate  = (void*)_enumerate,
@@ -422,6 +446,15 @@ METHOD(linked_list_t, create_enumerator, enumerator_t*, private_linked_list_t *t
         },
         .list = this,
     );
+#else
+    INIT(enumerator, private_enumerator_t, 
+        {
+            (void*)enumerate,
+            (void*)free,
+        },
+        this,
+    );
+#endif
 
     return &enumerator->enumerator;
 }
@@ -601,6 +634,7 @@ linked_list_t *linked_list_create()
 {
     private_linked_list_t *this;
 
+#ifndef _WIN32
     INIT(this,
         .public = {
             .get_count     = _get_count,
@@ -637,6 +671,48 @@ linked_list_t *linked_list_create()
         .current = NULL,
         .last    = NULL,
     );
+#else
+    INIT(this, private_linked_list_t, 
+        {
+            get_count,
+            insert_first,
+            remove_first,
+            remove_,
+            get_first,
+            get_next,
+            reset_current,
+            insert_last,
+            remove_last,
+            get_last,
+
+            (void*)find_first,
+            // (void*)invoke_offset,
+            // (void*)invoke_function,
+
+            // clone_offset,
+            clear_,
+            destroy,
+            // destroy_offset,
+            destroy_function,
+
+            create_enumerator,
+            enumerate_,
+            (void*)reset_enumerator,
+
+            reverse_,
+            print_,
+
+            bubble_,
+            merge_,
+
+        },
+        0,
+        NULL,
+        NULL,
+        NULL,
+        0,
+    );
+#endif
 
     return &this->public;
 }
