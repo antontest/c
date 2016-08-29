@@ -146,6 +146,17 @@ METHOD(tcp_t, listen_, int, private_tcp_t *this, int family, char *ip, int port)
 METHOD(tcp_t, connect_, int, private_tcp_t *this, int family, char *ip, int port)
 {
     int ret = 0;
+#ifdef _WIN32
+	WORD wVersionRequested;
+	WSADATA wsaData;
+	int err;
+
+	wVersionRequested = MAKEWORD(1,1);
+	err = WSAStartup(wVersionRequested,&wsaData);
+	if (err) {
+		return 0;
+	}
+#endif
 
     /**
      * create socket
