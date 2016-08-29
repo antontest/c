@@ -7,15 +7,13 @@
 #Descp    : Linux下makefile模板       
 #*************************************************************/     
 # target
-TARGET=liblinked_list.a
+TARGET= liblinked_list.a
 
 # include
 INCLUDE_PATH = . ../../../incs/
 
-# search the lib which complied by myself
-CFG_LIB_PATH =
-# other librarys
-OTH_LIB =
+# output dir
+OUTDIR = .
 
 # Make command to use for dependencies
 MAKE = make
@@ -28,38 +26,33 @@ XX = g++
 SRC_PATH = .
 CSRC = $(wildcard $(addsuffix /*.c,$(SRC_PATH)))
 CPPSRC = $(wildcard $(addsuffix /*.cpp,$(SRC_PATH)))
-COBJ = $(CSRC:.c=.o)
-CPPOBJ = $(CPPSRC:.cpp=.o)
+COBJ = $(patsubst %.c,${OUTDIR}/%.o,$(notdir $(CSRC)))
+CPPOBJ = $(patsubst %.cpp,${OUTDIR}/%.o,$(notdir $(CPPSRC)))
+
+# deal with cpp
 ifneq "$(CPPOBJ)" ""
 CFLAGS += -lstdc++
 endif
 
 # dependent files .d
-CDEF = $(CSRC:.c=.d)
-CPPDEF = $(CPPSRC:.cpp=.d)
+CDEF = $(patsubst %.c,${OUTDIR}/%.d,$(notdir $(CSRC)))
+CPPDEF = $(patsubst %.cpp,${OUTDIR}/%.d,$(notdir $(CPPSRC)))
 
 # Warning
-WARNING = -Wall#-Wno-unused -Wno-format
+WARNING = -Wall -Wno-unused -Wno-format
 CFLAGS += $(WARNING) -O2 -Werror
 
 # complie
 INC = $(addprefix -I ,$(INCLUDE_PATH))
-COMPILE = $(CFLAGS) $(INC) -c $< -o $@  $(LIB) #$(OUTDIR)/$(*F).o
+COMPILE = $(CFLAGS) $(INC) -c $< -o $@ #$(OUTDIR)/$(*F).o
 
 # compile library
 LINK = ar -rs $@ $(COBJ) $(CPPOBJ)
 
-# Library of compling
-LIB_PATH = $(addprefix -L ,$(CFG_LIB_PATH))
-# set lib
-CFG_LIB = $(wildcard $(addsuffix /*.a,$(CFG_LIB_PATH)))
-CFG_LIB += $(wildcard $(addsuffix /*.so,$(CFG_LIB_PATH)))
-LIB := $(LIB_PATH) $(CFG_LIB) $(OTH_LIB)
-
 # make depend
 MAKEDEPEND = gcc -MM -MT
 
-# header and target link 
+# header and target LINK
 CUR_DIR_PATH=$(shell pwd)
 CUR_DIR=$(shell basename `pwd`)
 LN_FROM_INC=$(CUR_DIR_PATH)
@@ -68,30 +61,29 @@ LN_TO_INC=../../../incs/$(CUR_DIR)
 LN_TO_TARGET=../../../libs/$(TARGET)
 
 all:$(TARGET)
-$(CDEF) : %.d : %.c
+$(OUTDIR) :  
+	-if test -n "$(OUTDIR)" ; then $(MKDIR) -p $(OUTDIR) ; fi
+$(CDEF) : $(OUTDIR)/%.d : $(SRC_PATH)/%.c $(OUTDIR)
 	$(MAKEDEPEND) $(<:.c=.o) $< > $@
-$(CPPDEF) : %.d : %.cpp
+$(CPPDEF) : $(OUTDIR)/%.d : ${SRC_PATH}/%.cpp $(OUTDIR)
 	$(MAKEDEPEND) $(<:.cpp=.o) $< > $@
-
 depend :
 	-rm -f $(CDEF)
 	-rm -f $(CPPDEF)
 	$(MAKE) $(CDEF)
 	$(MAKE) $(CPPDEF)
-
-$(COBJ) : %.o : %.c
+$(COBJ) : $(OUTDIR)/%.o : $(SRC_PATH)/%.c
 	$(CC) $(COMPILE)
-$(CPPOBJ) : %.o : %.cpp
+$(CPPOBJ) : $(OUTDIR)/%.o : $(SRC_PATH)/%.cpp
 	$(XX) $(COMPILE)
-$(OUTDIR) :  
-	if test -n "$(OUTDIR)" ; then $(MKDIR) -p $(OUTDIR) ; fi
-LINK:
-	-test ! -L $(LN_TO_INC) && ln -sf $(LN_FROM_INC) $(LN_TO_INC)
-	-test ! -L $(LN_TO_TARGET) && ln -sf $(LN_FROM_TARGET) $(LN_TO_TARGET)
 $(TARGET) : $(OUTDIR) $(COBJ) $(CPPOBJ)
 	$(LINK)
-include $(CDEF)
-include $(CPPDEF)
+	# -test ! -L $(LN_TO_INC) && ln -sf $(LN_FROM_INC) $(LN_TO_INC)
+	# -test ! -L $(LN_TO_TARGET) && ln -sf $(LN_FROM_TARGET) $(LN_TO_TARGET)
+	-$(shell test ! -L $(LN_TO_INC) && ln -sf $(LN_FROM_INC) $(LN_TO_INC))
+	-$(shell test ! -L $(LN_TO_TARGET) && ln -sf $(LN_FROM_TARGET) $(LN_TO_TARGET))
+-include $(CDEF)
+-include $(CPPDEF)
 
 PHONY = rebuild clean cleanall install
 .PHONY : $(PHONY)
@@ -103,7 +95,7 @@ clean :
 	-$(RM) -f $(COBJ) $(CPPOBJ)
 	-$(RM) -f $(TARGET)
 	-$(RM) -f $(LN_TO_INC)
-	-$(RM) -f $(LN_TO_TARGET)
+	-$(RM) -f $(LN_TO_TARGET)	
 
 # Clean this project and all dependencies
 cleanall : clean
@@ -111,6 +103,6 @@ cleanall : clean
 
 # Install lib or share
 install:
-	install -p -D -m 0444 $(TARGET) $(USR_LIB_PATH)/$(TARGET) 
+	-install -p -D -m 0444 $(TARGET) $(USR_LIB_PATH)/$(TARGET)
 uninstall:
 	-$(RM) -f $(USR_LIB_PATH)/$(TARGET)
