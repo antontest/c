@@ -1,10 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
+#ifndef _WIN32
 #include <utils/utils.h>
 #include <host/host.h>
 #include <tcp.h>
-#include <time.h>
+#else 
+#include "utils.h"
+#include "host.h"
+#include "tcp.h"
+#endif
 
 #ifndef _WIN32
 #include <unistd.h>
@@ -85,19 +91,25 @@ static int get_sock_err(int fd)
 }
 */
 
+#ifdef _WIN32
+int win_sock_init()
+{
+	WORD wVersionRequested;
+	WSADATA wsaData;
+
+	wVersionRequested = MAKEWORD(1,1);
+    return WSAStartup(wVersionRequested,&wsaData);
+}
+#endif
+
 METHOD(tcp_t, listen_, int, private_tcp_t *this, int family, char *ip, int port)
 {
     int ret = 0;
-#ifdef _WIN32
-	WORD wVersionRequested;
-	WSADATA wsaData;
-	int err;
 
-	wVersionRequested = MAKEWORD(1,1);
-	err = WSAStartup(wVersionRequested,&wsaData);
-	if (err) {
-		return 0;
-	}
+#ifdef _WIN32 
+    if (win_sock_init()) {
+        return 0;
+    }
 #endif
 
     /**
@@ -146,16 +158,11 @@ METHOD(tcp_t, listen_, int, private_tcp_t *this, int family, char *ip, int port)
 METHOD(tcp_t, connect_, int, private_tcp_t *this, int family, char *ip, int port)
 {
     int ret = 0;
-#ifdef _WIN32
-	WORD wVersionRequested;
-	WSADATA wsaData;
-	int err;
 
-	wVersionRequested = MAKEWORD(1,1);
-	err = WSAStartup(wVersionRequested,&wsaData);
-	if (err) {
-		return 0;
-	}
+#ifdef _WIN32 
+    if (win_sock_init()) {
+        return 0;
+    }
 #endif
 
     /**
@@ -205,6 +212,12 @@ METHOD(tcp_t, connect_tm_, int, private_tcp_t *this, int family, char *ip, int p
     clock_t tm;
 #endif
     fd_set fds;
+
+#ifdef _WIN32 
+    if (win_sock_init()) {
+        return 0;
+    }
+#endif
 
     /**
      * create socket
