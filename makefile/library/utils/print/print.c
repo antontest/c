@@ -923,7 +923,9 @@ METHOD(progress_t, progress_show_, void, private_progress_t *this, int bit)
         bit = this->max;
     }
 
+#ifndef _WIN32
     printf("%s \033[?25l\033[42m\033[1m%*s\033[0m %d%%\033[?25h", this->title, bit, " ", 100 * bit / this->max);
+#endif
     if (bit >= this->max) {
         printf("\n");
     } else {
@@ -941,6 +943,7 @@ progress_t *progress_create()
 {
     private_progress_t *this = NULL;
 
+#ifndef _WIN32
     INIT(this,
         .public = {
             .init    = _init_progress_,
@@ -948,6 +951,15 @@ progress_t *progress_create()
             .destroy = _progress_destory_,
         },
     );
+#else
+    INIT(this, private_progress_t, 
+        .public = {
+            init_progress_,
+            progress_show_,
+            progress_destory_,
+        },
+    );
+#endif
 
     return &this->public;
 }

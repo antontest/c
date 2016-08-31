@@ -75,6 +75,7 @@ int main(int argc, char **argv)
     progress->init(progress, "test", 50);
 
     for (bit = 0; bit <= 50; bit += 2) {
+        printf("bit: %d\n\n", bit);
         progress->show(progress, bit);
         usleep(100000);
     }
