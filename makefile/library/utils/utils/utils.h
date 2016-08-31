@@ -116,6 +116,7 @@ enum status_t {
  * mutex
  */
 #ifndef _WIN32
+#include <pthread.h>
 typedef pthread_mutex_t    MUTEX_HANDLE;
 #define MUTEX_LOCK(mtx)    pthread_mutex_lock(&(mtx))
 #define MUTEX_UNLOCK(mtx)  pthread_mutex_unlock(&(mtx))
