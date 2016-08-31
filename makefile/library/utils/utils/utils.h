@@ -147,6 +147,16 @@ typedef void * SEM_HANDLE;
 #endif /* _WIN32 */
 
 /**
+ * socket
+ */
+#ifndef _WIN32 
+typedef int SOCKET;
+typedef struct sockaddr SOCKADDR;
+typedef struct sockaddr_in SOCKADDR_IN;
+typedef struct sockaddr_in6 SOCKADDR_IN6;
+typedef struct sockaddr_storage SOCKADDR_STORAGE;
+#endif
+/**
 * Call destructor of an object, if object != NULL
 */
 #define DESTROY_IF(obj) if (obj) (obj)->destroy(obj)

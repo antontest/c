@@ -370,16 +370,16 @@ METHOD(rwlock_cond_t, timed_wait_abs, bool,
 METHOD(rwlock_cond_t, timed_wait, bool,
 	private_rwlock_cond_t *this, rwlock_t *lock, u_int timeout)
 {
-	struct timeval tv;
-	u_int s, ms;
+	struct timeval tv = {0};
+	u_int s = 0; //, ms;
 
-	time_monotonic(&tv);
+	// time_monotonic(&tv);
 
 	s = timeout / 1000;
-	ms = timeout % 1000;
+	// ms = timeout % 1000;
 
 	tv.tv_sec += s;
-	timeval_add_ms(&tv, ms);
+	// timeval_add_ms(&tv, ms);
 
 	return timed_wait_abs(this, lock, tv);
 }

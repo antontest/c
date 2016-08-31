@@ -15,9 +15,11 @@ typedef struct host_t host_t;
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <utils/utils.h>
 #else
 typedef unsigned int socklen_t;
 #include <WinSock2.h>
+#include "utils.h"
 #endif
 
 /**
