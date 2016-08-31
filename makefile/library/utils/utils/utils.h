@@ -25,15 +25,6 @@
 # define TRUE  true
 #endif /* TRUE */
 
-#ifndef _WIN32 
-typedef int SOCKET;
-typedef struct sockaddr SOCKADDR;
-typedef struct sockaddr_in SOCKADDR_IN;
-typedef struct sockaddr_in6 SOCKADDR_IN6;
-typedef struct sockaddr_storage SOCKADDR_STORAGE;
-#else
-#endif
-
 typedef char s8 ;
 typedef unsigned char u8 ;
 typedef short int s16 ;
@@ -42,77 +33,18 @@ typedef int s32 ;
 typedef unsigned int u32 ;
 typedef enum status_t status_t;
 
-/**
- * Return values of function calls.
- */
-enum status_t {
-	/**
-	 * Call succeeded.
-	 */
-	SUCCESS,
-
-	/**
-	 * Call failed.
-	 */
-	FAILED,
-
-	/**
-	 * Out of resources.
-	 */
-	OUT_OF_RES,
-
-	/**
-	 * The suggested operation is already done
-	 */
-	ALREADY_DONE,
-
-	/**
-	 * Not supported.
-	 */
-	NOT_SUPPORTED,
-
-	/**
-	 * One of the arguments is invalid.
-	 */
-	INVALID_ARG,
-
-	/**
-	 * Something could not be found.
-	 */
-	NOT_FOUND,
-
-	/**
-	 * Error while parsing.
-	 */
-	PARSE_ERROR,
-
-	/**
-	 * Error while verifying.
-	 */
-	VERIFY_ERROR,
-
-	/**
-	 * Object in invalid state.
-	 */
-	INVALID_STATE,
-
-	/**
-	 * Destroy object which called method beints to.
-	 */
-	DESTROY_ME,
-
-	/**
-	 * Another call to the method is required.
-	 */
-	NEED_MORE,
-};
-
 #ifndef _WIN32
 #define SNPRINTF(buf, size, fmt, ...) \
     snprintf(buf, size, fmt, ##__VA_ARGS__)
 #else
 #define SNPRINTF(buf, size, fmt, ...) \
     _snprintf(buf, size, fmt, ##__VA_ARGS__)
+#endif
+
+#ifndef _WIN32 
+#define ACCESS(path, mode) access(path, mode)
+#else 
+#define ACCESS(path, mode) _access(path, mode)
 #endif
 
 /**

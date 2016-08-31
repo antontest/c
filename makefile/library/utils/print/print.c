@@ -2,8 +2,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
-#include <print.h>
+#include "print.h"
+#ifndef _WIN32 
+#include <unistd.h>
 #include <utils/utils.h>
+#else
+#include <io.h>
+#include "utils.h"
+#endif
 
 /**
  *
@@ -56,6 +62,7 @@ static direct_info_t direct_info[] = {
     {DIRECT_HORIZONTAL, "─"},
 };
 
+
 typedef enum input_type_t input_type_t;
 enum input_type_t {
     INPUT_TYPE_CHAR = 0, 
@@ -65,34 +72,12 @@ enum input_type_t {
     INPUT_TYPE_FLOAT,
 };
 
-typedef enum menu_state_t menu_state_t;
-enum menu_state_t {
-    MENU_INIT = 0,
-    MENU_INIT_SEPARATOR,
-    MENU_INIT_END,
-    MENU_HEAD_START,
-    MENU_HEAD,
-    MENU_HEAD_END,
-    MENU_LINE_START,
-    MENU_LINE,
-    MENU_LINE_END,
-    MENU_CONTENT_START,
-    MENU_PREFIX_BLANK,
-    MENU_CONTENT_NUM, 
-    MENU_CONTENT, 
-    MENU_SUFFIX_BLANK,
-    MENU_CONTENT_END,
-    MENU_END_START,
-    MENU_END_SEPARATOR,
-    MENU_END
-};
-
 typedef struct private_menu_t private_menu_t;
 struct private_menu_t {
     /**
-     * @brief public interface
+     * @brief pub interface
      */
-    menu_t public;
+    menu_t pub;
 
     /**
      * @brief header for menu
@@ -115,6 +100,11 @@ struct private_menu_t {
     unsigned int start_index;
 
     /**
+     * @brief menu index
+     */
+    unsigned int menu_index;
+
+    /**
      * @brief menu choice count
      */
     int choice_count;
@@ -125,61 +115,41 @@ struct private_menu_t {
     unsigned int is_support_multi_selected;
 };
 
-static int number_len(int n)
-{
-    int len = 0;
-
-    if (!n) {
-        return 1;
-    }
-
-    while (n) {
-        len++;
-        n /= 10;
-    }
-
-    return len;
-}
-
-METHOD(menu_t, init_menu_, void, private_menu_t *this, char *header, unsigned int start_index, unsigned int is_support_multi_selected)
+METHOD(menu_t, init_menu_, void, private_menu_t *this, unsigned int menu_width, char *header, unsigned int start_index, unsigned int is_support_multi_selected)
 {
     if (header) {
         this->header = header;
     } else {
         this->header = DFT_MENU_HEADER;
     }
-    
+
     this->start_index = start_index;
+    this->menu_index  = start_index;
     if (is_support_multi_selected >= 1) {
         this->is_support_multi_selected = 1;
     }
+
+    this->menu_width = menu_width;
 }
 
-void print_separator(char separator, int width)
+static void print_separator(FILE *fp, char separator, int width)
 {
     while (width-- > 0) {
-        printf("%c", separator);
+        fprintf(fp, "%c", separator);
     }
-    printf("\n");
+    fprintf(fp, "\n");
+    fflush(fp);
 }
 
 METHOD(menu_t, show_menu_, void, private_menu_t *this, ...)
 {
+    char    *menu      = NULL;
+    int     max_len    = 0;
+    int     menu_len   = 0;
+    int     header_len = 0;
+    int     menu_index = this->start_index;
     va_list menu_list;
-    char    *menu       = NULL;
-    int     len         = 0;
-    int     max_len     = 0;
-    int     menu_len    = 0;
-    int     header_len  = 0;
-    int     end_flag    = 1;
-    int     line_pos    = 0;
-    int     menu_index  = this->start_index;
-    menu_state_t status = MENU_INIT;
-    
 
-    /**
-     * get max length
-     */
     va_start(menu_list, this);
     while (1) {
         menu = va_arg(menu_list, char *);
@@ -195,30 +165,26 @@ METHOD(menu_t, show_menu_, void, private_menu_t *this, ...)
     }
     va_end(menu_list);
 
-    /**
-     * set max length
-     */
-    header_len  = strlen(this->header);
-    max_len    += number_len(this->choice_count);
-    if (max_len < header_len) {
-        max_len = header_len;
-    }
+    max_len += 2 + DFT_MENU_BLANK_WIDTH * 2;
+    /*
     if (max_len < DFT_MENU_WIDTH) {
         max_len = DFT_MENU_WIDTH;
     }
+    */
 
-#if 0
     /**
      * print header
      */
-    print_separator(this->separator, max_len);
     header_len = strlen(this->header);
-    printf("|%*s%s%*s|\n", (max_len - header_len) / 2 - 1, " ", this->header, (max_len - header_len) / 2 - 1, " ");
+    if (header_len > max_len) {
+        max_len = header_len;
+    }
+    printf("%*s\n", header_len + (max_len - header_len) / 2, this->header);
 
     /**
      * print separator
      */
-    print_separator(this->separator, max_len);
+    print_separator(stdout, this->separator, max_len);
 
     /**
      * print menu
@@ -229,125 +195,50 @@ METHOD(menu_t, show_menu_, void, private_menu_t *this, ...)
         if (!menu) {
             break;
         }
-        printf("  %d. %s\n", menu_index++, menu);
+        printf("%*s", DFT_MENU_BLANK_WIDTH, " ");
+        printf("%d. %s\n", menu_index++, menu);
     }
     va_end(menu_list);
-    
+
     /**
      * print separator
      */
-    print_separator(this->separator, max_len);
-#endif
+    print_separator(stdout, this->separator, max_len);
+    printf("  Please input your choice (%d - %d): \n", this->start_index, menu_index - 1);
+}
+
+METHOD(menu_t, show_head_, void, private_menu_t *this, char *head_info)
+{
+    int header_len = 0;
+
+    if (!head_info) {
+        head_info = this->header;
+    }
+
+    header_len = strlen(head_info);
+    printf("%*s\n", header_len + (this->menu_width - header_len) / 2, head_info);
 
     /**
-     * print menu
+     * print separator
      */
-    va_start(menu_list, this);
-    while (end_flag) {
-        switch (status) {
-            case MENU_INIT:
-                printf("%s", direct_info[DIRECT_UPLEFT].key);
-                status = MENU_INIT_SEPARATOR;
-            case MENU_INIT_SEPARATOR:
-                if (line_pos < (max_len + 2 * DFT_MENU_BLANK_WIDTH + 1)) {
-                    printf("%s", direct_info[DIRECT_HORIZONTAL].key);
-                } else {
-                    status = MENU_INIT_END;
-                }
-                break;
-            case MENU_INIT_END:
-                printf("%s\n", direct_info[DIRECT_UPRIGHT].key);
-                status = MENU_HEAD_START;
-            case MENU_HEAD_START:
-                line_pos = 0;
-                printf("%s", direct_info[DIRECT_VERTICAL].key);
-                status = MENU_HEAD;
-            case MENU_HEAD:
-                line_pos = header_len + (max_len + 2 * DFT_MENU_BLANK_WIDTH - header_len) / 2 + 1;
-                printf("\033[1m%*s\033[0m", line_pos, this->header);
-                status = MENU_HEAD_END;
-            case MENU_HEAD_END:
-                if (line_pos < (max_len + 2 * DFT_MENU_BLANK_WIDTH + 1)) {
-                    printf(" ");
-                    break;
-                } else {
-                    printf("%s\n", direct_info[DIRECT_VERTICAL].key);
-                    status = MENU_LINE_START;
-                    line_pos = 0;
-                }
-            case MENU_LINE_START:
-                line_pos = 0;
-                printf("%s", direct_info[DIRECT_LEFT].key);
-                status = MENU_LINE;
-            case MENU_LINE:
-                if (line_pos < (max_len + 2 * DFT_MENU_BLANK_WIDTH + 1)) {
-                    printf("%s", direct_info[DIRECT_HORIZONTAL].key);
-                    break;
-                } else {
-                    status = MENU_LINE_END;
-                }
-            case MENU_LINE_END:
-                printf("%s\n", direct_info[DIRECT_RIGHT].key);
-                status = MENU_CONTENT_START;
-            case MENU_CONTENT_START:
-                line_pos = 0;
-                printf("%s", direct_info[DIRECT_VERTICAL].key);
-                menu = va_arg(menu_list, char *);
-                if (!menu) {
-                    status = MENU_END_START;
-                    break;
-                } else {
-                    status = MENU_PREFIX_BLANK;
-                }
-            case MENU_PREFIX_BLANK:
-                if (line_pos < DFT_MENU_BLANK_WIDTH) {
-                    printf(" ");
-                    break;
-                } else {
-                    status = MENU_CONTENT_NUM;
-                }
-            case MENU_CONTENT_NUM:
-                line_pos += number_len(menu_index) + 2;
-                printf("%d. ", menu_index++);
-                status = MENU_CONTENT;
-            case MENU_CONTENT:
-                printf("%s", menu);
-                line_pos += strlen(menu);
-                status = MENU_SUFFIX_BLANK;
-            case MENU_SUFFIX_BLANK:
-                if (line_pos < ( 2 * DFT_MENU_BLANK_WIDTH + max_len + 1)) {
-                    printf(" ");
-                    break;
-                } else {
-                    status = MENU_CONTENT_END;
-                }
-            case MENU_CONTENT_END:
-                printf("%s\n", direct_info[DIRECT_VERTICAL].key);
-                status = MENU_CONTENT_START;
-                line_pos = 0;
-                break;
-            case MENU_END_START:
-                printf("\b%s", direct_info[DIRECT_DOWNLEFT].key);
-                status = MENU_END_SEPARATOR;
-            case MENU_END_SEPARATOR:
-                if (line_pos < (2 * DFT_MENU_BLANK_WIDTH + max_len + 2)) {
-                    printf("%s", direct_info[DIRECT_HORIZONTAL].key);
-                } else {
-                    status = MENU_END;
-                }
-                break;
-            case MENU_END:
-                printf("%s\n", direct_info[DIRECT_DOWNRIGHT].key);
-                end_flag = 0;
-                break;
-            default:
-                end_flag = 0;
-                break;
-        }
-        line_pos++;
-    }
-    va_end(menu_list);
-    printf("  Please input your choice (%d - %d): ", this->start_index, menu_index - 1);
+    print_separator(stdout, this->separator, this->menu_width);
+}
+
+METHOD(menu_t, show_choice_, void, private_menu_t *this, char *choice)
+{
+    printf("%*s", DFT_MENU_BLANK_WIDTH, " ");
+    printf("%d. %s\n", this->menu_index++, choice);
+
+    this->choice_count++;
+}
+
+METHOD(menu_t, show_tips_, void, private_menu_t *this, char *tips)
+{
+    /**
+     * print separator
+     */
+    print_separator(stdout, this->separator, this->menu_width);
+    printf("  Please input your choice (%d - %d): \n", this->start_index, this->menu_index - 1);
 }
 
 static int check_alpha(char *string)
@@ -388,7 +279,8 @@ METHOD(menu_t, get_choice, int, private_menu_t *this, int choices[], int *size)
     int  input_choice = 0;
     char buf[128]     = {0};
     char *result      = NULL;
-    
+    int  ret          = 0;
+
     /**
      * read input
      */
@@ -398,19 +290,30 @@ METHOD(menu_t, get_choice, int, private_menu_t *this, int choices[], int *size)
     }
     result = strtok(buf, " ");
 
-    memset(choices, -1, sizeof(int) * *size);
+    if (size) {
+        memset(choices, -1, sizeof(int) * *size);
+    }
+
     while (result) {
         input_choice = atoi(result);
-        if (input_choice >= this->start_index && input_choice < this->start_index + this->choice_count) {
+        if (input_choice >= this->start_index && 
+            input_choice < this->start_index + this->choice_count) {
+            if (!size) {
+                memcpy(choices, &input_choice, sizeof(input_choice));
+                break;
+            }
+
             if (check_choice(this, choices, input_choice)) {
                 goto sep;
             }
-            if (choices && size && input_index < *size) {
+
+            if (choices && input_index < *size) {
                 choices[input_index++] = input_choice;
             }
         } else {
             // printf("No such choice!\n");
-            return 1;
+            ret = 1;
+            break;
         }
 
         if (!this->is_support_multi_selected) {
@@ -428,7 +331,7 @@ sep:
         *size = input_index;
     }
 
-    return 0;
+    return ret;
 }
 
 METHOD(menu_t, menu_destroy_, void, private_menu_t *this)
@@ -443,30 +346,54 @@ menu_t *menu_create()
 {
     private_menu_t *this;
 
+#ifndef _WIN32
     INIT(this, 
-        .public = {
-            .init       = _init_menu_,
-            .show       = _show_menu_,
-            .get_choice = _get_choice,
-            .destroy    = _menu_destroy_,
-        },
-        .header                    = NULL,
-        .separator                 = DFT_MENU_SEPARATOR,
-        .start_index               = DFT_MENU_START_INDEX,
-        .is_support_multi_selected = DFT_MENU_MULTI_SELECTED,
-        .choice_count              = 0,
-    );
+            .pub = {
+            .init        = _init_menu_,
+            .show_menu   = _show_menu_,
+            .show_head   = _show_head_,
+            .show_choice = _show_choice_,
+            .show_tips   = _show_tips_,
+            .get_choice  = _get_choice,
+            .destroy     = _menu_destroy_,
+            },
+            .header                    = NULL,
+            .separator                 = DFT_MENU_SEPARATOR,
+            .start_index               = DFT_MENU_START_INDEX,
+            .is_support_multi_selected = DFT_MENU_MULTI_SELECTED,
+            .choice_count              = 0,
+        );
+#else
+    INIT(this, private_menu_t, 
+            {
+            init_menu_,
+            show_menu_,
+            show_head_,
+            show_choice_,
+            show_tips_,
+            get_choice,
+            menu_destroy_,
+            },
+            NULL, 
+            DFT_MENU_SEPARATOR,
+            0,
+            DFT_MENU_START_INDEX,
+            DFT_MENU_START_INDEX,
+            0,
+            DFT_MENU_MULTI_SELECTED
+        );
+#endif
 
-    return &this->public;
+    return &this->pub;
 }
 
 
 typedef struct private_table_t private_table_t;
 struct private_table_t {
     /**
-     * @brief public interface
+     * @brief pub interface
      */
-    table_t public;
+    table_t pub;
 
     /**
      * @brief count of table colum 
@@ -486,13 +413,34 @@ struct private_table_t {
     /**
      * @brief fmt length
      */
-    int len;
-    
+    int fmt_len;
+
     /**
      * @brief ponter to fmt
      */
     char *cur;
+
+    /**
+     * @brief log file handler
+     */
+    FILE *fp;
+
+    /**
+     * @brief log switch
+     */
+    int log_onoff;
 };
+
+static int number_len(int n)
+{
+    int len = 0;
+    while (n) {
+        len++;
+        n /= 10;
+    }
+
+    return len;
+}
 
 METHOD(table_t, init_table_, int, private_table_t *this, char *header, ...)
 {
@@ -505,6 +453,17 @@ METHOD(table_t, init_table_, int, private_table_t *this, char *header, ...)
     char    *pfmt       = NULL;
     char    *ptype      = NULL;
 
+#ifndef _WIN32
+    if (!ACCESS(DFT_LOG_FILE_FLAG, R_OK)) {
+#else 
+    if (!ACCESS(DFT_LOG_FILE_FLAG, 0)) {
+#endif
+        this->fp = fopen(DFT_LOG_FILE_PATH, "a");
+        if (this->fp) {
+            this->log_onoff = 1;
+            fprintf(this->fp, "\n");
+        }
+    }
 
     if (!header) {
         return 1;
@@ -523,13 +482,13 @@ METHOD(table_t, init_table_, int, private_table_t *this, char *header, ...)
         }
 
         width = va_arg(list, int);
-        this->len += strlen(type) + number_len(width) + 2;
+        this->fmt_len += strlen(type) + number_len(width) + 2;
 
         total_width += width + 1;
         this->col_cnt++;
     }
     va_end(list);
-    this->len += this->col_cnt + 1;
+    this->fmt_len += this->col_cnt + 1;
     total_width--;
 
     /**
@@ -539,12 +498,12 @@ METHOD(table_t, init_table_, int, private_table_t *this, char *header, ...)
     if (!this->col_width) {
         return 1;
     }
-    this->fmt = (char *)malloc(this->len);
+    this->fmt = (char *)malloc(this->fmt_len);
     if (!this->fmt) {
         return 1;
     }
     memset(this->col_width, 0, this->col_cnt * sizeof(int));
-    memset(this->fmt,       0, this->len);
+    memset(this->fmt,       0, this->fmt_len);
     pfmt = this->cur = this->fmt;
 
     /**
@@ -559,11 +518,17 @@ METHOD(table_t, init_table_, int, private_table_t *this, char *header, ...)
 #else 
     printf("%*s\n", len + (total_width - len) / 2, header);
 #endif
+    if (this->log_onoff) {
+        fprintf(this->fp, "%*s\n", len + (total_width - len) / 2, header);
+    }
 
     /**
      * print separator
      */
-    print_separator('=', total_width);
+    print_separator(stdout, '=', total_width);
+    if (this->log_onoff) {
+        print_separator(this->fp, '=', total_width);
+    }
 
     len = 0;
     va_start(list, header);
@@ -599,6 +564,9 @@ METHOD(table_t, init_table_, int, private_table_t *this, char *header, ...)
             *pfmt++ = ' ';
         }
         printf("%*s ", width, col);
+        if (this->log_onoff) {
+            fprintf(this->fp, "%*s ", width, col);
+        }
     }
     va_end(list);
 
@@ -607,6 +575,9 @@ METHOD(table_t, init_table_, int, private_table_t *this, char *header, ...)
 #else 
     printf("\n");
 #endif
+    if (this->log_onoff) {
+        fprintf(this->fp, "\n");
+    }
 
     return 0;
 }
@@ -617,21 +588,26 @@ METHOD(table_t, show_row_, void, private_table_t *this, ...)
 
     va_start(list, this);
     vprintf(this->fmt, list);
-    va_end(list);
     printf("\n");
+
+    if (this->log_onoff) {
+        vfprintf(this->fp, this->fmt, list);
+        fprintf(this->fp, "\n");
+    }
+    va_end(list);
 }
 
 METHOD(table_t, show_column_, void, private_table_t *this, ...)
 {
     va_list list;
-    char *fmt_start = NULL;
-    char ch         = '\0';
+    char    *pfmt = NULL;
+    char    ch    = '\0';
 
     if (*this->cur == '\0' || !this->cur) {
         this->cur = this->fmt;
     }
 
-    fmt_start = this->cur;
+    pfmt = this->cur;
     if (*this->cur == '%') {
         this->cur++;
     }
@@ -644,12 +620,18 @@ METHOD(table_t, show_column_, void, private_table_t *this, ...)
 
     *(--this->cur) = '\0';
     va_start(list, this);
-    vprintf(fmt_start, list);
+    vprintf(pfmt, list);
+    if (this->log_onoff) {
+        vfprintf(this->fp, pfmt, list);
+    }
     va_end(list);
 
     *this->cur = ch;
     if (ch == '\0') {
         printf("\n");
+        if (this->log_onoff) {
+            fprintf(this->fp, "\n");
+        }
     }
 }
 
@@ -661,6 +643,9 @@ METHOD(table_t, table_destroy_, void, private_table_t *this)
     if (this->fmt) {
         free(this->fmt);
     }
+    if (this->fp) {
+        fclose(this->fp);
+    }
     free(this);
 }
 
@@ -668,21 +653,42 @@ table_t *table_create()
 {
     private_table_t *this;
 
+#ifndef _WIN32
     INIT(this,
-        .public = {
+            .pub = {
             .init        = _init_table_,
             .show_row    = _show_row_,
             .show_column = _show_column_,
             .destroy     = _table_destroy_,
-        },
-        .col_cnt   = 0,
-        .col_width = NULL,
-        .fmt       = NULL,
-    );
+            },
+            .col_cnt   = 0,
+            .col_width = NULL,
+            .fmt       = NULL,
+            .fp        = NULL,
+            .log_onoff = 0,
+        );
+#else
+    INIT(this, private_table_t, 
+            {
+            init_table_,
+            show_row_,
+            show_column_,
+            table_destroy_,
+            },
+            0,
+            NULL,
+            NULL,
+            0,
+            NULL,
+            NULL,
+            0,
+        );
+#endif
 
-    return &this->public;
+    return &this->pub;
 }
 
+#ifndef _WIN32
 typedef enum color_status_t color_status_t;
 enum color_status_t {
     COLOR_STATUS_STAERT = 1,
@@ -698,9 +704,6 @@ struct color_info_t {
 };
 typedef enum color_id_t color_id_t;
 enum color_id_t {
-    /**
-     * color
-     */
     COLOR_ID_BLACK  = 0,
     COLOR_ID_RED    ,
     COLOR_ID_GREEN  ,
@@ -709,23 +712,11 @@ enum color_id_t {
     COLOR_ID_PINK   ,
     COLOR_ID_CYAN   ,
     COLOR_ID_WHITE  ,
-
-    /**
-     * show
-     */
-    COLOR_ID_BOLD   ,
-    COLOR_ID_UNDERLINE,
-    COLOR_ID_SHINE,
-    COLOR_ID_INVET,
-
-    COLOR_ID_NORMAL ,
+    COLOR_ID_NORMAL 
 };
 
 typedef enum color_key_t color_key_t;
 enum color_key_t {
-    /**
-     * color
-     */
     COLOR_KEY_BLACK  = 'h',
     COLOR_KEY_RED    = 'r',
     COLOR_KEY_GREEN  = 'g',
@@ -734,38 +725,20 @@ enum color_key_t {
     COLOR_KEY_PINK   = 'p',
     COLOR_KEY_CYAN   = 'c',
     COLOR_KEY_WHITE  = 'w',
-
-    /**
-     * show
-     */
-    COLOR_KEY_BOLD      = 'B',
-    COLOR_KEY_UNDERLINE = 'U',
-    COLOR_KEY_SHINE     = 'S',
-    COLOR_KEY_INVET     = 'I',
-
-    COLOR_KEY_NORMAL = 'n',
+    COLOR_KEY_NORMAL = 'n'
 };
 
 static color_info_t clr_info[] = {
-    {COLOR_ID_BLACK,     COLOR_KEY_BLACK,     "\033[30m"},
-    {COLOR_ID_RED,       COLOR_KEY_RED,       "\033[31m"},
-    {COLOR_ID_GREEN,     COLOR_KEY_GREEN,     "\033[32m"},
-    {COLOR_ID_YELLOW,    COLOR_KEY_YELLOW,    "\033[33m"},
-    {COLOR_ID_BLUE,      COLOR_KEY_BLUE,      "\033[34m"},
-    {COLOR_ID_PINK,      COLOR_KEY_PINK,      "\033[35m"},
-    {COLOR_ID_CYAN,      COLOR_KEY_CYAN,      "\033[36m"},
-    {COLOR_ID_WHITE,     COLOR_KEY_WHITE,     "\033[37m"},
-    {COLOR_ID_BOLD,      COLOR_KEY_BOLD,      "\033[1m"},
-    {COLOR_ID_UNDERLINE, COLOR_KEY_UNDERLINE, "\033[4m"},
-    {COLOR_ID_SHINE,     COLOR_KEY_SHINE,     "\033[5m"},
-    {COLOR_ID_INVET,     COLOR_KEY_INVET,     "\033[7m"},
-    {COLOR_ID_NORMAL,    COLOR_KEY_NORMAL,    "\033[0m" },
+    {COLOR_ID_BLACK,  COLOR_KEY_BLACK,  "\033[30m"},
+    {COLOR_ID_RED,    COLOR_KEY_RED,    "\033[31m"},
+    {COLOR_ID_GREEN,  COLOR_KEY_GREEN,  "\033[32m"},
+    {COLOR_ID_YELLOW, COLOR_KEY_YELLOW, "\033[33m"},
+    {COLOR_ID_BLUE,   COLOR_KEY_BLUE,   "\033[34m"},
+    {COLOR_ID_PINK,   COLOR_KEY_PINK,   "\033[35m"},
+    {COLOR_ID_CYAN,   COLOR_KEY_CYAN,   "\033[36m"},
+    {COLOR_ID_WHITE,  COLOR_KEY_WHITE,  "\033[37m"},
+    {COLOR_ID_NORMAL, COLOR_KEY_NORMAL, "\033[0m" },
 };
-
-#define SWITCH_OPT(key) \
-    case COLOR_KEY_##key: \
-        color_id = COLOR_ID_##key; \
-        break
 
 static char *parser_format(char *fmt)
 {
@@ -795,10 +768,6 @@ static char *parser_format(char *fmt)
                     case COLOR_KEY_PINK:
                     case COLOR_KEY_CYAN:
                     case COLOR_KEY_WHITE:
-                    case COLOR_KEY_BOLD:
-                    case COLOR_KEY_UNDERLINE:
-                    case COLOR_KEY_SHINE:
-                    case COLOR_KEY_INVET:
                     case COLOR_KEY_NORMAL:
                         status = COLOR_STATUS_END;
                         break;
@@ -842,20 +811,33 @@ static char *parser_format(char *fmt)
                 break;
             case COLOR_STATUS_PASER:
                 switch (*p) {
-                    SWITCH_OPT(BLACK);
-                    SWITCH_OPT(RED);
-                    SWITCH_OPT(GREEN);
-                    SWITCH_OPT(YELLOW);
-                    SWITCH_OPT(BLUE);
-                    SWITCH_OPT(PINK);
-                    SWITCH_OPT(CYAN);
-                    SWITCH_OPT(WHITE);
-
-                    SWITCH_OPT(BOLD);
-                    SWITCH_OPT(UNDERLINE);
-                    SWITCH_OPT(SHINE);
-                    SWITCH_OPT(INVET);
-                    SWITCH_OPT(NORMAL);
+                    case COLOR_KEY_BLACK:
+                        color_id = COLOR_ID_BLACK;
+                        break;
+                    case COLOR_KEY_RED:
+                        color_id = COLOR_ID_RED;
+                        break;
+                    case COLOR_KEY_GREEN:
+                        color_id = COLOR_ID_GREEN;
+                        break;
+                    case COLOR_KEY_YELLOW:
+                        color_id = COLOR_ID_YELLOW;
+                        break;
+                    case COLOR_KEY_BLUE:
+                        color_id = COLOR_ID_BLUE;
+                        break;
+                    case COLOR_KEY_PINK:
+                        color_id = COLOR_ID_PINK;
+                        break;
+                    case COLOR_KEY_CYAN:
+                        color_id = COLOR_ID_CYAN;
+                        break;
+                    case COLOR_KEY_WHITE:
+                        color_id = COLOR_ID_WHITE;
+                        break;
+                    case COLOR_KEY_NORMAL:
+                        color_id = COLOR_ID_NORMAL;
+                        break;
                     default:
                         *presult++ = *p;
                         break;
@@ -873,27 +855,12 @@ static char *parser_format(char *fmt)
         }
         p++;
     }
-    
+
     return result;
 }
 
 /**
  * @brief color print
- *
- * [h] -- black 
- * [r] -- red 
- * [g] -- green 
- * [y] -- yellow 
- * [b] -- blue 
- * [p] -- pink 
- * [c] -- cyan 
- * [w] -- white 
- * [B] -- bold 
- * [U] -- underline 
- * [I] -- invet 
- * [n] -- normal
- *
- * @usage cprintf("[r]red[b][B]blue[n]");
  *
  * @param fmt [in] printf format
  * @param ... [in]
@@ -910,7 +877,7 @@ void cprintf(char *fmt, ...)
 
     free(new_fmt);
 }
-
+#endif
 
 typedef struct private_progress_t private_progress_t;
 struct private_progress_t {
