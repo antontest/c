@@ -1,20 +1,40 @@
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
+#include <time.h>
 #ifndef _WIN32
 #include <utils/utils.h>
 #include <mutex/mutex.h>
 #include <cond/cond.h>
 #include <bsem.h>
 #include <sys/time.h>
+#include <semaphore.h>
 #else
 #include "utils.h"
 #include "bsem.h"
-#include "cond.h"
-#include "mutex.h"
 #include <windows.h>
 #endif
 
+typedef struct private_bsem_t private_bsem_t;
+
+/**
+ * private data of a bsem
+ */
+struct private_bsem_t {
+	/**
+	 * public interface
+	 */
+	bsem_t public;
+
+	SEM_HANDLE sem;
+};
+
+METHOD(bsem_t, wait_, void, private_bsem_t *this)
+{
+    SEM_WAIT(this->sem); 
+}
+
+#ifndef _WIN32
 /**
  * Get a timestamp from a monotonic time source.
  *
@@ -32,7 +52,7 @@ static long time_monotonic_static(struct timeval *tv)
      defined(HAVE_PTHREAD_COND_TIMEDWAIT_MONOTONIC))
     /* as we use time_monotonic_static() for condvar operations, we use the
      * monotonic time source only if it is also supported by pthread. */
-    timespec_t ts;
+    struct time_t ts;
 
     if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0)
     {
@@ -60,60 +80,9 @@ static long time_monotonic_static(struct timeval *tv)
     return tv->tv_sec;
 }
 
-typedef struct private_bsem_t private_bsem_t;
-
-/**
- * private data of a bsem
- */
-struct private_bsem_t {
-	/**
-	 * public interface
-	 */
-	bsem_t public;
-
-#ifdef HAVE_SEM_TIMEDWAIT
-	/**
-	 * wrapped POSIX bsem object
-	 */
-	sem_t sem;
-#else /* !HAVE_SEM_TIMEDWAIT */
-
-	/**
-	 * Mutex to lock count variable
-	 */
-	mutex_t *mutex;
-
-	/**
-	 * Condvar to signal count increase
-	 */
-	cond_t *cond;
-
-	/**
-	 * bsem count value
-	 */
-	unsigned int count;
-#endif /* HAVE_SEM_TIMEDWAIT */
-};
-
-METHOD(bsem_t, wait_, void, private_bsem_t *this)
-{
-#ifdef HAVE_SEM_TIMEDWAIT
-	sem_wait(&this->sem);
-#else /* !HAVE_SEM_TIMEDWAIT */
-	this->mutex->lock(this->mutex);
-	while (this->count == 0)
-	{
-		this->cond->wait(this->cond, this->mutex);
-	}
-	this->count--;
-	this->mutex->unlock(this->mutex);
-#endif /* HAVE_SEM_TIMEDWAIT */
-}
-
 METHOD(bsem_t, timed_wait_abs, bool, private_bsem_t *this, struct timeval tv)
 {
-#ifdef HAVE_SEM_TIMEDWAIT
-	timespec_t ts;
+	struct timespec ts;
 
 	ts.tv_sec = tv.tv_sec;
 	ts.tv_nsec = tv.tv_usec * 1000;
@@ -121,20 +90,6 @@ METHOD(bsem_t, timed_wait_abs, bool, private_bsem_t *this, struct timeval tv)
 	/* there are errors other than ETIMEDOUT possible, but we consider them
 	 * all as timeout */
 	return sem_timedwait(&this->sem, &ts) == -1;
-#else /* !HAVE_SEM_TIMEDWAIT */
-	this->mutex->lock(this->mutex);
-	while (this->count == 0)
-	{
-		if (this->cond->timed_wait_abs(this->cond, this->mutex, tv))
-		{
-			this->mutex->unlock(this->mutex);
-			return TRUE;
-		}
-	}
-	this->count--;
-	this->mutex->unlock(this->mutex);
-	return FALSE;
-#endif /* HAVE_SEM_TIMEDWAIT */
 }
 
 METHOD(bsem_t, timed_wait, bool, private_bsem_t *this, unsigned int timeout)
@@ -149,28 +104,17 @@ METHOD(bsem_t, timed_wait, bool, private_bsem_t *this, unsigned int timeout)
 
 	return timed_wait_abs(this, tv);
 }
+#endif
 
 METHOD(bsem_t, post, void, private_bsem_t *this)
 {
-#ifdef HAVE_SEM_TIMEDWAIT
-	sem_post(&this->sem);
-#else /* !HAVE_SEM_TIMEDWAIT */
-	this->mutex->lock(this->mutex);
-	this->count++;
-	this->mutex->unlock(this->mutex);
-	this->cond->signal(this->cond);
-#endif /* HAVE_SEM_TIMEDWAIT */
+    SEM_POST(this->sem); 
 }
 
 METHOD(bsem_t, destroy, void, private_bsem_t *this)
 {
-#ifdef HAVE_SEM_TIMEDWAIT
-	sem_destroy(&this->sem);
-#else /* !HAVE_SEM_TIMEDWAIT */
-	this->cond->destroy(this->cond);
-	this->mutex->destroy(this->mutex);
-#endif /* HAVE_SEM_TIMEDWAIT */
-	free(this);
+    SEM_DESTROY(this->sem); 
+    free(this);
 }
 
 /*
@@ -180,23 +124,29 @@ bsem_t *bsem_create(unsigned int value)
 {
 	private_bsem_t *this;
 
+#ifndef _WIN32
 	INIT(this,
 		.public = {
-			.wait = _wait_,
-			.timed_wait = _timed_wait,
+			.wait           = _wait_,
+			.timed_wait     = _timed_wait,
 			.timed_wait_abs = _timed_wait_abs,
-			.post = _post,
-			.destroy = _destroy,
+			.post           = _post,
+			.destroy        = _destroy,
 		},
 	);
 
-#ifdef HAVE_SEM_TIMEDWAIT
 	sem_init(&this->sem, 0, value);
-#else /* !HAVE_SEM_TIMEDWAIT */
-	this->mutex = mutex_create();
-	this->cond = cond_create();
-	this->count = value;
-#endif /* HAVE_SEM_TIMEDWAIT */
+#else
+    INIT(this, private_bsem_t, 
+        {
+            wait_, 
+            post,
+            destroy,
+        },
+    );
+
+    this->sem = CreateSemaphore(NULL, value, value + 1, NULL);
+#endif
 
 	return &this->public;
 }

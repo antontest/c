@@ -52,14 +52,32 @@ typedef enum status_t status_t;
  */
 #ifndef _WIN32
 typedef pthread_mutex_t    MUTEX_HANDLE;
-#define MUTEX_LOCK(mtx)    pthread_mutex_lock(&mtx)
-#define MUTEX_UNLOCK(mtx)  pthread_mutex_unlock(&mtx)
-#define MUTEX_DESTROY(mtx) pthread_mutex_destroy(&mtx)
+#define MUTEX_LOCK(mtx)    pthread_mutex_lock(&(mtx))
+#define MUTEX_UNLOCK(mtx)  pthread_mutex_unlock(&(mtx))
+#define MUTEX_DESTROY(mtx) pthread_mutex_destroy(&(mtx))
 #else
 typedef void *             MUTEX_HANDLE;
 #define MUTEX_LOCK(mtx)    WaitForSingleObject(mtx,INFINITE)
 #define MUTEX_UNLOCK(mtx)  ReleaseMutex(mtx)
 #define MUTEX_DESTROY(mtx) CloseHandle(mtx)
+#endif /* _WIN32 */
+
+/**
+ * sem
+ */
+#ifndef _WIN32
+#include <semaphore.h>
+typedef sem_t SEM_HANDLE;
+#define SEM_INIT(sem, value) sem_init(&(sem), 0, value)
+#define SEM_WAIT(sem) sem_wait(&(sem))
+#define SEM_POST(sem) sem_post(&(sem))
+#define SEM_DESTROY(sem) sem_destroy(&sem)
+#else
+typedef void * SEM_HANDLE;
+#define SEM_INIT(sem, value) (sem) = CreateSemaphore(NULL, value, value + 1, NULL)
+#define SEM_WAIT(sem) WaitForSingleObject(sem, INFINITE)
+#define SEM_POST(sem) ReleaseSemaphore(sem, 1, NULL)
+#define SEM_DESTROY(sem) CloseHandle(sem)
 #endif /* _WIN32 */
 
 /**
