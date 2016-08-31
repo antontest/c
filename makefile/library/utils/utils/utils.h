@@ -48,6 +48,21 @@ typedef enum status_t status_t;
 #endif
 
 /**
+ * mutex
+ */
+#ifndef _WIN32
+typedef pthread_mutex_t    MUTEX_HANDLE;
+#define MUTEX_LOCK(mtx)    pthread_mutex_lock(&mtx)
+#define MUTEX_UNLOCK(mtx)  pthread_mutex_unlock(&mtx)
+#define MUTEX_DESTROY(mtx) pthread_mutex_destroy(&mtx)
+#else
+typedef void *             MUTEX_HANDLE;
+#define MUTEX_LOCK(mtx)    WaitForSingleObject(mtx,INFINITE)
+#define MUTEX_UNLOCK(mtx)  ReleaseMutex(mtx)
+#define MUTEX_DESTROY(mtx) CloseHandle(mtx)
+#endif /* _WIN32 */
+
+/**
 * Call destructor of an object, if object != NULL
 */
 #define DESTROY_IF(obj) if (obj) (obj)->destroy(obj)
