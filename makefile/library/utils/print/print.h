@@ -120,9 +120,7 @@ table_t *table_create();
 * @param fmt [in] printf format
 * @param ... [in]
 */
-#ifndef _WIN32
 void cprintf(char *fmt, ...);
-#endif
 
 typedef struct progress_t progress_t;
 struct progress_t {

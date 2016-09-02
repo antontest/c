@@ -9,8 +9,10 @@
 #else
 #include <io.h>
 #include "utils.h"
+#include <windows.h>
 #endif
 
+#ifndef _WIN32
 /**
  *
  *  左上 = ┌
@@ -62,6 +64,7 @@ static direct_info_t direct_info[] = {
     {DIRECT_HORIZONTAL, "─"},
 };
 
+#endif
 
 typedef enum input_type_t input_type_t;
 enum input_type_t {
@@ -462,6 +465,7 @@ METHOD(table_t, init_table_, int, private_table_t *this, char *header, ...)
         if (this->fp) {
             this->log_onoff = 1;
             fprintf(this->fp, "\n");
+            fflush(this->fp);
         }
     }
 
@@ -520,6 +524,7 @@ METHOD(table_t, init_table_, int, private_table_t *this, char *header, ...)
 #endif
     if (this->log_onoff) {
         fprintf(this->fp, "%*s\n", len + (total_width - len) / 2, header);
+        fflush(this->fp);
     }
 
     /**
@@ -528,6 +533,7 @@ METHOD(table_t, init_table_, int, private_table_t *this, char *header, ...)
     print_separator(stdout, '=', total_width);
     if (this->log_onoff) {
         print_separator(this->fp, '=', total_width);
+        fflush(this->fp);
     }
 
     len = 0;
@@ -566,6 +572,7 @@ METHOD(table_t, init_table_, int, private_table_t *this, char *header, ...)
         printf("%*s ", width, col);
         if (this->log_onoff) {
             fprintf(this->fp, "%*s ", width, col);
+            fflush(this->fp);
         }
     }
     va_end(list);
@@ -577,6 +584,7 @@ METHOD(table_t, init_table_, int, private_table_t *this, char *header, ...)
 #endif
     if (this->log_onoff) {
         fprintf(this->fp, "\n");
+        fflush(this->fp);
     }
 
     return 0;
@@ -593,6 +601,7 @@ METHOD(table_t, show_row_, void, private_table_t *this, ...)
     if (this->log_onoff) {
         vfprintf(this->fp, this->fmt, list);
         fprintf(this->fp, "\n");
+        fflush(this->fp);
     }
     va_end(list);
 }
@@ -623,6 +632,7 @@ METHOD(table_t, show_column_, void, private_table_t *this, ...)
     vprintf(pfmt, list);
     if (this->log_onoff) {
         vfprintf(this->fp, pfmt, list);
+        fflush(this->fp);
     }
     va_end(list);
 
@@ -631,6 +641,7 @@ METHOD(table_t, show_column_, void, private_table_t *this, ...)
         printf("\n");
         if (this->log_onoff) {
             fprintf(this->fp, "\n");
+            fflush(this->fp);
         }
     }
 }
@@ -879,6 +890,113 @@ void cprintf(char *fmt, ...)
 }
 #endif
 
+#ifdef _WIN32
+typedef enum win_clr_st_t win_clr_st_t;
+enum win_clr_st_t {
+    WIN_CLR_ST_NOR = 0,
+    WIN_CLR_ST_START,
+    WIN_CLR_ST_CLR,
+    WIN_CLR_ST_END,
+    WIN_CLR_ST_OUT,
+};
+
+void set_console_color(unsigned short wAttributes)
+{
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    if (hConsole == INVALID_HANDLE_VALUE)
+        return;
+
+    SetConsoleTextAttribute(hConsole, wAttributes);
+}
+
+/**
+ * @brief color print
+ *
+ * @param fmt [in] printf format
+ * @param ... [in]
+ */
+void cprintf(char *fmt, ...)
+{
+    char c          = '\0';
+    char t[3]       = {0};
+    char out[1024]  = {0};
+    char *p         = NULL;
+    int  len        = 0;
+    win_clr_st_t st = WIN_CLR_ST_NOR;
+    va_list list;
+
+    if (!fmt) {
+        return;
+    }
+
+    va_start(list, fmt);
+    len = vsnprintf(out, sizeof(out), fmt, list);
+    out[len] = '\0';
+    va_end(list);
+
+    p = out;
+    while (*p != '\0') {
+        switch (st) {
+            case WIN_CLR_ST_NOR:
+                if (*p == '[') {
+                    t[0] = *p;
+                    st = WIN_CLR_ST_START;
+                } else {
+                    printf("%c", *p);
+                }
+                break;
+
+            case WIN_CLR_ST_START:
+                t[1] = *p;
+                st = WIN_CLR_ST_END;
+                break;
+
+            case WIN_CLR_ST_END:
+                if (*p != ']') {
+                    printf("%c%c%c", t[0], t[1], *p);
+                    st = WIN_CLR_ST_NOR;
+                    break;
+                }
+                switch (t[1]) {
+                    case 'r':
+                        set_console_color(FOREGROUND_RED);
+                        break;
+                    case 'b':
+                        set_console_color(FOREGROUND_BLUE);
+                        break;
+                    case 'g':
+                        set_console_color(FOREGROUND_GREEN);
+                        break;
+                    case 'y':
+                        set_console_color(FOREGROUND_RED|FOREGROUND_GREEN);
+                        break;
+                    case 'c':
+                        set_console_color(FOREGROUND_BLUE|FOREGROUND_GREEN);
+                        break;
+                    case 'n':
+                        set_console_color(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+                        break;
+
+                    default:
+                        printf("%c%c%c", t[0], t[1], *p);
+                        break;
+                }
+                memset(t, '\0', sizeof(t));
+                st = WIN_CLR_ST_NOR;
+                break;
+
+            case WIN_CLR_ST_OUT:
+                break;
+
+            default:
+                break;
+        }
+        p++;
+    }
+}
+
+#endif
+
 typedef struct private_progress_t private_progress_t;
 struct private_progress_t {
     /**
@@ -953,7 +1071,7 @@ progress_t *progress_create()
     );
 #else
     INIT(this, private_progress_t, 
-        .public = {
+        {
             init_progress_,
             progress_show_,
             progress_destory_,

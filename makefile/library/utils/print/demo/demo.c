@@ -52,7 +52,7 @@ int main(int argc, char **argv)
     table->destroy(table);
 #endif
 
-#if 0
+#if 1
     printf("\033[31m\033[1maaa\033[33maa\033[0m\n");
     cprintf("[r]red[y]yellow[g][U][S]green[n][b][I]%s[n][c][B]cyan[p]pink[n]\n", "blue");
     printf("╔═════════════════════════╗\n"); 
@@ -67,7 +67,7 @@ int main(int argc, char **argv)
 
 #endif
 
-#if 1
+#if 0
     int bit = 0;
     progress_t *progress = NULL;
 
@@ -75,7 +75,6 @@ int main(int argc, char **argv)
     progress->init(progress, "test", 50);
 
     for (bit = 0; bit <= 50; bit += 2) {
-        printf("bit: %d\n\n", bit);
         progress->show(progress, bit);
         usleep(100000);
     }
