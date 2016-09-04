@@ -3,6 +3,7 @@
 #ifndef _WIN32
 #include <sys/time.h>
 #endif
+#include <time.h>
 
 /**
 * General purpose boolean type.
@@ -156,6 +157,22 @@ typedef struct sockaddr_in SOCKADDR_IN;
 typedef struct sockaddr_in6 SOCKADDR_IN6;
 typedef struct sockaddr_storage SOCKADDR_STORAGE;
 #endif
+
+/**
+ * time
+ */ 
+#ifndef _WIN32
+typedef struct timeval tclock_t;
+#define TIME_PER_SEC 1000000
+#define GETCURRTIME(tm) gettimeofday(&(tm), NULL)
+#define GETCOSTTIME(end_time, start_time) (double)(((end_time.tv_sec - start_time.tv_sec) * TIME_PER_SEC + end_time.tv_usec - start_time.tv_usec) / ((double)TIME_PER_SEC))
+#else 
+typedef clock_t tclock_t;
+#define TIME_PER_SEC 1000
+#define GETCURRTIME(tm) (tm) = clock()
+#define GETCOSTTIME(start_time, end_time) cost = (((double)(end_time - start_time)) / ((double)TIME_PER_SEC))
+#endif
+
 /**
 * Call destructor of an object, if object != NULL
 */
